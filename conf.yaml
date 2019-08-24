@@ -1,0 +1,50 @@
+
+skema: |
+    User:
+        type: “user”
+        _id: ID
+        name: Str
+        surname: Str
+        friends_ids: [ID]
+    Guest:
+        type: “guest”
+        _id: ObjectId
+        name: Str
+    ObjectId: Any # this will be added implicetly
+    Human: User | Guest
+
+
+database:
+    uri: http://localhost:27109
+    collections:
+        User: null
+        Guest: null
+        Human: humans
+    relations:
+        User.friends:
+            where: { _id: { $in: "x['friends_ids']" } }
+            collection: humans
+
+resolvers:
+    rules:
+        user: headers['user-id'] === where['_id'] or jwt_payload['user_id'] === 'ciao'
+
+    disambiguations:
+        Human:
+            User: 'surname' in x
+            Guest: x['type'] == 'guest'
+        
+
+# users(where: { name: { $in: [“ciao”]} }, orderBy: “name”,) {
+#     nodes {
+#         name
+#         surname
+#         friends {
+#             name
+#             surname
+#         }
+#     }
+# }
+
+# user(where: …
+
