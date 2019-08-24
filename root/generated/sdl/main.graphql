@@ -1,0 +1,21 @@
+union Human = User | Guest
+
+type Guest {
+    type: String
+    _id: ObjectId
+    name: String
+}
+
+type User {
+    type: String
+    _id: ID
+    name: String
+    surname: String
+    friends_ids: [ID]
+}
+
+scalar ID
+
+scalar Json
+
+scalar ObjectId

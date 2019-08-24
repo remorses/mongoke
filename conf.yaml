@@ -1,50 +1,50 @@
 
 skema: |
     User:
-        type: “user”
+        type: "user"
         _id: ID
         name: Str
         surname: Str
         friends_ids: [ID]
     Guest:
-        type: “guest”
+        type: "guest"
         _id: ObjectId
         name: Str
     ObjectId: Any # this will be added implicetly
+    ID: Any
     Human: User | Guest
 
+skema_path: ''
+skema_url: ''
 
 database:
     uri: http://localhost:27109
-    collections:
+    collections: # null means don't expose this type
         User: null
         Guest: null
         Human: humans
     relations:
-        User.friends:
+        User.father:
             where: { _id: { $in: "x['friends_ids']" } }
             collection: humans
+            relation_type: to_one
+        User.friends:
+            where: { _id: { $eq: "x['dad_id']" } }
+            collection: humans
+            relation_type: to_many
 
 resolvers:
-    rules:
-        user: headers['user-id'] === where['_id'] or jwt_payload['user_id'] === 'ciao'
-
+    jwt_payload_header: Authorization
+    guards:
+        user: 
+            before: |
+                headers['user-id'] == where['_id'] or jwt_payload['user_id'] == 'ciao'
+        User.articles: |
+                after: jwt_payload['user_id'] == x['author_id']
     disambiguations:
         Human:
-            User: 'surname' in x
-            Guest: x['type'] == 'guest'
+            User: |
+                'surname' in x
+            Guest: |
+                x['type'] == 'guest'
         
-
-# users(where: { name: { $in: [“ciao”]} }, orderBy: “name”,) {
-#     nodes {
-#         name
-#         surname
-#         friends {
-#             name
-#             surname
-#         }
-#     }
-# }
-
-# user(where: …
-

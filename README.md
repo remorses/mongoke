@@ -1,5 +1,51 @@
 Jsonschema to graphql mongodb server
 
+```yaml
+database:
+    uri: http://localhost:27109
+    collections: # null means don't expose this type
+        User: null
+        Guest: null
+        Human: humans
+    relations:
+        User.father:
+            where: { _id: { $in: "x['friends_ids']" } }
+            collection: humans
+            relation_type: to_one
+        User.friends:
+            where: { _id: { $eq: "x['dad_id']" } }
+            collection: humans
+            relation_type: to_many
+
+resolvers:
+    jwt_payload_header: Authorization
+    guards:
+        user: 
+            before: headers['user-id'] == where['_id'] or jwt_payload['user_id'] == 'ciao'
+        User.articles:
+            after: jwt_payload['user_id'] == x['author_id']
+    disambiguations:
+        Human:
+            User: 'surname' in x
+            Guest: x['type'] == 'guest'
+```
+steps:
+- generate skeleton files if not present
+    - replacing DB_URI in the main file
+    - adding required scalars like ObjectId, NumberOrString, 
+- generate graphql from skema and put it under /generated/sdl/main.graphql
+- for every database.collections 
+    - generate a graphql query subset and put it under /generated/sdl
+        - compute the necessary template variables
+            - query_name: is simply typename.lower() + 's'
+            - fields: is the list of all scalar fields, taken from the jsonschema
+    - generate a resolver and put it under /generated/resolvers
+        - compute the necessary template variables
+            - schema_path: Query + typename.lower() + 's'
+            - collection: from conf file
+- 
+
+
 
 cose da aggiungere:
 - devo determinare il _typename di alcuni oggetti, questo si può ottenere immettendo un _typename apposta nel database, oppure aggiungendo un file di configurazione in più
@@ -48,17 +94,17 @@ every type gets:
 ```graphql
 
 type Query {
-    ${type}s(where: Where${type}, orderBy: OrderBy,): ${type}Connection
-    ${type}(where: Where${type}, ): ${type}
+    ${{type}s(where: Where${{type}, orderBy: OrderBy,): ${{type}Connection
+    ${{type}(where: Where${{type}, ): ${{type}
 }
 
-type ${type}Connection {
-        nodes: [${type}]
+type ${{type}Connection {
+        nodes: [${{type}]
         pageInfo: PageInfo
 }
 
-input Where${type} { 
-    ${field}: GeneralWhere
+input Where${{type} { 
+    ${{field}: GeneralWhere
 }
 
 input GeneralWhere {
@@ -68,7 +114,7 @@ input GeneralWhere {
 }
 
 input OrderBy {
-    ${field}: Direction
+    ${{field}: Direction
 }
 
 enum Direction {
@@ -78,11 +124,26 @@ enum Direction {
 
 # relations
 
-extend ${fromType} {
-    ${relationName}: ${toType} # if one_to_one
-    ${relationName}(where, orderBy): Connection${toType} # if one_to_many
-    ${relationName}(where, orderBy): Connection${toType} # if many_to_many
+extend ${{fromType} {
+    ${{relationName}: ${{toType} # if one_to_one
+    ${{relationName}(where, orderBy): Connection${{toType} # if one_to_many
+    ${{relationName}(where, orderBy): Connection${{toType} # if many_to_many
 }
 
 scalar NumberOrString
+```
+
+```python
+@Resolver("Query.${{type}s")
+async def resolve_${{type}s(parent, args, ctx, info):
+    args = ConnectionArgs(**args)
+    where = strip_nones(args.where)
+    data = await connection_resolver(
+        collection=ctx['db'].${{collection}, 
+        where=where,
+        orderBy=orderBy,
+        pagination=pagination,
+    )
+    data['nodes'] = [map_typename(document) for document in data['nodes']]
+    return data
 ```
