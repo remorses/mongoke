@@ -23,6 +23,28 @@ database:
         User: null
         Guest: null
         Human: humans
+    types:
+    -   type_name: Human
+        collection: humans
+        guards:
+            before: |
+                headers['user-id'] == where['_id'] or jwt_payload['user_id'] == 'ciao'
+            after: |
+                jwt_payload['user_id'] == x['author_id']
+        disambiguations:
+            User: |
+                'surname' in x
+            Guest: |
+                x['type'] == 'guest'
+        relations:
+            -
+                field: father
+                where: 
+                    _id:
+                        $in: "x['friends_ids']"
+                collection: humans
+                relation_type: to_one
+
     relations:
         User.father:
             where: { _id: { $in: "x['friends_ids']" } }
@@ -47,4 +69,3 @@ resolvers:
                 'surname' in x
             Guest: |
                 x['type'] == 'guest'
-        

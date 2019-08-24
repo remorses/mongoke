@@ -1,0 +1,40 @@
+db_url: http://localhost:27109
+
+
+skema: |
+    User:
+        type: "user"
+        _id: ID
+        name: Str
+        surname: Str
+        friends_ids: [ID]
+    Guest:
+        type: "guest"
+        _id: ObjectId
+        name: Str
+    ObjectId: Any # this will be added implicetly
+    ID: Any
+    Human: User | Guest
+
+
+types:
+-   
+    type_name: Human
+    collection: humans
+    guards:
+        before:
+            - headers['user-id'] == where['_id'] or jwt_payload['user_id'] == 'ciao'
+        after: 
+            - jwt_payload['user_id'] == x['author_id']
+    disambiguations:
+        User: "'surname' in x"
+        Guest: "x['type'] == 'guest'"
+    relations:
+        - 
+            field: father
+            collection: humans
+            relation_type: to_one
+            where: 
+                _id:
+                    $in: "x['friends_ids']"
+

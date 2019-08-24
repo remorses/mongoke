@@ -1,0 +1,29 @@
+
+enum Direction {
+    ASC
+    DESC
+}
+
+input WhereInput {
+    $in: [NumberOrString]
+    $nin: [NumberOrString]
+    $eq: NumberOrString
+    $neq: NumberOrString
+    $gte: NumberOrString
+    $lte: NumberOrString
+    $gt: NumberOrString
+    $lt: NumberOrString
+}
+
+type PageInfo {
+    endCursor: Int
+    startCursor: Int
+    hasNextPage: Boolean
+    hasPreviousPage: Boolean
+}
+
+scalar Json
+scalar Url
+scalar ObjectId
+scalar NumberOrString
+

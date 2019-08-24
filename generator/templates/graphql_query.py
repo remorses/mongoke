@@ -1,7 +1,7 @@
 from populate import populate_string
 
 
-general = '''
+general_graphql = '''
 enum Direction {
     ASC
     DESC

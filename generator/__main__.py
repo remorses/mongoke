@@ -7,15 +7,21 @@ import os.path
 from populate import populate_string
 from .templates.resolvers import resolvers_init, resolvers_support, single_item_resolver, many_items_resolvers
 from .templates.scalars import scalars
-from .templates.graphql_query import graphql_query
+from .templates.graphql_query import graphql_query, general_graphql
 from .templates.main import main
 from .templates.jwt_middleware import jwt_middleware
 from .templates.logger import logger
 from .support import touch, pretty
 
+def is_scalar(type_body):
+    SCALARS = ['string', 'number', 'integer', 'boolean']
+    return (
+        type_body.get('type', '') in SCALARS 
+        or not {k:v for k, v in type_body.items() if k not in ('description', 'title',)}
+    )
+
 
 def get_scalar_fields(skema_schema, typename):
-    SCALARS = ['string', 'number', 'integer', 'boolean']
     json_schema = skema.to_jsonschema(skema_schema, ref=typename, resolve=True)
     # pretty(json_schema)
     if any([x in json_schema for x in ('anyOf', 'allOf', 'oneOf')]):
@@ -25,7 +31,7 @@ def get_scalar_fields(skema_schema, typename):
         type_properties = merge(*[x.get('properties',) for x in subsets])
     else:
         type_properties = json_schema.get('properties', {})
-    return [name for name, body in type_properties.items() if body.get('type', '') in SCALARS]
+    return [name for name, body in type_properties.items() if is_scalar(body)]
 
 
 def generate_from_config(config):
@@ -42,9 +48,15 @@ def generate_from_config(config):
     touch(f'{base}/generated/resolvers/__init__.py', resolvers_init)
     touch(f'{base}/generated/resolvers/support.py', resolvers_support)
     touch(f'{base}/generated/scalars/__init__.py', scalars)
+    touch(f'{base}/generated/sdl/general.graphql', general_graphql)
     touch(f'{base}/generated/sdl/main.graphql', main_graphql_schema)
 
 
+    # needs:
+        # disambiguations
+        # typename
+        # collection
+        # guards
 
     for typename, collection in config.get('database', {}).get('collections', {}).items():
         if collection:

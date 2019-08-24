@@ -11,12 +11,14 @@ type humanConnection {
 
 input humanWhere { 
     type: WhereInput
+    _id: WhereInput
     name: WhereInput
     surname: WhereInput
 }
 
 input humanOrderBy {
     type: Direction
+    _id: Direction
     name: Direction
     surname: Direction
 }
