@@ -6,10 +6,14 @@ import pymongo
 from pymongo import ASCENDING, DESCENDING
 from typing import NamedTuple, Union
 import typing
+from funcy import pluck
 
 gt = '$gt'
 lt = '$lt'
 MAX_NODES = 20
+
+def zip_pluck(d, *keys):
+    return zip(*[pluck(k, d) for k in keys])
 
 parse_direction = lambda direction: ASCENDING if direction == 'ASC' else DESCENDING
 

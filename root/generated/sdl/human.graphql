@@ -1,22 +1,22 @@
 
 extend type Query {
-    humans(where: humanWhere, orderBy: humanOrderBy,): humanConnection
-    human(where: humanWhere,): Human
+    humans(where: HumanWhere, orderBy: HumanOrderBy,): HumanConnection
+    human(where: HumanWhere,): Human
 }
 
-type humanConnection {
+type HumanConnection {
     nodes: [Human]
     pageInfo: PageInfo
 }
 
-input humanWhere { 
+input HumanWhere { 
     type: WhereInput
     _id: WhereInput
     name: WhereInput
     surname: WhereInput
 }
 
-input humanOrderBy {
+input HumanOrderBy {
     type: Direction
     _id: Direction
     name: Direction

@@ -5,29 +5,53 @@ from ..logger import logger
 # collection, resolver_path, guard_expression_before, guard_expression_after, disambiguations
 single_item_resolver = '''
 from tartiflette import Resolver
-from .support import strip_nones, connection_resolver
+from .support import strip_nones, connection_resolver, zip_pluck
 from operator import setitem
+from funcy import select_keys
 
 @Resolver('${{resolver_path}}')
 async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(parent, args, ctx, info):
     where = strip_nones(args.get('where', {}))
     headers = ctx['request']['headers']
     jwt_payload = ctx['req'].jwt_payload # TODO i need to decode jwt_payload and set it in req in a middleware
-    if not (${{guard_expression_before}}):
-        raise Exception('guard ${{guard_expression_before}} not satisfied')
-    collection=ctx['db']['${{collection}']
+    fields = []
+${{
+''.join([f"""
+    if not ({expr}):
+        raise Exception({json.dumps('guard `' + str(expr) + '` not satisfied')})
+    else:
+        fields += {fields}
+"""
+for expr, fields in zip_pluck(guards_before, ['expression', 'fields'])])
+}}
+    collection = ctx['db']['${{collection}}']
     x = collection.find_one(where)
-    ${{'\\n    '.join([f"({expr}) and setitem(x, '_typename', '{typename}')" for typename, expr in disambiguations.items()])}}
-    if not ${{guard_expression_after}}:
-        raise Exception('guard ${{guard_expression_after}} not satisfied')
+${{
+''.join([f"""
+    if not ({expr}):
+        raise Exception({json.dumps('guard `' + str(expr) + '` not satisfied')})
+    else:
+        fields += {fields}
+"""
+for expr, fields in zip_pluck(guards_after, ['expression', 'fields'])])
+}}
+${{
+''.join([
+f"""
+    if ({expr}):
+        x['_typename'] = '{typename}'
+""" 
+for typename, expr in zip_pluck(disambiguations, ['type_name', 'expression'])])
+}}
+    if fields:
+        x = select_keys(lambda k: k in fields, x)
     return x
-
 '''
 
 # collection, resolver_path, guard_expression_before, guard_expression_after, disambiguations
 many_items_resolvers = '''
 from tartiflette import Resolver
-from .support import strip_nones, connection_resolver
+from .support import strip_nones, connection_resolver, zip_pluck
 from operator import setitem
 
 @Resolver('${{resolver_path}}')
@@ -36,8 +60,16 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
     orderBy = args.get('orderBy', {'_id': 'ASC'}) # add default
     headers = ctx['request']['headers']
     jwt_payload = ctx['req'].jwt_payload # TODO i need to decode jwt_payload
-    if not (${{guard_expression_before}}):
-        raise Exception('guard ${{guard_expression_before}} not satisfied')
+    fields = []
+${{
+''.join([f"""
+    if not ({expr}):
+        raise Exception('guard {expr} not satisfied')
+    else:
+        fields += {fields}
+"""
+for expr, fields in zip_pluck(guards_before, ['expression', 'fields'])])
+}}
     pagination = {
         'after': args.get('after'),
         'before': args.get('before'),
@@ -52,10 +84,45 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
     )
     # User: 'surname' in x
     # Guest: x['type'] == 'guest'
+
+${{
+"""
+    nodes = []
     for x in data['nodes']:
-        ${{'\\n    '.join([f"({expr}) and setitem(x, '_typename', '{typename}')" for typename, expr in disambiguations.items()])}}
-    data['nodes'] = [x for x in nodes if ${{guard_expression_after}}] # TODO pageInfo is no more valid
+""" if guards_after else """
+    nodes = data['nodes']
+"""
+}}
+${{
+''.join([f"""
+        if not ({expr}):
+            pass
+        else:
+            own_fields = fields + {fields or []}
+            if own_fields:
+                x = select_keys(lambda k: k in fields, x)
+            nodes.append(x)
+"""
+for expr, fields in zip_pluck(guards_after, ['expression', 'fields'])]).strip()
+}}
+${{
+"""
+    for x in nodes: # TODO remove this useless if
+        if False:
+            pass
+""" if disambiguations else ''
+}}
+${{
+''.join([
+f"""
+        elif ({expr}):
+            x['_typename'] = '{typename}'
+"""
+for typename, expr in zip_pluck(disambiguations, ['type_name', 'expression'])])
+}}
+    data['nodes'] = nodes
     return data
+
 '''
 
 # nothing
@@ -67,10 +134,14 @@ import pymongo
 from pymongo import ASCENDING, DESCENDING
 from typing import NamedTuple, Union
 import typing
+from funcy import pluck
 
 gt = '$gt'
 lt = '$lt'
 MAX_NODES = 20
+
+def zip_pluck(d, *keys):
+    return zip(*[pluck(k, d) for k in keys])
 
 parse_direction = lambda direction: ASCENDING if direction == 'ASC' else DESCENDING
 

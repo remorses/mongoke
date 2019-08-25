@@ -31,8 +31,10 @@ types:
             expression: headers['user-id'] == where['_id'] or jwt_payload['user_id'] == 'ciao'
             fields: [name, surname]
     disambiguations:
-        User: "'surname' in x"
-        Guest: "x['type'] == 'guest'"
+        -   type_name: User
+            expression: "'surname' in x"
+        -   type_name: Guest
+            expression: "x['type'] == 'guest'"
     relations:
         -   field: father
             type_name: Human
