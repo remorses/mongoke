@@ -22,6 +22,11 @@ skema: |
 
 
 types:
+-   type_name: User
+    collection: null
+    guards:
+        -   when: after
+            expression: headers['user-id'] == x['_id']
 -   type_name: Human
     collection: humans
     guards:

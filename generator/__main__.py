@@ -100,6 +100,8 @@ def generate_from_config(config):
     # guards
     for type_config in config.get('types', []):
         collection = type_config['collection']
+        if not collection: # types with no collection are used only for relations not direct queries
+            continue
         typename = type_config['type_name']
         guards = type_config.get('guards', [])
         guards = lmap(add_guards_defaults, guards)
@@ -164,7 +166,7 @@ def generate_from_config(config):
                     zip_pluck=zip_pluck,
                 )
             )
-            implemented_types = [x.get('type_name') for x in config.get('types',[])]
+            implemented_types = [x.get('type_name') for x in config.get('types', []) if x.get('collection')]
             if relation_type == 'to_many' and toType not in implemented_types:
                 relation_sdl += populate_string(
                     to_many_relation_boilerplate,
