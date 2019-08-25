@@ -1,6 +1,6 @@
 import json
 import os.path
-from funcy import pluck
+from funcy import pluck, count
 
 def touch(filename, data):
     os.makedirs(os.path.dirname(filename), exist_ok=True)
@@ -9,5 +9,8 @@ def touch(filename, data):
 
 pretty = lambda x: print(json.dumps(x, indent=4, default=str))
 
-def zip_pluck(d, keys):
-    return zip(*[pluck(k, d) for k in keys])
+def zip_pluck(d, keys, enumerate=False):
+    args = [pluck(k, d) for k in keys]
+    if enumerate:
+        args = [count(), *args]
+    return zip(*args)

@@ -38,10 +38,11 @@ for expr, fields in zip_pluck(guards_after, ['expression', 'fields'])])
 ${{
 ''.join([
 f"""
-    if ({expr}):
+    {'if' if i == 0 else 'elif'} ({expr}):
         x['_typename'] = '{typename}'
 """ 
-for typename, expr in zip_pluck(disambiguations, ['type_name', 'expression'])])
+for (i, typename, expr) in zip_pluck(disambiguations, ['type_name', 'expression'], enumerate=True)
+])
 }}
     if fields:
         x = select_keys(lambda k: k in fields, x)
@@ -64,7 +65,7 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
 ${{
 ''.join([f"""
     if not ({expr}):
-        raise Exception('guard {expr} not satisfied')
+        raise Exception({json.dumps('guard `' + str(expr) + '` not satisfied')})
     else:
         fields += {fields}
 """
@@ -108,17 +109,16 @@ for expr, fields in zip_pluck(guards_after, ['expression', 'fields'])]).strip()
 ${{
 """
     for x in nodes: # TODO remove this useless if
-        if False:
-            pass
 """ if disambiguations else ''
 }}
 ${{
 ''.join([
 f"""
-        elif ({expr}):
+        {'if' if i == 0 else 'elif'} ({expr}):
             x['_typename'] = '{typename}'
 """
-for typename, expr in zip_pluck(disambiguations, ['type_name', 'expression'])])
+for (i, typename, expr) in zip_pluck(disambiguations, ['type_name', 'expression'], enumerate=True)
+])
 }}
     data['nodes'] = nodes
     return data

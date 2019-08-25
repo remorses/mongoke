@@ -23,7 +23,7 @@ async def resolve_query_human(parent, args, ctx, info):
     if ('surname' in x):
         x['_typename'] = 'User'
 
-    if (x['type'] == 'guest'):
+    elif (x['type'] == 'guest'):
         x['_typename'] = 'Guest'
 
     if fields:

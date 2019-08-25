@@ -12,7 +12,7 @@ async def resolve_query_humans(parent, args, ctx, info):
     fields = []
 
     if not (headers['user-id'] == where['_id'] or jwt_payload['user_id'] == 'ciao'):
-        raise Exception('guard headers['user-id'] == where['_id'] or jwt_payload['user_id'] == 'ciao' not satisfied')
+        raise Exception("guard `headers['user-id'] == where['_id'] or jwt_payload['user_id'] == 'ciao'` not satisfied")
     else:
         fields += ['name', 'surname']
 
@@ -37,11 +37,9 @@ async def resolve_query_humans(parent, args, ctx, info):
 
 
     for x in nodes: # TODO remove this useless if
-        if False:
-            pass
 
 
-        elif ('surname' in x):
+        if ('surname' in x):
             x['_typename'] = 'User'
 
         elif (x['type'] == 'guest'):
