@@ -36,20 +36,20 @@ scalar NumberOrString
 # query_name
 graphql_query = '''
 extend type Query {
-    ${{query_name}}s(where: ${{query_name}}Where, orderBy: ${{query_name}}OrderBy,): ${{query_name}}Connection
-    ${{query_name}}(where: ${{query_name}}Where,): ${{type_name}}
+    ${{query_name}}s(where: ${{type_name}}Where, orderBy: ${{type_name}}OrderBy,): ${{type_name}}Connection
+    ${{query_name}}(where: ${{type_name}}Where,): ${{type_name}}
 }
 
-type ${{query_name}}Connection {
+type ${{type_name}}Connection {
     nodes: [${{type_name}}]
     pageInfo: PageInfo
 }
 
-input ${{query_name}}Where { 
+input ${{type_name}}Where { 
     ${{'\\n    '.join([f'{field}: WhereInput' for field in fields])}}
 }
 
-input ${{query_name}}OrderBy {
+input ${{type_name}}OrderBy {
     ${{'\\n    '.join([f'{field}: Direction' for field in fields])}}
 }
 '''
@@ -64,7 +64,22 @@ extend type ${{fromType} {
 
 to_many_relation = '''
 extend type ${{fromType} {
-   ${{relationName}}(where: ${{toType}}Where, orderBy: ${{toType}}OrderBy): Connection${{toType}}
+   ${{relationName}}(where: ${{toType}}Where, orderBy: ${{toType}}OrderBy): ${{toType}}Connection
 }
 # if types don't have already the boilerplate i should write it now
+'''
+
+to_many_relation_boilerplate = '''
+type ${{toType}}Connection {
+    nodes: [${{type_name}}]
+    pageInfo: PageInfo
+}
+
+input ${{toType}}Where { 
+    ${{'\\n    '.join([f'{field}: WhereInput' for field in fields])}}
+}
+
+input ${{toType}}OrderBy {
+    ${{'\\n    '.join([f'{field}: Direction' for field in fields])}}
+}
 '''

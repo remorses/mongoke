@@ -1,5 +1,10 @@
 db_url: http://localhost:27109
 
+jwt:
+    secret: ''
+    algorithms: [H256]
+    role_key: X-Mongoko-Role
+
 
 skema: |
     User:
@@ -18,23 +23,21 @@ skema: |
 
 
 types:
--   
-    type_name: Human
+-   type_name: Human
     collection: humans
     guards:
-        before:
-            - headers['user-id'] == where['_id'] or jwt_payload['user_id'] == 'ciao'
-        after: 
-            - jwt_payload['user_id'] == x['author_id']
+        -   when: before
+            roles: [user]
+            expression: headers['user-id'] == where['_id'] or jwt_payload['user_id'] == 'ciao'
+            fields: [name, surname]
     disambiguations:
         User: "'surname' in x"
         Guest: "x['type'] == 'guest'"
     relations:
-        - 
-            field: father
-            collection: humans
+        -   field: father
+            type_name: Human
             relation_type: to_one
-            where: 
+            where:
                 _id:
                     $in: "x['friends_ids']"
 
