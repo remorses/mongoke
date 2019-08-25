@@ -79,7 +79,7 @@ def generate_from_config(config):
     skema_schema = config.get('skema')
     # TODO add other scalars from the skema
     scalars = [*SCALAR_TYPES, *get_skema_aliases(skema_schema)]
-    main_graphql_schema = to_graphql(skema_schema)
+    main_graphql_schema = to_graphql(skema_schema, scalar_already_present=SCALARS_ALREADY_IMPLEMENTED)
 
     touch(f'{base}/__init__.py', '')
     touch(f'{base}/__main__.py', main)

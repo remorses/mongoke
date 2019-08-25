@@ -1,0 +1,31 @@
+db_url: http://localhost:27109
+
+jwt:
+    secret: ''
+    algorithms: [H256]
+    role_key: X-Mongoko-Role
+
+skema: |
+    ID: Str
+    ObjectId: Any
+    DateTime: Any
+    Date: Any
+    User:
+        _id: ObjectId
+        name: Str
+        surname: Str
+        friends_ids: [ID]
+        articles: [ObjectId]
+        birthday: DateTime
+    Article:
+        author_id: ObjectId
+        title: String
+        made_at: Date
+
+types:
+-   type_name: User
+    collection: users
+-   type_name: Article
+    collection: articles
+
+

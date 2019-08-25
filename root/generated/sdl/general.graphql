@@ -33,6 +33,13 @@ input WhereBoolean {
     $neq: Boolean
 }
 
+input WhereID {
+    $in: [ID]
+    $nin: [ID]
+    $eq: ID
+    $neq: ID
+}
+
 input WhereObjectId {
     $in: [ObjectId]
     $nin: [ObjectId]
@@ -40,11 +47,18 @@ input WhereObjectId {
     $neq: ObjectId
 }
 
-input WhereID {
-    $in: [ID]
-    $nin: [ID]
-    $eq: ID
-    $neq: ID
+input WhereDateTime {
+    $in: [DateTime]
+    $nin: [DateTime]
+    $eq: DateTime
+    $neq: DateTime
+}
+
+input WhereDate {
+    $in: [Date]
+    $nin: [Date]
+    $eq: Date
+    $neq: Date
 }
 
 

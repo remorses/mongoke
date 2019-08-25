@@ -1,21 +1,16 @@
-union Human = User | Guest
-
-type Guest {
-    type: String
-    _id: ObjectId
-    name: String
+type Article {
+    author_id: ObjectId
+    title: String
+    made_at: Date
 }
 
 type User {
-    type: String
-    _id: ID
+    _id: ObjectId
     name: String
     surname: String
     friends_ids: [ID]
+    articles: [ObjectId]
+    birthday: DateTime
 }
 
 scalar ID
-
-scalar Json
-
-scalar ObjectId

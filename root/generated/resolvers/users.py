@@ -3,18 +3,13 @@ from tartiflette import Resolver
 from .support import strip_nones, connection_resolver, zip_pluck
 from operator import setitem
 
-@Resolver('Query.humans')
-async def resolve_query_humans(parent, args, ctx, info):
+@Resolver('Query.users')
+async def resolve_query_users(parent, args, ctx, info):
     where = strip_nones(args.get('where', {}))
     orderBy = args.get('orderBy', {'_id': 'ASC'}) # add default
     headers = ctx['request']['headers']
     jwt_payload = ctx['req'].jwt_payload # TODO i need to decode jwt_payload
     fields = []
-
-    if not (headers['user-id'] == where['_id'] or jwt_payload['user_id'] == 'ciao'):
-        raise Exception("guard `headers['user-id'] == where['_id'] or jwt_payload['user_id'] == 'ciao'` not satisfied")
-    else:
-        fields += ['name', 'surname']
 
     pagination = {
         'after': args.get('after'),
@@ -23,7 +18,7 @@ async def resolve_query_humans(parent, args, ctx, info):
         'last': args.get('last'),
     }
     data = await connection_resolver(
-        collection=ctx['db']['humans'], 
+        collection=ctx['db']['users'], 
         where=where,
         orderBy=orderBy,
         pagination=pagination,
@@ -36,14 +31,6 @@ async def resolve_query_humans(parent, args, ctx, info):
 
 
 
-    for x in nodes: # TODO remove this useless if
-
-
-        if ('surname' in x):
-            x['_typename'] = 'User'
-
-        elif (x['type'] == 'guest'):
-            x['_typename'] = 'Guest'
 
     data['nodes'] = nodes
     return data

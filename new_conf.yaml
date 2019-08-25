@@ -5,7 +5,6 @@ jwt:
     algorithms: [H256]
     role_key: X-Mongoko-Role
 
-
 skema: |
     User:
         type: "user"
