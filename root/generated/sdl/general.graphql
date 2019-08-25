@@ -33,6 +33,20 @@ input WhereBoolean {
     $neq: Boolean
 }
 
+input WhereObjectId {
+    $in: [ObjectId]
+    $nin: [ObjectId]
+    $eq: ObjectId
+    $neq: ObjectId
+}
+
+input WhereID {
+    $in: [ID]
+    $nin: [ID]
+    $eq: ID
+    $neq: ID
+}
+
 
 
 type PageInfo {
@@ -46,3 +60,4 @@ scalar Json
 scalar Url
 scalar ObjectId
 scalar NumberOrString
+# TODO create the additional scalars

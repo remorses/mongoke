@@ -1,7 +1,7 @@
 import skema
 from typing import *
 import sys
-from funcy import merge, lmap, collecting
+from funcy import merge, lmap, collecting, omit, remove
 import yaml
 from skema.to_graphql import to_graphql
 import os.path
@@ -14,18 +14,35 @@ from .templates.jwt_middleware import jwt_middleware
 from .templates.logger import logger
 from .support import touch, pretty, zip_pluck, get_type_properties
 
+SCALAR_TYPES = ['String', 'Float', 'Int', 'Boolean', ]
+SCALARS_ALREADY_IMPLEMENTED = ['ObjectId', 'Json', 'Date', 'DateTime', 'Time', *SCALAR_TYPES]
 
 def is_scalar(type_body):
     SCALARS = ['string', 'number', 'integer', 'boolean']
+    # print(omit(type_body, ['description', 'title', '$schema']))
     return (
         type_body.get('type', '') in SCALARS
         # TODO add aliases, not only Type: Any
-        or not {k: v for k, v in type_body.items() if k not in ('description', 'title',)}
+        or not omit(type_body, ['description', 'title', '$schema'])
     )
 
 
-SCALAR_TYPES = ['String', 'Float', 'Int', 'Boolean', ]
 
+
+
+def get_skema_aliases(skema_schema):
+    definitions = skema.to_jsonschema(
+        skema_schema, resolve=False).get('definitions', [])
+    aliases = [body.get('title') for d, body in definitions.items()]
+    pretty(aliases)
+    aliases = [x for x in aliases if is_alias(skema_schema, x)]
+    return aliases
+
+
+def is_alias(skema_schema, typename) -> bool:
+    json_schema = skema.to_jsonschema(skema_schema, ref=typename, resolve=True)
+    pretty(json_schema)
+    return is_scalar(json_schema)
 
 
 @collecting
@@ -33,12 +50,11 @@ def get_scalar_fields(skema_schema, typename) -> List[Tuple[str, str]]:
     json_schema = skema.to_jsonschema(skema_schema, ref=typename, resolve=True)
     # pretty(json_schema)
     type_properties = get_type_properties(json_schema)
-    aliases = skema.to_jsonschema(skema_schema, resolve=False).get('definitions', []).keys()
-    aliases = list(aliases)
-    pretty( aliases)
+    aliases = get_skema_aliases(skema_schema)
     for name, body in type_properties.items():
         if is_scalar(body):
-            if body.get('title', ) in aliases: # TODO this logic is faulted, should be ported to skema, as get_schema_scalars
+            #  TODO this logic is faulted, should be ported to skema, as get_schema_scalars
+            if body.get('title', '') in aliases:
                 scalar_name = body.get('title', )
             else:
                 scalar_name = body.get('type', 'Unknown').capitalize()
@@ -61,7 +77,8 @@ def generate_from_config(config):
     root_dir_name = config.get('root_dir_name', 'root')
     base = os.path.join(target_dir, root_dir_name)
     skema_schema = config.get('skema')
-    scalars = [*SCALAR_TYPES]  # TODO add other scalars from the skema
+    # TODO add other scalars from the skema
+    scalars = [*SCALAR_TYPES, *get_skema_aliases(skema_schema)]
     main_graphql_schema = to_graphql(skema_schema)
 
     touch(f'{base}/__init__.py', '')
@@ -70,7 +87,8 @@ def generate_from_config(config):
     touch(f'{base}/generated/middleware/__init__.py', jwt_middleware)
     touch(f'{base}/generated/resolvers/__init__.py', resolvers_init)
     touch(f'{base}/generated/resolvers/support.py', resolvers_support)
-    touch(f'{base}/generated/scalars/__init__.py', scalars_implementations)
+    touch(f'{base}/generated/scalars/__init__.py',
+          populate_string(scalars_implementations, dict(scalars=[x for x in scalars if x not in SCALARS_ALREADY_IMPLEMENTED])))
     touch(f'{base}/generated/sdl/general.graphql',
           populate_string(general_graphql, dict(scalars=scalars)))
     touch(f'{base}/generated/sdl/main.graphql', main_graphql_schema)

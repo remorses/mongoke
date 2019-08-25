@@ -21,9 +21,10 @@ class ObjectIdScalar:
     @staticmethod
     def coerce_output(val):
         return str(val)
-
-@Scalar("NumberOrString")
-class NumberOrString:
+${{
+''.join([f"""
+@Scalar("{scalar}")
+class {scalar}Class:
     @staticmethod
     def coerce_input(val):
         return val
@@ -31,4 +32,6 @@ class NumberOrString:
     @staticmethod
     def coerce_output(val):
         return val
+""" for scalar in scalars])
+}}
 '''

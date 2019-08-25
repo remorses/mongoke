@@ -22,8 +22,8 @@ class ObjectIdScalar:
     def coerce_output(val):
         return str(val)
 
-@Scalar("NumberOrString")
-class NumberOrString:
+@Scalar("ID")
+class IDClass:
     @staticmethod
     def coerce_input(val):
         return val
