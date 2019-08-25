@@ -20,8 +20,8 @@ input HumanWhere {
 }
 
 input HumanOrderBy {
-    ('type', 'String'): Direction
-    ('_id', 'ObjectId'): Direction
-    ('name', 'String'): Direction
-    ('surname', 'String'): Direction
+    type: Direction
+    _id: Direction
+    name: Direction
+    surname: Direction
 }

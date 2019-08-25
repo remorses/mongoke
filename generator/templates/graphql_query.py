@@ -54,7 +54,7 @@ input ${{type_name}}Where {
 }
 
 input ${{type_name}}OrderBy {
-    ${{'\\n    '.join([f'{field}: Direction' for field in fields])}}
+    ${{'\\n    '.join([f'{field}: Direction' for field, _ in fields])}}
 }
 '''
 
