@@ -6,13 +6,13 @@ import yaml
 from skema.to_graphql import to_graphql
 import os.path
 from populate import populate_string
-from .templates.resolvers import resolvers_init, resolvers_support, single_item_resolver, many_items_resolvers
+from .templates.resolvers import resolvers_dependencies, resolvers_init, resolvers_support, single_item_resolver, many_items_resolvers
 from .templates.scalars import scalars_implementations
 from .templates.graphql_query import graphql_query, general_graphql, to_many_relation, to_many_relation_boilerplate, to_one_relation
 from .templates.main import main
 from .templates.jwt_middleware import jwt_middleware
 from .templates.logger import logger
-from .support import touch, pretty, zip_pluck, get_type_properties
+from .support import touch, pretty, get_type_properties
 
 SCALAR_TYPES = ['String', 'Float', 'Int', 'Boolean', ]
 SCALARS_ALREADY_IMPLEMENTED = ['ObjectId', 'Json',
@@ -132,7 +132,7 @@ def generate_from_config(config):
                 disambiguations=disambiguations,
                 guards_before=[g for g in guards if g['when'] == 'before'],
                 guards_after=[g for g in guards if g['when'] == 'after'],
-                zip_pluck=zip_pluck,
+                **resolvers_dependencies,
             )
         )
         touch(f'{base}/generated/resolvers/{query_name}.py', single_resolver)
@@ -146,7 +146,7 @@ def generate_from_config(config):
                 disambiguations=disambiguations,
                 guards_before=[g for g in guards if g['when'] == 'before'],
                 guards_after=[g for g in guards if g['when'] == 'after'],
-                zip_pluck=zip_pluck,
+                **resolvers_dependencies,
             )
         )
         touch(f'{base}/generated/resolvers/{query_name}s.py', many_resolver)
@@ -163,7 +163,6 @@ def generate_from_config(config):
                     toType=toType,
                     fromType=fromType,
                     relationName=relationName,
-                    zip_pluck=zip_pluck,
                 )
             )
             implemented_types = [x.get('type_name') for x in config.get('types', []) if x.get('collection')]
@@ -175,7 +174,6 @@ def generate_from_config(config):
                         fromType=fromType,
                         relationName=relationName,
                         fields=get_scalar_fields(skema_schema, toType),
-                        zip_pluck=zip_pluck,
                     )
                 )            
             touch(

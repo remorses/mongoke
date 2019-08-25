@@ -1,3 +1,25 @@
+from .support import zip_pluck, indent_to, join_yields
+import json
+from funcy import lfilter, post_processing
+
+
+
+@join_yields('')
+def guards_before_checks(guards_before, indentation):
+    for expr, fields in zip_pluck(guards_before, ['expression', 'fields']):
+        code =  f"""
+        if not ({expr}):
+            raise Exception({json.dumps('guard `' + str(expr) + '` not satisfied')})
+        else:
+            fields += {fields}
+        """
+        yield indent_to(indentation, code)
+
+
+resolvers_dependencies = dict(
+    guards_before_checks=guards_before_checks,
+    zip_pluck=zip_pluck,
+)
 
 resolvers_init = '''
 from ..logger import logger
@@ -15,15 +37,7 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
     headers = ctx['request']['headers']
     jwt_payload = ctx['req'].jwt_payload # TODO i need to decode jwt_payload and set it in req in a middleware
     fields = []
-${{
-''.join([f"""
-    if not ({expr}):
-        raise Exception({json.dumps('guard `' + str(expr) + '` not satisfied')})
-    else:
-        fields += {fields}
-"""
-for expr, fields in zip_pluck(guards_before, ['expression', 'fields'])])
-}}
+${{guards_before_checks(guards_before, '    ')}}
     collection = ctx['db']['${{collection}}']
     x = collection.find_one(where)
 ${{
@@ -62,15 +76,7 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
     headers = ctx['request']['headers']
     jwt_payload = ctx['req'].jwt_payload # TODO i need to decode jwt_payload
     fields = []
-${{
-''.join([f"""
-    if not ({expr}):
-        raise Exception({json.dumps('guard `' + str(expr) + '` not satisfied')})
-    else:
-        fields += {fields}
-"""
-for expr, fields in zip_pluck(guards_before, ['expression', 'fields'])])
-}}
+${{guards_before_checks(guards_before, '    ')}}
     pagination = {
         'after': args.get('after'),
         'before': args.get('before'),

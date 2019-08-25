@@ -10,12 +10,11 @@ async def resolve_query_human(parent, args, ctx, info):
     headers = ctx['request']['headers']
     jwt_payload = ctx['req'].jwt_payload # TODO i need to decode jwt_payload and set it in req in a middleware
     fields = []
-
     if not (headers['user-id'] == where['_id'] or jwt_payload['user_id'] == 'ciao'):
         raise Exception("guard `headers['user-id'] == where['_id'] or jwt_payload['user_id'] == 'ciao'` not satisfied")
     else:
         fields += ['name', 'surname']
-
+    
     collection = ctx['db']['humans']
     x = collection.find_one(where)
 
