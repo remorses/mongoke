@@ -61,13 +61,13 @@ input ${{type_name}}OrderBy {
 ######
 
 to_one_relation = '''
-extend type ${{fromType} {
+extend type ${{fromType}} {
     ${{relationName}}: ${{toType}}
 }
 '''
 
 to_many_relation = '''
-extend type ${{fromType} {
+extend type ${{fromType}} {
    ${{relationName}}(where: ${{toType}}Where, orderBy: ${{toType}}OrderBy): ${{toType}}Connection
 }
 # if types don't have already the boilerplate i should write it now
@@ -75,15 +75,15 @@ extend type ${{fromType} {
 
 to_many_relation_boilerplate = '''
 type ${{toType}}Connection {
-    nodes: [${{type_name}}]
+    nodes: [${{toType}}]
     pageInfo: PageInfo
 }
 
 input ${{toType}}Where { 
-    ${{'\\n    '.join([f'{field}: WhereInput' for field in fields])}}
+    ${{'\\n    '.join([f'{field}: Where{scalar_name}' for field, scalar_name in fields])}}
 }
 
 input ${{toType}}OrderBy {
-    ${{'\\n    '.join([f'{field}: Direction' for field in fields])}}
+    ${{'\\n    '.join([f'{field}: Direction' for field, _ in fields])}}
 }
 '''

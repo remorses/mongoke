@@ -35,9 +35,9 @@ types:
         -   type_name: Guest
             expression: "x['type'] == 'guest'"
     relations:
-        -   field: father
-            type_name: Human
-            relation_type: to_one
+        -   field: friends
+            type_name: User
+            relation_type: to_many
             where:
                 _id:
                     $in: "x['friends_ids']"

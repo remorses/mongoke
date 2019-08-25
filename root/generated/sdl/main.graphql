@@ -1,16 +1,17 @@
-type Article {
-    author_id: ObjectId
-    title: String
-    made_at: Date
+union Human = User | Guest
+
+type Guest {
+    type: String
+    _id: ObjectId
+    name: String
 }
 
 type User {
-    _id: ObjectId
+    type: String
+    _id: ID
     name: String
     surname: String
     friends_ids: [ID]
-    articles: [ObjectId]
-    birthday: DateTime
 }
 
 scalar ID

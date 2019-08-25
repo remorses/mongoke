@@ -8,14 +8,16 @@ import os.path
 from populate import populate_string
 from .templates.resolvers import resolvers_init, resolvers_support, single_item_resolver, many_items_resolvers
 from .templates.scalars import scalars_implementations
-from .templates.graphql_query import graphql_query, general_graphql
+from .templates.graphql_query import graphql_query, general_graphql, to_many_relation, to_many_relation_boilerplate, to_one_relation
 from .templates.main import main
 from .templates.jwt_middleware import jwt_middleware
 from .templates.logger import logger
 from .support import touch, pretty, zip_pluck, get_type_properties
 
 SCALAR_TYPES = ['String', 'Float', 'Int', 'Boolean', ]
-SCALARS_ALREADY_IMPLEMENTED = ['ObjectId', 'Json', 'Date', 'DateTime', 'Time', *SCALAR_TYPES]
+SCALARS_ALREADY_IMPLEMENTED = ['ObjectId', 'Json',
+                               'Date', 'DateTime', 'Time', *SCALAR_TYPES]
+
 
 def is_scalar(type_body):
     SCALARS = ['string', 'number', 'integer', 'boolean']
@@ -25,9 +27,6 @@ def is_scalar(type_body):
         # TODO add aliases, not only Type: Any
         or not omit(type_body, ['description', 'title', '$schema'])
     )
-
-
-
 
 
 def get_skema_aliases(skema_schema):
@@ -79,7 +78,8 @@ def generate_from_config(config):
     skema_schema = config.get('skema')
     # TODO add other scalars from the skema
     scalars = [*SCALAR_TYPES, *get_skema_aliases(skema_schema)]
-    main_graphql_schema = to_graphql(skema_schema, scalar_already_present=SCALARS_ALREADY_IMPLEMENTED)
+    main_graphql_schema = to_graphql(
+        skema_schema, scalar_already_present=SCALARS_ALREADY_IMPLEMENTED)
 
     touch(f'{base}/__init__.py', '')
     touch(f'{base}/__main__.py', main)
@@ -98,7 +98,6 @@ def generate_from_config(config):
     # typename
     # collection
     # guards
-
     for type_config in config.get('types', []):
         collection = type_config['collection']
         typename = type_config['type_name']
@@ -149,6 +148,39 @@ def generate_from_config(config):
             )
         )
         touch(f'{base}/generated/resolvers/{query_name}s.py', many_resolver)
+
+        for relation in relations:
+            fromType = typename
+            toType = relation.get('type_name')
+            relationName = relation.get('field')
+            relation_type = relation.get('relation_type', 'to_one')
+            relation_template = to_one_relation if relation_type == 'to_one' else to_many_relation
+            relation_sdl = populate_string(
+                relation_template,
+                dict(
+                    toType=toType,
+                    fromType=fromType,
+                    relationName=relationName,
+                    zip_pluck=zip_pluck,
+                )
+            )
+            implemented_types = [x.get('type_name') for x in config.get('types',[])]
+            if relation_type == 'to_many' and toType not in implemented_types:
+                relation_sdl += populate_string(
+                    to_many_relation_boilerplate,
+                    dict(
+                        toType=toType,
+                        fromType=fromType,
+                        relationName=relationName,
+                        fields=get_scalar_fields(skema_schema, toType),
+                        zip_pluck=zip_pluck,
+                    )
+                )            
+            touch(
+                f'{base}/generated/sdl/{fromType.lower()}_{relationName}.graphql', relation_sdl)
+        
+
+
 
 
 config = yaml.safe_load(open(sys.argv[-1]).read())

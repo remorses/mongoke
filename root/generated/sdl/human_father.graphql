@@ -1,0 +1,4 @@
+
+extend type Human {
+    father: User
+}

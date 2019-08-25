@@ -1,0 +1,27 @@
+
+extend type Query {
+    humans(where: HumanWhere, orderBy: HumanOrderBy,): HumanConnection
+    human(where: HumanWhere,): Human
+}
+
+type HumanConnection {
+    nodes: [Human]
+    pageInfo: PageInfo
+}
+
+input HumanWhere { 
+    $and: [HumanWhere]
+    $or: [HumanWhere]
+    # $not: [HumanWhere]
+    type: WhereString
+    _id: WhereObjectId
+    name: WhereString
+    surname: WhereString
+}
+
+input HumanOrderBy {
+    type: Direction
+    _id: Direction
+    name: Direction
+    surname: Direction
+}
