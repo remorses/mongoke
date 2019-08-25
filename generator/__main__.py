@@ -167,7 +167,7 @@ def generate_from_config(config):
                 )
             )
             implemented_types = [x.get('type_name') for x in config.get(
-                'types', []) if x.get('exposed')]
+                'types', []) if x.get('exposed', True)]
             if relation_type == 'to_many' and toType not in implemented_types:
                 relation_sdl += populate_string(
                     to_many_relation_boilerplate,
@@ -182,12 +182,13 @@ def generate_from_config(config):
                 f'{base}/generated/sdl/{typename.lower()}_{relationName}.graphql', relation_sdl)
         for relation in relations:
             relationName = relation.get('field')
+            relation_type = relation.get('relation_type', 'to_one')
             relation_template = single_relation_resolver if relation_type == 'to_one' else many_relations_resolver
             toType = relation.get('type_name')
             relationTypeConfig = [x for x in config.get(
                 'types', []) if x.get('type_name') == toType][0]
             relation_resolver = populate_string(
-                single_relation_resolver,
+                relation_template,
                 dict(
                     # query_name=query_name,
                     # type_name=typename,
