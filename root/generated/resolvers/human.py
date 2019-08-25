@@ -18,13 +18,12 @@ async def resolve_query_human(parent, args, ctx, info):
     collection = ctx['db']['humans']
     x = collection.find_one(where)
 
-
     if ('surname' in x):
         x['_typename'] = 'User'
-
+    
     elif (x['type'] == 'guest'):
         x['_typename'] = 'Guest'
-
+    
     if fields:
         x = select_keys(lambda k: k in fields, x)
     return x

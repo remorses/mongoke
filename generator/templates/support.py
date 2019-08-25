@@ -1,3 +1,4 @@
+import json
 from funcy import lfilter, post_processing, pluck, count
 
 def zip_pluck(d, keys, enumerate=False):
@@ -6,13 +7,16 @@ def zip_pluck(d, keys, enumerate=False):
         args = [count(), *args]
     return zip(*args)
 
-join_yields = lambda separator='': post_processing(lambda parts: separator.join(list(map(str, parts))))
+join_yields = lambda separator='': post_processing(lambda parts: separator.join(list(parts)))
 
 def remove_indentation(string: str):
-    lines = lfilter(bool, string.split('\n'))
-    print(lines)
+    lines = string.split('\n')
+    # lines = map(lambda x: x.replace(' ', ''), lines)
+    lines = lfilter(bool, lines)
     base_indent = min([len(line) - len(line.lstrip()) for line in lines])
     lines = [x[base_indent:] for x in lines]
+    # lines = lfilter(lambda s: len(s.replace(' ', '')), lines)
+    print(lines)
     return '\n'.join(lines)
 
 def indent_to(indentation, string):
@@ -33,3 +37,22 @@ if __name__ == '__main__':
         yy
     '''
     print(indent_to('....', x))
+
+
+EXPR_INDICATOR = '@'
+
+def replace_expressions(obj):
+    for k, v in obj.items():
+        if isinstance(v, str):
+            obj[k] = EXPR_INDICATOR + str(v) + EXPR_INDICATOR
+        if isinstance(v, dict):
+            replace_expressions(v)
+    return obj
+
+def repr_eval_dict(obj, indentation=''):
+    obj = replace_expressions(obj)
+    dumped = json.dumps(obj, indent=4)
+    dumped = dumped.replace('"' + EXPR_INDICATOR, '').replace(EXPR_INDICATOR + '"', '')
+    dumped = bytes(dumped, 'utf-8').decode('unicode_escape')
+    dumped = indent_to(indentation, dumped)
+    return dumped.lstrip()

@@ -45,5 +45,5 @@ types:
             relation_type: to_many
             where:
                 _id:
-                    $in: "x['friends_ids']"
+                    $in: "parent['friends_ids']"
 

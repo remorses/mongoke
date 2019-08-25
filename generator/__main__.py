@@ -33,14 +33,14 @@ def get_skema_aliases(skema_schema):
     definitions = skema.to_jsonschema(
         skema_schema, resolve=False).get('definitions', [])
     aliases = [body.get('title') for d, body in definitions.items()]
-    pretty(aliases)
+    # pretty(aliases)
     aliases = [x for x in aliases if is_alias(skema_schema, x)]
     return aliases
 
 
 def is_alias(skema_schema, typename) -> bool:
     json_schema = skema.to_jsonschema(skema_schema, ref=typename, resolve=True)
-    pretty(json_schema)
+    # pretty(json_schema)
     return is_scalar(json_schema)
 
 

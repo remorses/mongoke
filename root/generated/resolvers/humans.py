@@ -10,12 +10,11 @@ async def resolve_query_humans(parent, args, ctx, info):
     headers = ctx['request']['headers']
     jwt_payload = ctx['req'].jwt_payload # TODO i need to decode jwt_payload
     fields = []
-
     if not (headers['user-id'] == where['_id'] or jwt_payload['user_id'] == 'ciao'):
         raise Exception("guard `headers['user-id'] == where['_id'] or jwt_payload['user_id'] == 'ciao'` not satisfied")
     else:
         fields += ['name', 'surname']
-
+    
     pagination = {
         'after': args.get('after'),
         'before': args.get('before'),
@@ -36,14 +35,13 @@ async def resolve_query_humans(parent, args, ctx, info):
 
 
 
-    for x in nodes: # TODO remove this useless if
-
+    for x in nodes:
 
         if ('surname' in x):
             x['_typename'] = 'User'
-
+        
         elif (x['type'] == 'guest'):
             x['_typename'] = 'Guest'
-
+        
     data['nodes'] = nodes
     return data

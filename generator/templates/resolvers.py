@@ -4,8 +4,8 @@ from funcy import lfilter, post_processing
 
 
 
-@join_yields('')
-def guards_before_checks(guards_before, indentation):
+@join_yields('\n')
+def repr_guards_before_checks(guards_before, indentation):
     for expr, fields in zip_pluck(guards_before, ['expression', 'fields']):
         code =  f"""
         if not ({expr}):
@@ -15,10 +15,48 @@ def guards_before_checks(guards_before, indentation):
         """
         yield indent_to(indentation, code)
 
+@join_yields('\n')
+def repr_guards_after_checks(guards_after, indentation):
+    for expr, fields in zip_pluck(guards_after, ['expression', 'fields']):
+        code = f"""
+        if not ({expr}):
+            raise Exception({json.dumps('guard `' + str(expr) + '` not satisfied')})
+        else:
+            fields += {fields}
+        """
+        yield indent_to(indentation, code)
+
+
+@join_yields('\n')
+def repr_disambiguations(disambiguations, indentation):
+    for (i, typename, expr) in zip_pluck(disambiguations, ['type_name', 'expression'], enumerate=True):
+        code = f"""
+        {'if' if i == 0 else 'elif'} ({expr}):
+            x['_typename'] = '{typename}'
+        """ 
+        yield indent_to(indentation, code)
+
+@join_yields('\n')
+def filter_nodes_guards_after(guards_after, indentation):
+    for expr, fields in zip_pluck(guards_after, ['expression', 'fields']):
+        code = f"""
+        if not ({expr}):
+            pass
+        else:
+            own_fields = fields + {fields}
+            if own_fields:
+                x = select_keys(lambda k: k in fields, x)
+            nodes.append(x)
+        """
+        yield indent_to(indentation, code)
+
 
 resolvers_dependencies = dict(
-    guards_before_checks=guards_before_checks,
+    repr_guards_before_checks=repr_guards_before_checks,
+    repr_guards_after_checks=repr_guards_after_checks,
+    filter_nodes_guards_after=filter_nodes_guards_after,
     zip_pluck=zip_pluck,
+    repr_disambiguations=repr_disambiguations,
 )
 
 resolvers_init = '''
@@ -37,27 +75,11 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
     headers = ctx['request']['headers']
     jwt_payload = ctx['req'].jwt_payload # TODO i need to decode jwt_payload and set it in req in a middleware
     fields = []
-${{guards_before_checks(guards_before, '    ')}}
+${{repr_guards_before_checks(guards_before, '    ')}}
     collection = ctx['db']['${{collection}}']
     x = collection.find_one(where)
-${{
-''.join([f"""
-    if not ({expr}):
-        raise Exception({json.dumps('guard `' + str(expr) + '` not satisfied')})
-    else:
-        fields += {fields}
-"""
-for expr, fields in zip_pluck(guards_after, ['expression', 'fields'])])
-}}
-${{
-''.join([
-f"""
-    {'if' if i == 0 else 'elif'} ({expr}):
-        x['_typename'] = '{typename}'
-""" 
-for (i, typename, expr) in zip_pluck(disambiguations, ['type_name', 'expression'], enumerate=True)
-])
-}}
+${{repr_guards_after_checks(guards_after, '    ')}}
+${{repr_disambiguations(disambiguations, '    ')}}
     if fields:
         x = select_keys(lambda k: k in fields, x)
     return x
@@ -76,7 +98,7 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
     headers = ctx['request']['headers']
     jwt_payload = ctx['req'].jwt_payload # TODO i need to decode jwt_payload
     fields = []
-${{guards_before_checks(guards_before, '    ')}}
+${{repr_guards_before_checks(guards_before, '    ')}}
     pagination = {
         'after': args.get('after'),
         'before': args.get('before'),
@@ -100,32 +122,13 @@ ${{
     nodes = data['nodes']
 """
 }}
-${{
-''.join([f"""
-        if not ({expr}):
-            pass
-        else:
-            own_fields = fields + {fields or []}
-            if own_fields:
-                x = select_keys(lambda k: k in fields, x)
-            nodes.append(x)
-"""
-for expr, fields in zip_pluck(guards_after, ['expression', 'fields'])]).strip()
-}}
+${{filter_nodes_guards_after(guards_after, '        ')}}
 ${{
 """
-    for x in nodes: # TODO remove this useless if
+    for x in nodes:
 """ if disambiguations else ''
 }}
-${{
-''.join([
-f"""
-        {'if' if i == 0 else 'elif'} ({expr}):
-            x['_typename'] = '{typename}'
-"""
-for (i, typename, expr) in zip_pluck(disambiguations, ['type_name', 'expression'], enumerate=True)
-])
-}}
+${{repr_disambiguations(disambiguations, '        ')}}
     data['nodes'] = nodes
     return data
 
