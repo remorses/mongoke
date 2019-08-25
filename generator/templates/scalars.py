@@ -1,4 +1,4 @@
-scalars = '''
+scalars_implementations = '''
 from tartiflette import Scalar
 from bson import ObjectId
 

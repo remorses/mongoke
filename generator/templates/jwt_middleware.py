@@ -9,7 +9,7 @@ JWT_ALGORITHM = 'HS256'
 async def jwt_middleware(app, handler):
     async def middleware(request: web.Request):
         request.jwt_payload = {}
-        jwt_token = request.headers.get('Authorization', None)
+        jwt_token = request.headers.get('Authorization', '').replace('Bearer ', '')
         if jwt_token:
             try:
                 payload = jwt.decode(jwt_token, verify=False, algorithms=[JWT_ALGORITHM])

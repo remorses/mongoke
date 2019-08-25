@@ -1,6 +1,6 @@
 import json
 import os.path
-from funcy import pluck, count
+from funcy import pluck, count, merge
 
 def touch(filename, data):
     os.makedirs(os.path.dirname(filename), exist_ok=True)
@@ -14,3 +14,14 @@ def zip_pluck(d, keys, enumerate=False):
     if enumerate:
         args = [count(), *args]
     return zip(*args)
+
+
+def get_type_properties(json_schema):
+    if any([x in json_schema for x in ('anyOf', 'allOf', 'oneOf')]):
+        subsets = json_schema.get('anyOf', [])
+        subsets = subsets or json_schema.get('allOf', [])
+        subsets = subsets or json_schema.get('oneOf', [])
+        type_properties = merge(*[x.get('properties',) for x in subsets])
+    else:
+        type_properties = json_schema.get('properties', {})
+    return type_properties

@@ -10,15 +10,18 @@ type HumanConnection {
 }
 
 input HumanWhere { 
-    type: WhereInput
-    _id: WhereInput
-    name: WhereInput
-    surname: WhereInput
+    $and: [HumanWhere]
+    $or: [HumanWhere]
+    # $not: [HumanWhere]
+    type: WhereString
+    _id: WhereObjectId
+    name: WhereString
+    surname: WhereString
 }
 
 input HumanOrderBy {
-    type: Direction
-    _id: Direction
-    name: Direction
-    surname: Direction
+    ('type', 'String'): Direction
+    ('_id', 'ObjectId'): Direction
+    ('name', 'String'): Direction
+    ('surname', 'String'): Direction
 }

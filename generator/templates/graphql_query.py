@@ -1,22 +1,23 @@
 from populate import populate_string
 
-
+# scalars
 general_graphql = '''
 enum Direction {
     ASC
     DESC
 }
 
-input WhereInput {
-    $in: [NumberOrString]
-    $nin: [NumberOrString]
-    $eq: NumberOrString
-    $neq: NumberOrString
-    $gte: NumberOrString
-    $lte: NumberOrString
-    $gt: NumberOrString
-    $lt: NumberOrString
-}
+${{
+''.join([f"""
+input Where{scalar} {'{'}
+    $in: [{scalar}]
+    $nin: [{scalar}]
+    $eq: {scalar}
+    $neq: {scalar}
+{'}'}
+""" for scalar in map(str, scalars)])
+}}
+
 
 type PageInfo {
     endCursor: Int
@@ -29,7 +30,7 @@ scalar Json
 scalar Url
 scalar ObjectId
 scalar NumberOrString
-
+# TODO create the additional scalars
 '''
 
 # fields
@@ -46,7 +47,10 @@ type ${{type_name}}Connection {
 }
 
 input ${{type_name}}Where { 
-    ${{'\\n    '.join([f'{field}: WhereInput' for field in fields])}}
+    $and: [${{type_name}}Where]
+    $or: [${{type_name}}Where]
+    # $not: [${{type_name}}Where]
+    ${{'\\n    '.join([f'{field}: Where{scalar_name}' for field, scalar_name in fields])}}
 }
 
 input ${{type_name}}OrderBy {
