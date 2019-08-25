@@ -22,8 +22,10 @@ skema: |
 
 
 types:
--   type_name: User
-    collection: null
+-   
+    exposed: false
+    type_name: User
+    collection: users
     guards:
         -   when: after
             expression: headers['user-id'] == x['_id']
@@ -40,10 +42,16 @@ types:
         -   type_name: Guest
             expression: "x['type'] == 'guest'"
     relations:
-        -   field: friends
+        # -   field: friends
+        #     type_name: User
+        #     relation_type: to_many
+        #     where:
+        #         _id:
+        #             $in: "parent['friends_ids']"
+        -   field: father
             type_name: User
-            relation_type: to_many
+            relation_type: to_one
             where:
                 _id:
-                    $in: "parent['friends_ids']"
+                    $in: "parent['father_id']"
 

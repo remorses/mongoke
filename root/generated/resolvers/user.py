@@ -1,6 +1,6 @@
 
 from tartiflette import Resolver
-from .support import strip_nones, connection_resolver, zip_pluck
+from .support import strip_nones, connection_resolver, zip_pluck, select_keys
 from operator import setitem
 from funcy import select_keys
 
@@ -13,7 +13,11 @@ async def resolve_query_user(parent, args, ctx, info):
 
     collection = ctx['db']['users']
     x = collection.find_one(where)
-
+    if not (headers['user-id'] == x['_id']):
+        raise Exception("guard `headers['user-id'] == x['_id']` not satisfied")
+    else:
+        fields += []
+    
 
     if fields:
         x = select_keys(lambda k: k in fields, x)

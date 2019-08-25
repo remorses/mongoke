@@ -6,7 +6,7 @@ import yaml
 from skema.to_graphql import to_graphql
 import os.path
 from populate import populate_string
-from .templates.resolvers import resolvers_dependencies, resolvers_init, resolvers_support, single_item_resolver, many_items_resolvers
+from .templates.resolvers import resolvers_dependencies, resolvers_init, resolvers_support, single_item_resolver, many_items_resolvers, single_relation_resolver, many_relations_resolver
 from .templates.scalars import scalars_implementations
 from .templates.graphql_query import graphql_query, general_graphql, to_many_relation, to_many_relation_boilerplate, to_one_relation
 from .templates.main import main
@@ -99,9 +99,10 @@ def generate_from_config(config):
     # collection
     # guards
     for type_config in config.get('types', []):
-        collection = type_config['collection']
-        if not collection: # types with no collection are used only for relations not direct queries
+        # types with no collection are used only for relations not direct queries
+        if not config.get('exposed', True):
             continue
+        collection = type_config['collection']
         typename = type_config['type_name']
         guards = type_config.get('guards', [])
         guards = lmap(add_guards_defaults, guards)
@@ -165,7 +166,8 @@ def generate_from_config(config):
                     relationName=relationName,
                 )
             )
-            implemented_types = [x.get('type_name') for x in config.get('types', []) if x.get('collection')]
+            implemented_types = [x.get('type_name') for x in config.get(
+                'types', []) if x.get('exposed')]
             if relation_type == 'to_many' and toType not in implemented_types:
                 relation_sdl += populate_string(
                     to_many_relation_boilerplate,
@@ -175,12 +177,34 @@ def generate_from_config(config):
                         relationName=relationName,
                         fields=get_scalar_fields(skema_schema, toType),
                     )
-                )            
+                )
             touch(
-                f'{base}/generated/sdl/{fromType.lower()}_{relationName}.graphql', relation_sdl)
-        
-
-
+                f'{base}/generated/sdl/{typename.lower()}_{relationName}.graphql', relation_sdl)
+        for relation in relations:
+            relationName = relation.get('field')
+            relation_template = single_relation_resolver if relation_type == 'to_one' else many_relations_resolver
+            toType = relation.get('type_name')
+            relationTypeConfig = [x for x in config.get(
+                'types', []) if x.get('type_name') == toType][0]
+            relation_resolver = populate_string(
+                single_relation_resolver,
+                dict(
+                    # query_name=query_name,
+                    # type_name=typename,
+                    where_filter=relation.get('where',),
+                    collection=relationTypeConfig.get('collection'),
+                    resolver_path=typename + '.' + relationName,
+                    # disambiguations=disambiguations,
+                    # guards_before=[g for g in guards if g['when'] == 'before'],
+                    # guards_after=[g for g in guards if g['when'] == 'after'],
+                    disambiguations=[],
+                    guards_before=[],
+                    guards_after=[],
+                    **resolvers_dependencies,
+                )
+            )
+            touch(
+                f'{base}/generated/resolvers/{typename.lower()}_{relationName}.py', relation_resolver)
 
 
 config = yaml.safe_load(open(sys.argv[-1]).read())

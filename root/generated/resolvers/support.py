@@ -6,7 +6,7 @@ import pymongo
 from pymongo import ASCENDING, DESCENDING
 from typing import NamedTuple, Union
 import typing
-from funcy import pluck
+from funcy import pluck, select_keys
 
 gt = '$gt'
 lt = '$lt'

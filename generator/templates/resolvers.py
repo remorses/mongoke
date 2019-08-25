@@ -1,4 +1,4 @@
-from .support import zip_pluck, indent_to, join_yields
+from .support import zip_pluck, indent_to, join_yields, repr_eval_dict
 import json
 from funcy import lfilter, post_processing
 
@@ -57,6 +57,7 @@ resolvers_dependencies = dict(
     filter_nodes_guards_after=filter_nodes_guards_after,
     zip_pluck=zip_pluck,
     repr_disambiguations=repr_disambiguations,
+    repr_eval_dict=repr_eval_dict,
 )
 
 resolvers_init = '''
@@ -65,7 +66,7 @@ from ..logger import logger
 # collection, resolver_path, guard_expression_before, guard_expression_after, disambiguations
 single_item_resolver = '''
 from tartiflette import Resolver
-from .support import strip_nones, connection_resolver, zip_pluck
+from .support import strip_nones, connection_resolver, zip_pluck, select_keys
 from operator import setitem
 from funcy import select_keys
 
@@ -88,7 +89,7 @@ ${{repr_disambiguations(disambiguations, '    ')}}
 # collection, resolver_path, guard_expression_before, guard_expression_after, disambiguations
 many_items_resolvers = '''
 from tartiflette import Resolver
-from .support import strip_nones, connection_resolver, zip_pluck
+from .support import strip_nones, connection_resolver, zip_pluck, select_keys
 from operator import setitem
 
 @Resolver('${{resolver_path}}')
@@ -134,6 +135,26 @@ ${{repr_disambiguations(disambiguations, '        ')}}
 
 '''
 
+# where_filter, collection, resolver_path
+# TODO add guards, disamb.
+single_relation_resolver = ''' 
+from tartiflette import Resolver
+from .support import strip_nones, connection_resolver, zip_pluck, select_keys
+from operator import setitem
+
+@Resolver('${{resolver_path}}')
+async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(parent, args, ctx, info):
+    where = ${{repr_eval_dict(where_filter, '    ')}}
+${{repr_guards_before_checks(guards_before, '    ')}}
+    x = await ctx['db']['${{collection}}'].find_one(where)
+${{repr_guards_after_checks(guards_after, '    ')}}
+${{repr_disambiguations(disambiguations, '    ')}}
+    return x
+'''
+
+many_relations_resolver = '''
+'''
+
 # nothing
 resolvers_support = '''
 import collections
@@ -143,7 +164,7 @@ import pymongo
 from pymongo import ASCENDING, DESCENDING
 from typing import NamedTuple, Union
 import typing
-from funcy import pluck
+from funcy import pluck, select_keys
 
 gt = '$gt'
 lt = '$lt'

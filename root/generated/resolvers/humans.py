@@ -1,6 +1,6 @@
 
 from tartiflette import Resolver
-from .support import strip_nones, connection_resolver, zip_pluck
+from .support import strip_nones, connection_resolver, zip_pluck, select_keys
 from operator import setitem
 
 @Resolver('Query.humans')
