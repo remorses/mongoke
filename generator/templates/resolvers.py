@@ -89,7 +89,7 @@ ${{repr_disambiguations(disambiguations, '    ')}}
 # collection, resolver_path, guard_expression_before, guard_expression_after, disambiguations
 many_items_resolvers = '''
 from tartiflette import Resolver
-from .support import strip_nones, connection_resolver, zip_pluck, select_keys
+from .support import strip_nones, connection_resolver, zip_pluck, select_keys, get_pagination
 from operator import setitem
 
 @Resolver('${{resolver_path}}')
@@ -100,28 +100,20 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
     jwt_payload = ctx['req'].jwt_payload # TODO i need to decode jwt_payload
     fields = []
 ${{repr_guards_before_checks(guards_before, '    ')}}
-    pagination = {
-        'after': args.get('after'),
-        'before': args.get('before'),
-        'first': args.get('first'),
-        'last': args.get('last'),
-    }
+    pagination = get_pagination(args)
     data = await connection_resolver(
         collection=ctx['db']['${{collection}}'], 
         where=where,
         orderBy=orderBy,
         pagination=pagination,
     )
-    # User: 'surname' in x
-    # Guest: x['type'] == 'guest'
-
 ${{
 """
     nodes = []
     for x in data['nodes']:
 """ if guards_after else """
     nodes = data['nodes']
-"""
+""" if disambiguations else ''
 }}
 ${{filter_nodes_guards_after(guards_after, '        ')}}
 ${{
@@ -130,7 +122,7 @@ ${{
 """ if disambiguations else ''
 }}
 ${{repr_disambiguations(disambiguations, '        ')}}
-    data['nodes'] = nodes
+    ${{"data['nodes'] = nodes" if guards_after or disambiguations else ''}}
     return data
 
 '''
@@ -156,7 +148,7 @@ ${{repr_disambiguations(disambiguations, '    ')}}
 # TODO complete
 many_relations_resolver = '''
 from tartiflette import Resolver
-from .support import strip_nones, connection_resolver, zip_pluck, select_keys
+from .support import strip_nones, connection_resolver, zip_pluck, select_keys, get_pagination
 from operator import setitem
 
 @Resolver('${{resolver_path}}')
@@ -184,6 +176,15 @@ MAX_NODES = 20
 
 def zip_pluck(d, *keys):
     return zip(*[pluck(k, d) for k in keys])
+
+def get_pagination(args):
+    return {
+        'after': args.get('after'),
+        'before': args.get('before'),
+        'first': args.get('first'),
+        'last': args.get('last'),
+    }
+
 
 parse_direction = lambda direction: ASCENDING if direction == 'ASC' else DESCENDING
 

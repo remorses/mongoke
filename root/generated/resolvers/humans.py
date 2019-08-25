@@ -1,6 +1,6 @@
 
 from tartiflette import Resolver
-from .support import strip_nones, connection_resolver, zip_pluck, select_keys
+from .support import strip_nones, connection_resolver, zip_pluck, select_keys, get_pagination
 from operator import setitem
 
 @Resolver('Query.humans')
@@ -15,21 +15,13 @@ async def resolve_query_humans(parent, args, ctx, info):
     else:
         fields += ['name', 'surname']
     
-    pagination = {
-        'after': args.get('after'),
-        'before': args.get('before'),
-        'first': args.get('first'),
-        'last': args.get('last'),
-    }
+    pagination = get_pagination(args)
     data = await connection_resolver(
         collection=ctx['db']['humans'], 
         where=where,
         orderBy=orderBy,
         pagination=pagination,
     )
-    # User: 'surname' in x
-    # Guest: x['type'] == 'guest'
-
 
     nodes = data['nodes']
 

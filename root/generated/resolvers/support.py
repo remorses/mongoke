@@ -15,6 +15,15 @@ MAX_NODES = 20
 def zip_pluck(d, *keys):
     return zip(*[pluck(k, d) for k in keys])
 
+def get_pagination(args):
+    return {
+        'after': args.get('after'),
+        'before': args.get('before'),
+        'first': args.get('first'),
+        'last': args.get('last'),
+    }
+
+
 parse_direction = lambda direction: ASCENDING if direction == 'ASC' else DESCENDING
 
 async def connection_resolver(

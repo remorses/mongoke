@@ -1,6 +1,6 @@
 
 from tartiflette import Resolver
-from .support import strip_nones, connection_resolver, zip_pluck, select_keys
+from .support import strip_nones, connection_resolver, zip_pluck, select_keys, get_pagination
 from operator import setitem
 
 @Resolver('Query.users')
@@ -11,21 +11,13 @@ async def resolve_query_users(parent, args, ctx, info):
     jwt_payload = ctx['req'].jwt_payload # TODO i need to decode jwt_payload
     fields = []
 
-    pagination = {
-        'after': args.get('after'),
-        'before': args.get('before'),
-        'first': args.get('first'),
-        'last': args.get('last'),
-    }
+    pagination = get_pagination(args)
     data = await connection_resolver(
         collection=ctx['db']['users'], 
         where=where,
         orderBy=orderBy,
         pagination=pagination,
     )
-    # User: 'surname' in x
-    # Guest: x['type'] == 'guest'
-
 
     nodes = []
     for x in data['nodes']:
