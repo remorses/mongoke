@@ -1,0 +1,73 @@
+db_url: http://localhost:27109
+
+jwt:
+    secret: ''
+    algorithms: [H256]
+    role_key: X-Mongoko-Role
+
+skema: |
+    User:
+        type: "user"
+        _id: ID
+        name: Str
+        surname: Str
+        friends_ids: [ID]
+    Guest:
+        type: "guest"
+        _id: ObjectId
+        name: Str
+    WindowedEvent:
+        value: Int
+        timestamp: Int
+    ObjectId: Any # this will be added implicetly
+    ID: Any
+    Human: User | Guest
+
+
+collections:
+    users:
+        type: Human
+        guards:
+            -   expression: session['role'] == 'admin'
+                when: after
+            -   expression: session['role'] == 'semi'
+                exclude: [passwords, campaign_data]
+        disambiguations:
+            User: x['type'] == 'user'
+            Guest: x['type'] == 'guest'
+
+aggregations:
+    events_over_minute:
+        collection: events
+        type: WindowedEvent
+        pipeline:
+            -   $group:
+                    _id:
+                        $substartct:
+                            - $timestamp
+                            - $mod: [$timestamp, 60000] # minute 60 * 1000
+                    value:
+                        $sum: $likes
+            -   $project:
+                    _id: 0
+                    value: 1
+                    timestamp: $_id
+
+relations:
+    -   from: users
+        relation_type: to_many
+        to: events_over_minute
+        field: likes_over_time
+        query:
+            bot_id:
+                $in: ${{ parent['_id'] }}
+            type: like
+    -   from: users
+        to: users
+        field: father
+        relation_type: to_one
+        query:
+            _id:
+                $in: ${{ parent['father_id'] }}
+
+

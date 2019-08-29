@@ -128,7 +128,8 @@ ${{repr_disambiguations(disambiguations, '        ')}}
 '''
 
 # where_filter, collection, resolver_path
-# TODO add guards, disamb.
+# TODO add guards, disambig
+# TODO add pipeline for making an aggregate
 single_relation_resolver = ''' 
 from tartiflette import Resolver
 from .support import strip_nones, connection_resolver, zip_pluck, select_keys
@@ -145,7 +146,7 @@ ${{repr_disambiguations(disambiguations, '    ')}}
 '''
 
 # where_filter, collection
-# TODO complete
+# TODO add pipeline for making an aggregate
 many_relations_resolver = '''
 from tartiflette import Resolver
 from .support import strip_nones, connection_resolver, zip_pluck, select_keys, get_pagination

@@ -1,5 +1,0 @@
-
-extend type Human {
-   friends(where: HumanWhere, orderBy: HumanOrderBy): HumanConnection
-}
-# if types don't have already the boilerplate i should write it now

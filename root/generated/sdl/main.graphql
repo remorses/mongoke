@@ -1,5 +1,10 @@
 union Human = User | Guest
 
+type WindowedEvent {
+    value: Int
+    timestamp: Int
+}
+
 type Guest {
     type: String
     _id: ObjectId

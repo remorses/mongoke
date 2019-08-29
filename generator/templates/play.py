@@ -61,3 +61,60 @@ ${{
 ${{repr_disambiguations(disambiguations, '        ')}}
     data['nodes'] = nodes
     return data
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@Resolver('Query.humans')
+async def resolve_query_humans(parent, args, ctx, info):
+    where = strip_nones(args.get('where', {}))
+    orderBy = args.get('orderBy', {'_id': 'ASC'}) # add default
+    headers = ctx['request']['headers']
+    jwt_payload = ctx['req'].jwt_payload # TODO i need to decode jwt_payload
+    fields = []
+    if not (headers['user-id'] == where['_id'] or jwt_payload['user_id'] == 'ciao'):
+        raise Exception("guard `headers['user-id'] == where['_id'] or jwt_payload['user_id'] == 'ciao'` not satisfied")
+    else:
+        fields += ['name', 'surname']
+    
+    pagination = get_pagination(args)
+    data = await connection_resolver(
+        collection=ctx['db']['humans'], 
+        where=where,
+        orderBy=orderBy,
+        pagination=pagination,
+    )
+    def guard(x):
+        return all([
+            ,
+        ])
+
+    def disambiguate(x):
+        if ('surname' in x):
+            x['_typename'] = 'User'
+        elif (x['type'] == 'guest'):
+            x['_typename'] = 'Guest'
+        return x
+    data['nodes'] = [select_keys() for x in data['nodes'] if guard(x)]
+    data['nodes'] = map(disambiguate, data['nodes'])
+    data['nodes'] = list(data['nodes'])
+    return data

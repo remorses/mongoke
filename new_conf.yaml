@@ -16,25 +16,38 @@ skema: |
         type: "guest"
         _id: ObjectId
         name: Str
+    WindowedEvent:
+        value: Int
+        timestamp: Int
     ObjectId: Any # this will be added implicetly
     ID: Any
     Human: User | Guest
 
 
 types:
--   
-    exposed: false
+-   exposed: false
     type_name: User
     collection: users
+    guards:
+        -   when: after
+            expression: headers['user-id'] == x['_id']
+-   exposed: false
+    type_name: WindowedEvent
+    collection: events
+    pipeline:
+-   exposed: false
+    type_name: Event
+    collection: events
     guards:
         -   when: after
             expression: headers['user-id'] == x['_id']
 -   type_name: Human
     collection: humans
     guards:
-        -   when: before
-            roles: [user]
-            expression: headers['user-id'] == where['_id'] or jwt_payload['user_id'] == 'ciao'
+        before:
+            expression: >
+                headers['user-id'] == where['_id']
+                or jwt_payload['user_id'] == 'ciao'
             fields: [name, surname]
     disambiguations:
         -   type_name: User
@@ -45,13 +58,36 @@ types:
         -   field: friends
             type_name: Human
             relation_type: to_many
-            where:
-                _id:
-                    $in: "parent['friends_ids']"
+            pipeline:
+                -   $match:
+                        _id:
+                            $in: "parent['friends_ids']"
+        -   field: likes_over_time
+            type_name: WindowedEvent
+            relation_type: to_many
+            collection: events
+            pipeline:
+                -   $match:
+                        type: like
+                        bot_id:
+                            $in: ${ parent['_id'] }
+                -   $group:
+                        _id:
+                            $substartct:
+                                - $timestamp
+                                - $mod: [$timestamp, 60000] # minute 60 * 1000
+                        value:
+                            $sum: $likes
+                -   $project:
+                        _id: 0
+                        value: 1
+                        timestamp: $_id
         -   field: father
             type_name: User
+            collection: users
             relation_type: to_one
             where:
                 _id:
-                    $in: "parent['father_id']"
+                    $in: ${ parent['father_id'] }
+
 

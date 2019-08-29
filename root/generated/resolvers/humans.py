@@ -10,26 +10,34 @@ async def resolve_query_humans(parent, args, ctx, info):
     headers = ctx['request']['headers']
     jwt_payload = ctx['req'].jwt_payload # TODO i need to decode jwt_payload
     fields = []
-    if not (headers['user-id'] == where['_id'] or jwt_payload['user_id'] == 'ciao'):
-        raise Exception("guard `headers['user-id'] == where['_id'] or jwt_payload['user_id'] == 'ciao'` not satisfied")
+    if not (session['role'] == 'semi'):
+        raise Exception("guard `session['role'] == 'semi'` not satisfied")
     else:
-        fields += ['name', 'surname']
+        fields += []
     
     pagination = get_pagination(args)
     data = await connection_resolver(
-        collection=ctx['db']['humans'], 
+        collection=ctx['db']['users'], 
         where=where,
         orderBy=orderBy,
         pagination=pagination,
     )
 
-    nodes = data['nodes']
+    nodes = []
+    for x in data['nodes']:
 
-
+        if not (session['role'] == 'admin'):
+            pass
+        else:
+            own_fields = fields + []
+            if own_fields:
+                x = select_keys(lambda k: k in fields, x)
+            nodes.append(x)
+        
 
     for x in nodes:
 
-        if ('surname' in x):
+        if (x['type'] == 'user'):
             x['_typename'] = 'User'
         
         elif (x['type'] == 'guest'):

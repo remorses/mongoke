@@ -1,4 +1,5 @@
 import json
+from populate import populate_string
 from funcy import lfilter, post_processing, pluck, count
 
 def zip_pluck(d, keys, enumerate=False):
@@ -39,7 +40,7 @@ if __name__ == '__main__':
     print(indent_to('....', x))
 
 
-EXPR_INDICATOR = '@'
+
 
 def replace_expressions(obj):
     for k, v in obj.items():
@@ -49,10 +50,21 @@ def replace_expressions(obj):
             replace_expressions(v)
     return obj
 
+# def _repr_eval_dict(obj, indentation=''):
+#     obj = replace_expressions(obj)
+#     dumped = json.dumps(obj, indent=4)
+#     dumped = dumped.replace('"' + EXPR_INDICATOR, '').replace(EXPR_INDICATOR + '"', '')
+#     dumped = bytes(dumped, 'utf-8').decode('unicode_escape')
+#     dumped = indent_to(indentation, dumped)
+#     return dumped.lstrip()
+    
+EXPR_START = '${{'
+EXPR_END = '}}'
+
 def repr_eval_dict(obj, indentation=''):
-    obj = replace_expressions(obj)
     dumped = json.dumps(obj, indent=4)
-    dumped = dumped.replace('"' + EXPR_INDICATOR, '').replace(EXPR_INDICATOR + '"', '')
+    # dumped = populate_string(dumped, do_eval=False)
+    dumped = dumped.replace('"' + EXPR_START, '').replace(EXPR_END + '"', '')
     dumped = bytes(dumped, 'utf-8').decode('unicode_escape')
     dumped = indent_to(indentation, dumped)
     return dumped.lstrip()

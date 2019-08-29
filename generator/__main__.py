@@ -71,7 +71,69 @@ def add_disambiguations_defaults(dis):
     return dis
 
 
+def generate_type_sdl(schema, typename, guards, query_name, is_aggregation=False):
+    return populate_string(
+        graphql_query,
+        dict(
+            query_name=query_name,
+            type_name=typename,
+            fields=get_scalar_fields(schema, typename),
+            # scalars=scalars,
+        )
+    )
+
+
+
+def generate_resolvers(collection, disambiguations, guards, query_name, is_aggregation=False):
+    single_resolver = populate_string(
+        single_item_resolver,
+        dict(
+            # query_name=query_name,
+            # type_name=typename,
+            collection=collection,
+            resolver_path='Query.' + query_name,
+            disambiguations=disambiguations,
+            guards_before=[g for g in guards if g['when'] == 'before'],
+            guards_after=[g for g in guards if g['when'] == 'after'],
+            **resolvers_dependencies,
+        )
+    )
+    many_resolver = populate_string(
+        many_items_resolvers,
+        dict(
+            # query_name=query_name,
+            # type_name=typename,
+            collection=collection,
+            resolver_path='Query.' + query_name + 's',
+            disambiguations=disambiguations,
+            guards_before=[g for g in guards if g['when'] == 'before'],
+            guards_after=[g for g in guards if g['when'] == 'after'],
+            **resolvers_dependencies,
+        )
+    )
+    return single_resolver, many_resolver
+
+@collecting
+def make_disambiguations_objects(disambiguations):
+    for type, expr in disambiguations.items():
+        yield {
+            'type_name': type,
+            'expression': expr, 
+        }
+
+
 def generate_from_config(config):
+    collections = config.get('collections', {})
+    aggregations = config.get('aggregations', {})
+    def get_type_config(name):
+        if name in collections:
+            conf = collections[name]
+        elif name in aggregations:
+            conf = aggregations[name]
+        else:
+            raise Exception('fromType not found in config')
+        return conf
+    relations = config.get('relations', [])
     target_dir = config.get('target_dir', '.')
     root_dir_name = config.get('root_dir_name', 'root')
     base = os.path.join(target_dir, root_dir_name)
@@ -98,115 +160,84 @@ def generate_from_config(config):
     # typename
     # collection
     # guards
-    for type_config in config.get('types', []):
+    for collection, type_config in collections.items():
         # types with no collection are used only for relations not direct queries
-        if not config.get('exposed', True):
+        if not type_config.get('exposed', True):
             continue
-        collection = type_config['collection']
-        typename = type_config['type_name']
+        typename = type_config['type']
+        query_name = typename[0].lower() + typename[1:]
         guards = type_config.get('guards', [])
         guards = lmap(add_guards_defaults, guards)
-        disambiguations = type_config.get('disambiguations', [])
+        disambiguations = type_config.get('disambiguations', {})
+        disambiguations = make_disambiguations_objects(disambiguations)
         disambiguations = lmap(add_disambiguations_defaults, disambiguations)
-        relations = type_config.get('relations', [])  # TODO relations
 
-        query_name = typename[0].lower() + typename[1:]
-        # pretty(get_scalar_fields(skema_schema, typename))
-        query_subset = populate_string(
-            graphql_query,
-            dict(
-                query_name=query_name,
-                type_name=typename,
-                fields=get_scalar_fields(skema_schema, typename),
-                # scalars=scalars,
-            )
+        query_subset = generate_type_sdl(
+            skema_schema,
+            guards=guards,
+            typename=typename,
+            query_name=query_name
         )
         touch(f'{base}/generated/sdl/{query_name}.graphql', query_subset)
-
-        single_resolver = populate_string(
-            single_item_resolver,
-            dict(
-                # query_name=query_name,
-                # type_name=typename,
-                collection=collection,
-                resolver_path='Query.' + query_name,
-                disambiguations=disambiguations,
-                guards_before=[g for g in guards if g['when'] == 'before'],
-                guards_after=[g for g in guards if g['when'] == 'after'],
-                **resolvers_dependencies,
-            )
+        single_resolver, many_resolver = generate_resolvers(
+            collection=collection,
+            disambiguations=disambiguations,
+            guards=guards,
+            query_name=query_name,
         )
         touch(f'{base}/generated/resolvers/{query_name}.py', single_resolver)
-        many_resolver = populate_string(
-            many_items_resolvers,
-            dict(
-                # query_name=query_name,
-                # type_name=typename,
-                collection=collection,
-                resolver_path='Query.' + query_name + 's',
-                disambiguations=disambiguations,
-                guards_before=[g for g in guards if g['when'] == 'before'],
-                guards_after=[g for g in guards if g['when'] == 'after'],
-                **resolvers_dependencies,
-            )
-        )
         touch(f'{base}/generated/resolvers/{query_name}s.py', many_resolver)
 
-        for relation in relations:
-            fromType = typename
-            toType = relation.get('type_name')
-            relationName = relation.get('field')
-            relation_type = relation.get('relation_type', 'to_one')
-            relation_template = to_one_relation if relation_type == 'to_one' else to_many_relation
-            relation_sdl = populate_string(
-                relation_template,
+    for relation in relations:
+        fromTypeConfig = get_type_config(relation['from'])
+        fromType = fromTypeConfig['type']
+        toTypeConfig = get_type_config(relation['to'])
+        toType = toTypeConfig.get('type')
+        relationName = relation.get('field')
+        relation_type = relation.get('relation_type', 'to_one')
+        relation_template = to_one_relation if relation_type == 'to_one' else to_many_relation
+        relation_sdl = populate_string(
+            relation_template,
+            dict(
+                toType=toType,
+                fromType=fromType,
+                relationName=relationName,
+            )
+        )
+        implemented_types = [x.get('type') for x in merge(collections, aggregations).values() if x.get('exposed', True)]
+        if relation_type == 'to_many' and toType not in implemented_types:
+            relation_sdl += populate_string(
+                to_many_relation_boilerplate,
                 dict(
                     toType=toType,
                     fromType=fromType,
                     relationName=relationName,
+                    fields=get_scalar_fields(skema_schema, toType),
                 )
             )
-            implemented_types = [x.get('type_name') for x in config.get(
-                'types', []) if x.get('exposed', True)]
-            if relation_type == 'to_many' and toType not in implemented_types:
-                relation_sdl += populate_string(
-                    to_many_relation_boilerplate,
-                    dict(
-                        toType=toType,
-                        fromType=fromType,
-                        relationName=relationName,
-                        fields=get_scalar_fields(skema_schema, toType),
-                    )
-                )
-            touch(
-                f'{base}/generated/sdl/{typename.lower()}_{relationName}.graphql', relation_sdl)
-        for relation in relations:
-            relationName = relation.get('field')
-            relation_type = relation.get('relation_type', 'to_one')
-            relation_template = single_relation_resolver if relation_type == 'to_one' else many_relations_resolver
-            toType = relation.get('type_name')
-            relationTypeConfig = [x for x in config.get(
-                'types', []) if x.get('type_name') == toType][0]
-            relation_resolver = populate_string(
-                relation_template,
-                dict(
-                    # query_name=query_name,
-                    # type_name=typename,
-                    where_filter=relation.get('where',),
-                    collection=relationTypeConfig.get('collection'),
-                    resolver_path=typename + '.' + relationName,
-                    # disambiguations=disambiguations,
-                    # guards_before=[g for g in guards if g['when'] == 'before'],
-                    # guards_after=[g for g in guards if g['when'] == 'after'],
-                    disambiguations=[],
-                    guards_before=[],
-                    guards_after=[],
-                    **resolvers_dependencies,
-                )
+        touch(f'{base}/generated/sdl/{fromType.lower()}_{relationName}.graphql', relation_sdl)
+        relation_template = single_relation_resolver if relation_type == 'to_one' else many_relations_resolver
+        relation_resolver = populate_string(
+            relation_template,
+            dict(
+                # query_name=query_name,
+                # type_name=typename,
+                where_filter=relation['query'],
+                pipeline=fromTypeConfig.get('pipeline', []),
+                collection=collection,
+                resolver_path=fromType + '.' + relationName,
+                # disambiguations=disambiguations,
+                # guards_before=[g for g in guards if g['when'] == 'before'],
+                # guards_after=[g for g in guards if g['when'] == 'after'],
+                disambiguations=[],
+                guards_before=[],
+                guards_after=[],
+                **resolvers_dependencies,
             )
-            touch(
-                f'{base}/generated/resolvers/{typename.lower()}_{relationName}.py', relation_resolver)
+        )
+        touch(f'{base}/generated/resolvers/{typename.lower()}_{relationName}.py', relation_resolver)
 
 
 config = yaml.safe_load(open(sys.argv[-1]).read())
 generate_from_config(config)
+

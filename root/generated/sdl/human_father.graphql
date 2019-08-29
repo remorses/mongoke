@@ -1,4 +1,4 @@
 
 extend type Human {
-    father: User
+    father: Human
 }

@@ -7,7 +7,7 @@ from operator import setitem
 async def resolve_human_father(parent, args, ctx, info):
     where = {
         "_id": {
-            "$in": parent['father_id']
+            "$in":  parent['father_id'] 
         }
     }
 
