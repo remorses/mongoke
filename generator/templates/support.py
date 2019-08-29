@@ -42,13 +42,13 @@ if __name__ == '__main__':
 
 
 
-def replace_expressions(obj):
-    for k, v in obj.items():
-        if isinstance(v, str):
-            obj[k] = EXPR_INDICATOR + str(v) + EXPR_INDICATOR
-        if isinstance(v, dict):
-            replace_expressions(v)
-    return obj
+# def replace_expressions(obj):
+#     for k, v in obj.items():
+#         if isinstance(v, str):
+#             obj[k] = EXPR_INDICATOR + str(v) + EXPR_INDICATOR
+#         if isinstance(v, dict):
+#             replace_expressions(v)
+#     return obj
 
 # def _repr_eval_dict(obj, indentation=''):
 #     obj = replace_expressions(obj)

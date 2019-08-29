@@ -1,5 +1,5 @@
 import yaml
-
+import json
 s = '''
 ciao:
     expr: > 
@@ -8,6 +8,6 @@ ciao:
 '''
 
 # print(yaml.load(s)['ciao']['expr'])
-x = yaml.load(open('spec_conf.yaml'))
-y = yaml.dump(x)
+x = yaml.load(open('pr_conf.yaml'))
+y = json.dumps(x, indent=4)
 print(y)

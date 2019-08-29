@@ -1,0 +1,19 @@
+
+extend type Bot {
+   likes_over_time(where: EventWindowWhere, orderBy: EventWindowOrderBy): EventWindowConnection
+}
+# if types don't have already the boilerplate i should write it now
+type EventWindowConnection {
+    nodes: [EventWindow]
+    pageInfo: PageInfo
+}
+
+input EventWindowWhere { 
+    value: WhereNumber
+    timestamp: WhereNumber
+}
+
+input EventWindowOrderBy {
+    value: Direction
+    timestamp: Direction
+}

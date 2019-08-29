@@ -6,36 +6,52 @@ jwt:
     role_key: X-Mongoko-Role
 
 skema: |
+    Bot:
+        _id: ObjectId
+        username: Str
     User:
-        type: "user"
-        _id: ID
+        bot_id: ObjectId
         name: Str
         surname: Str
-        friends_ids: [ID]
-    Guest:
-        type: "guest"
+    MessageCampaign:
         _id: ObjectId
-        name: Str
-    WindowedEvent:
+        bot_id: ObjectId
+        messages: [Str]
+    PostCampaign:
+        _id: ObjectId
+        bot_id: ObjectId
+        posts: [Str]
+    Campaign: MessageCampaign | PostCampaign
+    EventWindow:
         value: Int
         timestamp: Int
-    ObjectId: Any # this will be added implicetly
+    Event:
+        _id: ObjectId
+        bot_id: ObjectId
+        type: "like" | "bo"
+        likes?: Int
+    ObjectId: Any # this will be added implictely
     ID: Any
-    Human: User | Guest
 
 
-collections:
-    Human:
-        collection: humans
+
+types:
+    User:
+        exposed: False
+        collection: users
+    Bot:
+        collection: bots
         guards:
-            -   expression: session['role'] == 'admin'
-                when: after
-            -   expression: session['role'] == 'semi'
-                exclude: [passwords, campaign_data]
+            -   expression: jwt['_id'] == where['_id']
+                when: before
+    Campaign:
+        collection: campaigns
         disambiguations:
-            User: x['type'] == 'user'
-            Guest: x['type'] == 'guest'
-    WindowedEvent:
+            MessageCampaign: >
+                'messages' in x
+            PostCampaign: |
+                'posts' in x
+    EventWindow:
         exposed: False
         collection: events
         pipeline:
@@ -52,7 +68,7 @@ collections:
                     timestamp: $_id
 
 relations:
-    -   from: User
+    -   from: Bot
         to: EventWindow
         relation_type: to_many
         field: likes_over_time
@@ -60,12 +76,11 @@ relations:
             bot_id:
                 $in: ${{ parent['_id'] }}
             type: like
-    -   from: User
-        to: Human
-        field: father
+    -   from: Bot
+        to: User
+        field: user
         relation_type: to_one
         query:
-            _id:
-                $in: ${{ parent['father_id'] }}
+            _id: ${{ parent['_id'] }}
 
 

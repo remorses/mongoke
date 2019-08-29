@@ -63,7 +63,6 @@ def get_scalar_fields(skema_schema, typename) -> List[Tuple[str, str]]:
 def add_guards_defaults(guard):
     guard['when'] = guard.get('when') or 'before'
     guard['fields'] = guard.get('fields') or []
-    guard['roles'] = guard.get('roles') or []
     return guard
 
 
@@ -118,20 +117,17 @@ def make_disambiguations_objects(disambiguations):
     for type, expr in disambiguations.items():
         yield {
             'type_name': type,
-            'expression': expr, 
+            'expression': expr.strip(), 
         }
 
 
 def generate_from_config(config):
-    collections = config.get('collections', {})
-    aggregations = config.get('aggregations', {})
+    types = config.get('types', {})
     def get_type_config(name):
-        if name in collections:
-            conf = collections[name]
-        elif name in aggregations:
-            conf = aggregations[name]
+        if name in types.keys():
+            conf = types[name]
         else:
-            raise Exception('fromType not found in config')
+            raise Exception(f'fromType {name} not found in config')
         return conf
     relations = config.get('relations', [])
     target_dir = config.get('target_dir', '.')
@@ -160,11 +156,11 @@ def generate_from_config(config):
     # typename
     # collection
     # guards
-    for collection, type_config in collections.items():
+    for typename, type_config in types.items():
         # types with no collection are used only for relations not direct queries
         if not type_config.get('exposed', True):
             continue
-        typename = type_config['type']
+        collection = type_config['collection']
         query_name = typename[0].lower() + typename[1:]
         guards = type_config.get('guards', [])
         guards = lmap(add_guards_defaults, guards)
@@ -189,10 +185,10 @@ def generate_from_config(config):
         touch(f'{base}/generated/resolvers/{query_name}s.py', many_resolver)
 
     for relation in relations:
-        fromTypeConfig = get_type_config(relation['from'])
-        fromType = fromTypeConfig['type']
-        toTypeConfig = get_type_config(relation['to'])
-        toType = toTypeConfig.get('type')
+        fromType = relation['from']
+        fromTypeConfig = get_type_config(fromType)
+        toType = relation['to']
+        toTypeConfig = get_type_config(toType)
         relationName = relation.get('field')
         relation_type = relation.get('relation_type', 'to_one')
         relation_template = to_one_relation if relation_type == 'to_one' else to_many_relation
@@ -204,7 +200,7 @@ def generate_from_config(config):
                 relationName=relationName,
             )
         )
-        implemented_types = [x.get('type') for x in merge(collections, aggregations).values() if x.get('exposed', True)]
+        implemented_types = [name for name, x in types.items() if x.get('exposed', True)]
         if relation_type == 'to_many' and toType not in implemented_types:
             relation_sdl += populate_string(
                 to_many_relation_boilerplate,
@@ -223,7 +219,7 @@ def generate_from_config(config):
                 # query_name=query_name,
                 # type_name=typename,
                 where_filter=relation['query'],
-                pipeline=fromTypeConfig.get('pipeline', []),
+                pipeline=toTypeConfig.get('pipeline', []),
                 collection=collection,
                 resolver_path=fromType + '.' + relationName,
                 # disambiguations=disambiguations,
@@ -238,6 +234,8 @@ def generate_from_config(config):
         touch(f'{base}/generated/resolvers/{typename.lower()}_{relationName}.py', relation_resolver)
 
 
-config = yaml.safe_load(open(sys.argv[-1]).read())
+arg = sys.argv[-1]
+arg = 'pr_conf.yaml'
+config = yaml.safe_load(open(arg).read())
 generate_from_config(config)
 

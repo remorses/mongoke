@@ -1,4 +1,0 @@
-
-extend type Human {
-    father: Human
-}

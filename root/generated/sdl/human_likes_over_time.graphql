@@ -1,5 +1,0 @@
-
-extend type Human {
-   likes_over_time(where: WindowedEventWhere, orderBy: WindowedEventOrderBy): WindowedEventConnection
-}
-# if types don't have already the boilerplate i should write it now

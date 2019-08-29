@@ -1,22 +1,43 @@
-union Human = User | Guest
+type Event {
+    _id: ObjectId
+    bot_id: ObjectId
+    type: Type
+    likes: Int
+}
 
-type WindowedEvent {
+type EventWindow {
     value: Int
     timestamp: Int
 }
 
-type Guest {
-    type: String
+union Campaign = MessageCampaign | PostCampaign
+
+type PostCampaign {
     _id: ObjectId
-    name: String
+    bot_id: ObjectId
+    posts: [String]
+}
+
+type MessageCampaign {
+    _id: ObjectId
+    bot_id: ObjectId
+    messages: [String]
 }
 
 type User {
-    type: String
-    _id: ID
+    bot_id: ObjectId
     name: String
     surname: String
-    friends_ids: [ID]
+}
+
+type Bot {
+    _id: ObjectId
+    username: String
 }
 
 scalar ID
+
+enum Type {
+    like
+    bo
+}
