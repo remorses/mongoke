@@ -74,7 +74,7 @@ from funcy import select_keys
 async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(parent, args, ctx, info):
     where = strip_nones(args.get('where', {}))
     headers = ctx['request']['headers']
-    jwt_payload = ctx['req'].jwt_payload # TODO i need to decode jwt_payload and set it in req in a middleware
+    jwt = ctx['req'].jwt_payload # TODO i need to decode jwt_payload and set it in req in a middleware
     fields = []
 ${{repr_guards_before_checks(guards_before, '    ')}}
     collection = ctx['db']['${{collection}}']
@@ -97,7 +97,7 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
     where = strip_nones(args.get('where', {}))
     orderBy = args.get('orderBy', {'_id': 'ASC'}) # add default
     headers = ctx['request']['headers']
-    jwt_payload = ctx['req'].jwt_payload # TODO i need to decode jwt_payload
+    jwt = ctx['req'].jwt_payload # TODO i need to decode jwt_payload
     fields = []
 ${{repr_guards_before_checks(guards_before, '    ')}}
     pagination = get_pagination(args)

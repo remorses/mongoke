@@ -231,7 +231,7 @@ def generate_from_config(config):
                 **resolvers_dependencies,
             )
         )
-        touch(f'{base}/generated/resolvers/{typename.lower()}_{relationName}.py', relation_resolver)
+        touch(f'{base}/generated/resolvers/{fromType.lower()}_{relationName}.py', relation_resolver)
 
 
 arg = sys.argv[-1]

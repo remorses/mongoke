@@ -87,7 +87,7 @@ async def connection_resolver(
         toSkip = await collection.count_documents(where) - (last + 1)
         nodes = nodes.skip(max(toSkip, 0))
 
-    nodes = await nodes.to_list(MAX_NODES)
+    # nodes = await nodes.to_list(MAX_NODES)
     hasNext = None
     hasPrevious = None
 

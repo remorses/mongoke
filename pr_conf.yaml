@@ -49,7 +49,7 @@ types:
         disambiguations:
             MessageCampaign: >
                 'messages' in x
-            PostCampaign: |
+            PostCampaign: >
                 'posts' in x
     EventWindow:
         exposed: False
