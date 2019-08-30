@@ -83,7 +83,7 @@ def generate_type_sdl(schema, typename, guards, query_name, is_aggregation=False
 
 
 
-def generate_resolvers(collection, disambiguations, guards, query_name, is_aggregation=False):
+def generate_resolvers(collection, disambiguations, guards, query_name, is_aggregation=False, **kwargs):
     single_resolver = populate_string(
         single_item_resolver,
         dict(
@@ -95,6 +95,7 @@ def generate_resolvers(collection, disambiguations, guards, query_name, is_aggre
             guards_before=[g for g in guards if g['when'] == 'before'],
             guards_after=[g for g in guards if g['when'] == 'after'],
             **resolvers_dependencies,
+            **kwargs,
         )
     )
     many_resolver = populate_string(
@@ -108,6 +109,7 @@ def generate_resolvers(collection, disambiguations, guards, query_name, is_aggre
             guards_before=[g for g in guards if g['when'] == 'before'],
             guards_after=[g for g in guards if g['when'] == 'after'],
             **resolvers_dependencies,
+            **kwargs,
         )
     )
     return single_resolver, many_resolver
@@ -162,6 +164,7 @@ def generate_from_config(config):
             continue
         collection = type_config['collection']
         query_name = typename[0].lower() + typename[1:]
+        pipeline = type_config.get('pipeline', [])
         guards = type_config.get('guards', [])
         guards = lmap(add_guards_defaults, guards)
         disambiguations = type_config.get('disambiguations', {})
@@ -180,6 +183,7 @@ def generate_from_config(config):
             disambiguations=disambiguations,
             guards=guards,
             query_name=query_name,
+            pipeline=pipeline,
         )
         touch(f'{base}/generated/resolvers/{query_name}.py', single_resolver)
         touch(f'{base}/generated/resolvers/{query_name}s.py', many_resolver)

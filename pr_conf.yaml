@@ -51,6 +51,10 @@ types:
                 'messages' in x
             PostCampaign: >
                 'posts' in x
+        pipeline:
+            - $project:
+                _id: 0
+                username: 0
     EventWindow:
         exposed: False
         collection: events

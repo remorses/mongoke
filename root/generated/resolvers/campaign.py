@@ -1,6 +1,6 @@
 
 from tartiflette import Resolver
-from .support import strip_nones, connection_resolver, zip_pluck, select_keys
+from .support import strip_nones, zip_pluck, select_keys
 from operator import setitem
 from funcy import select_keys
 
@@ -8,7 +8,7 @@ from funcy import select_keys
 async def resolve_query_campaign(parent, args, ctx, info):
     where = strip_nones(args.get('where', {}))
     headers = ctx['request']['headers']
-    jwt_payload = ctx['req'].jwt_payload # TODO i need to decode jwt_payload and set it in req in a middleware
+    jwt = ctx['req'].jwt_payload # TODO i need to decode jwt_payload and set it in req in a middleware
     fields = []
 
     collection = ctx['db']['campaigns']

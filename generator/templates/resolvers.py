@@ -66,7 +66,7 @@ from ..logger import logger
 # collection, resolver_path, guard_expression_before, guard_expression_after, disambiguations
 single_item_resolver = '''
 from tartiflette import Resolver
-from .support import strip_nones, connection_resolver, zip_pluck, select_keys
+from .support import strip_nones, zip_pluck, select_keys
 from operator import setitem
 from funcy import select_keys
 
@@ -92,6 +92,8 @@ from tartiflette import Resolver
 from .support import strip_nones, connection_resolver, zip_pluck, select_keys, get_pagination
 from operator import setitem
 
+pipeline = ${{repr_eval_dict(pipeline,)}}
+
 @Resolver('${{resolver_path}}')
 async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(parent, args, ctx, info):
     where = strip_nones(args.get('where', {}))
@@ -106,6 +108,7 @@ ${{repr_guards_before_checks(guards_before, '    ')}}
         where=where,
         orderBy=orderBy,
         pagination=pagination,
+        pipeline=pipeline,
     )
 ${{
 """
@@ -132,7 +135,7 @@ ${{repr_disambiguations(disambiguations, '        ')}}
 # TODO add pipeline for making an aggregate
 single_relation_resolver = ''' 
 from tartiflette import Resolver
-from .support import strip_nones, connection_resolver, zip_pluck, select_keys
+from .support import strip_nones, zip_pluck, select_keys
 from operator import setitem
 
 @Resolver('${{resolver_path}}')
@@ -151,6 +154,8 @@ many_relations_resolver = '''
 from tartiflette import Resolver
 from .support import strip_nones, connection_resolver, zip_pluck, select_keys, get_pagination
 from operator import setitem
+
+pipeline = ${{repr_eval_dict(pipeline,)}}
 
 @Resolver('${{resolver_path}}')
 async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(parent, args, ctx, info):
@@ -194,6 +199,7 @@ async def connection_resolver(
         where: dict,
         orderBy: dict, # needs to exist always at least one, the fisrst is the cursorField
         pagination: dict,
+        pipeline=pipeline,
     ):
     first, last = pagination.get('first'), pagination.get('last'), 
     after, before = pagination.get('after'), pagination.get('before')
