@@ -25,9 +25,10 @@ async def resolve_query_bots(parent, args, ctx, info):
         pagination=pagination,
         pipeline=pipeline,
     )
-
-
-
-
+    
+        
+    
+        
     
     return data
+

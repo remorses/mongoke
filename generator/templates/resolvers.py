@@ -1,10 +1,11 @@
-from .support import zip_pluck, indent_to, join_yields, repr_eval_dict
+from .support import zip_pluck, join_yields, repr_eval_dict
+from populate import indent_to
 import json
 from funcy import lfilter, post_processing
 
 
 
-@join_yields('\n')
+@join_yields('')
 def repr_guards_before_checks(guards_before, indentation):
     for expr, fields in zip_pluck(guards_before, ['expression', 'fields']):
         code =  f"""
@@ -15,7 +16,7 @@ def repr_guards_before_checks(guards_before, indentation):
         """
         yield indent_to(indentation, code)
 
-@join_yields('\n')
+@join_yields('')
 def repr_guards_after_checks(guards_after, indentation):
     for expr, fields in zip_pluck(guards_after, ['expression', 'fields']):
         code = f"""
@@ -27,7 +28,7 @@ def repr_guards_after_checks(guards_after, indentation):
         yield indent_to(indentation, code)
 
 
-@join_yields('\n')
+@join_yields('')
 def repr_disambiguations(disambiguations, indentation):
     for (i, typename, expr) in zip_pluck(disambiguations, ['type_name', 'expression'], enumerate=True):
         code = f"""
@@ -36,7 +37,7 @@ def repr_disambiguations(disambiguations, indentation):
         """ 
         yield indent_to(indentation, code)
 
-@join_yields('\n')
+@join_yields('')
 def filter_nodes_guards_after(guards_after, indentation):
     for expr, fields in zip_pluck(guards_after, ['expression', 'fields']):
         code = f"""
@@ -76,11 +77,11 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
     headers = ctx['request']['headers']
     jwt = ctx['req'].jwt_payload # TODO i need to decode jwt_payload and set it in req in a middleware
     fields = []
-${{repr_guards_before_checks(guards_before, '    ')}}
+    ${{repr_guards_before_checks(guards_before, '    ')}}
     collection = ctx['db']['${{collection}}']
     x = collection.find_one(where)
-${{repr_guards_after_checks(guards_after, '    ')}}
-${{repr_disambiguations(disambiguations, '    ')}}
+    ${{repr_guards_after_checks(guards_after, '    ')}}
+    ${{repr_disambiguations(disambiguations, '    ')}}
     if fields:
         x = select_keys(lambda k: k in fields, x)
     return x
@@ -101,7 +102,7 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
     headers = ctx['request']['headers']
     jwt = ctx['req'].jwt_payload # TODO i need to decode jwt_payload
     fields = []
-${{repr_guards_before_checks(guards_before, '    ')}}
+    ${{repr_guards_before_checks(guards_before, '    ')}}
     pagination = get_pagination(args)
     data = await connection_resolver(
         collection=ctx['db']['${{collection}}'], 
@@ -110,21 +111,17 @@ ${{repr_guards_before_checks(guards_before, '    ')}}
         pagination=pagination,
         pipeline=pipeline,
     )
-${{
-"""
+    ${{
+    indent_to('    ', """
     nodes = []
     for x in data['nodes']:
-""" if guards_after else """
+    """ if guards_after else """
     nodes = data['nodes']
-""" if disambiguations else ''
-}}
-${{filter_nodes_guards_after(guards_after, '        ')}}
-${{
-"""
-    for x in nodes:
-""" if disambiguations else ''
-}}
-${{repr_disambiguations(disambiguations, '        ')}}
+    """ if disambiguations else '')
+    }}
+        ${{filter_nodes_guards_after(guards_after, '        ')}}
+    ${{"for x in nodes:" if disambiguations else ''}}
+        ${{repr_disambiguations(disambiguations, '        ')}}
     ${{"data['nodes'] = nodes" if guards_after or disambiguations else ''}}
     return data
 
@@ -141,10 +138,10 @@ from operator import setitem
 @Resolver('${{resolver_path}}')
 async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(parent, args, ctx, info):
     where = ${{repr_eval_dict(where_filter, '    ')}}
-${{repr_guards_before_checks(guards_before, '    ')}}
+    ${{repr_guards_before_checks(guards_before, '    ')}}
     x = await ctx['db']['${{collection}}'].find_one(where)
-${{repr_guards_after_checks(guards_after, '    ')}}
-${{repr_disambiguations(disambiguations, '    ')}}
+    ${{repr_guards_after_checks(guards_after, '    ')}}
+    ${{repr_disambiguations(disambiguations, '    ')}}
     return x
 '''
 

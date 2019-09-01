@@ -1,6 +1,7 @@
 import json
 from populate import populate_string
 from funcy import lfilter, post_processing, pluck, count
+from populate import indent_to
 
 def zip_pluck(d, keys, enumerate=False):
     args = [pluck(k, d) for k in keys]
@@ -10,34 +11,22 @@ def zip_pluck(d, keys, enumerate=False):
 
 join_yields = lambda separator='': post_processing(lambda parts: separator.join(list(parts)))
 
-def remove_indentation(string: str):
-    lines = string.split('\n')
-    # lines = map(lambda x: x.replace(' ', ''), lines)
-    lines = lfilter(bool, lines)
-    base_indent = min([len(line) - len(line.lstrip()) for line in lines])
-    lines = [x[base_indent:] for x in lines]
-    # lines = lfilter(lambda s: len(s.replace(' ', '')), lines)
-    print(lines)
-    return '\n'.join(lines)
+# def remove_indentation(string: str):
+#     lines = string.split('\n')
+#     # lines = map(lambda x: x.replace(' ', ''), lines)
+#     lines = lfilter(bool, lines)
+#     base_indent = min([len(line) - len(line.lstrip()) for line in lines])
+#     lines = [x[base_indent:] for x in lines]
+#     # lines = lfilter(lambda s: len(s.replace(' ', '')), lines)
+#     print(lines)
+#     return '\n'.join(lines)
 
-def indent_to(indentation, string):
-    string = remove_indentation(string)
-    return '\n'.join([indentation + line for line in string.split('\n')])
+# def indent_to(indentation, string):
+#     string = remove_indentation(string)
+#     return '\n'.join([indentation + line for line in string.split('\n')])
 
 
-if __name__ == '__main__':
-    join_yields()
-    print('hello')
-    x = remove_indentation("""
-    ciao x
-        come va
-    """)
-    print(x)
-    x = '''
-    xxx
-        yy
-    '''
-    print(indent_to('....', x))
+
 
 
 

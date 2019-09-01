@@ -3,6 +3,7 @@ extend type Bot {
    likes_over_time(where: EventWindowWhere, orderBy: EventWindowOrderBy): EventWindowConnection
 }
 # if types don't have already the boilerplate i should write it now
+
 type EventWindowConnection {
     nodes: [EventWindow]
     pageInfo: PageInfo

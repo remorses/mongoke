@@ -31,3 +31,4 @@ class IDClass:
     @staticmethod
     def coerce_output(val):
         return val
+

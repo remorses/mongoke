@@ -17,8 +17,8 @@ async def resolve_query_bot(parent, args, ctx, info):
     
     collection = ctx['db']['bots']
     x = collection.find_one(where)
-
-
+    
+    
     if fields:
         x = select_keys(lambda k: k in fields, x)
     return x

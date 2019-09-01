@@ -10,13 +10,12 @@ async def resolve_query_campaign(parent, args, ctx, info):
     headers = ctx['request']['headers']
     jwt = ctx['req'].jwt_payload # TODO i need to decode jwt_payload and set it in req in a middleware
     fields = []
-
+    
     collection = ctx['db']['campaigns']
     x = collection.find_one(where)
-
+    
     if ('messages' in x):
         x['_typename'] = 'MessageCampaign'
-    
     elif ('posts' in x):
         x['_typename'] = 'PostCampaign'
     

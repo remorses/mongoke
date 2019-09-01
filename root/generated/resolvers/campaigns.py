@@ -19,7 +19,7 @@ async def resolve_query_campaigns(parent, args, ctx, info):
     headers = ctx['request']['headers']
     jwt = ctx['req'].jwt_payload # TODO i need to decode jwt_payload
     fields = []
-
+    
     pagination = get_pagination(args)
     data = await connection_resolver(
         collection=ctx['db']['campaigns'], 
@@ -28,18 +28,15 @@ async def resolve_query_campaigns(parent, args, ctx, info):
         pagination=pagination,
         pipeline=pipeline,
     )
-
     nodes = data['nodes']
-
-
-
+    
+        
     for x in nodes:
-
         if ('messages' in x):
             x['_typename'] = 'MessageCampaign'
-        
         elif ('posts' in x):
             x['_typename'] = 'PostCampaign'
         
     data['nodes'] = nodes
     return data
+

@@ -8,8 +8,8 @@ async def resolve_bot_user(parent, args, ctx, info):
     where = {
         "_id":  parent['_id'] 
     }
-
+    
     x = await ctx['db']['campaigns'].find_one(where)
-
-
+    
+    
     return x
