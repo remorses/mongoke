@@ -1,0 +1,23 @@
+
+extend type Query {
+    bots(where: BotWhere, orderBy: BotOrderBy,): BotConnection
+    bot(where: BotWhere,): Bot
+}
+
+type BotConnection {
+    nodes: [Bot]
+    pageInfo: PageInfo
+}
+
+input BotWhere { 
+    $and: [BotWhere]
+    $or: [BotWhere]
+    # $not: [BotWhere]
+    _id: WhereObjectId
+    username: WhereString
+}
+
+input BotOrderBy {
+    _id: Direction
+    username: Direction
+}

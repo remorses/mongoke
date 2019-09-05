@@ -7,7 +7,7 @@ import yaml
 from skema.to_graphql import to_graphql
 import os.path
 from populate import populate_string
-from .templates.resolvers import resolvers_dependencies, resolvers_init, resolvers_support, single_item_resolver, many_items_resolvers, single_relation_resolver, many_relations_resolver
+from .templates.resolvers import resolvers_dependencies, resolvers_init, resolvers_support, single_item_resolver, many_items_resolvers, single_relation_resolver, many_relations_resolver, generated_init
 from .templates.scalars import scalars_implementations
 from .templates.graphql_query import graphql_query, general_graphql, to_many_relation, to_many_relation_boilerplate, to_one_relation
 from .templates.main import main
@@ -150,7 +150,8 @@ def generate_from_config(config):
         return conf
     relations = config.get('relations', [])
     target_dir = config.get('target_dir', '.')
-    root_dir_name = config.get('root_dir_name', 'root')
+    root_dir_name = config.get('root_dir_name', 'src')
+    db_url = config.get('db_url', '')
     base = os.path.join(target_dir, root_dir_name)
     skema_schema = get_skema(config)
     # TODO add other scalars from the skema
@@ -159,8 +160,9 @@ def generate_from_config(config):
         skema_schema, scalar_already_present=SCALARS_ALREADY_IMPLEMENTED)
 
     touch(f'{base}/__init__.py', '')
-    touch(f'{base}/__main__.py', main)
+    touch(f'{base}/__main__.py', populate_string(main, dict(root_dir_name=root_dir_name, db_url=db_url)))
     touch(f'{base}/generated/__init__.py', '')
+    touch(f'{base}/generated/logger.py', logger)
     touch(f'{base}/generated/middleware/__init__.py', jwt_middleware)
     touch(f'{base}/generated/resolvers/__init__.py', resolvers_init)
     touch(f'{base}/generated/resolvers/support.py', resolvers_support)
@@ -168,7 +170,7 @@ def generate_from_config(config):
           populate_string(scalars_implementations, dict(scalars=[x for x in scalars if x not in SCALARS_ALREADY_IMPLEMENTED])))
     touch(f'{base}/generated/sdl/general.graphql',
           populate_string(general_graphql, dict(scalars=scalars)))
-    touch(f'{base}/generated/sdl/main.graphql', main_graphql_schema)
+    touch(f'{base}/generated/sdl/main.graphql', main_graphql_schema, )
 
     # needs:
     # disambiguations

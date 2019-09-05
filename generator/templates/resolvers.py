@@ -64,6 +64,10 @@ resolvers_dependencies = dict(
 resolvers_init = '''
 from ..logger import logger
 '''
+
+generated_init = '''
+from ..logger import logger
+'''
 # collection, resolver_path, guard_expression_before, guard_expression_after, disambiguations
 single_item_resolver = '''
 from tartiflette import Resolver
