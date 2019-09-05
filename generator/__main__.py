@@ -1,4 +1,5 @@
 import skema
+import requests
 from typing import *
 import sys
 from funcy import merge, lmap, collecting, omit, remove
@@ -122,6 +123,22 @@ def make_disambiguations_objects(disambiguations):
             'expression': expr.strip(), 
         }
 
+def get_skema(config):
+    if 'skema_path' in config:
+        with open(config['skema_path']) as f:
+            return f.read()
+    if config.get('skema'):
+        return config.get('skema')
+    if config.get('skema_url'):
+        r = requests.get(config.get('skema_url'), stream=True)
+        skema = []
+        while 1:
+            buf = r.raw.read(16*1024)
+            if not buf:
+                break
+            skema.append(buf.decode())
+        return skema
+    
 
 def generate_from_config(config):
     types = config.get('types', {})
@@ -135,7 +152,7 @@ def generate_from_config(config):
     target_dir = config.get('target_dir', '.')
     root_dir_name = config.get('root_dir_name', 'root')
     base = os.path.join(target_dir, root_dir_name)
-    skema_schema = config.get('skema')
+    skema_schema = get_skema(config)
     # TODO add other scalars from the skema
     scalars = [*SCALAR_TYPES, *get_skema_aliases(skema_schema)]
     main_graphql_schema = to_graphql(
