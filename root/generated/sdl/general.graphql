@@ -33,11 +33,25 @@ input WhereBoolean {
     $neq: Boolean
 }
 
-input WhereObjectId {
-    $in: [ObjectId]
-    $nin: [ObjectId]
-    $eq: ObjectId
-    $neq: ObjectId
+input WhereProtectedStr {
+    $in: [ProtectedStr]
+    $nin: [ProtectedStr]
+    $eq: ProtectedStr
+    $neq: ProtectedStr
+}
+
+input WhereCampaignType {
+    $in: [CampaignType]
+    $nin: [CampaignType]
+    $eq: CampaignType
+    $neq: CampaignType
+}
+
+input WhereBotType {
+    $in: [BotType]
+    $nin: [BotType]
+    $eq: BotType
+    $neq: BotType
 }
 
 input WhereID {
@@ -45,6 +59,48 @@ input WhereID {
     $nin: [ID]
     $eq: ID
     $neq: ID
+}
+
+input WhereObjectId {
+    $in: [ObjectId]
+    $nin: [ObjectId]
+    $eq: ObjectId
+    $neq: ObjectId
+}
+
+input WhereDateTime {
+    $in: [DateTime]
+    $nin: [DateTime]
+    $eq: DateTime
+    $neq: DateTime
+}
+
+input WhereTimestamp {
+    $in: [Timestamp]
+    $nin: [Timestamp]
+    $eq: Timestamp
+    $neq: Timestamp
+}
+
+input WhereCron {
+    $in: [Cron]
+    $nin: [Cron]
+    $eq: Cron
+    $neq: Cron
+}
+
+input WherePictureSrc {
+    $in: [PictureSrc]
+    $nin: [PictureSrc]
+    $eq: PictureSrc
+    $neq: PictureSrc
+}
+
+input WhereTag {
+    $in: [Tag]
+    $nin: [Tag]
+    $eq: Tag
+    $neq: Tag
 }
 
 

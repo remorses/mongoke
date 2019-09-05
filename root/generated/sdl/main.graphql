@@ -1,43 +1,216 @@
-type Event {
-    _id: ObjectId
-    bot_id: ObjectId
-    type: Type
-    likes: Int
+type Window {
+    value: Float
+    start: DateTime
 }
 
-type EventWindow {
-    value: Int
-    timestamp: Int
+enum BotType {
+    DEFAULT
+    DEVELOPER
+    REAL_USER
+    INJECTED
 }
 
-union Campaign = MessageCampaign | PostCampaign
-
-type PostCampaign {
-    _id: ObjectId
-    bot_id: ObjectId
-    posts: [String]
+enum CampaignType {
+    POST
+    MESSAGE
+    STORY
 }
 
-type MessageCampaign {
-    _id: ObjectId
-    bot_id: ObjectId
-    messages: [String]
+type SystemStatusWindow {
+    botsNumber: Int
+    botsActive: Int
+    timestamp: Timestamp
+}
+
+type StarterPackInQueue {
+    packName: String
+    replacements: Json
+    addedAt: DateTime
+}
+
+type MessageThread {
+    instagramThreadId: ID
+    prInstagramPk: ID
+    campaignId: ObjectId
+    targetInstagramPk: ID
+    targetInstagramUsername: String
+    targetProfilePicture: PictureSrc
+    startedAt: DateTime
+    messages: [Messages]
 }
 
 type User {
-    bot_id: ObjectId
+    _id: ObjectId
     name: String
     surname: String
+    loginType: String
+    creditInCents: Int
+    taskIds: [ObjectId]
+    botPks: [ID]
+    subscribedAt: DateTime
+    paypalData: [PaypalData]
+    accreditHistory: [AccreditHistory]
 }
 
-type Bot {
+type BotEvent {
+    taskId: TaskId
+    campaignId: CampaignId
+    type: String
+    metadata: Metadata
+    args: Json
+    node: Json
+    timestamp: Float
+}
+
+type Variables {
+    botIndex: Int
+    BotsCount: Int
+    lastRun: DateTime
+    runsCount: Int
+    totalRunsCount: Int
+}
+
+type Task {
     _id: ObjectId
+    name: String
+    botsPk: [ID]
+    deadline: Deadline
+    cron: Cron
+    scripts: [String]
+    variables: TaskVariables
+    runsCount: Int
+    timeOffset: Int
+    lastRun: LastRun
+}
+
+type Bot implements BaseBot_ {
+    botType: BotType
+    pk: ID
     username: String
+    password: String
+    settings: Settings
+    timezoneSecondsOffset: Int
+    proxy: String
+    lat: Float
+    lng: Float
+    language: String
+    fullName: String
+    state: String
+    city: String
+    phone: String
+    hashtags: [String]
+    geotags: [String]
+    captions: [String]
+    competitors: [String]
+    biography: String
+    externalUrl: String
+    gender: String
+    email: String
+    profilePicture: PictureSrc
+    privacy: Privacy
+    prId: ObjectId
+    createdAt: String
+    messageCampaignCapacity: Int
+    status: Status
+    error: String
+    lastRun: BotLastRun
+    totalRunsCount: Int
+    failedRepairs: Int
 }
 
 scalar ID
 
+type Messages {
+    text: String
+    sentAt: DateTime
+    from: String
+    isPr: Boolean
+    medias: [Medias]
+}
+
+type AccreditHistory {
+    amountInCents: Int
+    madeAt: DateTime
+    paypalOrderId: ID
+}
+
+type PaypalData {
+    email: String
+}
+
+type Metadata {
+    pk: ID
+    script_name: String
+}
+
+union CampaignId = ObjectId | null
+
+union TaskId = ObjectId | null
+
+union LastRun = null | DateTime
+
+union TaskVariables = Variables | null
+
+union Deadline = DateTime | null
+
+union BotLastRun = DateTime | null
+
+enum Status {
+    OK
+    ERROR
+}
+
+enum Privacy {
+    private
+    public
+}
+
+type Settings {
+    cookies: Json
+}
+
+scalar Tag
+
+type Medias {
+    src: String
+    type: Type
+}
+
+scalar Cron
+
 enum Type {
-    like
-    bo
+    IMAGE
+    POST
+    VIDEO
+}
+
+scalar Timestamp
+
+scalar PictureSrc
+
+interface BaseBot_ {
+    botType: BotType
+    pk: ID
+    username: String
+    password: String
+    settings: Settings
+    timezoneSecondsOffset: Int
+    proxy: String
+    lat: Float
+    lng: Float
+    language: String
+    fullName: String
+    state: String
+    city: String
+    phone: String
+    hashtags: [String]
+    geotags: [String]
+    captions: [String]
+    competitors: [String]
+    biography: String
+    externalUrl: String
+    gender: String
+    email: String
+    profilePicture: PictureSrc
+    privacy: Privacy
 }

@@ -131,12 +131,12 @@ def get_skema(config):
         return config.get('skema')
     if config.get('skema_url'):
         r = requests.get(config.get('skema_url'), stream=True)
-        skema = []
+        skema = ''
         while 1:
             buf = r.raw.read(16*1024)
             if not buf:
                 break
-            skema.append(buf.decode())
+            skema += buf.decode()
         return skema
     
 

@@ -5,33 +5,34 @@ jwt:
     algorithms: [H256]
     role_key: X-Mongoko-Role
 
-skema: |
-    Bot:
-        _id: ObjectId
-        username: Str
-    User:
-        bot_id: ObjectId
-        name: Str
-        surname: Str
-    MessageCampaign:
-        _id: ObjectId
-        bot_id: ObjectId
-        messages: [Str]
-    PostCampaign:
-        _id: ObjectId
-        bot_id: ObjectId
-        posts: [Str]
-    Campaign: MessageCampaign | PostCampaign
-    EventWindow:
-        value: Int
-        timestamp: Int
-    Event:
-        _id: ObjectId
-        bot_id: ObjectId
-        type: "like" | "bo"
-        likes?: Int
-    ObjectId: Any # this will be added implictely
-    ID: Any
+# skema: |
+#     Bot:
+#         _id: ObjectId
+#         username: Str
+#     User:
+#         bot_id: ObjectId
+#         name: Str
+#         surname: Str
+#     MessageCampaign:
+#         _id: ObjectId
+#         bot_id: ObjectId
+#         messages: [Str]
+#     PostCampaign:
+#         _id: ObjectId
+#         bot_id: ObjectId
+#         posts: [Str]
+#     Campaign: MessageCampaign | PostCampaign
+#     EventWindow:
+#         value: Int
+#         timestamp: Int
+#     Event:
+#         _id: ObjectId
+#         bot_id: ObjectId
+#         type: "like" | "bo"
+#         likes?: Int
+#     ObjectId: Any # this will be added implictely
+#     ID: Any
+skema_url: https://gist.githubusercontent.com/remorses/4f591ebbd772545147ba1b3a334b631e/raw/049d320dd3da36440d2bb0a8c0e85d3906b4b320/social-automata-domain.skema
 
 
 
