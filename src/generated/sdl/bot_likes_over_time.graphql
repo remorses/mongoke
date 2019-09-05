@@ -10,8 +10,8 @@ type EventWindowConnection {
 }
 
 input EventWindowWhere { 
-    value: WhereNumber
-    timestamp: WhereNumber
+    value: WhereFloat
+    timestamp: WhereFloat
 }
 
 input EventWindowOrderBy {

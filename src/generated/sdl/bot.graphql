@@ -10,8 +10,8 @@ type BotConnection {
 }
 
 input BotWhere { 
-    $and: [BotWhere]
-    $or: [BotWhere]
+    and: [BotWhere]
+    or: [BotWhere]
     # $not: [BotWhere]
     _id: WhereObjectId
     username: WhereString

@@ -2,6 +2,11 @@ from populate import populate_string
 
 # scalars
 general_graphql = '''
+
+type Query {
+    mongoku_version: String
+}
+
 enum Direction {
     ASC
     DESC
@@ -10,10 +15,10 @@ enum Direction {
 ${{
 ''.join([f"""
 input Where{scalar} {'{'}
-    $in: [{scalar}]
-    $nin: [{scalar}]
-    $eq: {scalar}
-    $neq: {scalar}
+    in: [{scalar}]
+    nin: [{scalar}]
+    eq: {scalar}
+    neq: {scalar}
 {'}'}
 """ for scalar in map(str, scalars)])
 }}
@@ -27,9 +32,7 @@ type PageInfo {
 }
 
 scalar Json
-scalar Url
 scalar ObjectId
-scalar NumberOrString
 # TODO create the additional scalars
 '''
 
@@ -47,8 +50,8 @@ type ${{type_name}}Connection {
 }
 
 input ${{type_name}}Where { 
-    $and: [${{type_name}}Where]
-    $or: [${{type_name}}Where]
+    and: [${{type_name}}Where]
+    or: [${{type_name}}Where]
     # $not: [${{type_name}}Where]
     ${{'\\n    '.join([f'{field}: Where{scalar_name}' for field, scalar_name in fields])}}
 }

@@ -31,7 +31,7 @@ async def connection_resolver(
         where: dict,
         orderBy: dict, # needs to exist always at least one, the fisrst is the cursorField
         pagination: dict,
-        pipeline=pipeline,
+        pipeline=[],
     ):
     first, last = pagination.get('first'), pagination.get('last'), 
     after, before = pagination.get('after'), pagination.get('before')

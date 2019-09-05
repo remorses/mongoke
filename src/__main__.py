@@ -31,7 +31,9 @@ def run():
         executor_http_methods=['POST', 'GET',],
         graphiql_enabled=True
     )
-    app.on_startup.append(lambda app: context.update({'loop': asyncio.get_event_loop()}))
+    async def on_startup(app):
+        context.update({'loop': asyncio.get_event_loop()})
+    app.on_startup.append(on_startup)
     web.run_app(app)
 
 run()

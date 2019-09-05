@@ -44,6 +44,13 @@ def is_alias(skema_schema, typename) -> bool:
     # pretty(json_schema)
     return is_scalar(json_schema)
 
+map_json_type_to_grpahql = {
+    'string': 'String',
+    'number': 'Float',
+    'integer': 'Number',
+    'boolean': 'Bool',
+    None: 'Json',
+}
 
 @collecting
 def get_scalar_fields(skema_schema, typename) -> List[Tuple[str, str]]:
@@ -57,7 +64,7 @@ def get_scalar_fields(skema_schema, typename) -> List[Tuple[str, str]]:
             if body.get('title', '') in aliases:
                 scalar_name = body.get('title', )
             else:
-                scalar_name = body.get('type', 'Unknown').capitalize()
+                scalar_name = map_json_type_to_grpahql[body.get('type', None).lower()]
             yield (name, scalar_name)
 
 

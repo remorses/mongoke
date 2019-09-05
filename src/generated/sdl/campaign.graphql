@@ -10,8 +10,8 @@ type CampaignConnection {
 }
 
 input CampaignWhere { 
-    $and: [CampaignWhere]
-    $or: [CampaignWhere]
+    and: [CampaignWhere]
+    or: [CampaignWhere]
     # $not: [CampaignWhere]
     _id: WhereObjectId
     bot_id: WhereObjectId
