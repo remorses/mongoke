@@ -29,10 +29,12 @@ def is_scalar(type_body):
         or not omit(type_body, ['description', 'title', '$schema'])
     )
 
+HIDE_GRAPHQL = '[graphql hide]'
 
 def get_skema_aliases(skema_schema):
     definitions = skema.to_jsonschema(
         skema_schema, resolve=False).get('definitions', [])
+    definitions = {d: body for d, body in definitions.items() if not HIDE_GRAPHQL in body.get('description', '') and not body.get('enum')} # TODO should be implemented in skema
     aliases = [body.get('title') for d, body in definitions.items()]
     # pretty(aliases)
     aliases = [x for x in aliases if is_alias(skema_schema, x)]
@@ -53,7 +55,7 @@ map_json_type_to_grpahql = {
 }
 
 @collecting
-def get_scalar_fields(skema_schema, typename) -> List[Tuple[str, str]]:
+def get_scalar_fields(skema_schema, typename) -> Iterable[Tuple[str, str]]:
     json_schema = skema.to_jsonschema(skema_schema, ref=typename, resolve=True)
     # pretty(json_schema)
     type_properties = get_type_properties(json_schema)
@@ -185,10 +187,11 @@ def generate_from_config(config):
     # collection
     # guards
     for typename, type_config in types.items():
+        type_config = type_config or {}
         # types with no collection are used only for relations not direct queries
         if not type_config.get('exposed', True):
             continue
-        collection = type_config['collection']
+        collection = type_config.get('collection', '')
         query_name = typename[0].lower() + typename[1:]
         pipeline = type_config.get('pipeline', [])
         guards = type_config.get('guards', [])
@@ -266,6 +269,7 @@ def generate_from_config(config):
 
 arg = sys.argv[-1]
 arg = 'pr_conf.yaml'
+arg = 'automata_conf.yml'
 config = yaml.safe_load(open(arg).read())
 generate_from_config(config)
 

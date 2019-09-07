@@ -1,5 +1,6 @@
 main = '''
 import os
+import aiohttp_cors
 import urllib.parse
 from aiohttp import web
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -31,6 +32,15 @@ def run():
         executor_http_methods=['POST', 'GET',],
         graphiql_enabled=True
     )
+    cors = aiohttp_cors.setup(app, defaults={
+        "*": aiohttp_cors.ResourceOptions(
+                allow_credentials=True,
+                expose_headers="*",
+                allow_headers="*",
+            )
+    })
+    for route in list(app.router.routes()):
+        cors.add(route)
     async def on_startup(app):
         context.update({'loop': asyncio.get_event_loop()})
     app.on_startup.append(on_startup)

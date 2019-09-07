@@ -5,8 +5,8 @@ from operator import setitem
 
 pipeline = []
 
-@Resolver('Query.bots')
-async def resolve_query_bots(parent, args, ctx, info):
+@Resolver('Query.tasks')
+async def resolve_query_tasks(parent, args, ctx, info):
     where = strip_nones(args.get('where', {}))
     orderBy = args.get('orderBy', {'_id': 'ASC'}) # add default
     headers = ctx['request']['headers']

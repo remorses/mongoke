@@ -1,0 +1,29 @@
+
+extend type Query {
+    tasks(where: TaskWhere, orderBy: TaskOrderBy,): TaskConnection
+    task(where: TaskWhere,): Task
+}
+
+type TaskConnection {
+    nodes: [Task]
+    pageInfo: PageInfo
+}
+
+input TaskWhere { 
+    and: [TaskWhere]
+    or: [TaskWhere]
+    # $not: [TaskWhere]
+    _id: WhereObjectId
+    name: WhereString
+    cron: WhereCron
+    runsCount: WhereFloat
+    timeOffset: WhereFloat
+}
+
+input TaskOrderBy {
+    _id: Direction
+    name: Direction
+    cron: Direction
+    runsCount: Direction
+    timeOffset: Direction
+}

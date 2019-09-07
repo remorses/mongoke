@@ -4,8 +4,8 @@ from .support import strip_nones, zip_pluck, select_keys
 from operator import setitem
 from funcy import select_keys
 
-@Resolver('Query.bot')
-async def resolve_query_bot(parent, args, ctx, info):
+@Resolver('Query.task')
+async def resolve_query_task(parent, args, ctx, info):
     where = strip_nones(args.get('where', {}))
     headers = ctx['request']['headers']
     jwt = ctx['req'].jwt_payload # TODO i need to decode jwt_payload and set it in req in a middleware

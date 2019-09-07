@@ -33,7 +33,6 @@ type PageInfo {
 
 scalar Json
 scalar ObjectId
-# TODO create the additional scalars
 '''
 
 # fields
