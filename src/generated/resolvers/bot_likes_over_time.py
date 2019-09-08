@@ -2,6 +2,7 @@
 from tartiflette import Resolver
 from .support import strip_nones, connection_resolver, zip_pluck, select_keys, get_pagination
 from operator import setitem
+from funcy import omit
 
 def filter_nodes_by_guard(nodes, fields):
     for x in nodes:

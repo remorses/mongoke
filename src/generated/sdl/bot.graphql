@@ -14,10 +14,12 @@ input BotWhere {
     or: [BotWhere]
     # $not: [BotWhere]
     _id: WhereObjectId
+    user_id: WhereObjectId
     username: WhereString
 }
 
 input BotOrderBy {
     _id: Direction
+    user_id: Direction
     username: Direction
 }

@@ -18,6 +18,7 @@ DB_URL = "${{db_url}}" or None
 def run():
     app = web.Application(middlewares=[jwt_middleware])
     db = AsyncIOMotorClient(DB_URL)
+    db: AsyncIOMotorClient = db.get_database()
     app.db = db
     context = {
         'db': db,

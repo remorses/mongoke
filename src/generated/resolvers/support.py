@@ -6,11 +6,12 @@ import pymongo
 from pymongo import ASCENDING, DESCENDING
 from typing import NamedTuple, Union
 import typing
-from funcy import pluck, select_keys
+from funcy import pluck, select_keys, omit
 
 gt = '$gt'
 lt = '$lt'
 MAX_NODES = 20
+DEFAULT_NODES_COUNT = 10
 
 def zip_pluck(d, *keys):
     return zip(*[pluck(k, d) for k in keys])
@@ -37,6 +38,14 @@ async def connection_resolver(
     after, before = pagination.get('after'), pagination.get('before')
     first = min(MAX_NODES, first or 0)
     last = min(MAX_NODES, last or 0)
+
+    if not first and not after:
+        if after:
+            first = DEFAULT_NODES_COUNT
+        elif before:
+            before = DEFAULT_NODES_COUNT
+        else:
+            first = DEFAULT_NODES_COUNT
 
     sorting = [(field, parse_direction(direction)) for field, direction in orderBy.items()]
     cursorField = list(orderBy.keys())[0]

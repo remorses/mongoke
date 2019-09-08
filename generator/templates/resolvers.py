@@ -6,20 +6,9 @@ from funcy import lfilter, post_processing
 
 
 @join_yields('')
-def repr_guards_before_checks(guards_before, indentation):
-    for expr, fields in zip_pluck(guards_before, ['expression', 'excluded']):
+def repr_guards_checks(guards, indentation):
+    for expr, fields in zip_pluck(guards, ['expression', 'excluded']):
         code =  f"""
-        if not ({expr}):
-            raise Exception({json.dumps('guard `' + str(expr) + '` not satisfied')})
-        else:
-            fields += {fields}
-        """
-        yield indent_to(indentation, code)
-
-@join_yields('')
-def repr_guards_after_checks(guards_after, indentation):
-    for expr, fields in zip_pluck(guards_after, ['expression', 'excluded']):
-        code = f"""
         if not ({expr}):
             raise Exception({json.dumps('guard `' + str(expr) + '` not satisfied')})
         else:
@@ -38,12 +27,12 @@ def repr_disambiguations(disambiguations, indentation):
         yield indent_to(indentation, code)
 
 
-def repr_node_filterer(guards_before):
+def repr_node_filterer(guards_after):
     code = f'''
     def filter_nodes_by_guard(nodes, fields):
         for x in nodes:
             try:
-                {repr_guards_before_checks(guards_before, '                ')}
+                {repr_guards_checks(guards_after, '                ')}
                 yield omit(x, fields)
             except Exception:
                 pass
@@ -58,8 +47,7 @@ def repr_many_disambiguations(disambiguations, indentation):
     return indent_to(indentation, code)
 
 resolvers_dependencies = dict(
-    repr_guards_before_checks=repr_guards_before_checks,
-    repr_guards_after_checks=repr_guards_after_checks,
+    repr_guards_checks=repr_guards_checks,
     zip_pluck=zip_pluck,
     repr_disambiguations=repr_disambiguations,
     repr_eval_dict=repr_eval_dict,
@@ -85,12 +73,12 @@ from funcy import omit
 async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(parent, args, ctx, info):
     where = strip_nones(args.get('where', {}))
     headers = ctx['req'].headers
-    jwt = ctx['req'].jwt_payload # TODO i need to decode jwt_payload and set it in req in a middleware
+    jwt = ctx['req'].jwt_payload
     fields = []
-    ${{repr_guards_before_checks(guards_before, '    ')}}
+    ${{repr_guards_checks(guards_before, '    ')}}
     collection = ctx['db']['${{collection}}']
-    x = collection.find_one(where)
-    ${{repr_guards_after_checks(guards_after, '    ')}}
+    x = await collection.find_one(where)
+    ${{repr_guards_checks(guards_after, '    ')}}
     ${{repr_disambiguations(disambiguations, '    ')}}
     if fields:
         x = omit(x, fields)
@@ -102,8 +90,9 @@ many_items_resolvers = '''
 from tartiflette import Resolver
 from .support import strip_nones, connection_resolver, zip_pluck, select_keys, get_pagination
 from operator import setitem
+from funcy import omit
 
-${{repr_node_filterer(guards_before)}}
+${{repr_node_filterer(guards_after)}}
 
 pipeline: list = ${{repr_eval_dict(pipeline,)}}
 
@@ -112,9 +101,9 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
     where = strip_nones(args.get('where', {}))
     orderBy = args.get('orderBy', {'_id': 'ASC'}) # add default
     headers = ctx['req'].headers
-    jwt = ctx['req'].jwt_payload # TODO i need to decode jwt_payload
+    jwt = ctx['req'].jwt_payload
     fields = []
-    ${{repr_guards_before_checks(guards_before, '    ')}}
+    ${{repr_guards_checks(guards_before, '    ')}}
     pagination = get_pagination(args)
     data = await connection_resolver(
         collection=ctx['db']['${{collection}}'], 
@@ -140,9 +129,9 @@ from operator import setitem
 @Resolver('${{resolver_path}}')
 async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(parent, args, ctx, info):
     where = ${{repr_eval_dict(where_filter, '    ')}}
-    ${{repr_guards_before_checks(guards_before, '    ')}}
+    ${{repr_guards_checks(guards_before, '    ')}}
     x = await ctx['db']['${{collection}}'].find_one(where)
-    ${{repr_guards_after_checks(guards_after, '    ')}}
+    ${{repr_guards_checks(guards_after, '    ')}}
     ${{repr_disambiguations(disambiguations, '    ')}}
     return x
 '''
@@ -153,8 +142,9 @@ many_relations_resolver = '''
 from tartiflette import Resolver
 from .support import strip_nones, connection_resolver, zip_pluck, select_keys, get_pagination
 from operator import setitem
+from funcy import omit
 
-${{repr_node_filterer(guards_before)}}
+${{repr_node_filterer(guards_after)}}
 
 pipeline: list = ${{repr_eval_dict(pipeline,)}}
 
@@ -167,7 +157,7 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
     headers = ctx['req'].headers
     jwt = ctx['req'].jwt_payload # TODO i need to decode jwt_payload
     fields = []
-    ${{repr_guards_before_checks(guards_before, '    ')}}
+    ${{repr_guards_checks(guards_before, '    ')}}
     pagination = get_pagination(args)
     data = await connection_resolver(
         collection=ctx['db']['${{collection}}'], 
@@ -190,11 +180,12 @@ import pymongo
 from pymongo import ASCENDING, DESCENDING
 from typing import NamedTuple, Union
 import typing
-from funcy import pluck, select_keys
+from funcy import pluck, select_keys, omit
 
 gt = '$gt'
 lt = '$lt'
 MAX_NODES = 20
+DEFAULT_NODES_COUNT = 10
 
 def zip_pluck(d, *keys):
     return zip(*[pluck(k, d) for k in keys])
@@ -221,6 +212,14 @@ async def connection_resolver(
     after, before = pagination.get('after'), pagination.get('before')
     first = min(MAX_NODES, first or 0)
     last = min(MAX_NODES, last or 0)
+
+    if not first and not after:
+        if after:
+            first = DEFAULT_NODES_COUNT
+        elif before:
+            before = DEFAULT_NODES_COUNT
+        else:
+            first = DEFAULT_NODES_COUNT
 
     sorting = [(field, parse_direction(direction)) for field, direction in orderBy.items()]
     cursorField = list(orderBy.keys())[0]

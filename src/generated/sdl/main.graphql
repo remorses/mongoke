@@ -32,6 +32,7 @@ type User {
 
 type Bot {
     _id: ObjectId
+    user_id: ObjectId
     username: String
 }
 

@@ -2,6 +2,7 @@
 from tartiflette import Resolver
 from .support import strip_nones, connection_resolver, zip_pluck, select_keys, get_pagination
 from operator import setitem
+from funcy import omit
 
 def filter_nodes_by_guard(nodes, fields):
     for x in nodes:
@@ -26,7 +27,7 @@ async def resolve_query_campaigns(parent, args, ctx, info):
     where = strip_nones(args.get('where', {}))
     orderBy = args.get('orderBy', {'_id': 'ASC'}) # add default
     headers = ctx['req'].headers
-    jwt = ctx['req'].jwt_payload # TODO i need to decode jwt_payload
+    jwt = ctx['req'].jwt_payload
     fields = []
     
     pagination = get_pagination(args)

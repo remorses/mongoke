@@ -1,4 +1,6 @@
-# db_url: mongodb://localhost:27107
+
+
+db_url: mongodb://localhost:27017/playdb
 root_dir_name: src
 
 jwt:
@@ -9,6 +11,7 @@ jwt:
 skema: |
     Bot:
         _id: ObjectId
+        user_id: ObjectId
         username: Str
     User:
         bot_id: ObjectId
@@ -43,13 +46,13 @@ types:
         collection: users
     Bot:
         collection: bots
-        guards:
-            -   expression: jwt['_id'] == where['_id']
-                excluded: ["ciao"]
-                when: before
-            -   expression: jwt['_id'] == where['_id']
-                excluded: ["ciao"]
-                when: after
+        # guards:
+            # -   expression: where.get('user_id') == jwt.get('user_id')
+            #     excluded: ["ciao"]
+            #     when: after
+            # -   expression: x['user_id'] == where.get('_id')
+            #     excluded: ["ciao"]
+            #     when: after
     Campaign:
         collection: campaigns
         disambiguations:

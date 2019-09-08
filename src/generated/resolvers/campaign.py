@@ -8,11 +8,11 @@ from funcy import omit
 async def resolve_query_campaign(parent, args, ctx, info):
     where = strip_nones(args.get('where', {}))
     headers = ctx['req'].headers
-    jwt = ctx['req'].jwt_payload # TODO i need to decode jwt_payload and set it in req in a middleware
+    jwt = ctx['req'].jwt_payload
     fields = []
     
     collection = ctx['db']['campaigns']
-    x = collection.find_one(where)
+    x = await collection.find_one(where)
     
     if ('messages' in x):
         x['_typename'] = 'MessageCampaign'
