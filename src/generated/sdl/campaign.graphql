@@ -1,6 +1,6 @@
 
 extend type Query {
-    campaigns(where: CampaignWhere, orderBy: CampaignOrderBy,): CampaignConnection
+    campaigns(where: CampaignWhere, orderBy: CampaignOrderBy, first: Int, last: Int, after: String, before: String): CampaignConnection
     campaign(where: CampaignWhere,): Campaign
 }
 

@@ -1,6 +1,6 @@
 
 extend type Bot {
-   likes_over_time(where: EventWindowWhere, orderBy: EventWindowOrderBy): EventWindowConnection
+   likes_over_time(where: EventWindowWhere, orderBy: EventWindowOrderBy, first: Int, last: Int, after: String, before: String): EventWindowConnection
 }
 # if types don't have already the boilerplate i should write it now
 

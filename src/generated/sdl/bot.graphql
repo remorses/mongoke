@@ -1,6 +1,6 @@
 
 extend type Query {
-    bots(where: BotWhere, orderBy: BotOrderBy,): BotConnection
+    bots(where: BotWhere, orderBy: BotOrderBy, first: Int, last: Int, after: String, before: String): BotConnection
     bot(where: BotWhere,): Bot
 }
 
