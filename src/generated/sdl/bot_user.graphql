@@ -1,0 +1,4 @@
+
+extend type Bot {
+    user: User
+}

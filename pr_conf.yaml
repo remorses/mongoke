@@ -77,20 +77,20 @@ types:
                     value: 1
                     timestamp: $_id
 
-# relations:
-#     -   from: Bot
-#         to: EventWindow
-#         relation_type: to_many
-#         field: likes_over_time
-#         query:
-#             bot_id:
-#                 $in: ${{ parent['_id'] }}
-#             type: like
-#     -   from: Bot
-#         to: User
-#         field: user
-#         relation_type: to_one
-#         query:
-#             _id: ${{ parent['_id'] }}
+relations:
+    -   from: Bot
+        to: EventWindow
+        relation_type: to_many
+        field: likes_over_time
+        query:
+            bot_id:
+                $in: ${{ parent['_id'] }}
+            type: like
+    -   from: Bot
+        to: User
+        field: user
+        relation_type: to_one
+        query:
+            _id: ${{ parent['_id'] }}
 
 

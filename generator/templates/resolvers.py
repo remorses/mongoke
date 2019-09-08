@@ -124,8 +124,8 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
         pagination=pagination,
         pipeline=pipeline,
     )
-    ${{repr_many_disambiguations(disambiguations, '    ') if disambiguations else ''}}
     data['nodes'] = list(filter_nodes_by_guard(data['nodes']))
+    ${{repr_many_disambiguations(disambiguations, '    ') if disambiguations else ''}}
     return data
 
 '''
@@ -157,7 +157,6 @@ from operator import setitem
 
 ${{repr_node_filterer(guards_before)}}
 
-
 pipeline: list = ${{repr_eval_dict(pipeline,)}}
 
 @Resolver('${{resolver_path}}')
@@ -165,7 +164,22 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
     relation_where = ${{repr_eval_dict(where_filter, '    ')}}
     where = {**args.get('where', {}), **relation_where}
     where = strip_nones(where)
-    
+    orderBy = args.get('orderBy', {'_id': 'ASC'}) # add default
+    headers = ctx['request']['headers']
+    jwt = ctx['req'].jwt_payload # TODO i need to decode jwt_payload
+    fields = []
+    ${{repr_guards_before_checks(guards_before, '    ')}}
+    pagination = get_pagination(args)
+    data = await connection_resolver(
+        collection=ctx['db']['${{collection}}'], 
+        where=where,
+        orderBy=orderBy,
+        pagination=pagination,
+        pipeline=pipeline,
+    )
+    data['nodes'] = list(filter_nodes_by_guard(data['nodes']))
+    ${{repr_many_disambiguations(disambiguations, '    ') if disambiguations else ''}}
+    return data
 '''
 
 # nothing

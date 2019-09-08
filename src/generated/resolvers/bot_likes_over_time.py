@@ -15,16 +15,42 @@ def filter_nodes_by_guard(nodes):
 
 pipeline: list = [
     {
+        "$group": {
+            "_id": {
+                "$substartct": [
+                    "$timestamp",
+                    {
+                        "$mod": [
+                            "$timestamp",
+                            60000
+                        ]
+                    }
+                ]
+            },
+            "value": {
+                "$sum": "$likes"
+            }
+        }
+    },
+    {
         "$project": {
             "_id": 0,
-            "username": 0
+            "value": 1,
+            "timestamp": "$_id"
         }
     }
 ]
 
-@Resolver('Query.campaigns')
-async def resolve_query_campaigns(parent, args, ctx, info):
-    where = strip_nones(args.get('where', {}))
+@Resolver('Bot.likes_over_time')
+async def resolve_bot_likes_over_time(parent, args, ctx, info):
+    relation_where = {
+        "bot_id": {
+            "$in":  parent['_id'] 
+        },
+        "type": "like"
+    }
+    where = {**args.get('where', {}), **relation_where}
+    where = strip_nones(where)
     orderBy = args.get('orderBy', {'_id': 'ASC'}) # add default
     headers = ctx['request']['headers']
     jwt = ctx['req'].jwt_payload # TODO i need to decode jwt_payload
@@ -39,12 +65,5 @@ async def resolve_query_campaigns(parent, args, ctx, info):
         pipeline=pipeline,
     )
     data['nodes'] = list(filter_nodes_by_guard(data['nodes']))
-    for x in data['nodes']:
-        if ('messages' in x):
-            x['_typename'] = 'MessageCampaign'
-        elif ('posts' in x):
-            x['_typename'] = 'PostCampaign'
-        
     
     return data
-

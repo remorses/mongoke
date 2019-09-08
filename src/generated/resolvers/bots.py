@@ -39,7 +39,7 @@ async def resolve_query_bots(parent, args, ctx, info):
         pagination=pagination,
         pipeline=pipeline,
     )
-    
     data['nodes'] = list(filter_nodes_by_guard(data['nodes']))
+    
     return data
 
