@@ -18,7 +18,7 @@ here = os.path.dirname(os.path.abspath(__file__))
 
 DB_URL = "mongodb://localhost:27017/playdb" or None
 
-def run():
+def build():
     app = web.Application(middlewares=[jwt_middleware])
     db = AsyncIOMotorClient(DB_URL)
     db: AsyncIOMotorClient = db.get_database()
@@ -48,6 +48,9 @@ def run():
     async def on_startup(app):
         context.update({'loop': asyncio.get_event_loop()})
     app.on_startup.append(on_startup)
-    web.run_app(app)
+    return app
 
-run()
+if __name__ == '__main__':
+    web.run_app(build())
+
+
