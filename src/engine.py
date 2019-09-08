@@ -3,8 +3,8 @@ from tartiflette import Engine
 from typing import *
 from .generated.logger import logger
 import traceback
-from tartiflette.types.exceptions.tartiflette import TartifletteError
-def my_error_coercer(
+
+async def my_error_coercer(
     ex: Exception, error: Dict[str, Any]
 ) -> Dict[str, Any]:
     # error["extensions"]["type"] = "custom_exception"
