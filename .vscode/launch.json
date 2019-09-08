@@ -4,11 +4,19 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
             "name": "Python: Modulo",
             "type": "python",
             "request": "launch",
             "module": "generator"
-        }
+        },
+        {
+            "name": "Python: Generated",
+            "type": "python",
+            "request": "launch",
+            "module": "src",
+            "justMyCode": false
+        },
     ]
 }

@@ -121,10 +121,22 @@ async def connection_resolver(
         }
     }
 
+MONGODB_OPERATORS = [
+    'in',
+    'nin',
+    'eq',
+    'neq',
+    'or',
+    'and',
+    # TODO add gt, gte, like ....
+]
+
 def strip_nones(x: dict):
     result = {}
     for k, v in x.items():
         if not v == None:
+            if k in MONGODB_OPERATORS:
+                k = '$' + k
             result[k] = v
     return result
 

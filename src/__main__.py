@@ -7,6 +7,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from tartiflette_aiohttp import register_graphql_handlers
 import asyncio
 
+from .engine import CustomEngine
 import src.generated.resolvers.bot
 import src.generated.resolvers.bots
 import src.generated.resolvers.campaign
@@ -30,6 +31,7 @@ def build():
     }
     app = register_graphql_handlers(
         app=app,
+        engine=CustomEngine(),
         engine_sdl=f'{here}/generated/sdl/',
         executor_context=context,
         executor_http_endpoint='/',

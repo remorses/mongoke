@@ -13,6 +13,7 @@ from .templates.graphql_query import graphql_query, general_graphql, to_many_rel
 from .templates.main import main
 from .templates.jwt_middleware import jwt_middleware
 from .templates.logger import logger
+from .templates.engine import engine
 from .support import touch, pretty, get_type_properties, get_skema
 
 SCALAR_TYPES = ['String', 'Float', 'Int', 'Boolean', ]
@@ -162,6 +163,7 @@ def generate_from_config(config):
         skema_schema, scalar_already_present=SCALARS_ALREADY_IMPLEMENTED)
 
     touch(f'{base}/__init__.py', '')
+    touch(f'{base}/engine.py', engine)
     touch(f'{base}/__main__.py', populate_string(main, dict(
         root_dir_name=root_dir_name,
         db_url=db_url,
