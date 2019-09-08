@@ -10,4 +10,4 @@ ciao:
 # print(yaml.load(s)['ciao']['expr'])
 x = yaml.load(open('pr_conf.yaml'))
 y = json.dumps(x, indent=4)
-print(y)
+print(y)skema
