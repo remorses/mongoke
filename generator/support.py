@@ -15,6 +15,21 @@ def zip_pluck(d, keys, enumerate=False):
         args = [count(), *args]
     return zip(*args)
 
+def get_skema(config):
+    if 'skema_path' in config:
+        with open(config['skema_path']) as f:
+            return f.read()
+    if config.get('skema'):
+        return config.get('skema')
+    if config.get('skema_url'):
+        r = requests.get(config.get('skema_url'), stream=True)
+        skema = ''
+        while 1:
+            buf = r.raw.read(16*1024)
+            if not buf:
+                break
+            skema += buf.decode()
+        return skema
 
 def get_type_properties(json_schema):
     if any([x in json_schema for x in ('anyOf', 'allOf', 'oneOf')]):

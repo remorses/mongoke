@@ -3,8 +3,7 @@ from tartiflette import Resolver
 from .support import strip_nones, connection_resolver, zip_pluck, select_keys, get_pagination
 from operator import setitem
 
-def filter_nodes_by_guard(nodes):
-    fields = []
+def filter_nodes_by_guard(nodes, fields):
     for x in nodes:
         try:
             if not (jwt['_id'] == where['_id']):
@@ -23,7 +22,7 @@ pipeline: list = []
 async def resolve_query_bots(parent, args, ctx, info):
     where = strip_nones(args.get('where', {}))
     orderBy = args.get('orderBy', {'_id': 'ASC'}) # add default
-    headers = ctx['request']['headers']
+    headers = ctx['req'].headers
     jwt = ctx['req'].jwt_payload # TODO i need to decode jwt_payload
     fields = []
     if not (jwt['_id'] == where['_id']):
@@ -39,7 +38,7 @@ async def resolve_query_bots(parent, args, ctx, info):
         pagination=pagination,
         pipeline=pipeline,
     )
-    data['nodes'] = list(filter_nodes_by_guard(data['nodes']))
+    data['nodes'] = list(filter_nodes_by_guard(data['nodes'], fields))
     
     return data
 

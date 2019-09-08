@@ -7,7 +7,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from tartiflette_aiohttp import register_graphql_handlers
 import asyncio
 
-import ${{root_dir_name}}.generated.resolvers
+${{'\\n'.join([f'import {root_dir_name}.generated.resolvers.{name}' for name in resolver_names])}}
 import ${{root_dir_name}}.generated.scalars
 from ${{root_dir_name}}.generated.middleware import jwt_middleware
 

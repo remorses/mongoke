@@ -7,7 +7,7 @@ from funcy import omit
 @Resolver('Query.campaign')
 async def resolve_query_campaign(parent, args, ctx, info):
     where = strip_nones(args.get('where', {}))
-    headers = ctx['request']['headers']
+    headers = ctx['req'].headers
     jwt = ctx['req'].jwt_payload # TODO i need to decode jwt_payload and set it in req in a middleware
     fields = []
     

@@ -7,7 +7,10 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from tartiflette_aiohttp import register_graphql_handlers
 import asyncio
 
-import src.generated.resolvers
+import src.generated.resolvers.bot
+import src.generated.resolvers.bots
+import src.generated.resolvers.campaign
+import src.generated.resolvers.campaigns
 import src.generated.scalars
 from src.generated.middleware import jwt_middleware
 

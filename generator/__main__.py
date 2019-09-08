@@ -2,7 +2,7 @@ import skema
 import requests
 from typing import *
 import sys
-from funcy import merge, lmap, collecting, omit, remove
+from funcy import merge, lmap, collecting, omit, remove, lcat
 import yaml
 from skema.to_graphql import to_graphql
 import os.path
@@ -13,7 +13,7 @@ from .templates.graphql_query import graphql_query, general_graphql, to_many_rel
 from .templates.main import main
 from .templates.jwt_middleware import jwt_middleware
 from .templates.logger import logger
-from .support import touch, pretty, get_type_properties
+from .support import touch, pretty, get_type_properties, get_skema
 
 SCALAR_TYPES = ['String', 'Float', 'Int', 'Boolean', ]
 SCALARS_ALREADY_IMPLEMENTED = ['ObjectId', 'Json',
@@ -29,12 +29,15 @@ def is_scalar(type_body):
         or not omit(type_body, ['description', 'title', '$schema'])
     )
 
+
 HIDE_GRAPHQL = '[graphql hide]'
+
 
 def get_skema_aliases(skema_schema):
     definitions = skema.to_jsonschema(
         skema_schema, resolve=False).get('definitions', [])
-    definitions = {d: body for d, body in definitions.items() if not HIDE_GRAPHQL in body.get('description', '') and not body.get('enum')} # TODO should be implemented in skema
+    definitions = {d: body for d, body in definitions.items() if not HIDE_GRAPHQL in body.get(
+        'description', '') and not body.get('enum')}  # TODO should be implemented in skema
     aliases = [body.get('title') for d, body in definitions.items()]
     # pretty(aliases)
     aliases = [x for x in aliases if is_alias(skema_schema, x)]
@@ -46,6 +49,7 @@ def is_alias(skema_schema, typename) -> bool:
     # pretty(json_schema)
     return is_scalar(json_schema)
 
+
 map_json_type_to_grpahql = {
     'string': 'String',
     'number': 'Float',
@@ -53,6 +57,7 @@ map_json_type_to_grpahql = {
     'boolean': 'Bool',
     None: 'Json',
 }
+
 
 @collecting
 def get_scalar_fields(skema_schema, typename) -> Iterable[Tuple[str, str]]:
@@ -66,7 +71,8 @@ def get_scalar_fields(skema_schema, typename) -> Iterable[Tuple[str, str]]:
             if body.get('title', '') in aliases:
                 scalar_name = body.get('title', )
             else:
-                scalar_name = map_json_type_to_grpahql[body.get('type', None).lower()]
+                scalar_name = map_json_type_to_grpahql[body.get(
+                    'type', None).lower()]
             yield (name, scalar_name)
 
 
@@ -90,7 +96,6 @@ def generate_type_sdl(schema, typename, guards, query_name, is_aggregation=False
             # scalars=scalars,
         )
     )
-
 
 
 def generate_resolvers(collection, disambiguations, guards, query_name, is_aggregation=False, **kwargs):
@@ -124,33 +129,21 @@ def generate_resolvers(collection, disambiguations, guards, query_name, is_aggre
     )
     return single_resolver, many_resolver
 
+
 @collecting
 def make_disambiguations_objects(disambiguations):
     for type, expr in disambiguations.items():
         yield {
             'type_name': type,
-            'expression': expr.strip(), 
+            'expression': expr.strip(),
         }
 
-def get_skema(config):
-    if 'skema_path' in config:
-        with open(config['skema_path']) as f:
-            return f.read()
-    if config.get('skema'):
-        return config.get('skema')
-    if config.get('skema_url'):
-        r = requests.get(config.get('skema_url'), stream=True)
-        skema = ''
-        while 1:
-            buf = r.raw.read(16*1024)
-            if not buf:
-                break
-            skema += buf.decode()
-        return skema
-    
+def get_query_name(typename):
+    return  typename[0].lower() + typename[1:]
 
 def generate_from_config(config):
     types = config.get('types', {})
+
     def get_type_config(name):
         if name in types.keys():
             return types[name]
@@ -162,13 +155,19 @@ def generate_from_config(config):
     db_url = config.get('db_url', '')
     base = os.path.join(target_dir, root_dir_name)
     skema_schema = get_skema(config)
+
     # TODO add other scalars from the skema
     scalars = [*SCALAR_TYPES, *get_skema_aliases(skema_schema)]
     main_graphql_schema = to_graphql(
         skema_schema, scalar_already_present=SCALARS_ALREADY_IMPLEMENTED)
 
     touch(f'{base}/__init__.py', '')
-    touch(f'{base}/__main__.py', populate_string(main, dict(root_dir_name=root_dir_name, db_url=db_url)))
+    touch(f'{base}/__main__.py', populate_string(main, dict(
+        root_dir_name=root_dir_name,
+        db_url=db_url,
+        resolver_names=lcat([[get_query_name(typename), get_query_name(typename) + 's'] for typename,
+                               type_config in types.items() if type_config.get('exposed', True)]),
+    )))
     touch(f'{base}/generated/__init__.py', '')
     touch(f'{base}/generated/logger.py', logger)
     touch(f'{base}/generated/middleware/__init__.py', jwt_middleware)
@@ -191,7 +190,7 @@ def generate_from_config(config):
         if not type_config.get('exposed', True):
             continue
         collection = type_config.get('collection', '')
-        query_name = typename[0].lower() + typename[1:]
+        query_name = get_query_name(typename)
         pipeline = type_config.get('pipeline', [])
         guards = type_config.get('guards', [])
         guards = lmap(add_guards_defaults, guards)
@@ -213,8 +212,8 @@ def generate_from_config(config):
             query_name=query_name,
             pipeline=pipeline,
         )
-        touch(f'{base}/generated/resolvers/{query_name}.py', single_resolver)
-        touch(f'{base}/generated/resolvers/{query_name}s.py', many_resolver)
+        touch(f'{base}/generated/resolvers/{get_query_name(typename)}.py', single_resolver)
+        touch(f'{base}/generated/resolvers/{get_query_name(typename)}s.py', many_resolver)
 
     for relation in relations:
         fromType = relation['from']
@@ -232,7 +231,8 @@ def generate_from_config(config):
                 relationName=relationName,
             )
         )
-        implemented_types = [name for name, x in types.items() if x.get('exposed', True)]
+        implemented_types = [name for name,
+                             x in types.items() if x.get('exposed', True)]
         if relation_type == 'to_many' and toType not in implemented_types:
             relation_sdl += populate_string(
                 to_many_relation_boilerplate,
@@ -243,7 +243,8 @@ def generate_from_config(config):
                     fields=get_scalar_fields(skema_schema, toType),
                 )
             )
-        touch(f'{base}/generated/sdl/{fromType.lower()}_{relationName}.graphql', relation_sdl)
+        touch(
+            f'{base}/generated/sdl/{fromType.lower()}_{relationName}.graphql', relation_sdl)
         relation_template = single_relation_resolver if relation_type == 'to_one' else many_relations_resolver
         relation_resolver = populate_string(
             relation_template,
@@ -263,7 +264,8 @@ def generate_from_config(config):
                 **resolvers_dependencies,
             )
         )
-        touch(f'{base}/generated/resolvers/{fromType.lower()}_{relationName}.py', relation_resolver)
+        touch(
+            f'{base}/generated/resolvers/{fromType.lower()}_{relationName}.py', relation_resolver)
 
 
 arg = sys.argv[-1]
@@ -271,4 +273,3 @@ arg = 'pr_conf.yaml'
 # arg = 'automata_conf.yml'
 config = yaml.safe_load(open(arg).read())
 generate_from_config(config)
-

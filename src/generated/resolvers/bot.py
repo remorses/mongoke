@@ -7,7 +7,7 @@ from funcy import omit
 @Resolver('Query.bot')
 async def resolve_query_bot(parent, args, ctx, info):
     where = strip_nones(args.get('where', {}))
-    headers = ctx['request']['headers']
+    headers = ctx['req'].headers
     jwt = ctx['req'].jwt_payload # TODO i need to decode jwt_payload and set it in req in a middleware
     fields = []
     if not (jwt['_id'] == where['_id']):

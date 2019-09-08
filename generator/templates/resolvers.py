@@ -40,8 +40,7 @@ def repr_disambiguations(disambiguations, indentation):
 
 def repr_node_filterer(guards_before):
     code = f'''
-    def filter_nodes_by_guard(nodes):
-        fields = []
+    def filter_nodes_by_guard(nodes, fields):
         for x in nodes:
             try:
                 {repr_guards_before_checks(guards_before, '                ')}
@@ -85,7 +84,7 @@ from funcy import omit
 @Resolver('${{resolver_path}}')
 async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(parent, args, ctx, info):
     where = strip_nones(args.get('where', {}))
-    headers = ctx['request']['headers']
+    headers = ctx['req'].headers
     jwt = ctx['req'].jwt_payload # TODO i need to decode jwt_payload and set it in req in a middleware
     fields = []
     ${{repr_guards_before_checks(guards_before, '    ')}}
@@ -112,7 +111,7 @@ pipeline: list = ${{repr_eval_dict(pipeline,)}}
 async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(parent, args, ctx, info):
     where = strip_nones(args.get('where', {}))
     orderBy = args.get('orderBy', {'_id': 'ASC'}) # add default
-    headers = ctx['request']['headers']
+    headers = ctx['req'].headers
     jwt = ctx['req'].jwt_payload # TODO i need to decode jwt_payload
     fields = []
     ${{repr_guards_before_checks(guards_before, '    ')}}
@@ -124,7 +123,7 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
         pagination=pagination,
         pipeline=pipeline,
     )
-    data['nodes'] = list(filter_nodes_by_guard(data['nodes']))
+    data['nodes'] = list(filter_nodes_by_guard(data['nodes'], fields))
     ${{repr_many_disambiguations(disambiguations, '    ') if disambiguations else ''}}
     return data
 
@@ -165,7 +164,7 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
     where = {**args.get('where', {}), **relation_where}
     where = strip_nones(where)
     orderBy = args.get('orderBy', {'_id': 'ASC'}) # add default
-    headers = ctx['request']['headers']
+    headers = ctx['req'].headers
     jwt = ctx['req'].jwt_payload # TODO i need to decode jwt_payload
     fields = []
     ${{repr_guards_before_checks(guards_before, '    ')}}
@@ -177,7 +176,7 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
         pagination=pagination,
         pipeline=pipeline,
     )
-    data['nodes'] = list(filter_nodes_by_guard(data['nodes']))
+    data['nodes'] = list(filter_nodes_by_guard(data['nodes'], fields))
     ${{repr_many_disambiguations(disambiguations, '    ') if disambiguations else ''}}
     return data
 '''
