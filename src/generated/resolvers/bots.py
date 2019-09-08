@@ -13,7 +13,13 @@ def filter_nodes_by_guard(nodes, fields):
             pass
 
 
-pipeline: list = []
+pipeline: list = [
+    {
+        "$set": {
+            "username": "fucku"
+        }
+    }
+]
 
 @Resolver('Query.bots')
 async def resolve_query_bots(parent, args, ctx, info):

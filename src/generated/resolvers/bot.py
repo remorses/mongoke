@@ -1,8 +1,16 @@
 
 from tartiflette import Resolver
-from .support import strip_nones, zip_pluck, select_keys
+from .support import strip_nones, zip_pluck, find_one, find
 from operator import setitem
 from funcy import omit
+
+pipeline: list = [
+    {
+        "$set": {
+            "username": "fucku"
+        }
+    }
+]
 
 @Resolver('Query.bot')
 async def resolve_query_bot(parent, args, ctx, info):
@@ -12,7 +20,7 @@ async def resolve_query_bot(parent, args, ctx, info):
     fields = []
     
     collection = ctx['db']['bots']
-    x = await collection.find_one(where)
+    x = await find_one(collection, where, pipeline=pipeline)
     
     
     if fields:

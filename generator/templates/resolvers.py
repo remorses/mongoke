@@ -65,7 +65,7 @@ from ..logger import logger
 # collection, resolver_path, guard_expression_before, guard_expression_after, disambiguations
 single_item_resolver = '''
 from tartiflette import Resolver
-from .support import strip_nones, zip_pluck, select_keys
+from .support import strip_nones, zip_pluck, find_one, find
 from operator import setitem
 from funcy import omit
 
@@ -79,7 +79,7 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
     fields = []
     ${{repr_guards_checks(guards_before, '    ')}}
     collection = ctx['db']['${{collection}}']
-    x = await collection.find_one(where)
+    x = await find_one(collection, where, pipeline=pipeline)
     ${{repr_guards_checks(guards_after, '    ')}}
     ${{repr_disambiguations(disambiguations, '    ')}}
     if fields:
@@ -125,7 +125,7 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
 # TODO add pipeline for making an aggregate
 single_relation_resolver = ''' 
 from tartiflette import Resolver
-from .support import strip_nones, zip_pluck, select_keys
+from .support import strip_nones, zip_pluck, find_one, find
 from operator import setitem
 
 pipeline: list = ${{repr_eval_dict(pipeline,)}}
@@ -134,7 +134,8 @@ pipeline: list = ${{repr_eval_dict(pipeline,)}}
 async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(parent, args, ctx, info):
     where = ${{repr_eval_dict(where_filter, '    ')}}
     ${{repr_guards_checks(guards_before, '    ')}}
-    x = await ctx['db']['${{collection}}'].find_one(where)
+    collection = ctx['db']['${{collection}}']
+    x = await find_one(collection, where, pipeline=pipeline)
     ${{repr_guards_checks(guards_after, '    ')}}
     ${{repr_disambiguations(disambiguations, '    ')}}
     return x
@@ -179,6 +180,7 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
 resolvers_support = '''
 import collections
 from motor.motor_asyncio import AsyncIOMotorDatabase, AsyncIOMotorCollection
+from mongodb_streams import find, find_one
 from tartiflette import Resolver
 import pymongo
 from pymongo import ASCENDING, DESCENDING
@@ -205,14 +207,15 @@ def get_pagination(args):
 
 parse_direction = lambda direction: ASCENDING if direction == 'ASC' else DESCENDING
 
+
 async def connection_resolver(
-        collection: AsyncIOMotorCollection, 
-        where: dict,
-        orderBy: dict, # needs to exist always at least one, the fisrst is the cursorField
-        pagination: dict,
-        pipeline=[],
-    ):
-    first, last = pagination.get('first'), pagination.get('last'), 
+    collection: AsyncIOMotorCollection,
+    where: dict,
+    orderBy: dict,  # needs to exist always at least one, the fisrst is the cursorField
+    pagination: dict,
+    pipeline=[]
+):
+    first, last = pagination.get('first'), pagination.get('last'),
     after, before = pagination.get('after'), pagination.get('before')
     first = min(MAX_NODES, first or 0)
     last = min(MAX_NODES, last or 0)
@@ -225,7 +228,6 @@ async def connection_resolver(
         else:
             first = DEFAULT_NODES_COUNT
 
-    sorting = [(field, parse_direction(direction)) for field, direction in orderBy.items()]
     cursorField = list(orderBy.keys())[0]
 
     if after and not (first or before):
@@ -235,60 +237,64 @@ async def connection_resolver(
     if first and last:
         raise Exception('no sense using first and last together')
 
+
     if after != None and before != None:
-        nodes = collection.find(
-            {
+        args = dict(
+            match={
                 **where,
                 cursorField: {
                     gt: after,
                     lt: before
                 },
             },
-            sort=sorting
         )
     elif after != None:
-        nodes = collection.find(
-            {
+        args = dict(
+            match={
                 **where,
                 cursorField: {
                     gt: after,
                 },
             },
-            sort=sorting,
         )
     elif before != None:
-        nodes = collection.find(
-            {   
+        args = dict(
+            match={
                 **where,
                 cursorField: {
                     lt: before
                 },
             },
-            sort=sorting,
         )
     else:
-        nodes = collection.find(where, sort=sorting, )
-
+        args = dict(match=where, )
+    if pipeline:
+        args.update(dict(pipeline=pipeline))
+    sorting = {field: parse_direction(direction)
+               for field, direction in orderBy.items()}
+    if sorting:
+        args.update(dict(sort=sorting))
     if first:
-        nodes = nodes.limit(first + 1)
+        args.update(dict(limit=first + 1, ))
     elif last:
         toSkip = await collection.count_documents(where) - (last + 1)
-        nodes = nodes.skip(max(toSkip, 0))
+        args.update(dict(limit=max(toSkip, 0)))
 
-    nodes = await nodes.to_list(MAX_NODES)
+    nodes = await find(collection, **args)
+
     hasNext = None
     hasPrevious = None
 
     if first:
         hasNext = len(nodes) == (first + 1)
         nodes = nodes[:-1] if hasNext else nodes
-        
+
     if last:
         hasPrevious = len(nodes) == last + 1
         nodes = nodes[1:] if hasPrevious else nodes
 
     end_cursor = nodes[-1][cursorField] if nodes else None
-    start_cursor = nodes[0][cursorField] if nodes else None  
+    start_cursor = nodes[0][cursorField] if nodes else None
     return {
         'nodes': nodes,
         'pageInfo': {
@@ -298,6 +304,8 @@ async def connection_resolver(
             'hasPreviousPage': hasPrevious,
         }
     }
+
+
 
 MONGODB_OPERATORS = [
     'in',

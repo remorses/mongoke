@@ -1,6 +1,7 @@
 
 import collections
 from motor.motor_asyncio import AsyncIOMotorDatabase, AsyncIOMotorCollection
+from mongodb_streams import find, find_one
 from tartiflette import Resolver
 import pymongo
 from pymongo import ASCENDING, DESCENDING
@@ -27,14 +28,15 @@ def get_pagination(args):
 
 parse_direction = lambda direction: ASCENDING if direction == 'ASC' else DESCENDING
 
+
 async def connection_resolver(
-        collection: AsyncIOMotorCollection, 
-        where: dict,
-        orderBy: dict, # needs to exist always at least one, the fisrst is the cursorField
-        pagination: dict,
-        pipeline=[],
-    ):
-    first, last = pagination.get('first'), pagination.get('last'), 
+    collection: AsyncIOMotorCollection,
+    where: dict,
+    orderBy: dict,  # needs to exist always at least one, the fisrst is the cursorField
+    pagination: dict,
+    pipeline=[]
+):
+    first, last = pagination.get('first'), pagination.get('last'),
     after, before = pagination.get('after'), pagination.get('before')
     first = min(MAX_NODES, first or 0)
     last = min(MAX_NODES, last or 0)
@@ -47,7 +49,6 @@ async def connection_resolver(
         else:
             first = DEFAULT_NODES_COUNT
 
-    sorting = [(field, parse_direction(direction)) for field, direction in orderBy.items()]
     cursorField = list(orderBy.keys())[0]
 
     if after and not (first or before):
@@ -57,60 +58,64 @@ async def connection_resolver(
     if first and last:
         raise Exception('no sense using first and last together')
 
+
     if after != None and before != None:
-        nodes = collection.find(
-            {
+        args = dict(
+            match={
                 **where,
                 cursorField: {
                     gt: after,
                     lt: before
                 },
             },
-            sort=sorting
         )
     elif after != None:
-        nodes = collection.find(
-            {
+        args = dict(
+            match={
                 **where,
                 cursorField: {
                     gt: after,
                 },
             },
-            sort=sorting,
         )
     elif before != None:
-        nodes = collection.find(
-            {   
+        args = dict(
+            match={
                 **where,
                 cursorField: {
                     lt: before
                 },
             },
-            sort=sorting,
         )
     else:
-        nodes = collection.find(where, sort=sorting, )
-
+        args = dict(match=where, )
+    if pipeline:
+        args.update(dict(pipeline=pipeline))
+    sorting = {field: parse_direction(direction)
+               for field, direction in orderBy.items()}
+    if sorting:
+        args.update(dict(sort=sorting))
     if first:
-        nodes = nodes.limit(first + 1)
+        args.update(dict(limit=first + 1, ))
     elif last:
         toSkip = await collection.count_documents(where) - (last + 1)
-        nodes = nodes.skip(max(toSkip, 0))
+        args.update(dict(limit=max(toSkip, 0)))
 
-    nodes = await nodes.to_list(MAX_NODES)
+    nodes = await find(collection, **args)
+
     hasNext = None
     hasPrevious = None
 
     if first:
         hasNext = len(nodes) == (first + 1)
         nodes = nodes[:-1] if hasNext else nodes
-        
+
     if last:
         hasPrevious = len(nodes) == last + 1
         nodes = nodes[1:] if hasPrevious else nodes
 
     end_cursor = nodes[-1][cursorField] if nodes else None
-    start_cursor = nodes[0][cursorField] if nodes else None  
+    start_cursor = nodes[0][cursorField] if nodes else None
     return {
         'nodes': nodes,
         'pageInfo': {
@@ -120,6 +125,8 @@ async def connection_resolver(
             'hasPreviousPage': hasPrevious,
         }
     }
+
+
 
 MONGODB_OPERATORS = [
     'in',

@@ -46,6 +46,9 @@ types:
         collection: users
     Bot:
         collection: bots
+        pipeline:
+            - $set:
+                username: fucku
         # guards:
         #     -   expression: where.get('user_id') == jwt.get('user_id')
         #         excluded: ["ciao"]
