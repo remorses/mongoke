@@ -38,13 +38,6 @@ input WhereBoolean {
     neq: Boolean
 }
 
-input WhereID {
-    in: [ID]
-    nin: [ID]
-    eq: ID
-    neq: ID
-}
-
 input WhereObjectId {
     in: [ObjectId]
     nin: [ObjectId]
@@ -52,39 +45,11 @@ input WhereObjectId {
     neq: ObjectId
 }
 
-input WhereDateTime {
-    in: [DateTime]
-    nin: [DateTime]
-    eq: DateTime
-    neq: DateTime
-}
-
-input WhereTimestamp {
-    in: [Timestamp]
-    nin: [Timestamp]
-    eq: Timestamp
-    neq: Timestamp
-}
-
-input WhereCron {
-    in: [Cron]
-    nin: [Cron]
-    eq: Cron
-    neq: Cron
-}
-
-input WherePictureSrc {
-    in: [PictureSrc]
-    nin: [PictureSrc]
-    eq: PictureSrc
-    neq: PictureSrc
-}
-
-input WhereTag {
-    in: [Tag]
-    nin: [Tag]
-    eq: Tag
-    neq: Tag
+input WhereID {
+    in: [ID]
+    nin: [ID]
+    eq: ID
+    neq: ID
 }
 
 

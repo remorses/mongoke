@@ -72,7 +72,7 @@ def get_scalar_fields(skema_schema, typename) -> Iterable[Tuple[str, str]]:
 
 def add_guards_defaults(guard):
     guard['when'] = guard.get('when') or 'before'
-    guard['fields'] = guard.get('fields') or []
+    guard['excluded'] = guard.get('excluded') or []
     return guard
 
 
@@ -153,10 +153,9 @@ def generate_from_config(config):
     types = config.get('types', {})
     def get_type_config(name):
         if name in types.keys():
-            conf = types[name]
+            return types[name]
         else:
             raise Exception(f'fromType {name} not found in config')
-        return conf
     relations = config.get('relations', [])
     target_dir = config.get('target_dir', '.')
     root_dir_name = config.get('root_dir_name', 'src')
@@ -269,7 +268,7 @@ def generate_from_config(config):
 
 arg = sys.argv[-1]
 arg = 'pr_conf.yaml'
-arg = 'automata_conf.yml'
+# arg = 'automata_conf.yml'
 config = yaml.safe_load(open(arg).read())
 generate_from_config(config)
 

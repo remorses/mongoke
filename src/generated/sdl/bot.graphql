@@ -13,55 +13,11 @@ input BotWhere {
     and: [BotWhere]
     or: [BotWhere]
     # $not: [BotWhere]
-    botType: WhereString
-    pk: WhereID
+    _id: WhereObjectId
     username: WhereString
-    password: WhereString
-    timezoneSecondsOffset: WhereFloat
-    lat: WhereFloat
-    lng: WhereFloat
-    language: WhereString
-    fullName: WhereString
-    state: WhereString
-    city: WhereString
-    phone: WhereString
-    biography: WhereString
-    externalUrl: WhereString
-    gender: WhereString
-    email: WhereString
-    profilePicture: WherePictureSrc
-    privacy: WhereString
-    prId: WhereObjectId
-    createdAt: WhereString
-    messageCampaignCapacity: WhereFloat
-    status: WhereString
-    totalRunsCount: WhereFloat
-    failedRepairs: WhereFloat
 }
 
 input BotOrderBy {
-    botType: Direction
-    pk: Direction
+    _id: Direction
     username: Direction
-    password: Direction
-    timezoneSecondsOffset: Direction
-    lat: Direction
-    lng: Direction
-    language: Direction
-    fullName: Direction
-    state: Direction
-    city: Direction
-    phone: Direction
-    biography: Direction
-    externalUrl: Direction
-    gender: Direction
-    email: Direction
-    profilePicture: Direction
-    privacy: Direction
-    prId: Direction
-    createdAt: Direction
-    messageCampaignCapacity: Direction
-    status: Direction
-    totalRunsCount: Direction
-    failedRepairs: Direction
 }

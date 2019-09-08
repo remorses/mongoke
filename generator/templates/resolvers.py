@@ -7,7 +7,7 @@ from funcy import lfilter, post_processing
 
 @join_yields('')
 def repr_guards_before_checks(guards_before, indentation):
-    for expr, fields in zip_pluck(guards_before, ['expression', 'fields']):
+    for expr, fields in zip_pluck(guards_before, ['expression', 'excluded']):
         code =  f"""
         if not ({expr}):
             raise Exception({json.dumps('guard `' + str(expr) + '` not satisfied')})
@@ -18,7 +18,7 @@ def repr_guards_before_checks(guards_before, indentation):
 
 @join_yields('')
 def repr_guards_after_checks(guards_after, indentation):
-    for expr, fields in zip_pluck(guards_after, ['expression', 'fields']):
+    for expr, fields in zip_pluck(guards_after, ['expression', 'excluded']):
         code = f"""
         if not ({expr}):
             raise Exception({json.dumps('guard `' + str(expr) + '` not satisfied')})
@@ -37,28 +37,35 @@ def repr_disambiguations(disambiguations, indentation):
         """ 
         yield indent_to(indentation, code)
 
-@join_yields('')
-def filter_nodes_guards_after(guards_after, indentation):
-    for expr, fields in zip_pluck(guards_after, ['expression', 'fields']):
-        code = f"""
-        if not ({expr}):
-            pass
-        else:
-            own_fields = fields + {fields}
-            if own_fields:
-                x = select_keys(lambda k: k in fields, x)
-            nodes.append(x)
-        """
-        yield indent_to(indentation, code)
 
+def repr_node_filterer(guards_before):
+    code = f'''
+    def filter_nodes_by_guard(nodes):
+        fields = []
+        for x in nodes:
+            try:
+                {repr_guards_before_checks(guards_before, '                ')}
+                yield omit(x, fields)
+            except Exception:
+                pass
+    '''
+    return indent_to('', code)
+
+def repr_many_disambiguations(disambiguations, indentation):
+    code = f'''
+    for x in data['nodes']:
+        {repr_disambiguations(disambiguations, '        ')}
+    '''
+    return indent_to(indentation, code)
 
 resolvers_dependencies = dict(
     repr_guards_before_checks=repr_guards_before_checks,
     repr_guards_after_checks=repr_guards_after_checks,
-    filter_nodes_guards_after=filter_nodes_guards_after,
     zip_pluck=zip_pluck,
     repr_disambiguations=repr_disambiguations,
     repr_eval_dict=repr_eval_dict,
+    repr_node_filterer=repr_node_filterer,
+    repr_many_disambiguations=repr_many_disambiguations,
 )
 
 resolvers_init = '''
@@ -73,7 +80,7 @@ single_item_resolver = '''
 from tartiflette import Resolver
 from .support import strip_nones, zip_pluck, select_keys
 from operator import setitem
-from funcy import select_keys
+from funcy import omit
 
 @Resolver('${{resolver_path}}')
 async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(parent, args, ctx, info):
@@ -87,7 +94,7 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
     ${{repr_guards_after_checks(guards_after, '    ')}}
     ${{repr_disambiguations(disambiguations, '    ')}}
     if fields:
-        x = select_keys(lambda k: k in fields, x)
+        x = omit(x, fields)
     return x
 '''
 
@@ -97,7 +104,9 @@ from tartiflette import Resolver
 from .support import strip_nones, connection_resolver, zip_pluck, select_keys, get_pagination
 from operator import setitem
 
-pipeline = ${{repr_eval_dict(pipeline,)}}
+${{repr_node_filterer(guards_before)}}
+
+pipeline: list = ${{repr_eval_dict(pipeline,)}}
 
 @Resolver('${{resolver_path}}')
 async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(parent, args, ctx, info):
@@ -115,18 +124,8 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
         pagination=pagination,
         pipeline=pipeline,
     )
-    ${{
-    indent_to('    ', """
-    nodes = []
-    for x in data['nodes']:
-    """ if guards_after else """
-    nodes = data['nodes']
-    """ if disambiguations else '')
-    }}
-        ${{filter_nodes_guards_after(guards_after, '        ')}}
-    ${{"for x in nodes:" if disambiguations else ''}}
-        ${{repr_disambiguations(disambiguations, '        ')}}
-    ${{"data['nodes'] = nodes" if guards_after or disambiguations else ''}}
+    ${{repr_many_disambiguations(disambiguations, '    ') if disambiguations else ''}}
+    data['nodes'] = list(filter_nodes_by_guard(data['nodes']))
     return data
 
 '''
@@ -156,7 +155,10 @@ from tartiflette import Resolver
 from .support import strip_nones, connection_resolver, zip_pluck, select_keys, get_pagination
 from operator import setitem
 
-pipeline = ${{repr_eval_dict(pipeline,)}}
+${{repr_node_filterer(guards_before)}}
+
+
+pipeline: list = ${{repr_eval_dict(pipeline,)}}
 
 @Resolver('${{resolver_path}}')
 async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(parent, args, ctx, info):
