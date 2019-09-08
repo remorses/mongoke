@@ -8,7 +8,7 @@ def filter_nodes_by_guard(nodes, fields):
     for x in nodes:
         try:
             
-            yield omit(x, fields)
+            yield omit(x or dict(), fields)
         except Exception:
             pass
 
@@ -22,10 +22,6 @@ async def resolve_query_bots(parent, args, ctx, info):
     headers = ctx['req'].headers
     jwt = ctx['req'].jwt_payload
     fields = []
-    if not (where.get('user_id') == jwt.get('user_id')):
-        raise Exception("guard `where.get('user_id') == jwt.get('user_id')` not satisfied")
-    else:
-        fields += ['ciao']
     
     pagination = get_pagination(args)
     data = await connection_resolver(

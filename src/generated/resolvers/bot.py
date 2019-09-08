@@ -10,15 +10,11 @@ async def resolve_query_bot(parent, args, ctx, info):
     headers = ctx['req'].headers
     jwt = ctx['req'].jwt_payload
     fields = []
-    if not (where.get('user_id') == jwt.get('user_id')):
-        raise Exception("guard `where.get('user_id') == jwt.get('user_id')` not satisfied")
-    else:
-        fields += ['ciao']
     
     collection = ctx['db']['bots']
     x = await collection.find_one(where)
     
     
     if fields:
-        x = omit(x, fields)
+        x = omit(x or dict(), fields)
     return x

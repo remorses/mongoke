@@ -33,7 +33,7 @@ def repr_node_filterer(guards_after):
         for x in nodes:
             try:
                 {repr_guards_checks(guards_after, '                ')}
-                yield omit(x, fields)
+                yield omit(x or dict(), fields)
             except Exception:
                 pass
     '''
@@ -81,7 +81,7 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
     ${{repr_guards_checks(guards_after, '    ')}}
     ${{repr_disambiguations(disambiguations, '    ')}}
     if fields:
-        x = omit(x, fields)
+        x = omit(x or dict(), fields)
     return x
 '''
 
@@ -311,7 +311,10 @@ def strip_nones(x: dict):
         if not v == None:
             if k in MONGODB_OPERATORS:
                 k = '$' + k
-            result[k] = v
+            if isinstance(v, dict):
+                result[k] = strip_nones(v)
+            else:
+                result[k] = v
     return result
 
 '''

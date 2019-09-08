@@ -8,7 +8,7 @@ def filter_nodes_by_guard(nodes, fields):
     for x in nodes:
         try:
             
-            yield omit(x, fields)
+            yield omit(x or dict(), fields)
         except Exception:
             pass
 

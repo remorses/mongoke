@@ -20,5 +20,5 @@ async def resolve_query_campaign(parent, args, ctx, info):
         x['_typename'] = 'PostCampaign'
     
     if fields:
-        x = omit(x, fields)
+        x = omit(x or dict(), fields)
     return x

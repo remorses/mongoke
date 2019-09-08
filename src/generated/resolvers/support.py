@@ -137,6 +137,9 @@ def strip_nones(x: dict):
         if not v == None:
             if k in MONGODB_OPERATORS:
                 k = '$' + k
-            result[k] = v
+            if isinstance(v, dict):
+                result[k] = strip_nones(v)
+            else:
+                result[k] = v
     return result
 

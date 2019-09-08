@@ -2,13 +2,15 @@ engine = '''
 from tartiflette import Engine
 from typing import *
 from .generated.logger import logger
+import traceback
 
 async def my_error_coercer(
     exception: Exception, error: Dict[str, Any]
 ) -> Dict[str, Any]:
     # error["extensions"]["type"] = "custom_exception"
-    logger.exception(exception)
-    logger.error(exception)
+    ex = ex.original_error
+    trace = '\n'.join(traceback.format_exception(etype=type(ex), value=ex, tb=ex.__traceback__))
+    logger.error(trace)
     return error
 
 class CustomEngine(Engine):
