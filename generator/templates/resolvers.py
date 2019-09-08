@@ -69,6 +69,8 @@ from .support import strip_nones, zip_pluck, select_keys
 from operator import setitem
 from funcy import omit
 
+pipeline: list = ${{repr_eval_dict(pipeline,)}}
+
 @Resolver('${{resolver_path}}')
 async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(parent, args, ctx, info):
     where = strip_nones(args.get('where', {}))
@@ -125,6 +127,8 @@ single_relation_resolver = '''
 from tartiflette import Resolver
 from .support import strip_nones, zip_pluck, select_keys
 from operator import setitem
+
+pipeline: list = ${{repr_eval_dict(pipeline,)}}
 
 @Resolver('${{resolver_path}}')
 async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(parent, args, ctx, info):
