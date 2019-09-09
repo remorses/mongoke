@@ -1,0 +1,36 @@
+
+
+Configuration:
+    db_url?: /mongodb://.*/
+    root_dir_name?: Path
+    skema?: Str
+    skema_url?: Url
+    types:
+        ...:
+            collection: Str
+            exposed?: Bool
+            pipeline?: [Any]
+            disambiguations: [
+                ...: Str
+            ]
+            guards?: [
+                expression: Str
+                excluded?: [Str]
+                when: "after" | "before"
+            ]
+    relations?: [
+        from: Str
+        to: Str
+        relation_type: "to_many" | "to_one"
+        field: Str
+        query: MongoDbQuery
+    ]
+
+Path: Str
+MongoDbQuery:
+    ...:
+        $in?: [Any]
+        $eq?: Any
+        ...
+    ...
+Url: Str

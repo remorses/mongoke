@@ -1,0 +1,109 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/Configuration",
+    "definitions": {
+        "Configuration": {
+            "title": "Configuration",
+            "description": "",
+            "type": "object",
+            "required": [
+                "types"
+            ],
+            "properties": {
+                "db_url": {
+                    "type": "string",
+                    "pattern": "mongodb://.*",
+                    "title": "db_url",
+                    "description": ""
+                },
+                "root_dir_name": {
+                    "$ref": "#/definitions/Path",
+                    "title": "root_dir_name",
+                    "description": ""
+                },
+                "skema": {
+                    "type": "string",
+                    "title": "skema",
+                    "description": ""
+                },
+                "skema_url": {
+                    "$ref": "#/definitions/Url",
+                    "title": "skema_url",
+                    "description": ""
+                },
+                "types": {
+                    "title": "types",
+                    "description": "",
+                    "type": "object",
+                    "required": [],
+                    "properties": {}
+                },
+                "relations": {
+                    "type": "array",
+                    "title": "relations",
+                    "items": {
+                        "title": "relations",
+                        "description": "",
+                        "type": "object",
+                        "required": [
+                            "from",
+                            "to",
+                            "relation_type",
+                            "field",
+                            "query"
+                        ],
+                        "properties": {
+                            "from": {
+                                "type": "string",
+                                "title": "from",
+                                "description": ""
+                            },
+                            "to": {
+                                "type": "string",
+                                "title": "to",
+                                "description": ""
+                            },
+                            "relation_type": {
+                                "enum": [
+                                    "to_many",
+                                    "to_one"
+                                ],
+                                "type": "string",
+                                "title": "relation_type",
+                                "description": ""
+                            },
+                            "field": {
+                                "type": "string",
+                                "title": "field",
+                                "description": ""
+                            },
+                            "query": {
+                                "$ref": "#/definitions/MongoDbQuery",
+                                "title": "query",
+                                "description": ""
+                            }
+                        }
+                    },
+                    "minItems": 0
+                }
+            }
+        },
+        "Path": {
+            "type": "string",
+            "title": "Path",
+            "description": ""
+        },
+        "MongoDbQuery": {
+            "title": "MongoDbQuery",
+            "description": "",
+            "type": "object",
+            "required": [],
+            "properties": {}
+        },
+        "Url": {
+            "type": "string",
+            "title": "Url",
+            "description": ""
+        }
+    }
+}

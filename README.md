@@ -1,6 +1,6 @@
 Todo:
 - cursor must be obfuscated in connection, (also after and before are string so it is a must)
-- add pipelines feature to all resolvers (adding a custom find and find_one made with aggregate)
+- ~~add pipelines feature to all resolvers (adding a custom find and find_one made with aggregate)~~
 - ~~add the $ to the where input fields inside resolvers (in must be $in, ...)~~
 - ~~remove strip_nones after asserting v1 works~~
 
