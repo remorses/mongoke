@@ -1,6 +1,6 @@
 
 extend type Bot {
-   likes_over_time(where: EventWindowWhere, orderBy: EventWindowOrderBy, first: Int, last: Int, after: String, before: String): EventWindowConnection
+   likes_over_time(where: EventWindowWhere, cursorField: EventWindowFields, first: Int, last: Int, after: AnyScalar, before: AnyScalar): EventWindowConnection
 }
 # if types don't have already the boilerplate i should write it now
 
@@ -14,7 +14,7 @@ input EventWindowWhere {
     timestamp: WhereFloat
 }
 
-input EventWindowOrderBy {
-    value: Direction
-    timestamp: Direction
+enum EventWindowFields {
+    value
+    timestamp
 }

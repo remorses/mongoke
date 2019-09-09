@@ -55,11 +55,12 @@ input WhereID {
 
 
 type PageInfo {
-    endCursor: String
-    startCursor: String
+    endCursor: AnyScalar
+    startCursor: AnyScalar
     hasNextPage: Boolean
     hasPreviousPage: Boolean
 }
 
 scalar Json
 scalar ObjectId
+scalar AnyScalar

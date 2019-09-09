@@ -139,6 +139,7 @@ def make_disambiguations_objects(disambiguations):
             'expression': expr.strip(),
         }
 
+
 @collecting
 def get_resolver_filenames(congif):
     for typename, type_config in config.get('types', {}).items():
@@ -150,7 +151,8 @@ def get_resolver_filenames(congif):
 
 
 def get_query_name(typename):
-    return  typename[0].lower() + typename[1:]
+    return typename[0].lower() + typename[1:]
+
 
 def generate_from_config(config):
     types = config.get('types', {})
@@ -182,7 +184,8 @@ def generate_from_config(config):
     touch(f'{base}/generated/logger.py', logger)
     touch(f'{base}/generated/middleware/__init__.py', jwt_middleware)
     touch(f'{base}/generated/resolvers/__init__.py', resolvers_init)
-    touch(f'{base}/generated/resolvers/support.py', resolvers_support)
+    touch(f'{base}/generated/resolvers/support.py', populate_string(resolvers_support,
+                                                                    dict(scalars=[x for x in scalars if x not in SCALARS_ALREADY_IMPLEMENTED])))
     touch(f'{base}/generated/scalars/__init__.py',
           populate_string(scalars_implementations, dict(scalars=[x for x in scalars if x not in SCALARS_ALREADY_IMPLEMENTED])))
     touch(f'{base}/generated/sdl/general.graphql',
@@ -221,9 +224,13 @@ def generate_from_config(config):
             guards=guards,
             query_name=query_name,
             pipeline=pipeline,
+            map_fields_to_types=dict(
+                get_scalar_fields(skema_schema, typename)),
         )
-        touch(f'{base}/generated/resolvers/{get_query_name(typename)}.py', single_resolver)
-        touch(f'{base}/generated/resolvers/{get_query_name(typename)}s.py', many_resolver)
+        touch(
+            f'{base}/generated/resolvers/{get_query_name(typename)}.py', single_resolver)
+        touch(
+            f'{base}/generated/resolvers/{get_query_name(typename)}s.py', many_resolver)
 
     for relation in relations:
         fromType = relation['from']
@@ -268,19 +275,24 @@ def generate_from_config(config):
                 # disambiguations=disambiguations,
                 # guards_before=[g for g in guards if g['when'] == 'before'],
                 # guards_after=[g for g in guards if g['when'] == 'after'],
+                # TODO add guards to relations, disambs, ...
                 disambiguations=[],
                 guards_before=[],
                 guards_after=[],
+                map_fields_to_types=dict(
+                    get_scalar_fields(skema_schema, toType)),
                 **resolvers_dependencies,
             )
         )
         touch(
             f'{base}/generated/resolvers/{get_relation_filename(relation)}.py', relation_resolver)
 
+
 def get_relation_filename(relation):
     fromType = relation['from']
     relationName = relation['field']
     return f'{fromType.lower()}_{relationName}'
+
 
 arg = sys.argv[-1]
 arg = 'pr_conf.yaml'

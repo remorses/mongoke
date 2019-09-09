@@ -14,3 +14,33 @@ Low priority
 - add edges to make connection type be relay compliant 
 - better performance of connection_resolver removing the $skip and $count
 - add a dataloader for single connections
+
+
+connection_resolver coercion
+
+add cursorField argument,
+in every resolver create a map from cursorField to scalar typename
+map = {
+    _id: ObjectId,
+    name: String
+}
+
+then at the time of get_pageination pass as argument the scalar type, doing
+
+def get_cursor_coercer(info):
+    field = args.get('cursorField', '_id')
+    scalar_name = map_fields_to_types[field]
+    scalars = info.schema._scalar_definitions
+    return scalars[scalar_name].input_coercer
+
+get_pagination(args, get_cursor_coercer(info))
+
+def get_pagination(args, coerce):
+    after = args.get('after')
+    before = args.get('before')
+    return {
+        'after': after and coerce(after),
+        'before': before and coerce(before),
+        'first': args.get('first'),
+        'last': args.get('last'),
+    }

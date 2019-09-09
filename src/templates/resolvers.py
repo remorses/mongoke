@@ -91,28 +91,31 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
 # collection, resolver_path, guard_expression_before, guard_expression_after, disambiguations
 many_items_resolvers = '''
 from tartiflette import Resolver
-from .support import strip_nones, connection_resolver, zip_pluck, select_keys, get_pagination
+from .support import strip_nones, connection_resolver, zip_pluck, select_keys, get_pagination, get_cursor_coercer
 from operator import setitem
 from funcy import omit
 
 ${{repr_node_filterer(guards_after)}}
+
+map_fields_to_types = ${{repr_eval_dict(map_fields_to_types, '    ')}}
 
 pipeline: list = ${{repr_eval_dict(pipeline,)}}
 
 @Resolver('${{resolver_path}}')
 async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(parent, args, ctx, info):
     where = strip_nones(args.get('where', {}))
-    orderBy = args.get('orderBy', {'_id': 'ASC'}) # add default
+    cursorField = args.get('cursorField', '_id')
     headers = ctx['req'].headers
     jwt = ctx['req'].jwt_payload
     fields = []
     ${{repr_guards_checks(guards_before, '    ')}}
-    pagination = get_pagination(args)
+    pagination = get_pagination(args,)
     data = await connection_resolver(
         collection=ctx['db']['${{collection}}'], 
         where=where,
-        orderBy=orderBy,
+        cursorField=cursorField,
         pagination=pagination,
+        scalar_name=map_fields_to_types[cursorField],
         pipeline=pipeline,
     )
     data['nodes'] = list(filter_nodes_by_guard(data['nodes'], fields))
@@ -147,11 +150,13 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
 # TODO add pipeline for making an aggregate
 many_relations_resolver = '''
 from tartiflette import Resolver
-from .support import strip_nones, connection_resolver, zip_pluck, select_keys, get_pagination
+from .support import strip_nones, connection_resolver, zip_pluck, select_keys, get_pagination, get_cursor_coercer
 from operator import setitem
 from funcy import omit
 
 ${{repr_node_filterer(guards_after)}}
+
+map_fields_to_types = ${{repr_eval_dict(map_fields_to_types, '    ')}}
 
 pipeline: list = ${{repr_eval_dict(pipeline,)}}
 
@@ -160,17 +165,18 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
     relation_where = ${{repr_eval_dict(where_filter, '    ')}}
     where = {**args.get('where', {}), **relation_where}
     where = strip_nones(where)
-    orderBy = args.get('orderBy', {'_id': 'ASC'}) # add default
+    cursorField = args.get('cursorField', '_id')
     headers = ctx['req'].headers
     jwt = ctx['req'].jwt_payload # TODO i need to decode jwt_payload
     fields = []
     ${{repr_guards_checks(guards_before, '    ')}}
-    pagination = get_pagination(args)
+    pagination = get_pagination(args,)
     data = await connection_resolver(
         collection=ctx['db']['${{collection}}'], 
         where=where,
-        orderBy=orderBy,
+        cursorField=cursorField,
         pagination=pagination,
+        scalar_name=map_fields_to_types[cursorField],
         pipeline=pipeline,
     )
     data['nodes'] = list(filter_nodes_by_guard(data['nodes'], fields))
@@ -189,36 +195,63 @@ from pymongo import ASCENDING, DESCENDING
 from typing import NamedTuple, Union
 import typing
 from funcy import pluck, select_keys, omit
+from ..scalars import scalar_classes
+
 
 gt = '$gt'
 lt = '$lt'
 MAX_NODES = 20
 DEFAULT_NODES_COUNT = 10
 
+INPUT_COERCERS = {
+    'String': str,
+    'Int': int,
+    'Float': float,
+    'Bool': bool,
+    ${{'**{scalar.name: scalar._implementation.coerce_input for scalar in scalar_classes},' }}
+}
+
+OUTPUT_COERCERS = {
+    'String': str,
+    'Int': int,
+    'Float': float,
+    'Bool': bool,
+    ${{'**{scalar.name: scalar._implementation.coerce_output for scalar in scalar_classes},' }}
+}
+
+def get_cursor_coercer(info, scalar_name,):
+    return COERCERS[scalar_name]
+
 def zip_pluck(d, *keys):
     return zip(*[pluck(k, d) for k in keys])
 
-def get_pagination(args):
+def get_pagination(args,):
+    after = args.get('after')
+    before = args.get('before')
     return {
-        'after': args.get('after'),
-        'before': args.get('before'),
+        'after': after,
+        'before': before,
         'first': args.get('first'),
         'last': args.get('last'),
     }
 
 
-parse_direction = lambda direction: ASCENDING if direction == 'ASC' else DESCENDING
-
 
 async def connection_resolver(
     collection: AsyncIOMotorCollection,
     where: dict,
-    orderBy: dict,  # needs to exist always at least one, the fisrst is the cursorField
+    cursorField,  # needs to exist always at least one, the fisrst is the cursorField
     pagination: dict,
+    scalar_name,
     pipeline=[]
 ):
     first, last = pagination.get('first'), pagination.get('last'),
     after, before = pagination.get('after'), pagination.get('before')
+    if after:
+        after = INPUT_COERCERS[scalar_name](after)
+    if before:
+        before = INPUT_COERCERS[scalar_name](before)
+
     first = min(MAX_NODES, first or 0)
     last = min(MAX_NODES, last or 0)
 
@@ -229,8 +262,6 @@ async def connection_resolver(
             last = DEFAULT_NODES_COUNT
         else:
             first = DEFAULT_NODES_COUNT
-
-    cursorField = list(orderBy.keys())[0]
 
     if after and not (first or before):
         raise Exception('need `first` or `before` if using `after`')
@@ -272,10 +303,7 @@ async def connection_resolver(
         args = dict(match=where, )
     if pipeline:
         args.update(dict(pipeline=pipeline))
-    sorting = {field: parse_direction(direction)
-               for field, direction in orderBy.items()}
-    if sorting:
-        args.update(dict(sort=sorting))
+    args.update(dict(sort={cursorField: ASCENDING}))
     if first:
         args.update(dict(limit=first + 1, ))
     elif last:
@@ -301,8 +329,8 @@ async def connection_resolver(
     return {
         'nodes': nodes,
         'pageInfo': {
-            'endCursor': end_cursor,
-            'startCursor': start_cursor,
+            'endCursor': end_cursor and OUTPUT_COERCERS[scalar_name](end_cursor),
+            'startCursor': start_cursor and OUTPUT_COERCERS[scalar_name](start_cursor),
             'hasNextPage': hasNext,
             'hasPreviousPage': hasPrevious,
         }

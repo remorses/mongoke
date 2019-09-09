@@ -25,21 +25,22 @@ input Where{scalar} {'{'}
 
 
 type PageInfo {
-    endCursor: Int
-    startCursor: Int
+    endCursor: AnyScalar
+    startCursor: AnyScalar
     hasNextPage: Boolean
     hasPreviousPage: Boolean
 }
 
 scalar Json
 scalar ObjectId
+scalar AnyScalar
 '''
 
 # fields
 # query_name
 graphql_query = '''
 extend type Query {
-    ${{query_name}}s(where: ${{type_name}}Where, orderBy: ${{type_name}}OrderBy, first: Int, last: Int, after: String, before: String): ${{type_name}}Connection
+    ${{query_name}}s(where: ${{type_name}}Where, cursorField: ${{type_name}}Fields, first: Int, last: Int, after: AnyScalar, before: AnyScalar): ${{type_name}}Connection
     ${{query_name}}(where: ${{type_name}}Where,): ${{type_name}}
 }
 
@@ -55,8 +56,8 @@ input ${{type_name}}Where {
     ${{'\\n    '.join([f'{field}: Where{scalar_name}' for field, scalar_name in fields])}}
 }
 
-input ${{type_name}}OrderBy {
-    ${{'\\n    '.join([f'{field}: Direction' for field, _ in fields])}}
+enum ${{type_name}}Fields {
+    ${{'\\n    '.join([f'{field}' for field, _ in fields])}}
 }
 '''
 
@@ -70,7 +71,7 @@ extend type ${{fromType}} {
 
 to_many_relation = '''
 extend type ${{fromType}} {
-   ${{relationName}}(where: ${{toType}}Where, orderBy: ${{toType}}OrderBy, first: Int, last: Int, after: String, before: String): ${{toType}}Connection
+   ${{relationName}}(where: ${{toType}}Where, cursorField: ${{toType}}Fields, first: Int, last: Int, after: AnyScalar, before: AnyScalar): ${{toType}}Connection
 }
 # if types don't have already the boilerplate i should write it now
 '''
@@ -85,7 +86,7 @@ input ${{toType}}Where {
     ${{'\\n    '.join([f'{field}: Where{scalar_name}' for field, scalar_name in fields])}}
 }
 
-input ${{toType}}OrderBy {
-    ${{'\\n    '.join([f'{field}: Direction' for field, _ in fields])}}
+enum ${{toType}}Fields {
+    ${{'\\n    '.join([f'{field}' for field, _ in fields])}}
 }
 '''

@@ -1,6 +1,6 @@
 
 from tartiflette import Resolver
-from .support import strip_nones, connection_resolver, zip_pluck, select_keys, get_pagination
+from .support import strip_nones, connection_resolver, zip_pluck, select_keys, get_pagination, get_cursor_coercer
 from operator import setitem
 from funcy import omit
 
@@ -12,6 +12,11 @@ def filter_nodes_by_guard(nodes, fields):
         except Exception:
             pass
 
+
+map_fields_to_types = {
+        "value": "Float",
+        "timestamp": "Float"
+    }
 
 pipeline: list = [
     {
@@ -51,17 +56,18 @@ async def resolve_bot_likes_over_time(parent, args, ctx, info):
     }
     where = {**args.get('where', {}), **relation_where}
     where = strip_nones(where)
-    orderBy = args.get('orderBy', {'_id': 'ASC'}) # add default
+    cursorField = args.get('cursorField', '_id')
     headers = ctx['req'].headers
     jwt = ctx['req'].jwt_payload # TODO i need to decode jwt_payload
     fields = []
     
-    pagination = get_pagination(args)
+    pagination = get_pagination(args,)
     data = await connection_resolver(
         collection=ctx['db']['campaigns'], 
         where=where,
-        orderBy=orderBy,
+        cursorField=cursorField,
         pagination=pagination,
+        scalar_name=map_fields_to_types[cursorField],
         pipeline=pipeline,
     )
     data['nodes'] = list(filter_nodes_by_guard(data['nodes'], fields))

@@ -1,6 +1,6 @@
 
 extend type Query {
-    bots(where: BotWhere, orderBy: BotOrderBy, first: Int, last: Int, after: String, before: String): BotConnection
+    bots(where: BotWhere, cursorField: BotFields, first: Int, last: Int, after: AnyScalar, before: AnyScalar): BotConnection
     bot(where: BotWhere,): Bot
 }
 
@@ -18,8 +18,8 @@ input BotWhere {
     username: WhereString
 }
 
-input BotOrderBy {
-    _id: Direction
-    user_id: Direction
-    username: Direction
+enum BotFields {
+    _id
+    user_id
+    username
 }

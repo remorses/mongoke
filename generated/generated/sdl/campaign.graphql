@@ -1,6 +1,6 @@
 
 extend type Query {
-    campaigns(where: CampaignWhere, orderBy: CampaignOrderBy, first: Int, last: Int, after: String, before: String): CampaignConnection
+    campaigns(where: CampaignWhere, cursorField: CampaignFields, first: Int, last: Int, after: AnyScalar, before: AnyScalar): CampaignConnection
     campaign(where: CampaignWhere,): Campaign
 }
 
@@ -17,7 +17,7 @@ input CampaignWhere {
     bot_id: WhereObjectId
 }
 
-input CampaignOrderBy {
-    _id: Direction
-    bot_id: Direction
+enum CampaignFields {
+    _id
+    bot_id
 }

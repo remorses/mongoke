@@ -1,6 +1,6 @@
 
 from tartiflette import Resolver
-from .support import strip_nones, connection_resolver, zip_pluck, select_keys, get_pagination
+from .support import strip_nones, connection_resolver, zip_pluck, select_keys, get_pagination, get_cursor_coercer
 from operator import setitem
 from funcy import omit
 
@@ -12,6 +12,11 @@ def filter_nodes_by_guard(nodes, fields):
         except Exception:
             pass
 
+
+map_fields_to_types = {
+        "_id": "ObjectId",
+        "bot_id": "ObjectId"
+    }
 
 pipeline: list = [
     {
@@ -25,17 +30,18 @@ pipeline: list = [
 @Resolver('Query.campaigns')
 async def resolve_query_campaigns(parent, args, ctx, info):
     where = strip_nones(args.get('where', {}))
-    orderBy = args.get('orderBy', {'_id': 'ASC'}) # add default
+    cursorField = args.get('cursorField', '_id')
     headers = ctx['req'].headers
     jwt = ctx['req'].jwt_payload
     fields = []
     
-    pagination = get_pagination(args)
+    pagination = get_pagination(args,)
     data = await connection_resolver(
         collection=ctx['db']['campaigns'], 
         where=where,
-        orderBy=orderBy,
+        cursorField=cursorField,
         pagination=pagination,
+        scalar_name=map_fields_to_types[cursorField],
         pipeline=pipeline,
     )
     data['nodes'] = list(filter_nodes_by_guard(data['nodes'], fields))
