@@ -5,12 +5,15 @@ from .generated.logger import logger
 import traceback
 
 async def my_error_coercer(
-    ex: Exception, error: Dict[str, Any]
+    exception: Exception, error: Dict[str, Any]
 ) -> Dict[str, Any]:
-    # error["extensions"]["type"] = "custom_exception"
-    ex = ex.original_error
-    trace = '\n'.join(traceback.format_exception(etype=type(ex), value=ex, tb=ex.__traceback__))
-    logger.error(trace)
+
+    ex = exception.original_error
+    if ex:
+        trace = '\n'.join(traceback.format_exception(etype=type(ex), value=ex, tb=ex.__traceback__))
+        logger.error(trace)
+    else:
+        logger.error(exception)
     return error
 
 class CustomEngine(Engine):

@@ -1,7 +1,7 @@
 
 import collections
 from motor.motor_asyncio import AsyncIOMotorDatabase, AsyncIOMotorCollection
-from mongodb_streams import find, find_one
+import mongodb_streams
 from tartiflette import Resolver
 import pymongo
 from pymongo import ASCENDING, DESCENDING
@@ -101,7 +101,7 @@ async def connection_resolver(
         toSkip = await collection.count_documents(where) - (last + 1)
         args.update(dict(limit=max(toSkip, 0)))
 
-    nodes = await find(collection, **args)
+    nodes = await mongodb_streams.find(collection, **args)
 
     hasNext = None
     hasPrevious = None
