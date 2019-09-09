@@ -13,7 +13,7 @@ pipeline: list = [
     }
 ]
 
-@Resolver('Query.bot', resolve_type=)
+@Resolver('Query.bot')
 async def resolve_query_bot(parent, args, ctx, info):
     where = strip_nones(args.get('where', {}))
     headers = ctx['req'].headers

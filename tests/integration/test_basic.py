@@ -4,7 +4,7 @@ import pytest
 from generated.__main__ import build
 from unittest.mock import _Call, call
 from asynctest import mock
-from pprint import pprint
+from prtty import pretty
 
 from aiohttp.test_utils import TestClient, TestServer
 
@@ -41,8 +41,18 @@ async def test_single_resolver(query):
             }
         }
         ''')
-        pprint(r)
-        pprint(m.call_args_list)
+        pretty(r)
+        pretty(m.call_args_list)
+        assert r == {
+            "data": {
+                "bot": {
+                    "username": "hello",
+                    "user": {
+                        "name": "name"
+                    }
+                }
+            }
+        }
         # m.assert_called_with(_, where={'username': {'$eq': 'ciao'}}, pipeline=_)
 
 
@@ -60,7 +70,7 @@ async def test_many_resolver(query):
             }
         }
         ''')
-        pprint(r, indent=4)
+        pretty(r, )
         print(m.call_args)
         
         # m.assert_called_with(_, where={'username': {'$eq': 'ciao'}}, pipeline=_)
