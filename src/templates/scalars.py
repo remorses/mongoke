@@ -15,7 +15,7 @@ class JsonClass:
         return val
 
     def parse_literal(self, ast: "Node") -> Union[str, "UNDEFINED_VALUE"]:
-        return ast.value
+        return self.coerce_input(ast.value)
 
 AnyScalarScalar = Scalar("AnyScalar")
 @AnyScalarScalar
@@ -37,7 +37,7 @@ class AnyScalarClass:
         return val
 
     def parse_literal(self, ast: "Node") -> Union[str, "UNDEFINED_VALUE"]:
-        return ast.value
+        return self.coerce_input(ast.value)
 
 ObjectIdScalar = Scalar("ObjectId")
 @ObjectIdScalar
@@ -51,7 +51,7 @@ class ObjectIdClass:
         return str(val)
 
     def parse_literal(self, ast: "Node") -> Union[str, "UNDEFINED_VALUE"]:
-        return ast.value
+        return self.coerce_input(ast.value)
 
 
 ${{
@@ -68,7 +68,7 @@ class {scalar}Class:
         return val
 
     def parse_literal(self, ast: "Node") -> Union[str, "UNDEFINED_VALUE"]:
-        return ast.value
+        return self.coerce_input(ast.value)
 
 
 """ for scalar in scalars])
