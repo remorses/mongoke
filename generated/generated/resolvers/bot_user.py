@@ -9,11 +9,11 @@ pipeline: list = []
 @Resolver('Bot.user')
 async def resolve_bot_user(parent, args, ctx, info):
     where = {
-        "_id":  parent['_id'] 
+        "_id":  parent.get('_id') 
     }
     
     collection = ctx['db']['campaigns']
-    x = await mongodb_streams.find_one(collection, where, pipeline=pipeline)
+    x = await mongodb_streams.find_one(collection, match=where, pipeline=pipeline)
     
     
     return x

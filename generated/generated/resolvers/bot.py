@@ -13,7 +13,7 @@ pipeline: list = [
     }
 ]
 
-@Resolver('Query.bot')
+@Resolver('Query.bot', resolve_type=)
 async def resolve_query_bot(parent, args, ctx, info):
     where = strip_nones(args.get('where', {}))
     headers = ctx['req'].headers
@@ -21,7 +21,7 @@ async def resolve_query_bot(parent, args, ctx, info):
     fields = []
     
     collection = ctx['db']['bots']
-    x = await mongodb_streams.find_one(collection, where, pipeline=pipeline)
+    x = await mongodb_streams.find_one(collection, match=where, pipeline=pipeline)
     
     
     if fields:

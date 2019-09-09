@@ -45,7 +45,7 @@ pipeline: list = [
 async def resolve_bot_likes_over_time(parent, args, ctx, info):
     relation_where = {
         "bot_id": {
-            "$in":  parent['_id'] 
+            "$in":  parent.get('_id') 
         },
         "type": "like"
     }

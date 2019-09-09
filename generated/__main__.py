@@ -12,6 +12,8 @@ import generated.generated.resolvers.bot
 import generated.generated.resolvers.bots
 import generated.generated.resolvers.campaign
 import generated.generated.resolvers.campaigns
+import generated.generated.resolvers.bot_likes_over_time
+import generated.generated.resolvers.bot_user
 import generated.generated.scalars
 from generated.generated.middleware import jwt_middleware
 
@@ -50,7 +52,7 @@ def build(db):
 
 if __name__ == '__main__':
     DB_URL = "mongodb://localhost:27017/playdb" or None
-    db: AsyncIOMotorClient = AsyncIOMotorClient(DB_URL).db.get_database()
+    db: AsyncIOMotorClient = AsyncIOMotorClient(DB_URL).get_database()
     web.run_app(build(db))
 
 

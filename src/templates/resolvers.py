@@ -80,7 +80,7 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
     fields = []
     ${{repr_guards_checks(guards_before, '    ')}}
     collection = ctx['db']['${{collection}}']
-    x = await mongodb_streams.find_one(collection, where, pipeline=pipeline)
+    x = await mongodb_streams.find_one(collection, match=where, pipeline=pipeline)
     ${{repr_guards_checks(guards_after, '    ')}}
     ${{repr_disambiguations(disambiguations, '    ')}}
     if fields:
@@ -137,7 +137,7 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
     where = ${{repr_eval_dict(where_filter, '    ')}}
     ${{repr_guards_checks(guards_before, '    ')}}
     collection = ctx['db']['${{collection}}']
-    x = await mongodb_streams.find_one(collection, where, pipeline=pipeline)
+    x = await mongodb_streams.find_one(collection, match=where, pipeline=pipeline)
     ${{repr_guards_checks(guards_after, '    ')}}
     ${{repr_disambiguations(disambiguations, '    ')}}
     return x

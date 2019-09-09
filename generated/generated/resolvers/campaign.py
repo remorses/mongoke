@@ -22,7 +22,7 @@ async def resolve_query_campaign(parent, args, ctx, info):
     fields = []
     
     collection = ctx['db']['campaigns']
-    x = await mongodb_streams.find_one(collection, where, pipeline=pipeline)
+    x = await mongodb_streams.find_one(collection, match=where, pipeline=pipeline)
     
     if ('messages' in x):
         x['_typename'] = 'MessageCampaign'

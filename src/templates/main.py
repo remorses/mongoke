@@ -47,7 +47,7 @@ def build(db):
 
 if __name__ == '__main__':
     DB_URL = "${{db_url}}" or None
-    db: AsyncIOMotorClient = AsyncIOMotorClient(DB_URL).db.get_database()
+    db: AsyncIOMotorClient = AsyncIOMotorClient(DB_URL).get_database()
     web.run_app(build(db))
 
 

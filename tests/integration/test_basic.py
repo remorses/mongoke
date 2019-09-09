@@ -3,9 +3,12 @@ import mongodb_streams
 import pytest
 from generated.__main__ import build
 from unittest.mock import _Call, call
-from  asynctest import mock
+from asynctest import mock
+from pprint import pprint
 
-from aiohttp.test_utils import TestClient, TestServer, loop_context
+from aiohttp.test_utils import TestClient, TestServer
+
+_ = mock.ANY
 
 
 @pytest.fixture()
@@ -19,19 +22,45 @@ async def query():
             r = await client.post('/', json=dict(query=query, variables=variables))
             return await r.json()
         yield func
-    
+
 
 @pytest.mark.asyncio
-async def test_1(query):
+async def test_single_resolver(query):
     with mock.patch('mongodb_streams.find_one', ) as m:
-        m.return_value = dict(username='hello')
+        m.side_effect = [
+            dict(username='hello'),
+            dict(name='name')
+        ]
         r = await query('''
         {
             bot(where: {username: {eq: "ciao"}}) {
                 username
+                user {
+                    name
+                }
             }
         }
         ''')
+        pprint(r)
+        pprint(m.call_args_list)
+        # m.assert_called_with(_, where={'username': {'$eq': 'ciao'}}, pipeline=_)
+
+
+@pytest.mark.asyncio
+async def test_many_resolver(query):
+    with mock.patch('mongodb_streams.find', ) as m:
+        bots = [dict(_id=str(i), username=str(i)) for i in range(20)]
+        m.return_value = bots
+        r = await query('''
+        {
+            bots(first: 3) {
+                nodes {
+                    username
+                }
+            }
+        }
+        ''')
+        pprint(r, indent=4)
         print(m.call_args)
-        assert m.call_args == (mock.ANY, {'username': {'$eq': 'ciao'}}, mock.ANY)
-        # m.assert_called_with(pipeline=mock.ANY)
+        
+        # m.assert_called_with(_, where={'username': {'$eq': 'ciao'}}, pipeline=_)

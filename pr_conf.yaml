@@ -89,13 +89,13 @@ relations:
         field: likes_over_time
         query:
             bot_id:
-                $in: ${{ parent['_id'] }}
+                $in: ${{ parent.get('_id') }}
             type: like
     -   from: Bot
         to: User
         field: user
         relation_type: to_one
         query:
-            _id: ${{ parent['_id'] }}
+            _id: ${{ parent.get('_id') }}
 
 
