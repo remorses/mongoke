@@ -55,8 +55,8 @@ input WhereID {
 
 
 type PageInfo {
-    endCursor: Int
-    startCursor: Int
+    endCursor: String
+    startCursor: String
     hasNextPage: Boolean
     hasPreviousPage: Boolean
 }

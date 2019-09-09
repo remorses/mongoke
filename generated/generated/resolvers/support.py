@@ -41,11 +41,11 @@ async def connection_resolver(
     first = min(MAX_NODES, first or 0)
     last = min(MAX_NODES, last or 0)
 
-    if not first and not after:
+    if not first and not last:
         if after:
             first = DEFAULT_NODES_COUNT
         elif before:
-            before = DEFAULT_NODES_COUNT
+            last = DEFAULT_NODES_COUNT
         else:
             first = DEFAULT_NODES_COUNT
 
@@ -98,8 +98,9 @@ async def connection_resolver(
     if first:
         args.update(dict(limit=first + 1, ))
     elif last:
-        toSkip = await collection.count_documents(where) - (last + 1)
-        args.update(dict(limit=max(toSkip, 0)))
+        count = await collection.count_documents(where)
+        toSkip = count - (last + 1)
+        args.update(dict(skip=max(toSkip, 0)))
 
     nodes = await mongodb_streams.find(collection, **args)
 

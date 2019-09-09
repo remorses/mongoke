@@ -8,7 +8,7 @@ from funcy import omit
 pipeline: list = [
     {
         "$set": {
-            "username": "fucku"
+            "user_id": "fucku"
         }
     }
 ]

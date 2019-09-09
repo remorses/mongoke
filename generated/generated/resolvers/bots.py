@@ -16,7 +16,7 @@ def filter_nodes_by_guard(nodes, fields):
 pipeline: list = [
     {
         "$set": {
-            "username": "fucku"
+            "user_id": "fucku"
         }
     }
 ]
