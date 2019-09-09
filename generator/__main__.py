@@ -151,10 +151,9 @@ def generate_from_config(config):
         else:
             raise Exception(f'fromType {name} not found in config')
     relations = config.get('relations', [])
-    target_dir = config.get('target_dir', '.')
-    root_dir_name = config.get('root_dir_name', 'src')
+    root_dir_path = config.get('root_dir_path', 'src')
     db_url = config.get('db_url', '')
-    base = os.path.join(target_dir, root_dir_name)
+    base = os.path.abspath(root_dir_path)
     skema_schema = get_skema(config)
 
     # TODO add other scalars from the skema
@@ -165,7 +164,7 @@ def generate_from_config(config):
     touch(f'{base}/__init__.py', '')
     touch(f'{base}/engine.py', engine)
     touch(f'{base}/__main__.py', populate_string(main, dict(
-        root_dir_name=root_dir_name,
+        root_dir_name=root_dir_path.split('/')[-1],
         db_url=db_url,
         resolver_names=lcat([[get_query_name(typename), get_query_name(typename) + 's'] for typename,
                                type_config in types.items() if type_config.get('exposed', True)]),

@@ -2,7 +2,7 @@
 
 Configuration:
     db_url?: /mongodb://.*/
-    root_dir_name?: Path
+    root_dir_path?: Str
     skema?: Str
     skema_url?: Url
     types:
@@ -10,13 +10,12 @@ Configuration:
             collection: Str
             exposed?: Bool
             pipeline?: [Any]
-            disambiguations: [
+            disambiguations?:
                 ...: Str
-            ]
             guards?: [
                 expression: Str
                 excluded?: [Str]
-                when: "after" | "before"
+                when?: "after" | "before"
             ]
     relations?: [
         from: Str
@@ -25,12 +24,9 @@ Configuration:
         field: Str
         query: MongoDbQuery
     ]
+    jwt?:
+        secret: Str
+        algorithms: ["H256"]
 
-Path: Str
-MongoDbQuery:
-    ...:
-        $in?: [Any]
-        $eq?: Any
-        ...
-    ...
+MongoDbQuery: Any
 Url: Str

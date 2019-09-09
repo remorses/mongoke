@@ -16,9 +16,9 @@
                     "title": "db_url",
                     "description": ""
                 },
-                "root_dir_name": {
-                    "$ref": "#/definitions/Path",
-                    "title": "root_dir_name",
+                "root_dir_path": {
+                    "type": "string",
+                    "title": "root_dir_path",
                     "description": ""
                 },
                 "skema": {
@@ -36,7 +36,87 @@
                     "description": "",
                     "type": "object",
                     "required": [],
-                    "properties": {}
+                    "properties": {},
+                    "additionalProperties": {
+                        "description": "",
+                        "type": "object",
+                        "required": [
+                            "collection"
+                        ],
+                        "properties": {
+                            "collection": {
+                                "type": "string",
+                                "title": "collection",
+                                "description": ""
+                            },
+                            "exposed": {
+                                "type": "boolean",
+                                "title": "exposed",
+                                "description": ""
+                            },
+                            "pipeline": {
+                                "type": "array",
+                                "title": "pipeline",
+                                "items": {
+                                    "title": "pipeline",
+                                    "description": ""
+                                },
+                                "minItems": 0
+                            },
+                            "disambiguations": {
+                                "title": "disambiguations",
+                                "description": "",
+                                "type": "object",
+                                "required": [],
+                                "properties": {},
+                                "additionalProperties": {
+                                    "type": "string",
+                                    "description": ""
+                                }
+                            },
+                            "guards": {
+                                "type": "array",
+                                "title": "guards",
+                                "items": {
+                                    "title": "guards",
+                                    "description": "",
+                                    "type": "object",
+                                    "required": [
+                                        "expression"
+                                    ],
+                                    "properties": {
+                                        "expression": {
+                                            "type": "string",
+                                            "title": "expression",
+                                            "description": ""
+                                        },
+                                        "excluded": {
+                                            "type": "array",
+                                            "title": "excluded",
+                                            "items": {
+                                                "type": "string",
+                                                "title": "excluded",
+                                                "description": ""
+                                            },
+                                            "minItems": 0
+                                        },
+                                        "when": {
+                                            "enum": [
+                                                "after",
+                                                "before"
+                                            ],
+                                            "type": "string",
+                                            "title": "when",
+                                            "description": ""
+                                        }
+                                    },
+                                    "additionalProperties": false
+                                },
+                                "minItems": 0
+                            }
+                        },
+                        "additionalProperties": false
+                    }
                 },
                 "relations": {
                     "type": "array",
@@ -82,23 +162,47 @@
                                 "title": "query",
                                 "description": ""
                             }
-                        }
+                        },
+                        "additionalProperties": false
                     },
                     "minItems": 0
+                },
+                "jwt": {
+                    "title": "jwt",
+                    "description": "",
+                    "type": "object",
+                    "required": [
+                        "secret",
+                        "algorithms"
+                    ],
+                    "properties": {
+                        "secret": {
+                            "type": "string",
+                            "title": "secret",
+                            "description": ""
+                        },
+                        "algorithms": {
+                            "type": "array",
+                            "title": "algorithms",
+                            "items": {
+                                "enum": [
+                                    "H256"
+                                ],
+                                "type": "string",
+                                "title": "algorithms",
+                                "description": ""
+                            },
+                            "minItems": 0
+                        }
+                    },
+                    "additionalProperties": false
                 }
-            }
-        },
-        "Path": {
-            "type": "string",
-            "title": "Path",
-            "description": ""
+            },
+            "additionalProperties": false
         },
         "MongoDbQuery": {
             "title": "MongoDbQuery",
-            "description": "",
-            "type": "object",
-            "required": [],
-            "properties": {}
+            "description": ""
         },
         "Url": {
             "type": "string",
