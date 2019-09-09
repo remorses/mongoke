@@ -2,10 +2,11 @@ engine = '''
 from tartiflette import Engine
 from typing import *
 from .generated.logger import logger
+from tartiflette.types.exceptions.tartiflette import TartifletteError
 import traceback
 
 async def my_error_coercer(
-    exception: Exception, error: Dict[str, Any]
+    exception: TartifletteError, error: Dict[str, Any]
 ) -> Dict[str, Any]:
 
     ex = exception.original_error

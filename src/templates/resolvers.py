@@ -91,7 +91,7 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
 # collection, resolver_path, guard_expression_before, guard_expression_after, disambiguations
 many_items_resolvers = '''
 from tartiflette import Resolver
-from .support import strip_nones, connection_resolver, zip_pluck, select_keys, get_pagination, get_cursor_coercer
+from .support import strip_nones, connection_resolver, zip_pluck, select_keys, get_pagination
 from operator import setitem
 from funcy import omit
 
@@ -150,7 +150,7 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
 # TODO add pipeline for making an aggregate
 many_relations_resolver = '''
 from tartiflette import Resolver
-from .support import strip_nones, connection_resolver, zip_pluck, select_keys, get_pagination, get_cursor_coercer
+from .support import strip_nones, connection_resolver, zip_pluck, select_keys, get_pagination
 from operator import setitem
 from funcy import omit
 
@@ -219,9 +219,6 @@ OUTPUT_COERCERS = {
     ${{'**{scalar.name: scalar._implementation.coerce_output for scalar in scalar_classes},' }}
 }
 
-def get_cursor_coercer(info, scalar_name,):
-    return COERCERS[scalar_name]
-
 def zip_pluck(d, *keys):
     return zip(*[pluck(k, d) for k in keys])
 
@@ -270,9 +267,10 @@ async def connection_resolver(
     if first and last:
         raise Exception('no sense using first and last together')
 
+    args: dict = dict()
 
     if after != None and before != None:
-        args = dict(
+        args.update(dict(
             match={
                 **where,
                 cursorField: {
@@ -280,25 +278,25 @@ async def connection_resolver(
                     lt: before
                 },
             },
-        )
+        ))
     elif after != None:
-        args = dict(
+        args.update(dict(
             match={
                 **where,
                 cursorField: {
                     gt: after,
                 },
             },
-        )
+        ))
     elif before != None:
-        args = dict(
+        args.update(dict(
             match={
                 **where,
                 cursorField: {
                     lt: before
                 },
             },
-        )
+        ))
     else:
         args = dict(match=where, )
     if pipeline:

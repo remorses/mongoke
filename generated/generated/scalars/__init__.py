@@ -2,6 +2,9 @@
 from tartiflette import Scalar
 from bson import ObjectId
 from typing import Union
+from tartiflette.language.ast.base import Node
+from tartiflette.constants import UNDEFINED_VALUE
+
 
 JsonScalar = Scalar("Json")
 @JsonScalar

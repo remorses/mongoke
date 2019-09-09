@@ -1,12 +1,11 @@
 import asyncio
 import mongodb_streams
 import pytest
+from aiohttp.test_utils import TestClient, TestServer
 from generated.__main__ import build
 from unittest.mock import _Call, call
 from asynctest import mock
 from prtty import pretty
-
-from aiohttp.test_utils import TestClient, TestServer
 
 _ = mock.ANY
 

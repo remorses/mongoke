@@ -1,6 +1,6 @@
 
 from tartiflette import Resolver
-from .support import strip_nones, connection_resolver, zip_pluck, select_keys, get_pagination, get_cursor_coercer
+from .support import strip_nones, connection_resolver, zip_pluck, select_keys, get_pagination
 from operator import setitem
 from funcy import omit
 
