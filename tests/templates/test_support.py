@@ -1,7 +1,7 @@
 
 
 
-from generator.templates.support import join_yields, repr_eval_dict
+from src.templates.support import join_yields, repr_eval_dict
 
 
 

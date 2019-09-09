@@ -1,6 +1,7 @@
  
 from tartiflette import Resolver
-from .support import strip_nones, zip_pluck, find_one, find
+from .support import strip_nones, zip_pluck
+import mongodb_streams
 from operator import setitem
 
 pipeline: list = []
@@ -12,7 +13,7 @@ async def resolve_bot_user(parent, args, ctx, info):
     }
     
     collection = ctx['db']['campaigns']
-    x = await find_one(collection, where, pipeline=pipeline)
+    x = await mongodb_streams.find_one(collection, where, pipeline=pipeline)
     
     
     return x

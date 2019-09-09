@@ -9,13 +9,13 @@
             "name": "Python: Modulo",
             "type": "python",
             "request": "launch",
-            "module": "generator"
+            "module": "src"
         },
         {
             "name": "Python: Generated",
             "type": "python",
             "request": "launch",
-            "module": "src",
+            "module": "generated",
             "justMyCode": false
         },
     ]

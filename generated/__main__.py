@@ -1,4 +1,4 @@
-main = '''
+
 import os
 import aiohttp_cors
 import urllib.parse
@@ -8,18 +8,17 @@ from tartiflette_aiohttp import register_graphql_handlers
 import asyncio
 
 from .engine import CustomEngine
-${{'\\n'.join([f'import {root_dir_name}.generated.resolvers.{name}' for name in resolver_names])}}
-import ${{root_dir_name}}.generated.scalars
-from ${{root_dir_name}}.generated.middleware import jwt_middleware
+import generated.generated.resolvers.bot
+import generated.generated.resolvers.bots
+import generated.generated.resolvers.campaign
+import generated.generated.resolvers.campaigns
+import generated.generated.scalars
+from generated.generated.middleware import jwt_middleware
 
 here = os.path.dirname(os.path.abspath(__file__))
 
-DB_URL = "${{db_url}}" or None
-
-def build():
+def build(db):
     app = web.Application(middlewares=[jwt_middleware])
-    db = AsyncIOMotorClient(DB_URL)
-    db: AsyncIOMotorClient = db.get_database()
     app.db = db
     context = {
         'db': db,
@@ -50,7 +49,8 @@ def build():
     return app
 
 if __name__ == '__main__':
-    web.run_app(build())
+    DB_URL = "mongodb://localhost:27017/playdb" or None
+    db: AsyncIOMotorClient = AsyncIOMotorClient(DB_URL).db.get_database()
+    web.run_app(build(db))
 
 
-'''

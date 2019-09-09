@@ -65,7 +65,8 @@ from ..logger import logger
 # collection, resolver_path, guard_expression_before, guard_expression_after, disambiguations
 single_item_resolver = '''
 from tartiflette import Resolver
-from .support import strip_nones, zip_pluck, find_one, find
+from .support import strip_nones, zip_pluck
+import mongodb_streams
 from operator import setitem
 from funcy import omit
 
@@ -79,7 +80,7 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
     fields = []
     ${{repr_guards_checks(guards_before, '    ')}}
     collection = ctx['db']['${{collection}}']
-    x = await find_one(collection, where, pipeline=pipeline)
+    x = await mongodb_streams.find_one(collection, where, pipeline=pipeline)
     ${{repr_guards_checks(guards_after, '    ')}}
     ${{repr_disambiguations(disambiguations, '    ')}}
     if fields:
@@ -125,7 +126,8 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
 # TODO add pipeline for making an aggregate
 single_relation_resolver = ''' 
 from tartiflette import Resolver
-from .support import strip_nones, zip_pluck, find_one, find
+from .support import strip_nones, zip_pluck
+import mongodb_streams
 from operator import setitem
 
 pipeline: list = ${{repr_eval_dict(pipeline,)}}
@@ -135,7 +137,7 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
     where = ${{repr_eval_dict(where_filter, '    ')}}
     ${{repr_guards_checks(guards_before, '    ')}}
     collection = ctx['db']['${{collection}}']
-    x = await find_one(collection, where, pipeline=pipeline)
+    x = await mongodb_streams.find_one(collection, where, pipeline=pipeline)
     ${{repr_guards_checks(guards_after, '    ')}}
     ${{repr_disambiguations(disambiguations, '    ')}}
     return x
@@ -180,7 +182,7 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
 resolvers_support = '''
 import collections
 from motor.motor_asyncio import AsyncIOMotorDatabase, AsyncIOMotorCollection
-from mongodb_streams import find, find_one
+import mongodb_streams
 from tartiflette import Resolver
 import pymongo
 from pymongo import ASCENDING, DESCENDING
@@ -280,7 +282,7 @@ async def connection_resolver(
         toSkip = await collection.count_documents(where) - (last + 1)
         args.update(dict(limit=max(toSkip, 0)))
 
-    nodes = await find(collection, **args)
+    nodes = await mongodb_streams.find(collection, **args)
 
     hasNext = None
     hasPrevious = None
