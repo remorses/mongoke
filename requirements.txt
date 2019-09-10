@@ -8,3 +8,8 @@ tartiflette-aiohttp
 aiohttp-cors
 motor
 mongodb_streams
+
+# tests 
+prtty
+asynctest
+pytest-asyncio

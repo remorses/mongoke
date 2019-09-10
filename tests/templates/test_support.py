@@ -8,7 +8,7 @@ from src.templates.support import join_yields, repr_eval_dict
 def test_join_yields():
     @join_yields(', ')
     def op():
-        yield 1
+        yield '1'
         yield '2'
         yield '3'
     x = op()

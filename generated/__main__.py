@@ -29,7 +29,7 @@ def build(db):
     }
     app = register_graphql_handlers(
         app=app,
-        engine=CustomEngine(),
+        # engine=CustomEngine(),
         engine_sdl=f'{here}/generated/sdl/',
         executor_context=context,
         executor_http_endpoint='/',
@@ -51,7 +51,7 @@ def build(db):
     return app
 
 if __name__ == '__main__':
-    DB_URL = "mongodb://localhost:27017/non_existent" or None
+    DB_URL = "mongodb://localhost:27017/playdb" or None
     db: AsyncIOMotorClient = AsyncIOMotorClient(DB_URL).get_database()
     web.run_app(build(db))
 
