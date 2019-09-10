@@ -70,18 +70,19 @@ types:
     EventWindow:
         exposed: False
         collection: events
-        pipeline: []
-            # -   $project:
-            #         _id: 1
-            #         value: $likes
-            #         timestamp: $_id
-            # -   $group:
-            #         _id: $timestamp
-            #             # $subtract:
-            #             #     - $timestamp
-            #             #     - $mod: [$timestamp, 60000] # minute 60 * 1000
-            #         value:
-            #             $sum: $likes
+        pipeline:
+            -   $group:
+                    _id:
+                        $subtract:
+                            - $timestamp
+                            - $mod: [$timestamp, 10] # minute 60 * 1000
+                    value: 
+                        $sum:
+                            $value
+            
+            -   $project:
+                    timestamp: $_id
+                    value: 1
 
 relations:
     -   from: Bot

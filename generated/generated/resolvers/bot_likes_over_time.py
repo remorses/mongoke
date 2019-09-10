@@ -18,7 +18,32 @@ map_fields_to_types = {
         "timestamp": "Float"
     }
 
-pipeline: list = []
+pipeline: list = [
+    {
+        "$group": {
+            "_id": {
+                "$subtract": [
+                    "$timestamp",
+                    {
+                        "$mod": [
+                            "$timestamp",
+                            10
+                        ]
+                    }
+                ]
+            },
+            "value": {
+                "$sum": "$value"
+            }
+        }
+    },
+    {
+        "$project": {
+            "timestamp": "$_id",
+            "value": 1
+        }
+    }
+]
 
 @Resolver('Bot.likes_over_time')
 async def resolve_bot_likes_over_time(parent, args, ctx, info):
