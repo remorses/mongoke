@@ -163,7 +163,7 @@ def generate_from_config(config):
         else:
             raise Exception(f'fromType {name} not found in config')
     relations = config.get('relations', [])
-    root_dir_path = config.get('root_dir_path', 'src')
+    root_dir_path = config.get('root_dir_path', 'generated')
     db_url = config.get('db_url', '')
     base = os.path.abspath(root_dir_path)
     skema_schema = get_skema(config)
@@ -295,7 +295,7 @@ def get_relation_filename(relation):
 
 
 arg = sys.argv[-1]
-arg = 'pr_conf.yaml'
+# arg = 'confs/pr_conf.yaml'
 # arg = 'automata_conf.yml'
 config = yaml.safe_load(open(arg).read())
 generate_from_config(config)

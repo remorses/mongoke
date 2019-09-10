@@ -1,0 +1,9 @@
+funcy
+populate
+skema
+
+# generated
+tartiflette-aiohttp
+aiohttp-cors
+motor
+mongodb_streams
