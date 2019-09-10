@@ -51,7 +51,7 @@ def build(db):
     return app
 
 if __name__ == '__main__':
-    DB_URL = "mongodb://localhost:27017/playdb" or None
+    DB_URL = "mongodb://localhost:27017/non_existent" or None
     db: AsyncIOMotorClient = AsyncIOMotorClient(DB_URL).get_database()
     web.run_app(build(db))
 

@@ -1,6 +1,6 @@
 
 
-db_url: mongodb://localhost:27017/non_existent
+db_url: mongodb://mongo:27017/playdb
 root_dir_path: ./generated
 
 jwt:

@@ -1,0 +1,12 @@
+
+version: '3'
+
+services:
+    graphql-server:
+        build: .
+        command: /conf.yml
+        volumes: 
+            - ./confs/testing.yaml:/conf.yml
+    mongo:
+        image: mongo
+

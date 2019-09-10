@@ -1,6 +1,7 @@
 funcy
-populate
+populate==0.0.8
 skema
+requests
 
 # generated
 tartiflette-aiohttp
