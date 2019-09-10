@@ -1,4 +1,5 @@
 Todo:
+- connection nodes must all have an _id field because it is default cursor field
 - unit tests for the connection_resolver
 - integration tests for all the resolver types
 - integration tests for the relations

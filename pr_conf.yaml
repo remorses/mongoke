@@ -33,6 +33,7 @@ skema: |
         bot_id: ObjectId
         type: "like" | "bo"
         likes?: Int
+        timestamp: 0..
     ObjectId: Any # this will be added implictely
     ID: Any
 # skema_url: https://gist.githubusercontent.com/remorses/4f591ebbd772545147ba1b3a334b631e/raw/social-automata-domain.skema
@@ -69,28 +70,25 @@ types:
     EventWindow:
         exposed: False
         collection: events
-        pipeline:
-            -   $group:
-                    _id:
-                        $substartct:
-                            - $timestamp
-                            - $mod: [$timestamp, 60000] # minute 60 * 1000
-                    value:
-                        $sum: $likes
-            -   $project:
-                    _id: 0
-                    value: 1
-                    timestamp: $_id
+        pipeline: []
+            # -   $project:
+            #         _id: 1
+            #         value: $likes
+            #         timestamp: $_id
+            # -   $group:
+            #         _id: $timestamp
+            #             # $subtract:
+            #             #     - $timestamp
+            #             #     - $mod: [$timestamp, 60000] # minute 60 * 1000
+            #         value:
+            #             $sum: $likes
 
 relations:
     -   from: Bot
         to: EventWindow
         relation_type: to_many
         field: likes_over_time
-        query:
-            bot_id:
-                $in: ${{ parent.get('_id') }}
-            type: like
+        query: {}
     -   from: Bot
         to: User
         field: user

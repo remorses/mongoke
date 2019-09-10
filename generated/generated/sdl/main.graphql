@@ -3,6 +3,7 @@ type Event {
     bot_id: ObjectId
     type: Type
     likes: Int
+    timestamp: Float
 }
 
 type EventWindow {

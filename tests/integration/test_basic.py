@@ -52,7 +52,38 @@ async def test_single_resolver(query):
                 }
             }
         }
-        # m.assert_called_with(_, where={'username': {'$eq': 'ciao'}}, pipeline=_)
+
+@pytest.mark.asyncio
+async def test_many_relation(query):
+    with mock.patch('mongodb_streams.find_one', ) as m:
+        m.side_effect = [
+            [dict(username='hello'),],
+            [dict(value=89, timestamp=34)]
+        ]
+        r = await query('''
+            {
+                bots(
+                    last: 50,
+                ) {
+                    nodes {
+                        username
+                        _id
+                        likes_over_time(
+                            first: 20
+                            cursorField: value
+                        ) {
+                            nodes {
+                                value
+                                timestamp
+                            }
+                        }
+                    }
+                }
+            }
+        ''')
+        pretty(r)
+        pretty(m.call_args_list)
+        
 
 
 @pytest.mark.asyncio

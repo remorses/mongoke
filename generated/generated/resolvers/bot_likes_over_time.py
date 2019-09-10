@@ -18,42 +18,11 @@ map_fields_to_types = {
         "timestamp": "Float"
     }
 
-pipeline: list = [
-    {
-        "$group": {
-            "_id": {
-                "$substartct": [
-                    "$timestamp",
-                    {
-                        "$mod": [
-                            "$timestamp",
-                            60000
-                        ]
-                    }
-                ]
-            },
-            "value": {
-                "$sum": "$likes"
-            }
-        }
-    },
-    {
-        "$project": {
-            "_id": 0,
-            "value": 1,
-            "timestamp": "$_id"
-        }
-    }
-]
+pipeline: list = []
 
 @Resolver('Bot.likes_over_time')
 async def resolve_bot_likes_over_time(parent, args, ctx, info):
-    relation_where = {
-        "bot_id": {
-            "$in":  parent.get('_id') 
-        },
-        "type": "like"
-    }
+    relation_where = {}
     where = {**args.get('where', {}), **relation_where}
     where = strip_nones(where)
     cursorField = args.get('cursorField', '_id')

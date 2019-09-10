@@ -305,7 +305,7 @@ async def connection_resolver(
     if first:
         args.update(dict(limit=first + 1, ))
     elif last:
-        count = await collection.count_documents(where)
+        count = await mongodb_streams.count_documents(collection, where, pipeline=pipeline)
         toSkip = count - (last + 1)
         args.update(dict(skip=max(toSkip, 0)))
 
