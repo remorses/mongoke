@@ -270,7 +270,7 @@ def generate_from_config(config):
                 # type_name=typename,
                 where_filter=relation['query'],
                 pipeline=toTypeConfig.get('pipeline', []),
-                collection=collection,
+                collection=toTypeConfig['collection'],
                 resolver_path=fromType + '.' + relationName,
                 # disambiguations=disambiguations,
                 # guards_before=[g for g in guards if g['when'] == 'before'],

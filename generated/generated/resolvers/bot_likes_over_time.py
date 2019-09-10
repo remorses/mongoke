@@ -32,7 +32,7 @@ async def resolve_bot_likes_over_time(parent, args, ctx, info):
     
     pagination = get_pagination(args,)
     data = await connection_resolver(
-        collection=ctx['db']['campaigns'], 
+        collection=ctx['db']['events'], 
         where=where,
         cursorField=cursorField,
         pagination=pagination,
