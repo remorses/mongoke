@@ -1,5 +1,6 @@
 import json
 import os.path
+import requests
 from funcy import pluck, count, merge
 
 def touch(filename, data):
