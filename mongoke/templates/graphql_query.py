@@ -4,7 +4,7 @@ from populate import populate_string
 general_graphql = '''
 
 type Query {
-    mongoku_version: String
+    mongoke_version: String
 }
 
 enum Direction {

@@ -1,7 +1,7 @@
 
 
 type Query {
-    mongoku_version: String
+    mongoke_version: String
 }
 
 enum Direction {

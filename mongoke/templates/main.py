@@ -24,7 +24,7 @@ def build(db):
     }
     app = register_graphql_handlers(
         app=app,
-        engine=CustomEngine(),
+        # engine=CustomEngine(),
         engine_sdl=f'{here}/generated/sdl/',
         executor_context=context,
         executor_http_endpoint='/',
