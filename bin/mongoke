@@ -1,0 +1,12 @@
+#! /usr/bin/env python
+import fire
+from mongoke import generate_from_config
+import yaml
+
+
+
+def main(file, start=False):
+    config = yaml.safe_load(open(file).read())
+    generate_from_config(config, start=start)
+
+fire.Fire(main)

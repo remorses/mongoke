@@ -2,9 +2,10 @@ funcy
 populate==0.0.8
 skema
 requests
+fire
 
 # generated
-tartiflette-aiohttp
+# tartiflette-aiohttp
 aiohttp-cors
 motor
 mongodb_streams
