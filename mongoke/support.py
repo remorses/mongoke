@@ -3,11 +3,13 @@ import os.path
 import requests
 from funcy import pluck, count, merge
 
-
-def touch(filename, data):
-    os.makedirs(os.path.dirname(filename), exist_ok=True)
-    with open(filename, "w") as f:
-        f.write(data)
+def make_touch(base):
+    def touch(filename, data):
+        filename = f'{base}/{filename}'
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        with open(filename, "w") as f:
+            f.write(data)
+    return touch
 
 
 pretty = lambda x: print(json.dumps(x, indent=4, default=str))
