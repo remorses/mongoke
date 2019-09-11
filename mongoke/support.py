@@ -32,12 +32,3 @@ def get_skema(config):
             skema += buf.decode()
         return skema
 
-def get_type_properties(json_schema):
-    if any([x in json_schema for x in ('anyOf', 'allOf', 'oneOf')]):
-        subsets = json_schema.get('anyOf', [])
-        subsets = subsets or json_schema.get('allOf', [])
-        subsets = subsets or json_schema.get('oneOf', [])
-        type_properties = merge(*[x.get('properties',) for x in subsets])
-    else:
-        type_properties = json_schema.get('properties', {})
-    return type_properties
