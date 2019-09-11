@@ -186,7 +186,7 @@ def generate_from_config(config, start=False):
     touch(f'{base}/generated/resolvers/__init__.py', resolvers_init)
     touch(f'{base}/generated/resolvers/support.py', populate_string(resolvers_support,
                                                                     dict(scalars=[x for x in scalars if x not in SCALARS_ALREADY_IMPLEMENTED])))
-    touch(f'{base}/generated/scalars/__init__.py',
+    touch(f'{base}/generated/scalars.py',
           populate_string(scalars_implementations, dict(scalars=[x for x in scalars if x not in SCALARS_ALREADY_IMPLEMENTED])))
     touch(f'{base}/generated/sdl/general.graphql',
           populate_string(general_graphql, dict(scalars=scalars)))
