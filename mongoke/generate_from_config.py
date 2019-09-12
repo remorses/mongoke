@@ -112,7 +112,7 @@ def generate_from_config(config, start=False):
         populate_string(general_graphql, dict(scalars=scalars)),
     )
     touch(f"generated/sdl/main.graphql", main_graphql_schema)
-
+    implemented_types = []
     for typename, type_config in types.items():
         type_config = type_config or {}
         if not type_config.get("exposed", True):
@@ -129,6 +129,7 @@ def generate_from_config(config, start=False):
             pipeline=type_config.get("pipeline", []),
             disambiguations=disambiguations,
         )
+        implemented_types += [typename]
 
     for relation in relations:
         toType = relation["to"]
@@ -142,9 +143,8 @@ def generate_from_config(config, start=False):
             collection=types[toType].get("collection", []),
             relationName=relation.get("field"),
             relation_type=relation.get("relation_type", "to_one"),
-            implemented_types=[
-                name for name, x in types.items() if x.get("exposed", True)
-            ],
+            implemented_types=implemented_types,
             resolver_filename=get_relation_filename(relation),
         )
+        implemented_types += [toType]
 

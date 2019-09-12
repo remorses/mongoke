@@ -22,32 +22,38 @@ pipeline: list = [
     {
         "$group": {
             "_id": {
-                "$subtract": [
+                "$substartct": [
                     "$timestamp",
                     {
                         "$mod": [
                             "$timestamp",
-                            10
+                            60000
                         ]
                     }
                 ]
             },
             "value": {
-                "$sum": "$value"
+                "$sum": "$likes"
             }
         }
     },
     {
         "$project": {
-            "timestamp": "$_id",
-            "value": 1
+            "_id": 0,
+            "value": 1,
+            "timestamp": "$_id"
         }
     }
 ]
 
-@Resolver('Bot.likes_over_time')
-async def resolve_bot_likes_over_time(parent, args, ctx, info):
-    relation_where = {}
+@Resolver('User.likes_over_time')
+async def resolve_user_likes_over_time(parent, args, ctx, info):
+    relation_where = {
+        "bot_id": {
+            "$in":  parent['_id'] 
+        },
+        "type": "like"
+    }
     where = {**args.get('where', {}), **relation_where}
     where = strip_nones(where)
     cursorField = args.get('cursorField', '_id')

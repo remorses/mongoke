@@ -6,13 +6,15 @@ from operator import setitem
 
 pipeline: list = []
 
-@Resolver('Bot.user')
-async def resolve_bot_user(parent, args, ctx, info):
+@Resolver('User.father')
+async def resolve_user_father(parent, args, ctx, info):
     where = {
-        "_id":  parent.get('_id') 
+        "_id": {
+            "$in":  parent['father_id'] 
+        }
     }
     
-    collection = ctx['db']['users']
+    collection = ctx['db']['humans']
     x = await mongodb_streams.find_one(collection, match=where, pipeline=pipeline)
     
     

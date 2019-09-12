@@ -14,30 +14,51 @@ def filter_nodes_by_guard(nodes, fields):
 
 
 map_fields_to_types = {
-        "_id": "ObjectId",
-        "user_id": "ObjectId",
-        "username": "String"
+        "value": "Float",
+        "timestamp": "Float"
     }
 
 pipeline: list = [
     {
-        "$set": {
-            "user_id": "fucku"
+        "$group": {
+            "_id": {
+                "$substartct": [
+                    "$timestamp",
+                    {
+                        "$mod": [
+                            "$timestamp",
+                            60000
+                        ]
+                    }
+                ]
+            },
+            "value": {
+                "$sum": "$likes"
+            }
+        }
+    },
+    {
+        "$project": {
+            "_id": 0,
+            "value": 1,
+            "timestamp": "$_id"
         }
     }
 ]
 
-@Resolver('Query.bots')
-async def resolve_query_bots(parent, args, ctx, info):
-    where = strip_nones(args.get('where', {}))
+@Resolver('Task.events')
+async def resolve_task_events(parent, args, ctx, info):
+    relation_where = {}
+    where = {**args.get('where', {}), **relation_where}
+    where = strip_nones(where)
     cursorField = args.get('cursorField', '_id')
     headers = ctx['req'].headers
-    jwt = ctx['req'].jwt_payload
+    jwt = ctx['req'].jwt_payload # TODO i need to decode jwt_payload
     fields = []
     
     pagination = get_pagination(args,)
     data = await connection_resolver(
-        collection=ctx['db']['bots'], 
+        collection=ctx['db']['events'], 
         where=where,
         cursorField=cursorField,
         pagination=pagination,
@@ -47,4 +68,3 @@ async def resolve_query_bots(parent, args, ctx, info):
     data['nodes'] = list(filter_nodes_by_guard(data['nodes'], fields))
     
     return data
-

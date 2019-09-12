@@ -8,12 +8,11 @@ from tartiflette_aiohttp import register_graphql_handlers
 import asyncio
 
 from .engine import CustomEngine
-import generated.generated.resolvers.bot
-import generated.generated.resolvers.bots
-import generated.generated.resolvers.campaign
-import generated.generated.resolvers.campaigns
-import generated.generated.resolvers.bot_likes_over_time
-import generated.generated.resolvers.bot_user
+import generated.generated.resolvers.human
+import generated.generated.resolvers.humans
+import generated.generated.resolvers.task_events
+import generated.generated.resolvers.user_likes_over_time
+import generated.generated.resolvers.user_father
 import generated.generated.scalars
 from generated.generated.middleware import jwt_middleware
 
@@ -29,7 +28,7 @@ def build(db):
     }
     app = register_graphql_handlers(
         app=app,
-        engine=CustomEngine(),
+        # engine=CustomEngine(),
         engine_sdl=f'{here}/generated/sdl/',
         executor_context=context,
         executor_http_endpoint='/',
@@ -51,7 +50,7 @@ def build(db):
     return app
 
 if __name__ == '__main__':
-    DB_URL = "mongodb://localhost:27017/playdb" or None
+    DB_URL = "mongodb://localhost:27109/db" or None
     db: AsyncIOMotorClient = AsyncIOMotorClient(DB_URL).get_database()
     web.run_app(build(db))
 
