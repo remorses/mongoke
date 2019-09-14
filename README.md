@@ -4,6 +4,89 @@
   <img width="300" src="https://github.com/remorses/mongoke/blob/master/.github/logo.png?raw=true">
 </p>
 
+## Instantly get a graphql server to serve your MongoDb database
+
+## Usage
+Define yoor database schma with a simple configuration
+```yaml
+# example.yml
+
+db_url: mongodb://mongo:27017/db
+
+skema: |
+    Article:
+        content: Str
+        autorId: ObjectId
+        createdAt: DateTime
+    User:
+        _id: ObjectId
+        name: Str
+        surname: Str
+        aricleIds: [ObjectId]
+    ObjectId: Any
+    DateTime: Any
+
+types:
+    User:
+        collection: users
+    Article:
+        collection: articles
+
+relations:
+    -   from: User
+        to: Article
+        relation_type: to_many
+        field: articles
+        query:
+            autorId: ${{ parent['_id'] }}
+```
+
+Then generate the server code and serve it with the mongoke docker image
+```
+version: '3'
+
+services:
+    server:
+        image: mongoke/mongoke:latest
+        command: /conf.yml
+        volumes: 
+            - ./example.yml:/conf.yml
+    mongo:
+        image: mongo
+        logging: 
+            driver: none
+```
+
+Then you can query the database from your graphql app as you like
+
+```graphql
+
+{
+  author(where: {name: "Joseph"}) {
+    name
+    articles {
+      nodes {
+        content
+      }
+    }
+  }
+}
+```
+
+```graphql
+
+{
+  articles(first: 5, after: "22/09/1999", cursorField: createdAt) {
+    nodes {
+      content
+    }
+    pageInfo {
+      endCursor
+    }
+  }
+}
+```
+
 ## Todo:
 - connection nodes must all have an _id field because it is default cursor field
 - unit tests for the connection_resolver
