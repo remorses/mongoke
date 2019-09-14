@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="460" height="300" src="https://raw.githubusercontent.com/remorses/mongoke/master/.github/logo.png">
+  <img width="460" height="300" src="https://github.com/remorses/mongoke/blob/master/.github/logo.png?raw=true">
 </p>
 
 Todo:
