@@ -5,11 +5,13 @@ requests
 fire
 
 # generated
+coloredlogs
 PyJWT
 tartiflette-aiohttp>=1.0.0
 tartiflette==1.0.0rc1
-aiohttp-cors
 motor
+tartiflette_scalars
+aiohttp-cors
 mongodb_streams
 
 # tests 
