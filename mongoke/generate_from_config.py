@@ -110,8 +110,9 @@ def generate_from_config(config, start=False):
     touch(
         f"generated/sdl/general.graphql",
         populate_string(general_graphql, dict(scalars=scalars)),
+        index=True
     )
-    touch(f"generated/sdl/main.graphql", main_graphql_schema)
+    touch(f"generated/sdl/main.graphql", main_graphql_schema, index=True)
     implemented_types = []
     for typename, type_config in types.items():
         type_config = type_config or {}

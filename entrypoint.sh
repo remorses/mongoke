@@ -1,2 +1,3 @@
 #!/bin/sh
-python -m src $1 && python -m generated
+pwd
+python -m mongoke $1 && python -m generated

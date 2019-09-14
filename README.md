@@ -4,7 +4,7 @@
   <img width="300" src="https://github.com/remorses/mongoke/blob/master/.github/logo.png?raw=true">
 </p>
 
-Todo:
+## Todo:
 - connection nodes must all have an _id field because it is default cursor field
 - unit tests for the connection_resolver
 - integration tests for all the resolver types

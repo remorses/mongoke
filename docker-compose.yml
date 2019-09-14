@@ -4,9 +4,13 @@ version: '3'
 services:
     graphql-server:
         build: .
+        # entrypoint: sh -c 'pip install tartiflette==1.0.0rc1 && python -m mongoke /conf.yml && ls generated/generated/sdl/*'
+        # entrypoint: pip show tartiflette
         command: /conf.yml
         volumes: 
             - ./confs/testing.yaml:/conf.yml
     mongo:
         image: mongo
+        logging: 
+            driver: none
 

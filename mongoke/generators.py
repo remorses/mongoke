@@ -90,7 +90,7 @@ def generate_type_boilerplate(
     query_subset = generate_type_sdl(
         skema_schema, guards=guards, typename=typename, query_name=query_name
     )
-    touch(f"generated/sdl/{query_name}.graphql", query_subset)
+    touch(f"generated/sdl/{query_name}.graphql", query_subset, index=True)
     single_resolver, many_resolver = generate_resolvers(
         collection=collection,
         disambiguations=disambiguations,
@@ -133,7 +133,7 @@ def generate_relation_boilerplate(
                 fields=get_scalar_fields(skema_schema, toType),
             ),
         )
-    touch(f"generated/sdl/{fromType.lower()}_{relationName}.graphql", relation_sdl)
+    touch(f"generated/sdl/{fromType.lower()}_{relationName}.graphql", relation_sdl, index=True)
     relation_template = (
         single_relation_resolver
         if relation_type == "to_one"

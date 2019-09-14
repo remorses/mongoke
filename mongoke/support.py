@@ -3,8 +3,15 @@ import os.path
 import requests
 from funcy import pluck, count, merge
 
+i = 0
 def make_touch(base):
-    def touch(filename, data):
+    def touch(filename, data, index=False):
+        global i
+        if index:
+            parts = filename.split('/')
+            parts = parts[:-1] + [f'{i}_' + parts[-1]]
+            filename = '/'.join(parts)
+            i += 1
         filename = f'{base}/{filename}'
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         with open(filename, "w") as f:

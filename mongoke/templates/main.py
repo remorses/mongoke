@@ -13,6 +13,10 @@ import ${{root_dir_name}}.generated.scalars
 from ${{root_dir_name}}.generated.middleware import jwt_middleware
 
 here = os.path.dirname(os.path.abspath(__file__))
+sdl_dir = f'{here}/generated/sdl/'
+sdl_files = sorted(os.listdir(sdl_dir))
+print(sdl_files)
+sdl_files = [sdl_dir + f for f in sdl_files]
 
 def build(db):
     app = web.Application(middlewares=[jwt_middleware])
@@ -25,7 +29,7 @@ def build(db):
     app = register_graphql_handlers(
         app=app,
         # engine=CustomEngine(),
-        engine_sdl=f'{here}/generated/sdl/',
+        engine_sdl=sdl_files,
         executor_context=context,
         executor_http_endpoint='/',
         executor_http_methods=['POST', 'GET',],
