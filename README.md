@@ -1,3 +1,7 @@
+<p align="center">
+  <img width="460" height="300" src="https://raw.githubusercontent.com/remorses/mongoke/master/.github/logo.png">
+</p>
+
 Todo:
 - connection nodes must all have an _id field because it is default cursor field
 - unit tests for the connection_resolver
