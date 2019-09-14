@@ -4,7 +4,11 @@
   <img width="300" src="https://github.com/remorses/mongoke/blob/master/.github/logo.png?raw=true">
 </p>
 
-## Instantly get a graphql server to serve your MongoDb database
+## Instantly serve your MongoDb database via graphql, 
+supports 
+- authorization of the fields based on jwt, 
+- relations between collections,
+- mongodb aggregated pipelines
 
 ## Usage
 Define yoor database schma with a simple configuration
