@@ -12,6 +12,9 @@ ${{'\\n'.join([f'import {root_dir_name}.generated.resolvers.{name}' for name in 
 import ${{root_dir_name}}.generated.scalars
 from ${{root_dir_name}}.generated.middleware import jwt_middleware
 
+DB_URL = "${{db_url}}" or None
+PORT = 80
+
 here = os.path.dirname(os.path.abspath(__file__))
 sdl_dir = f'{here}/generated/sdl/'
 sdl_files = sorted(os.listdir(sdl_dir))
@@ -50,9 +53,8 @@ def build(db):
     return app
 
 if __name__ == '__main__':
-    DB_URL = "${{db_url}}" or None
     db: AsyncIOMotorClient = AsyncIOMotorClient(DB_URL).get_database()
-    web.run_app(build(db))
+    web.run_app(build(db), port=PORT)
 
 
 '''
