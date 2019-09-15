@@ -5,6 +5,7 @@ Configuration:
     root_dir_path?: Str
     skema?: Str
     skema_url?: Url
+    skema_path?: Str # relative to the configuration dir
     types:
         ...:
             collection: Str
