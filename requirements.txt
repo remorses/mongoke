@@ -1,8 +1,9 @@
 funcy
 populate==0.0.8
-skema
+skema>=0.0.44
 requests
 fire
+
 
 # generated
 coloredlogs
@@ -10,7 +11,7 @@ PyJWT
 tartiflette-aiohttp>=1.0.0
 tartiflette==1.0.0rc2
 motor
-tartiflette_scalars
+tartiflette_scalars>=0.0.3
 aiohttp-cors
 mongodb_streams
 
