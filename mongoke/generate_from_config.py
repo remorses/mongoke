@@ -62,14 +62,14 @@ def make_disambiguations_objects(disambiguations):
         yield {"type_name": type, "expression": expr.strip()}
 
 
-def generate_from_config(config, start=False):
+def generate_from_config(config, config_path):
     types = config.get("types", {})
 
     relations = config.get("relations", [])
     root_dir_path = config.get("root_dir_path", "generated")
     db_url = config.get("db_url", "")
     touch = make_touch(base=os.path.abspath(root_dir_path))
-    skema_schema = get_skema(config)
+    skema_schema = get_skema(config, here=config_path)
 
     # TODO add other scalars from the skema
     scalars = [*SCALAR_TYPES, *get_skema_aliases(skema_schema)]

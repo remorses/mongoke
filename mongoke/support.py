@@ -34,9 +34,10 @@ def zip_pluck(d, keys, enumerate=False):
     return zip(*args)
 
 
-def get_skema(config):
+def get_skema(config, here='./'):
     if "skema_path" in config:
-        with open(config["skema_path"]) as f:
+        path = here + config["skema_path"]
+        with open(path) as f:
             return f.read()
     if config.get("skema"):
         return config.get("skema")

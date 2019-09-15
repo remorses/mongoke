@@ -1,8 +1,14 @@
+import os.path
+import fire
 from .generate_from_config import generate_from_config
 import sys
 import yaml
 
+def main(path):
+    config = yaml.safe_load(open(path).read())
+    config_path = os.path.abspath(os.path.dirname(path))
+    print(config_path)
+    generate_from_config(config, config_path + '/')
+
 if __name__ == "__main__":
-    arg = sys.argv[-1]
-    config = yaml.safe_load(open(arg).read())
-    generate_from_config(config)
+    fire.Fire(main)

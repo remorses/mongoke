@@ -7,37 +7,9 @@ jwt:
     secret: ''
     algorithms: [H256]
 
-skema: |
-    Bot:
-        _id: ObjectId
-        user_id: ObjectId
-        username: Str
-    User:
-        bot_id: ObjectId
-        name: Str
-        surname: Str
-    MessageCampaign:
-        _id: ObjectId
-        bot_id: ObjectId
-        messages: [Str]
-    PostCampaign:
-        _id: ObjectId
-        bot_id: ObjectId
-        posts: [Str]
-    Campaign: MessageCampaign | PostCampaign
-    EventWindow:
-        value: Int
-        timestamp: Int
-    Event:
-        _id: ObjectId
-        bot_id: ObjectId
-        type: "like" | "bo"
-        likes?: Int
-        timestamp: 0..
-    ObjectId: Any # this will be added implictely
-    ID: Any
+# skema: |
 # skema_url: https://gist.githubusercontent.com/remorses/4f591ebbd772545147ba1b3a334b631e/raw/social-automata-domain.skema
-
+skema_path: skema
 
 
 types:
