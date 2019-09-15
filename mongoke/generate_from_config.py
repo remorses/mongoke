@@ -36,6 +36,7 @@ from .generators import generate_relation_boilerplate, generate_type_boilerplate
 
 SCALAR_TYPES = ["String", "Float", "Int", "Boolean"]
 SCALARS_ALREADY_IMPLEMENTED = [
+    "ID",
     "ObjectId",
     "Json",
     "Date",
@@ -73,7 +74,7 @@ def generate_from_config(config, start=False):
     # TODO add other scalars from the skema
     scalars = [*SCALAR_TYPES, *get_skema_aliases(skema_schema)]
     main_graphql_schema = to_graphql(
-        skema_schema, scalar_already_present=SCALARS_ALREADY_IMPLEMENTED
+        skema_schema, hide=SCALARS_ALREADY_IMPLEMENTED
     )
 
     touch(f"__init__.py", "")

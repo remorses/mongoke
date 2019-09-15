@@ -35,7 +35,7 @@ def get_scalar_fields(skema_schema, typename) -> Iterable[Tuple[str, str]]:
             if body.get("title", "") in aliases:
                 scalar_name = body.get("title")
             else:
-                scalar_name = map_json_type_to_grpahql[body.get("type", None).lower()]
+                scalar_name = map_json_type_to_grpahql[body.get("type", '').lower()] # 
             yield (name, scalar_name)
 
 
@@ -55,7 +55,7 @@ map_json_type_to_grpahql = {
     "number": "Float",
     "integer": "Int",
     "boolean": "Boolean",
-    None: "Json",
+    "": "Json",
 }
 
 

@@ -8,7 +8,7 @@ fire
 coloredlogs
 PyJWT
 tartiflette-aiohttp>=1.0.0
-tartiflette==1.0.0rc1
+tartiflette==1.0.0rc2
 motor
 tartiflette_scalars
 aiohttp-cors
