@@ -2,8 +2,6 @@ import skema
 from typing import *
 from funcy import merge, lmap, collecting, omit, remove, lcat
 import yaml
-from skema.to_graphql import to_graphql
-
 
 HIDE_GRAPHQL = "[graphql hide]"
 
@@ -22,6 +20,13 @@ def get_skema_aliases(skema_schema):
     aliases = [x for x in aliases if is_alias(skema_schema, x)]
     return aliases
 
+map_json_type_to_grpahql = {
+    "string": "String",
+    "number": "Float",
+    "integer": "Int",
+    "boolean": "Boolean",
+    "": "Json",
+}
 
 @collecting
 def get_scalar_fields(skema_schema, typename) -> Iterable[Tuple[str, str]]:
@@ -50,13 +55,7 @@ def get_type_properties(json_schema):
     return type_properties
 
 
-map_json_type_to_grpahql = {
-    "string": "String",
-    "number": "Float",
-    "integer": "Int",
-    "boolean": "Boolean",
-    "": "Json",
-}
+
 
 
 def is_scalar(type_body):

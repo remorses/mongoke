@@ -5,7 +5,7 @@ from funcy import post_processing
 import skema
 from motor.motor_asyncio import AsyncIOMotorClient
 from motor.core import Collection
-from src.support import get_skema
+from mongoke.support import get_skema
 custom_resolvers = {
     'ObjectId': lambda: bson.ObjectId()
 }

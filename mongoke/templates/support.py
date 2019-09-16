@@ -53,6 +53,8 @@ EXPR_END = '}}'
 def repr_eval_dict(obj, indentation=''):
     dumped = json.dumps(obj, indent=4)
     # dumped = populate_string(dumped, do_eval=False)
+    dumped = dumped.replace(': false', ': False')
+    dumped = dumped.replace(': true', ': True')
     dumped = dumped.replace('"' + EXPR_START, '').replace(EXPR_END + '"', '')
     dumped = bytes(dumped, 'utf-8').decode('unicode_escape')
     dumped = indent_to(indentation, dumped)
