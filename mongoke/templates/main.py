@@ -5,6 +5,7 @@ import urllib.parse
 from aiohttp import web
 from motor.motor_asyncio import AsyncIOMotorClient
 from tartiflette_aiohttp import register_graphql_handlers
+from tartiflette_plugin_apollo_federation import ApolloFederationPlugin
 import asyncio
 
 from .engine import CustomEngine
@@ -36,7 +37,10 @@ def build(db):
         executor_context=context,
         executor_http_endpoint='/',
         executor_http_methods=['POST', 'GET',],
-        graphiql_enabled=True
+        graphiql_enabled=True,
+        engine_modules=[
+            ApolloFederationPlugin(engine_sdl=sdl_files)
+        ],
     )
     cors = aiohttp_cors.setup(app, defaults={
         "*": aiohttp_cors.ResourceOptions(
