@@ -9,6 +9,7 @@ supports
 - authorization of the fields based on jwt, 
 - relations between collections,
 - mongodb aggregated pipelines
+- apollo federation
 
 ## Usage
 Define yoor database schma with a simple configuration
