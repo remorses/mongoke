@@ -1,7 +1,7 @@
 
 <h1 align="center">mongoke</h1>
 <p align="center">
-  <img width="300" src="https://github.com/remorses/mongoke/blob/master/.github/logo.png?raw=true">
+  <img width="300" src="https://github.com/remorses/mongoke/blob/master/.github/logo.jpg?raw=true">
 </p>
 
 ## Instantly serve your MongoDb database via graphql, 
