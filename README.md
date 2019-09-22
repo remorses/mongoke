@@ -12,7 +12,11 @@ supports
 - apollo federation
 
 ## Usage
-Define yoor database schma with a simple configuration
+Mongoke serve your mongodb database via a declarative, idempotent configuration that describes the shape of the types in the database and their relations.
+To get started first describe the shape of your types inside the database via the [skema](https://github.com/remorses/skema) language, then write a configuration for every type to connect it to the associated collection and add authorization guards.
+Then you can add relations between types, describing what field will lead to the related types and if the relation is of type `to_one` or `to_many`.
+
+Here is an example:
 ```yaml
 # example.yml
 
@@ -93,9 +97,8 @@ Then you can query the database from your graphql app as you like
 ```
 
 ## Todo:
-- publish the docker image (after tartiflette devs fix extend type issue)
-- connection nodes must all have an _id field because it is default cursor field
-- unit tests for the connection_resolver
+- ~~publish the docker image (after tartiflette devs fix extend type issue)~~
+- resolve issue connection nodes must all have an _id field because it is default cursor field
 - integration tests for all the resolver types
 - integration tests for the relations
 - cursor must be obfuscated in connection, (also after and before are string so it is a must)

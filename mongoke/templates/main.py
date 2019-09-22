@@ -32,7 +32,7 @@ def build(db):
     }
     app = register_graphql_handlers(
         app=app,
-        # engine=CustomEngine(),
+        engine=CustomEngine(),
         engine_sdl=sdl_files,
         executor_context=context,
         executor_http_endpoint='/',
