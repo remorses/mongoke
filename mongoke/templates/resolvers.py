@@ -104,7 +104,7 @@ pipeline: list = ${{repr_eval_dict(pipeline,)}}
 @Resolver('${{resolver_path}}')
 async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(parent, args, ctx, info):
     where = strip_nones(args.get('where', {}))
-    cursorField = args.get('cursorField', '_id')
+    cursorField = args.get('cursorField',) or ('_id' if '_id' in map_fields_to_types else list(map_fields_to_types.keys())[0])
     headers = ctx['req'].headers
     jwt = ctx['req'].jwt_payload
     fields = []
@@ -165,7 +165,7 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
     relation_where = ${{repr_eval_dict(where_filter, '    ')}}
     where = {**args.get('where', {}), **relation_where}
     where = strip_nones(where)
-    cursorField = args.get('cursorField', '_id')
+    cursorField = args.get('cursorField',) or ('_id' if '_id' in map_fields_to_types else list(map_fields_to_types.keys())[0])
     headers = ctx['req'].headers
     jwt = ctx['req'].jwt_payload # TODO i need to decode jwt_payload
     fields = []
@@ -208,6 +208,7 @@ INPUT_COERCERS = {
     'Int': int,
     'Float': float,
     'Bool': bool,
+    'ID': str,
     ${{'**{scalar.name: scalar._implementation.coerce_input for scalar in scalar_classes},' }}
 }
 
@@ -216,6 +217,7 @@ OUTPUT_COERCERS = {
     'Int': int,
     'Float': float,
     'Bool': bool,
+    'ID': str,
     ${{'**{scalar.name: scalar._implementation.coerce_output for scalar in scalar_classes},' }}
 }
 

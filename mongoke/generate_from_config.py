@@ -34,7 +34,7 @@ from .skema_support import get_scalar_fields, get_skema_aliases
 from .naming import get_query_name, get_relation_filename, get_resolver_filenames
 from .generators import generate_relation_boilerplate, generate_type_boilerplate
 
-SCALAR_TYPES = ["String", "Float", "Int", "Boolean"]
+SCALAR_TYPES = ["String", "Float", "Int", "Boolean", "Json"]
 SCALARS_ALREADY_IMPLEMENTED = [
     "ID",
     "ObjectId",
@@ -72,7 +72,8 @@ def generate_from_config(config, config_path):
     skema_schema = get_skema(config, here=config_path)
 
     # TODO add other scalars from the skema
-    scalars = [*SCALAR_TYPES, *get_skema_aliases(skema_schema)]
+    scalars = {*SCALAR_TYPES, *get_skema_aliases(skema_schema)}
+    scalars = list(scalars)
     main_graphql_schema = to_graphql(
         skema_schema, hide=SCALARS_ALREADY_IMPLEMENTED
     )

@@ -20,7 +20,8 @@ async def jwt_middleware(app, handler):
             else:
                 request.jwt_payload = payload
         else:
-            logger.debug('no Authorization header')
+            # logger.debug('no Authorization header')
+            pass
         return await handler(request)
     return middleware
 '''
