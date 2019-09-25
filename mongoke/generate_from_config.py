@@ -1,8 +1,10 @@
 import skema
+from shutil import rmtree
 import requests
 from typing import *
 import sys
 from funcy import merge, lmap, collecting, omit, remove, lcat
+from .checksum import make_checksum, existent_checksum
 import yaml
 from skema.to_graphql import to_graphql
 import os.path
@@ -63,10 +65,16 @@ def make_disambiguations_objects(disambiguations):
 
 
 def generate_from_config(config, config_path):
+    checksum = make_checksum(config, config_path)
+    if existent_checksum(config, ) == checksum:
+        print('already generated')
+        return
+    
     types = config.get("types", {})
-
     relations = config.get("relations", [])
     root_dir_path = config.get("root_dir_path", "generated")
+    if os.path.exists(root_dir_path):
+        rmtree(root_dir_path)
     db_url = config.get("db_url", "")
     touch = make_touch(base=os.path.abspath(root_dir_path))
     skema_schema = get_skema(config, here=config_path)
@@ -78,6 +86,7 @@ def generate_from_config(config, config_path):
         skema_schema, hide=SCALARS_ALREADY_IMPLEMENTED
     )
 
+    touch(f"checksum", checksum)
     touch(f"__init__.py", "")
     touch(f"engine.py", engine)
     touch(
