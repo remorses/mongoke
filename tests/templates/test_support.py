@@ -1,7 +1,7 @@
 
 
 
-from src.templates.support import join_yields, repr_eval_dict
+from mongoke.templates.support import join_yields, repr_eval_dict
 
 
 
