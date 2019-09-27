@@ -187,6 +187,7 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
 # nothing
 resolvers_support = '''
 import collections
+from prtty import pretty
 from motor.motor_asyncio import AsyncIOMotorDatabase, AsyncIOMotorCollection
 import mongodb_streams
 from tartiflette import Resolver
@@ -310,7 +311,7 @@ async def connection_resolver(
         count = await mongodb_streams.count_documents(collection, where, pipeline=pipeline)
         toSkip = count - (last + 1)
         args.update(dict(skip=max(toSkip, 0)))
-
+    pretty(args)
     nodes = await mongodb_streams.find(collection, **args)
 
     hasNext = None
