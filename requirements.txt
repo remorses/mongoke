@@ -1,5 +1,5 @@
 funcy
-populate==0.0.8
+populate>=0.0.8
 skema>=0.0.44
 requests
 fire

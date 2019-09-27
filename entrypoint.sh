@@ -1,3 +1,3 @@
 #!/bin/sh
-pwd
+# pwd
 python -m mongoke $1 && python -m generated

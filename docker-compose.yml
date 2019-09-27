@@ -9,6 +9,9 @@ services:
         command: /conf.yml
         volumes: 
             - ./confs/testing.yaml:/conf.yml
+            - ./confs/skema:/skema
+        environment: 
+            - PYTHONUNBUFFERED=1
     mongo:
         image: mongo
         logging: 
