@@ -13,7 +13,7 @@ ${{'\\n'.join([f'import {root_dir_name}.generated.resolvers.{name}' for name in 
 import ${{root_dir_name}}.generated.scalars
 from ${{root_dir_name}}.generated.middleware import jwt_middleware
 
-DB_URL = "${{db_url}}" or None
+DB_URL = os.getenv('DB_URL') or "${{db_url}}" or None
 PORT = 80
 
 here = os.path.dirname(os.path.abspath(__file__))
