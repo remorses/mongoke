@@ -26,6 +26,21 @@ def repr_disambiguations(disambiguations, indentation):
         """ 
         yield indent_to(indentation, code)
 
+@join_yields('')
+def render_type_resolver(disambiguations, typename):
+    code = f"""
+    @TypeResolver('{typename}')
+    def resolve_type(result, context, info, abstract_type):
+        x = result
+    """
+    yield indent_to('', code) + '    '
+    for (i, typename, expr) in zip_pluck(disambiguations, ['type_name', 'expression'], enumerate=True):
+        code = f"""
+        {'if' if i == 0 else 'elif'} ({expr}):
+            return '{typename}'
+        """ 
+        yield indent_to('    ', code)
+
 
 def repr_node_filterer(guards_after):
     code = f'''
@@ -53,6 +68,7 @@ resolvers_dependencies = dict(
     repr_eval_dict=repr_eval_dict,
     repr_node_filterer=repr_node_filterer,
     repr_many_disambiguations=repr_many_disambiguations,
+    render_type_resolver=render_type_resolver,
 )
 
 resolvers_init = '''
@@ -64,11 +80,13 @@ from ..logger import logger
 '''
 # collection, resolver_path, guard_expression_before, guard_expression_after, disambiguations
 single_item_resolver = '''
-from tartiflette import Resolver
+from tartiflette import Resolver, TypeResolver
 from .support import strip_nones, zip_pluck
 import mongodb_streams
 from operator import setitem
 from funcy import omit
+
+${{render_type_resolver(disambiguations, typename) if disambiguations else ''}}
 
 pipeline: list = ${{repr_eval_dict(pipeline,)}}
 
@@ -82,7 +100,7 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
     collection = ctx['db']['${{collection}}']
     x = await mongodb_streams.find_one(collection, match=where, pipeline=pipeline)
     ${{repr_guards_checks(guards_after, '    ')}}
-    ${{repr_disambiguations(disambiguations, '    ')}}
+    # {{repr_disambiguations(disambiguations, '    ')}}
     if fields:
         x = omit(x or dict(), fields)
     return x
@@ -119,7 +137,7 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
         pipeline=pipeline,
     )
     data['nodes'] = list(filter_nodes_by_guard(data['nodes'], fields))
-    ${{repr_many_disambiguations(disambiguations, '    ') if disambiguations else ''}}
+    # {{repr_many_disambiguations(disambiguations, '    ') if disambiguations else ''}}
     return data
 
 '''
@@ -142,7 +160,7 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
     collection = ctx['db']['${{collection}}']
     x = await mongodb_streams.find_one(collection, match=where, pipeline=pipeline)
     ${{repr_guards_checks(guards_after, '    ')}}
-    ${{repr_disambiguations(disambiguations, '    ')}}
+    # {{repr_disambiguations(disambiguations, '    ')}}
     return x
 '''
 
@@ -180,7 +198,7 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
         pipeline=pipeline,
     )
     data['nodes'] = list(filter_nodes_by_guard(data['nodes'], fields))
-    ${{repr_many_disambiguations(disambiguations, '    ') if disambiguations else ''}}
+    # {{repr_many_disambiguations(disambiguations, '    ') if disambiguations else ''}}
     return data
 '''
 

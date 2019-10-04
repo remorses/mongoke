@@ -37,13 +37,14 @@ from .templates.scalars import scalars_implementations
 
 
 def generate_resolvers(
-    collection, disambiguations, guards, query_name, is_aggregation=False, **kwargs
+    collection, disambiguations, guards, typename, query_name, is_aggregation=False, **kwargs
 ):
     single_resolver = populate_string(
         single_item_resolver,
         dict(
             #  query_name=query_name,
             # type_name=typename,
+            typename=typename,
             collection=collection,
             resolver_path="Query." + query_name,
             disambiguations=disambiguations,
@@ -57,7 +58,7 @@ def generate_resolvers(
         many_items_resolvers,
         dict(
             #  query_name=query_name,
-            # type_name=typename,
+            typename=typename,
             collection=collection,
             resolver_path="Query." + query_name + "s",
             disambiguations=disambiguations,
@@ -92,6 +93,7 @@ def generate_type_boilerplate(
     )
     touch(f"generated/sdl/{query_name}.graphql", query_subset, index=True)
     single_resolver, many_resolver = generate_resolvers(
+        typename=typename,
         collection=collection,
         disambiguations=disambiguations,
         guards=guards,

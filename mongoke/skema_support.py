@@ -14,8 +14,9 @@ def get_skema_aliases(skema_schema):
         d: body
         for d, body in definitions.items()
         if not HIDE_GRAPHQL in body.get("description", "") and not body.get("enum")
-    }  # TODO should be implemented in skema
-    aliases = [body.get("title") for d, body in definitions.items()]
+    } # TODO should be implemented in skema
+    aliases = [body.get("title", None) for d, body in definitions.items()]
+    aliases = [x for x in aliases if x != None]
     # pretty(aliases)
     aliases = [x for x in aliases if is_alias(skema_schema, x)]
     return aliases
@@ -49,7 +50,7 @@ def get_type_properties(json_schema):
         subsets = json_schema.get("anyOf", [])
         subsets = subsets or json_schema.get("allOf", [])
         subsets = subsets or json_schema.get("oneOf", [])
-        type_properties = merge(*[x.get("properties") for x in subsets])
+        type_properties = merge(*[get_type_properties(x) for x in subsets])
     else:
         type_properties = json_schema.get("properties", {})
     return type_properties

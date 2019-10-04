@@ -64,12 +64,7 @@ def make_disambiguations_objects(disambiguations):
         yield {"type_name": type, "expression": expr.strip()}
 
 
-def generate_from_config(config, config_path):
-    checksum = make_checksum(config, config_path)
-    if existent_checksum(config, ) == checksum:
-        print('already generated')
-        return
-    
+def generate_from_config(config, config_path,):
     types = config.get("types", {})
     relations = config.get("relations", [])
     root_dir_path = config.get("root_dir_path", "generated")
@@ -86,7 +81,7 @@ def generate_from_config(config, config_path):
         skema_schema, hide=SCALARS_ALREADY_IMPLEMENTED
     )
 
-    touch(f"checksum", checksum)
+    touch(f"checksum", make_checksum(config, config_path))
     touch(f"__init__.py", "")
     touch(f"engine.py", engine)
     touch(
