@@ -329,7 +329,7 @@ async def connection_resolver(
         count = await mongodb_streams.count_documents(collection, where, pipeline=pipeline)
         toSkip = count - (last + 1)
         args.update(dict(skip=max(toSkip, 0)))
-    pretty(args)
+    # pretty(args)
     nodes = await mongodb_streams.find(collection, **args)
 
     hasNext = None

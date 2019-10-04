@@ -19,7 +19,7 @@ PORT = 80
 here = os.path.dirname(os.path.abspath(__file__))
 sdl_dir = f'{here}/generated/sdl/'
 sdl_files = sorted(os.listdir(sdl_dir))
-print(sdl_files)
+# print(sdl_files)
 sdl_files = [sdl_dir + f for f in sdl_files]
 
 def build(db):
