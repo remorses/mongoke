@@ -343,8 +343,8 @@ async def connection_resolver(
         hasPrevious = len(nodes) == last + 1
         nodes = nodes[1:] if hasPrevious else nodes
 
-    end_cursor = nodes[-1][cursorField] if nodes else None
-    start_cursor = nodes[0][cursorField] if nodes else None
+    end_cursor = nodes[-1].get(cursorField) if nodes else None
+    start_cursor = nodes[0].get(cursorField) if nodes else None
     return {
         'nodes': nodes,
         'pageInfo': {
