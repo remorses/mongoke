@@ -1,14 +1,18 @@
 import skema
 from typing import *
 from funcy import merge, lmap, collecting, omit, remove, lcat
+from functools import lru_cache
 import yaml
 
 HIDE_GRAPHQL = "[graphql hide]"
 
+@lru_cache(maxsize=10)
+def get_schema(skema_schema):
+    return skema.to_jsonschema(skema_schema, resolve=False)
 
 def get_skema_aliases(skema_schema):
-    definitions = skema.to_jsonschema(skema_schema, resolve=False).get(
-        "definitions", []
+    definitions = get_schema(skema_schema).get(
+        "definitions", {}
     )
     definitions = {
         d: body
@@ -31,7 +35,8 @@ map_json_type_to_grpahql = {
 
 @collecting
 def get_scalar_fields(skema_schema, typename) -> Iterable[Tuple[str, str]]:
-    json_schema = skema.to_jsonschema(skema_schema, ref=typename, resolve=True)
+    json_schema = get_schema(skema_schema)
+    json_schema = skema.resolve_schema(json_schema, ref=typename,)
     # pretty(json_schema)
     type_properties = get_type_properties(json_schema)
     aliases = get_skema_aliases(skema_schema)
@@ -70,6 +75,7 @@ def is_scalar(type_body):
 
 
 def is_alias(skema_schema, typename) -> bool:
-    json_schema = skema.to_jsonschema(skema_schema, ref=typename, resolve=True)
+    json_schema = get_schema(skema_schema)
+    json_schema = skema.resolve_schema(json_schema, ref=typename,)
     #  pretty(json_schema)
     return is_scalar(json_schema)
