@@ -16,6 +16,45 @@ Mongoke serve your mongodb database via a declarative, idempotent configuration 
 To get started first describe the shape of your types inside the database via the [skema](https://github.com/remorses/skema) language, then write a configuration for every type to connect it to the associated collection and add authorization guards.
 Then you can add relations between types, describing what field will lead to the related types and if the relation is of type `to_one` or `to_many`.
 
+
+```yml
+# docker-compose.yml
+version: '3'
+
+services:
+    mongoke:
+        image: mongoke/mongoke
+        environment: 
+            PYTHONUNBUFFERED: '1'
+            DB_URL: mongodb://mongo:27017   
+            CONFIG:
+                skema: |
+                    User:
+                        _id: ObjectId
+                        username: Str
+                        email: Str
+                    BlogPost:
+                        _id: ObjectId
+                        author_id: ObjectId
+                        content: Str
+                types:
+                    User:
+                        collection: users
+                    BlogPost:
+                        collection: posts
+                relations:
+                    -   field: posts
+                        from: User
+                        to: BlogPost
+                        where:
+                            author_id: ${{ parent['_id'] }}
+    mongo:
+        image: mongo
+        logging: 
+            driver: none
+
+```
+
 Here is an example:
 ```yaml
 # example.yml

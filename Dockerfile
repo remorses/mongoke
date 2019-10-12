@@ -1,6 +1,6 @@
 FROM python:3.7.2
 
-RUN apt-get update && apt-get install -y dumb-init cmake bison flex git jq
+RUN apt-get update && apt-get install -y dumb-init cmake bison flex
 
 WORKDIR /src
 

@@ -17,3 +17,24 @@ services:
         logging: 
             driver: none
 
+CONFIG:
+    skema: |
+        User:
+            _id: ObjectId
+            username: Str
+            email: Str
+        BlogPost:
+            _id: ObjectId
+            author_id: ObjectId
+            content: Str
+    types:
+        User:
+            collection: users
+        BlogPost:
+            collection: posts
+    relations:
+        -   field: posts
+            from: User
+            to: BlogPost
+            where:
+                author_id: ${{ parent['_id'] }}
