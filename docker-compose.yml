@@ -4,6 +4,7 @@ version: '3'
 services:
     graphql-server:
         build: .
+        # image: mongoke
         # entrypoint: sh -c 'pip install tartiflette==1.0.0rc1 && python -m mongoke /conf.yml && ls generated/generated/sdl/*'
         # entrypoint: pip show tartiflette
         command: /conf.yml
@@ -17,24 +18,3 @@ services:
         logging: 
             driver: none
 
-CONFIG:
-    skema: |
-        User:
-            _id: ObjectId
-            username: Str
-            email: Str
-        BlogPost:
-            _id: ObjectId
-            author_id: ObjectId
-            content: Str
-    types:
-        User:
-            collection: users
-        BlogPost:
-            collection: posts
-    relations:
-        -   field: posts
-            from: User
-            to: BlogPost
-            where:
-                author_id: ${{ parent['_id'] }}
