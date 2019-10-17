@@ -2,8 +2,7 @@
   <img width="300" src="https://github.com/remorses/mongoke/blob/master/.github/logo.jpg?raw=true">
 </p>
 <h1 align="center">mongoke</h1>
-
-## Instantly serve your MongoDb database via graphql, 
+<h3 align="center">Instantly serve your MongoDb database via graphql<h3>
 supports 
 - authorization of the fields based on jwt, 
 - relations between collections,
