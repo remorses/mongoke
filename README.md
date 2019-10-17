@@ -2,12 +2,19 @@
   <img width="300" src="https://github.com/remorses/mongoke/blob/master/.github/logo.jpg?raw=true">
 </p>
 <h1 align="center">mongoke</h1>
-<h3 align="center">Instantly serve your MongoDb database via graphql<h3>
-supports 
-- authorization of the fields based on jwt, 
-- relations between collections,
-- mongodb aggregated pipelines
-- apollo federation
+<h3 align="center">Instantly serve your MongoDb database via graphql</h3>
+
+-------------------
+
+## Features
+
+* **Powerful Queries**: Pagination, filtering, relation, relay-style connections built-in and generated in a bunch of seconds
+* **Works with existing databases**: Point it to an existing MongoDb database to instantly get a ready-to-use GraphQL API
+* **Authorization via Jwt**: Every collection can be protected based on jwt payload and document fields
+* **Horizontally Scalable**: The service is completely stateless and can be replicated on demand
+* **Apollo Federation**: The service can be easily glued with other graphql servers to handle writes and more complicated logic.
+* **Resilient Idempotent Configuration**: One YAML Configuration as the only source of truth, relations, authorization and types in one file
+
 
 ## Usage
 Mongoke serve your mongodb database via a declarative, idempotent configuration that describes the shape of the types in the database and their relations.
