@@ -16,11 +16,6 @@
 * **Resilient Idempotent Configuration**: One YAML Configuration as the only source of truth, relations, authorization and types in one file
 
 
-## Usage
-Mongoke serve your mongodb database via a declarative, idempotent configuration that describes the shape of the types in the database and their relations.
-To get started first describe the shape of your types inside the database via the [skema](https://github.com/remorses/skema) language, then write a configuration for every type to connect it to the associated collection and add authorization guards.
-Then you can add relations between types, describing what field will lead to the related types and if the relation is of type `to_one` or `to_many`.
-
 ## Quickstart:
 
 ### Docker compose
@@ -86,6 +81,12 @@ The fastest way to try Mongoke is via docker-compose.
     }
     ```
 ------
+
+
+## Usage
+Mongoke serve your mongodb database via a declarative, idempotent configuration that describes the shape of the types in the database and their relations.
+To get started first describe the shape of your types inside the database via the [skema](https://github.com/remorses/skema) language, then write a configuration for every type to connect it to the associated collection and add authorization guards.
+Then you can add relations between types, describing what field will lead to the related types and if the relation is of type `to_one` or `to_many`.
 
 Here is an example:
 ```yaml
