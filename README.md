@@ -52,39 +52,39 @@ The fastest way to try Mongoke is via docker-compose.
                 author_id: ${{ parent['_id'] }}
     ```
 2. Run the mongoke image with the above configuration via docker-compose up
-```yml
-# docker-compose.yml
-version: '3'
+    ```yml
+    # docker-compose.yml
+    version: '3'
 
-services:
-    mongoke:
-        ports:
-            - 4000:80
-        image: mongoke/mongoke
-        environment: 
-            PYTHONUNBUFFERED: '1'
-            DB_URL: mongodb://mongo:27017/db
-        volumes: 
-            - ./mongoke.yml:/conf.yml  
-    mongo:
-        image: mongo
-        logging: 
-            driver: none
+    services:
+        mongoke:
+            ports:
+                - 4000:80
+            image: mongoke/mongoke
+            environment: 
+                PYTHONUNBUFFERED: '1'
+                DB_URL: mongodb://mongo:27017/db
+            volumes: 
+                - ./mongoke.yml:/conf.yml  
+        mongo:
+            image: mongo
+            logging: 
+                driver: none
 
-```
+    ```
 3. Query the generated service via graphql or go to `http://localhost:4000` to open graphiql
-```graphql
-{
-  author(where: {name: "Joseph"}) {
-    name
-    articles {
-      nodes {
-        content
+    ```graphql
+    {
+      author(where: {name: "Joseph"}) {
+        name
+        articles {
+          nodes {
+            content
+          }
+        }
       }
     }
-  }
-}
-```
+    ```
 ------
 
 Here is an example:
