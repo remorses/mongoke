@@ -21,45 +21,73 @@ Mongoke serve your mongodb database via a declarative, idempotent configuration 
 To get started first describe the shape of your types inside the database via the [skema](https://github.com/remorses/skema) language, then write a configuration for every type to connect it to the associated collection and add authorization guards.
 Then you can add relations between types, describing what field will lead to the related types and if the relation is of type `to_one` or `to_many`.
 
+## Quickstart:
 
+### Docker compose
+
+The fastest way to try Mongoke is via docker-compose.
+
+1. Write the configuration to serve a blog database via graphql
+```yml
+# ./mongoke.yml
+skema: |
+    User:
+        _id: ObjectId
+        username: Str
+        email: Str
+    BlogPost:
+        _id: ObjectId
+        author_id: ObjectId
+        content: Str
+types:
+    User:
+        collection: users
+    BlogPost:
+        collection: posts
+relations:
+    -   field: posts
+        from: User
+        to: BlogPost
+        where:
+            author_id: ${{ parent['_id'] }}
+```
+2. Run the mongoke image with the above configuration via docker-compose up
 ```yml
 # docker-compose.yml
 version: '3'
 
 services:
     mongoke:
+        ports:
+            - 4000:80
         image: mongoke/mongoke
         environment: 
             PYTHONUNBUFFERED: '1'
-            DB_URL: mongodb://mongo:27017   
-            CONFIG:
-                skema: |
-                    User:
-                        _id: ObjectId
-                        username: Str
-                        email: Str
-                    BlogPost:
-                        _id: ObjectId
-                        author_id: ObjectId
-                        content: Str
-                types:
-                    User:
-                        collection: users
-                    BlogPost:
-                        collection: posts
-                relations:
-                    -   field: posts
-                        from: User
-                        to: BlogPost
-                        where:
-                            author_id: ${{ parent['_id'] }}
+            DB_URL: mongodb://mongo:27017/db
+        volumes: 
+            - ./mongoke.yml:/conf.yml  
     mongo:
         image: mongo
         logging: 
             driver: none
 
 ```
+3. Query the generated service via graphql or go to `http://localhost:4000` to open graphiql
+```graphql
+{
+  author(where: {name: "Joseph"}) {
+    name
+    articles {
+      nodes {
+        content
+      }
+    }
+  }
+}
 
+------
+
+```
 Here is an example:
 ```yaml
 # example.yml
