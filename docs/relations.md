@@ -69,39 +69,3 @@ relations:
         where: { "zoo_id": ${{ parent['_id'] }}}
 ```
 
-
-** from **
-The type where the relation's field is added
-** to **
-The type the relation leads to
-**field**
-The field added to the `from` type to connect the `to` type
-**relation_type**
-if "to_one" the field in graphql will be a simple type reference and can be queried with
-```gql
-{
-    owner {
-        email
-        pet {
-            name
-        }
-    }
-}
-```
-If "to_many" the field will resolve to a connection and can be queried like this
-```gql
-{
-    zoo {
-        pets(first: 10) {
-            nodes {
-                name
-            }
-        }
-    }
-}
-```
-**where**
-The mongodb where query to find the related documents, you can evaluate custom python code inside the ${{ }} and have access to parent: the `from` document as a python dict.
-The code inside ${{ }} will be evaluated during every query that needs the relation and the evaluation result will be used to query the `to` collection.
-
-
