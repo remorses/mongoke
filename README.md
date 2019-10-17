@@ -28,29 +28,29 @@ Then you can add relations between types, describing what field will lead to the
 The fastest way to try Mongoke is via docker-compose.
 
 1. Write the configuration to serve a blog database via graphql
-```yml
-# ./mongoke.yml
-skema: |
-    User:
-        _id: ObjectId
-        username: Str
-        email: Str
-    BlogPost:
-        _id: ObjectId
-        author_id: ObjectId
-        content: Str
-types:
-    User:
-        collection: users
-    BlogPost:
-        collection: posts
-relations:
-    -   field: posts
-        from: User
-        to: BlogPost
-        where:
-            author_id: ${{ parent['_id'] }}
-```
+    ```yml
+    # ./mongoke.yml
+    skema: |
+        User:
+            _id: ObjectId
+            username: Str
+            email: Str
+        BlogPost:
+            _id: ObjectId
+            author_id: ObjectId
+            content: Str
+    types:
+        User:
+            collection: users
+        BlogPost:
+            collection: posts
+    relations:
+        -   field: posts
+            from: User
+            to: BlogPost
+            where:
+                author_id: ${{ parent['_id'] }}
+    ```
 2. Run the mongoke image with the above configuration via docker-compose up
 ```yml
 # docker-compose.yml
@@ -84,10 +84,9 @@ services:
     }
   }
 }
-
+```
 ------
 
-```
 Here is an example:
 ```yaml
 # example.yml
