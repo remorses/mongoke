@@ -4,8 +4,6 @@
 <h1 align="center">mongoke</h1>
 <h3 align="center">Instantly serve your MongoDb database via graphql</h3>
 
--------------------
-
 ## Features
 
 * **Powerful Queries**: Pagination, filtering, relation, relay-style connections built-in and generated in a bunch of seconds
