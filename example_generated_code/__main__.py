@@ -9,16 +9,16 @@ from tartiflette_plugin_apollo_federation import ApolloFederationPlugin
 import asyncio
 
 from .engine import CustomEngine
-import generated.generated.resolvers.user
-import generated.generated.resolvers.users
-import generated.generated.resolvers.human
-import generated.generated.resolvers.humans
-import generated.generated.resolvers.task_events
-import generated.generated.resolvers.user_friends
-import generated.generated.resolvers.user_likes_over_time
-import generated.generated.resolvers.user_father
-import generated.generated.scalars
-from generated.generated.middleware import jwt_middleware
+import example_generated_code.generated.resolvers.user
+import example_generated_code.generated.resolvers.users
+import example_generated_code.generated.resolvers.human
+import example_generated_code.generated.resolvers.humans
+import example_generated_code.generated.resolvers.task_events
+import example_generated_code.generated.resolvers.user_friends
+import example_generated_code.generated.resolvers.user_likes_over_time
+import example_generated_code.generated.resolvers.user_father
+import example_generated_code.generated.scalars
+from example_generated_code.generated.middleware import jwt_middleware
 
 DB_URL = os.getenv('DB_URL') or "mongodb://localhost:27109/db" or None
 PORT = 80

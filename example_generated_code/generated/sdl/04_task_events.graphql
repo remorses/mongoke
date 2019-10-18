@@ -12,7 +12,13 @@ extend type Task {
 
 type WindowedEventConnection {
     nodes: [WindowedEvent]!
+    edges: [WindowedEventEdge]!
     pageInfo: PageInfo!
+}
+
+type WindowedEventEdge {
+    node: WindowedEvent
+    cursor: AnyScalar
 }
 
 input WindowedEventWhere { 

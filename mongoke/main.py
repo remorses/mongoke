@@ -9,7 +9,7 @@ import yaml
 
 
 
-def main(path, force=False):
+def main(path, force=False, generated_path=None):
     config = yaml.safe_load(open(path).read())
     jsonschema.validate(config, get_config_schema())
     config_path = os.path.abspath(os.path.dirname(path))
@@ -18,4 +18,4 @@ def main(path, force=False):
         if existent_checksum(config, ) == checksum:
             print('already generated')
             return
-    generate_from_config(config, config_path + '/')
+    generate_from_config(config, config_path + '/', generated_path)

@@ -16,7 +16,13 @@ extend type Query {
 
 type HumanConnection {
     nodes: [Human]!
+    edges: [HumanEdge]!
     pageInfo: PageInfo!
+}
+
+type HumanEdge {
+    node: Human
+    cursor: AnyScalar
 }
 
 input HumanWhere { 

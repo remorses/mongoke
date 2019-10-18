@@ -1,0 +1,94 @@
+
+
+type Query {
+    mongoke_version: String
+}
+
+enum Direction {
+    ASC
+    DESC
+}
+
+
+input WhereJson {
+    in: [Json]
+    nin: [Json]
+    eq: Json
+    neq: Json
+}
+
+input WhereBoolean {
+    in: [Boolean]
+    nin: [Boolean]
+    eq: Boolean
+    neq: Boolean
+}
+
+input WhereString {
+    in: [String]
+    nin: [String]
+    eq: String
+    neq: String
+}
+
+input WhereTime {
+    in: [Time]
+    nin: [Time]
+    eq: Time
+    neq: Time
+}
+
+input WhereDate {
+    in: [Date]
+    nin: [Date]
+    eq: Date
+    neq: Date
+}
+
+input WhereObjectId {
+    in: [ObjectId]
+    nin: [ObjectId]
+    eq: ObjectId
+    neq: ObjectId
+}
+
+input WhereInt {
+    in: [Int]
+    nin: [Int]
+    eq: Int
+    neq: Int
+}
+
+input WhereID {
+    in: [ID]
+    nin: [ID]
+    eq: ID
+    neq: ID
+}
+
+input WhereFloat {
+    in: [Float]
+    nin: [Float]
+    eq: Float
+    neq: Float
+}
+
+input WhereDateTime {
+    in: [DateTime]
+    nin: [DateTime]
+    eq: DateTime
+    neq: DateTime
+}
+
+
+
+type PageInfo {
+    startCursor: AnyScalar
+    endCursor: AnyScalar
+    hasNextPage: Boolean
+    hasPreviousPage: Boolean
+}
+
+scalar Json
+scalar ObjectId
+scalar AnyScalar

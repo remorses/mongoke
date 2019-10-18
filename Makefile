@@ -10,11 +10,11 @@ config-schema:
 
 .PHONY: play
 generate-spec: clean
-	python -m mongoke confs/spec_conf.yaml
+	python -m mongoke tests/confs/spec_conf.yaml --generated-path example_generated_code
 
 .PHONY: play
 play: generate-spec
-	python -m generated
+	python -m example_generated_code
 
 .PHONY: play
 tests: generate-pr

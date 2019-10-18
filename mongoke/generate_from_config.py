@@ -64,11 +64,11 @@ def make_disambiguations_objects(disambiguations):
         yield {"type_name": type, "expression": expr.strip()}
 
 
-def generate_from_config(config, config_path,):
+def generate_from_config(config, config_path, root_dir_path):
     types = config.get("types", {})
     jwt_config = config.get("jwt", {})
     relations = config.get("relations", [])
-    root_dir_path = config.get("root_dir_path", "generated")
+    root_dir_path = root_dir_path or "generated"
     if os.path.exists(root_dir_path):
         rmtree(root_dir_path)
     db_url = config.get("db_url", "")

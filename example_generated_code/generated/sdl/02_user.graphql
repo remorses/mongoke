@@ -16,7 +16,13 @@ extend type Query {
 
 type UserConnection {
     nodes: [User]!
+    edges: [UserEdge]!
     pageInfo: PageInfo!
+}
+
+type UserEdge {
+    node: User
+    cursor: AnyScalar
 }
 
 input UserWhere { 
