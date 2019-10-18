@@ -41,6 +41,16 @@ def build(db):
         engine_modules=[
             ApolloFederationPlugin(engine_sdl=sdl_files)
         ],
+        graphiql_enabled=os.getenv("DISABLE_GRAPHIQL", True),
+        graphiql_options={
+            "default_query": os.getenv("GRAPHIQL_DEFAULT_QUERY", ""),
+            "default_variables": {},
+            "default_headers": {
+                "Authorization": "Bearer " + os.getenv("GRAPHIQL_DEFAULT_JWT", "")
+            }
+            if os.getenv("GRAPHIQL_DEFAULT_JWT")
+            else {},
+        },
     )
     cors = aiohttp_cors.setup(app, defaults={
         "*": aiohttp_cors.ResourceOptions(
