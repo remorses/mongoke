@@ -3,7 +3,8 @@
 </p>
 <h1 align="center">mongoke</h1>
 <h3 align="center">Instantly serve your MongoDb database via graphql</h3>
-<p align="center">[Docs](./docs/index.md)</p>
+
+- [**Docs**](./docs/index.md)
 
 ## Features
 
