@@ -1,7 +1,12 @@
 import json
 import os.path
+import os.path
 import requests
 from funcy import pluck, count, merge
+
+def get_config_schema():
+    with open(os.path.dirname(__file__) +  '/config_schema.json') as f:
+        return json.loads(f.read())
 
 skema_defaults = '''
 ObjectId: Any

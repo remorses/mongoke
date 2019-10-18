@@ -1,6 +1,10 @@
 import yaml
 import json
 import jsonschema
+import os.path
+
+print(os.path.dirname(__file__))
+
 s = '''
 ciao:
     expr: > 

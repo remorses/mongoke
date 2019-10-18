@@ -43,7 +43,7 @@ extend type Query {
     ${{query_name}}(
         where: ${{type_name}}Where,
     ): ${{type_name}}
-    
+
     ${{query_name}}s(
         where: ${{type_name}}Where, 
         cursorField: ${{type_name}}Fields, 
@@ -51,12 +51,12 @@ extend type Query {
         last: Int, 
         after: AnyScalar, 
         before: AnyScalar
-    ): ${{type_name}}Connection
+    ): ${{type_name}}Connection!
 }
 
 type ${{type_name}}Connection {
-    nodes: [${{type_name}}]
-    pageInfo: PageInfo
+    nodes: [${{type_name}}]!
+    pageInfo: PageInfo!
 }
 
 input ${{type_name}}Where { 
@@ -88,15 +88,14 @@ extend type ${{fromType}} {
        last: Int, 
        after: AnyScalar, 
        before: AnyScalar
-    ): ${{toType}}Connection
+    ): ${{toType}}Connection!
 }
-# if types don't have already the boilerplate i should write it now
 '''
 
 to_many_relation_boilerplate = '''
 type ${{toType}}Connection {
-    nodes: [${{toType}}]
-    pageInfo: PageInfo
+    nodes: [${{toType}}]!
+    pageInfo: PageInfo!
 }
 
 input ${{toType}}Where { 

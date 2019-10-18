@@ -40,7 +40,7 @@ types:
             -   expression: session['role'] == 'admin'
                 when: after
             -   expression: session['role'] == 'semi'
-                exclude: [passwords, campaign_data]
+                excluded: [passwords, campaign_data]
         disambiguations:
             User: x['type'] == 'user'
             Guest: x['type'] == 'guest'

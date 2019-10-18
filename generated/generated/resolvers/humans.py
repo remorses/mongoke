@@ -36,7 +36,7 @@ async def resolve_query_humans(parent, args, ctx, info):
     if not (session['role'] == 'semi'):
         raise Exception("guard `session['role'] == 'semi'` not satisfied")
     else:
-        fields += []
+        fields += ['passwords', 'campaign_data']
     
     pagination = get_pagination(args,)
     data = await connection_resolver(

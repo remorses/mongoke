@@ -7,13 +7,12 @@ extend type Task {
        last: Int, 
        after: AnyScalar, 
        before: AnyScalar
-    ): WindowedEventConnection
+    ): WindowedEventConnection!
 }
-# if types don't have already the boilerplate i should write it now
 
 type WindowedEventConnection {
-    nodes: [WindowedEvent]
-    pageInfo: PageInfo
+    nodes: [WindowedEvent]!
+    pageInfo: PageInfo!
 }
 
 input WindowedEventWhere { 

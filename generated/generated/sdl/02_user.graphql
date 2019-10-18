@@ -1,5 +1,9 @@
 
 extend type Query {
+    user(
+        where: UserWhere,
+    ): User
+
     users(
         where: UserWhere, 
         cursorField: UserFields, 
@@ -7,16 +11,12 @@ extend type Query {
         last: Int, 
         after: AnyScalar, 
         before: AnyScalar
-    ): UserConnection
-
-    user(
-        where: UserWhere,
-    ): User
+    ): UserConnection!
 }
 
 type UserConnection {
-    nodes: [User]
-    pageInfo: PageInfo
+    nodes: [User]!
+    pageInfo: PageInfo!
 }
 
 input UserWhere { 

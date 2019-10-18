@@ -1,5 +1,9 @@
 
 extend type Query {
+    human(
+        where: HumanWhere,
+    ): Human
+
     humans(
         where: HumanWhere, 
         cursorField: HumanFields, 
@@ -7,16 +11,12 @@ extend type Query {
         last: Int, 
         after: AnyScalar, 
         before: AnyScalar
-    ): HumanConnection
-
-    human(
-        where: HumanWhere,
-    ): Human
+    ): HumanConnection!
 }
 
 type HumanConnection {
-    nodes: [Human]
-    pageInfo: PageInfo
+    nodes: [Human]!
+    pageInfo: PageInfo!
 }
 
 input HumanWhere { 

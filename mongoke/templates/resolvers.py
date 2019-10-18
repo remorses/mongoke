@@ -185,7 +185,7 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
     where = strip_nones(where)
     cursorField = args.get('cursorField',) or ('_id' if '_id' in map_fields_to_types else list(map_fields_to_types.keys())[0])
     headers = ctx['req'].headers
-    jwt = ctx['req'].jwt_payload # TODO i need to decode jwt_payload
+    jwt = ctx['req'].jwt_payload
     fields = []
     ${{repr_guards_checks(guards_before, '    ')}}
     pagination = get_pagination(args,)

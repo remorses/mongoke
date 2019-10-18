@@ -25,7 +25,7 @@ async def resolve_query_human(parent, args, ctx, info):
     if not (session['role'] == 'semi'):
         raise Exception("guard `session['role'] == 'semi'` not satisfied")
     else:
-        fields += []
+        fields += ['passwords', 'campaign_data']
     
     collection = ctx['db']['humans']
     x = await mongodb_streams.find_one(collection, match=where, pipeline=pipeline)

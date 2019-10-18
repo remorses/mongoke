@@ -31,6 +31,11 @@
                     "title": "skema_url",
                     "description": ""
                 },
+                "skema_path": {
+                    "type": "string",
+                    "title": "skema_path",
+                    "description": ""
+                },
                 "types": {
                     "title": "types",
                     "description": "",
@@ -130,7 +135,7 @@
                             "to",
                             "relation_type",
                             "field",
-                            "query"
+                            "where"
                         ],
                         "properties": {
                             "from": {
@@ -157,9 +162,8 @@
                                 "title": "field",
                                 "description": ""
                             },
-                            "query": {
-                                "$ref": "#/definitions/MongoDbQuery",
-                                "title": "query",
+                            "where": {
+                                "title": "where",
                                 "description": ""
                             }
                         },
@@ -171,14 +175,26 @@
                     "title": "jwt",
                     "description": "",
                     "type": "object",
-                    "required": [
-                        "secret",
-                        "algorithms"
-                    ],
+                    "required": [],
                     "properties": {
                         "secret": {
                             "type": "string",
                             "title": "secret",
+                            "description": ""
+                        },
+                        "header_name": {
+                            "type": "string",
+                            "title": "header_name",
+                            "description": ""
+                        },
+                        "header_scheme": {
+                            "type": "string",
+                            "title": "header_scheme",
+                            "description": ""
+                        },
+                        "required": {
+                            "type": "boolean",
+                            "title": "required",
                             "description": ""
                         },
                         "algorithms": {
@@ -186,7 +202,19 @@
                             "title": "algorithms",
                             "items": {
                                 "enum": [
-                                    "H256"
+                                    "H256",
+                                    "HS512",
+                                    "HS384",
+                                    "RS256",
+                                    "RS384",
+                                    "RS512",
+                                    "ES256",
+                                    "ES384",
+                                    "ES521",
+                                    "ES512",
+                                    "PS256",
+                                    "PS384",
+                                    "PS512"
                                 ],
                                 "type": "string",
                                 "title": "algorithms",
@@ -199,10 +227,6 @@
                 }
             },
             "additionalProperties": false
-        },
-        "MongoDbQuery": {
-            "title": "MongoDbQuery",
-            "description": ""
         },
         "Url": {
             "type": "string",

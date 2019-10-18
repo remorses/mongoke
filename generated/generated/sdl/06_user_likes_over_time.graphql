@@ -7,6 +7,5 @@ extend type User {
        last: Int, 
        after: AnyScalar, 
        before: AnyScalar
-    ): WindowedEventConnection
+    ): WindowedEventConnection!
 }
-# if types don't have already the boilerplate i should write it now
