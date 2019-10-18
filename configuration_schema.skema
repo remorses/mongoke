@@ -30,7 +30,7 @@ Configuration:
         header_name?: Str # default is "Authorization"
         header_scheme?: Str # default is "Bearer"
         required?: Bool
-        algorithms?: ["H256"]
+        algorithms?: ["H256" | "HS512" | "HS384" | "RS256" | "RS384" | "RS512" | "ES256" | "ES384" | "ES521" | "ES512" | "PS256" | "PS384" | "PS512"]
 
 
 Url: Str
