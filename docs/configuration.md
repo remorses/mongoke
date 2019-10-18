@@ -1,3 +1,6 @@
+
+
+
 # Configuration
 
 Mongoke defines its entire configuration in a yaml file that can be used to generate the entire graphql server.
@@ -34,6 +37,13 @@ Configuration:
 
 Url: Str
 ```
+
+# Index
+- [skema](#skema)
+- [types](#types)
+- [relations](#relations)
+- [jwt](#jwt)
+
 
 # skema
 Skema defines the database documents shape, written in the skema language.
