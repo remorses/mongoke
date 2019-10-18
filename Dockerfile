@@ -4,9 +4,9 @@ RUN apk update && apk add --no-cache build-base libffi-dev dumb-init cmake bison
 
 WORKDIR /src
 
-COPY requirements.txt /src/
+COPY *.txt /src/
 
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt -r requirements-generated.txt
 
 COPY mongoke /src/mongoke
 
