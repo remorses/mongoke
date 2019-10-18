@@ -99,6 +99,10 @@ services:
 
 ------
 
+## Tutorials
+Please help the project making new tutorials and submit a issue to list it here!
+
+------
 
 ## Todo:
 - ~~publish the docker image (after tartiflette devs fix extend type issue)~~
