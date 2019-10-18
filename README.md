@@ -69,7 +69,7 @@ services:
         logging: 
             driver: none
 ```
-### 3. Query the generated service via graphql or go to `http://localhost:4000/graphiql` to open graphiql
+### 3. Query the generated service via graphql or go to [http://localhost:4000/graphiql](http://localhost:4000/graphiql) to open graphiql
 ```graphql
 {
     user(where: {username: {eq: "Mike"}}) {
