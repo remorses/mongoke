@@ -1,5 +1,3 @@
-db_url: mongodb://localhost:27109/db
-
 jwt:
     algorithms: [H256]
     required: true

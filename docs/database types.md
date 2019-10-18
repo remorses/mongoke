@@ -4,7 +4,7 @@ mongodb is a schemaless database, you can put whatever you like inside it, but t
 To do this in mongoke we use a language made just for types, skema.
 
 ## Skema
-Skema is an sdl born from the necessity of defining domain types in one place for every language used in a multi language microservice architecture. One of the languages skema compiles to is graphql.
+Skema is an DSL born from the necessity of defining domain types in one place for every language used in a multi language microservice architecture. One of the languages skema compiles to is graphql.
 Here is an example bit of skema and his generated gralphql types:
 ```yml
 BlogPost:
@@ -39,10 +39,16 @@ type User {
 As you can see skema supports nested object types and an easier list definition.
 You can read more about skema here.
 
-## Database types
-Skema can also define scalars, in mongoke there are some scalars implemented by default:
+## Built in types
+Skema has some built in types:
+- Str
+- Bool
+- Int
+- Float
+- Any
+In mongoke there are some additional scalars implemented by default:
 - DateTime
 - ObjectId
 - Date
 - Time
-These can be used to define the shape of your documents.
+

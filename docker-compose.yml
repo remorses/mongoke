@@ -13,6 +13,7 @@ services:
             - ./confs/skema:/skema
         environment: 
             - PYTHONUNBUFFERED=1
+            - DB_URL=mongodb://mongo/db
     mongo:
         image: mongo
         logging: 
