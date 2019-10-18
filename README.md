@@ -116,7 +116,7 @@ relations:
         to: Article
         relation_type: to_many
         field: articles
-        query:
+        where:
             autorId: ${{ parent['_id'] }}
 ```
 
@@ -177,9 +177,9 @@ Then you can query the database from your graphql app as you like
 - ~~remove strip_nones after asserting v1 works~~
 
 Low priority
-- add verify the jwt with the secret if provided
+- `required` config field, add verify the jwt with the secret if provided
 - ~~add schema validation to the configuration~~
 - add subscriptions
-- add edges to make connection type be relay compliant 
+- add `edges` to make connection type be relay compliant 
 - better performance of connection_resolver removing the $skip and $count
 - add a dataloader for single connections

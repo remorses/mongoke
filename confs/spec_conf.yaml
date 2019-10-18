@@ -63,12 +63,12 @@ relations:
         to: WindowedEvent
         relation_type: to_many
         field: events
-        query: {}
+        where: {}
     -   from: User
         to: WindowedEvent
         relation_type: to_many
         field: likes_over_time
-        query:
+        where:
             bot_id:
                 $in: ${{ parent['_id'] }}
             type: like
@@ -76,7 +76,7 @@ relations:
         to: Human
         field: father
         relation_type: to_one
-        query:
+        where:
             _id:
                 $in: ${{ parent['father_id'] }}
 

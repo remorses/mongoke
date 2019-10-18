@@ -144,7 +144,7 @@ def generate_from_config(config, config_path,):
             touch=touch,
             skema_schema=skema_schema,
             fromType=relation["from"],
-            where_filter=relation["query"],
+            where_filter=relation["where"],
             toType=toType,
             pipeline=types[toType].get("pipeline", []),
             collection=types[toType].get("collection", []),

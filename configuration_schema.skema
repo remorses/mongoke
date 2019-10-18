@@ -23,11 +23,11 @@ Configuration:
         to: Str
         relation_type: "to_many" | "to_one"
         field: Str
-        query: MongoDbQuery
+        where: Any
     ]
     jwt?:
-        secret: Str
-        algorithms: ["H256"]
+        secret?: Str
+        required?: Bool
+        algorithms?: ["H256"]
 
-MongoDbQuery: Any
 Url: Str

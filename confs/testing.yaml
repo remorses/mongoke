@@ -61,12 +61,12 @@ relations:
         to: EventWindow
         relation_type: to_many
         field: likes_over_time
-        query: {}
+        where: {}
     -   from: Bot
         to: User
         field: user
         relation_type: to_one
-        query:
+        where:
             _id: ${{ parent.get('_id') }}
 
 
