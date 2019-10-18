@@ -9,7 +9,6 @@ Types can also specify additional fields to connect to other entities via relati
 
 
 - [Configuration](./configuration.md)
-- [Database Schema]()
-- [Graphql Queries]()
-- [Docker Usage]()
-- [Apollo Federation]()
+- [Database Schema](./database_schema.md)
+- [Graphql Queries](./queries.md)
+- [Docker Usage](./docker.md)

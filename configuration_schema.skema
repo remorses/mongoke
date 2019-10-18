@@ -1,5 +1,4 @@
 Configuration:
-    db_url?: /mongodb://.*/
     skema?: Str
     skema_url?: Url
     skema_path?: Str # relative to the configuration dir

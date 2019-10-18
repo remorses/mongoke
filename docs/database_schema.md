@@ -37,7 +37,7 @@ type User {
 }
 ```
 As you can see skema supports nested object types and an easier list definition.
-You can read more about skema here.
+You can read more about skema [here](https://github.com/remorses/skema).
 
 ## Built in types
 Skema has some built in types:
