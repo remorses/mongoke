@@ -27,7 +27,10 @@ Configuration:
     ]
     jwt?:
         secret?: Str
+        header_name?: Str # default is "Authorization"
+        header_scheme?: Str # default is "Bearer"
         required?: Bool
         algorithms?: ["H256"]
+
 
 Url: Str

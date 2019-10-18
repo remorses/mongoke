@@ -66,6 +66,7 @@ def make_disambiguations_objects(disambiguations):
 
 def generate_from_config(config, config_path,):
     types = config.get("types", {})
+    jwt_config = config.get("jwt", {})
     relations = config.get("relations", [])
     root_dir_path = config.get("root_dir_path", "generated")
     if os.path.exists(root_dir_path):
@@ -97,7 +98,19 @@ def generate_from_config(config, config_path,):
     )
     touch(f"generated/__init__.py", "")
     touch(f"generated/logger.py", logger)
-    touch(f"generated/middleware/__init__.py", jwt_middleware)
+    touch(f"generated/middleware/__init__.py", 
+        populate_string(
+            jwt_middleware,
+            dict(
+                jwt_header=jwt_config.get('header_name',) or 'Authorization',
+                jwt_sheme=jwt_config.get('header_scheme', 'Bearer'),
+                jwt_required=bool(jwt_config.get('required')),
+                jwt_secret=jwt_config.get('secret', None),
+                jwt_algorithms=jwt_config.get('algorithms', ['H256']),
+            ),
+        ),
+    )
+
     touch(f"generated/resolvers/__init__.py", resolvers_init)
     touch(
         f"generated/resolvers/support.py",

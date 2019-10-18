@@ -1,0 +1,20 @@
+
+extend type Task {
+   events(where: WindowedEventWhere, cursorField: WindowedEventFields, first: Int, last: Int, after: AnyScalar, before: AnyScalar): WindowedEventConnection
+}
+# if types don't have already the boilerplate i should write it now
+
+type WindowedEventConnection {
+    nodes: [WindowedEvent]
+    pageInfo: PageInfo
+}
+
+input WindowedEventWhere { 
+    value: WhereFloat
+    timestamp: WhereFloat
+}
+
+enum WindowedEventFields {
+    value
+    timestamp
+}

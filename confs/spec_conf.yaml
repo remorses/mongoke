@@ -1,9 +1,8 @@
 db_url: mongodb://localhost:27109/db
 
 jwt:
-    secret: ''
     algorithms: [H256]
-    role_key: X-Mongoko-Role
+    required: true
 
 skema: |
     User:

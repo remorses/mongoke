@@ -1,0 +1,5 @@
+
+extend type User {
+   likes_over_time(where: WindowedEventWhere, cursorField: WindowedEventFields, first: Int, last: Int, after: AnyScalar, before: AnyScalar): WindowedEventConnection
+}
+# if types don't have already the boilerplate i should write it now

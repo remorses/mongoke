@@ -1,0 +1,73 @@
+
+
+type Query {
+    mongoke_version: String
+}
+
+enum Direction {
+    ASC
+    DESC
+}
+
+
+input WhereString {
+    in: [String]
+    nin: [String]
+    eq: String
+    neq: String
+}
+
+input WhereID {
+    in: [ID]
+    nin: [ID]
+    eq: ID
+    neq: ID
+}
+
+input WhereObjectId {
+    in: [ObjectId]
+    nin: [ObjectId]
+    eq: ObjectId
+    neq: ObjectId
+}
+
+input WhereBoolean {
+    in: [Boolean]
+    nin: [Boolean]
+    eq: Boolean
+    neq: Boolean
+}
+
+input WhereInt {
+    in: [Int]
+    nin: [Int]
+    eq: Int
+    neq: Int
+}
+
+input WhereJson {
+    in: [Json]
+    nin: [Json]
+    eq: Json
+    neq: Json
+}
+
+input WhereFloat {
+    in: [Float]
+    nin: [Float]
+    eq: Float
+    neq: Float
+}
+
+
+
+type PageInfo {
+    endCursor: AnyScalar
+    startCursor: AnyScalar
+    hasNextPage: Boolean
+    hasPreviousPage: Boolean
+}
+
+scalar Json
+scalar ObjectId
+scalar AnyScalar

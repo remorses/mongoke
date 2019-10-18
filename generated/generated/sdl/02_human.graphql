@@ -1,0 +1,27 @@
+
+extend type Query {
+    humans(where: HumanWhere, cursorField: HumanFields, first: Int, last: Int, after: AnyScalar, before: AnyScalar): HumanConnection
+    human(where: HumanWhere,): Human
+}
+
+type HumanConnection {
+    nodes: [Human]
+    pageInfo: PageInfo
+}
+
+input HumanWhere { 
+    and: [HumanWhere]
+    or: [HumanWhere]
+    # $not: [HumanWhere]
+    type: WhereString
+    _id: WhereObjectId
+    name: WhereString
+    surname: WhereString
+}
+
+enum HumanFields {
+    type
+    _id
+    name
+    surname
+}
