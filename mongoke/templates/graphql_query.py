@@ -25,8 +25,8 @@ input Where{scalar} {'{'}
 
 
 type PageInfo {
-    endCursor: AnyScalar
     startCursor: AnyScalar
+    endCursor: AnyScalar
     hasNextPage: Boolean
     hasPreviousPage: Boolean
 }
@@ -56,7 +56,13 @@ extend type Query {
 
 type ${{type_name}}Connection {
     nodes: [${{type_name}}]!
+    edges: [${{type_name}}Edge]!
     pageInfo: PageInfo!
+}
+
+type ${{type_name}}Edge {
+    node: ${{type_name}}
+    cursor: AnyScalar
 }
 
 input ${{type_name}}Where { 
@@ -95,7 +101,13 @@ extend type ${{fromType}} {
 to_many_relation_boilerplate = '''
 type ${{toType}}Connection {
     nodes: [${{toType}}]!
+    edges: [${{toType}}Edge]!
     pageInfo: PageInfo!
+}
+
+type ${{toType}}Edge {
+    node: ${{toType}}
+    cursor: AnyScalar
 }
 
 input ${{toType}}Where { 

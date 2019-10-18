@@ -213,7 +213,7 @@ import pymongo
 from pymongo import ASCENDING, DESCENDING
 from typing import NamedTuple, Union
 import typing
-from funcy import pluck, select_keys, omit
+from funcy import pluck, select_keys, omit, lmap
 from ..scalars import scalar_classes
 
 
@@ -223,6 +223,7 @@ MAX_NODES = 20
 DEFAULT_NODES_COUNT = 10
 
 INPUT_COERCERS = {
+    None: lambda x: x,
     'String': str,
     'Int': int,
     'Float': float,
@@ -232,6 +233,7 @@ INPUT_COERCERS = {
 }
 
 OUTPUT_COERCERS = {
+    None: lambda x: x,
     'String': str,
     'Int': int,
     'Float': float,
@@ -252,8 +254,6 @@ def get_pagination(args,):
         'first': args.get('first'),
         'last': args.get('last'),
     }
-
-
 
 async def connection_resolver(
     collection: AsyncIOMotorCollection,
@@ -347,6 +347,11 @@ async def connection_resolver(
     start_cursor = nodes[0].get(cursorField) if nodes else None
     return {
         'nodes': nodes,
+        'edges': lmap(
+            lambda node: dict(
+                node=node, 
+                cursor=OUTPUT_COERCERS[scalar_name](node.get(cursorField))
+            ), nodes),
         'pageInfo': {
             'endCursor': end_cursor and OUTPUT_COERCERS[scalar_name](end_cursor),
             'startCursor': start_cursor and OUTPUT_COERCERS[scalar_name](start_cursor),
@@ -355,7 +360,11 @@ async def connection_resolver(
         }
     }
 
-
+def make_edge(node, cursorField):
+    return {
+        'node': node,
+        'cursor': node.get(cursorField),
+    }
 
 MONGODB_OPERATORS = [
     'in',
