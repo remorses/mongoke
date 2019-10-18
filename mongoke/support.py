@@ -3,6 +3,14 @@ import os.path
 import requests
 from funcy import pluck, count, merge
 
+skema_defaults = '''
+ObjectId: Any
+DateTime: Any
+Date: Any
+Time: Any
+Json: Any
+'''
+
 def to_string(i, length=2):
     i = str(i)
     prefix = '0' * (length - len(i))
@@ -38,9 +46,9 @@ def get_skema(config, here='./'):
     if "skema_path" in config:
         path = here + config["skema_path"]
         with open(path) as f:
-            return f.read()
+            return f.read() + skema_defaults
     if config.get("skema"):
-        return config.get("skema")
+        return config.get("skema") + skema_defaults
     if config.get("skema_url"):
         r = requests.get(config.get("skema_url"), stream=True)
         skema = ""
@@ -49,5 +57,5 @@ def get_skema(config, here='./'):
             if not buf:
                 break
             skema += buf.decode()
-        return skema
+        return skema + skema_defaults
 

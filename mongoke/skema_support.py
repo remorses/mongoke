@@ -6,17 +6,10 @@ import yaml
 
 HIDE_GRAPHQL = "[graphql hide]"
 
-skema_defaults = '''
-ObjectId: Any
-DateTime: Any
-Date: Any
-Time: Any
-Json: Any
-'''
 
 @lru_cache(maxsize=10)
 def get_schema(skema_schema):
-    return skema.to_jsonschema(skema_schema + skema_defaults, resolve=False)
+    return skema.to_jsonschema(skema_schema, resolve=False)
 
 def get_skema_aliases(skema_schema):
     definitions = get_schema(skema_schema).get(
