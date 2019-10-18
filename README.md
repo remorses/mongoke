@@ -101,7 +101,7 @@ services:
 
 ## Todo:
 - ~~publish the docker image (after tartiflette devs fix extend type issue)~~
-- ~~resolve issue connection nodes must all have an _id field because it is default cursor field
+- ~~resolve issue connection nodes must all have an _id field because it is default cursor field~~
 - integration tests for all the resolver types
 - integration tests for the relations
 - ~~add pipelines feature to all resolvers (adding a custom find and find_one made with aggregate)~~
