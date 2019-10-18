@@ -1,7 +1,7 @@
 # Mongoke documentation
 
 - [Configuration](./configuration.md)
-- [database Schema]()
+- [Database Schema]()
 - [Graphql Queries]()
-- [Docker usage]()
+- [Docker Usage]()
 - [Apollo Federation]()

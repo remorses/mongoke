@@ -46,6 +46,7 @@ Skema has some built in types:
 - Int
 - Float
 - Any
+
 In mongoke there are some additional scalars implemented by default:
 - DateTime
 - ObjectId

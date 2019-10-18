@@ -1,6 +1,6 @@
 ## Environment variables
 The accepted evn vars are:
-- **DB_URL** the mongodb database url, **the url must contains the database name!**, for example `mongodb://localhost/db`
+- **DB_URL** the mongodb database url, **the url must contains the database name**, for example `mongodb://localhost/db`
 
 ## Compose
 The docker image is hosted on docker hub and has name `mongoke/mongoke`, every time the container is started the python code is generated based on the configuration given at path `/conf.yml`.
