@@ -39,13 +39,14 @@ Url: Str
 ```
 
 # Index
-- [skema](#skema)
-- [types](#types)
-- [relations](#relations)
-- [jwt](#jwt)
+- [skema](#Skema)
+- [types](#Types)
+- [guards](#Guards)
+- [relations](#Relations)
+- [jwt](#Jwt configuration)
 
 
-# skema
+# Skema
 Skema defines the database documents shape, written in the skema language.
 The skema can be provided in 3 different ways:
 - inline as a string using the `skema` field
@@ -57,7 +58,7 @@ The skema can be provided in 3 different ways:
     skema_path?: Str
 ```
 
-# types
+# Types
 Individual types config defined as an object where keys are the type names and values are the type configuration.
 ```
 types:
