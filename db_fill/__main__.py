@@ -16,7 +16,7 @@ async def main(config, url, custom_resolvers={}):
         schema = get_skema(config)
         for typename, config in config['types'].items():
             collection = config['collection']
-            items = skema.fake_data(schema, ref=typename, amount=10, cutom_types=custom_resolvers)
+            items = skema.fake_data(schema, ref=typename, amount=10, resolvers=custom_resolvers)
             # print(dir(db[collection]))
             collection: Collection = db[collection]
             print(f'persisting {len(items)} documents in {collection.name} in db {collection.database.name}')

@@ -12,7 +12,6 @@ setup(
     author='Tommaso De Rossi',
     author_email='daer.tommy@gmail.com',
     license='Apache Software License 2.0',
-
     url=f'https://github.com/remorses/{NAME}',
     keywords=['TODO'],
     install_requires=[x for x in open('./requirements.txt').read().strip().split('\n') if x.strip()],

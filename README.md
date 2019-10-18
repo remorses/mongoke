@@ -30,6 +30,7 @@ The fastest way to try Mongoke is via docker-compose.
             email: Str
         BlogPost:
             _id: ObjectId
+            title: Str
             author_id: ObjectId
             content: Str
     types:
@@ -63,19 +64,31 @@ The fastest way to try Mongoke is via docker-compose.
             image: mongo
             logging: 
                 driver: none
-
     ```
 3. Query the generated service via graphql or go to `http://localhost:4000` to open graphiql
     ```graphql
     {
-      author(where: {name: "Joseph"}) {
-        name
-        articles {
-          nodes {
-            content
-          }
+        user(where: {name: {eq: "jhon"}) {
+            _id
+            name
+            email
+            posts {
+                nodes {
+                    title
+                }
+            }
         }
-      }
+
+        blogPosts(first: 10, after: "Post 1", cursorField: title) {
+            nodes {
+                title
+                content
+            }
+            pageInfo {
+                endCursor
+                hasNextPage
+            }
+        }
     }
     ```
 ------

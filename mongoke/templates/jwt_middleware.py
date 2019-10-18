@@ -22,7 +22,7 @@ async def jwt_middleware(app, handler):
                 raise web.HTTPUnauthorized(
                     reason='Missing authorization token',
                 )
-                """) if jwt_required else indent_to('            ', 'pass')
+                """) if jwt_required else indent_to('            ', 'return await handler(request)')
             }}
         try:
             payload = jwt.decode(jwt_token, verify=${{ repr(bool(jwt_required)) }}, secret=${{ repr(jwt_secret) }}, algorithms=[JWT_ALGORITHMS])

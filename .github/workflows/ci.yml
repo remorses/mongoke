@@ -5,9 +5,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
+    - name: Bump version
+      uses: remorses/bump-version@js
+      with:
+        version_file: VERSION
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Publish to Registry
       uses: elgohr/Publish-Docker-Github-Action@master
       with:
         name: mongoke/mongoke
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Publish
+        uses: remorses/pypi@master
+        with:
+          username: ${{ secrets.pypi_username }}
+          password: ${{ secrets.pypi_password }}
