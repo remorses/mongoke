@@ -1,7 +1,17 @@
 
 extend type Query {
-    humans(where: HumanWhere, cursorField: HumanFields, first: Int, last: Int, after: AnyScalar, before: AnyScalar): HumanConnection
-    human(where: HumanWhere,): Human
+    humans(
+        where: HumanWhere, 
+        cursorField: HumanFields, 
+        first: Int, 
+        last: Int, 
+        after: AnyScalar, 
+        before: AnyScalar
+    ): HumanConnection
+
+    human(
+        where: HumanWhere,
+    ): Human
 }
 
 type HumanConnection {

@@ -9,9 +9,12 @@ from tartiflette_plugin_apollo_federation import ApolloFederationPlugin
 import asyncio
 
 from .engine import CustomEngine
+import generated.generated.resolvers.user
+import generated.generated.resolvers.users
 import generated.generated.resolvers.human
 import generated.generated.resolvers.humans
 import generated.generated.resolvers.task_events
+import generated.generated.resolvers.user_friends
 import generated.generated.resolvers.user_likes_over_time
 import generated.generated.resolvers.user_father
 import generated.generated.scalars

@@ -1,0 +1,12 @@
+
+extend type User {
+   friends(
+       where: UserWhere, 
+       cursorField: UserFields, 
+       first: Int, 
+       last: Int, 
+       after: AnyScalar, 
+       before: AnyScalar
+    ): UserConnection
+}
+# if types don't have already the boilerplate i should write it now

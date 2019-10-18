@@ -31,6 +31,9 @@ types:
     Task:
         collection: tasks
         exposed: false
+    User:
+        collection: users
+        
     Human:
         collection: humans
         guards:
@@ -62,6 +65,11 @@ relations:
         to: WindowedEvent
         relation_type: to_many
         field: events
+        where: {}
+    -   from: User
+        to: User
+        relation_type: to_many
+        field: friends
         where: {}
     -   from: User
         to: WindowedEvent

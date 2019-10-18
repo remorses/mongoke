@@ -40,8 +40,18 @@ scalar AnyScalar
 # query_name
 graphql_query = '''
 extend type Query {
-    ${{query_name}}s(where: ${{type_name}}Where, cursorField: ${{type_name}}Fields, first: Int, last: Int, after: AnyScalar, before: AnyScalar): ${{type_name}}Connection
-    ${{query_name}}(where: ${{type_name}}Where,): ${{type_name}}
+    ${{query_name}}(
+        where: ${{type_name}}Where,
+    ): ${{type_name}}
+    
+    ${{query_name}}s(
+        where: ${{type_name}}Where, 
+        cursorField: ${{type_name}}Fields, 
+        first: Int, 
+        last: Int, 
+        after: AnyScalar, 
+        before: AnyScalar
+    ): ${{type_name}}Connection
 }
 
 type ${{type_name}}Connection {
@@ -71,7 +81,14 @@ extend type ${{fromType}} {
 
 to_many_relation = '''
 extend type ${{fromType}} {
-   ${{relationName}}(where: ${{toType}}Where, cursorField: ${{toType}}Fields, first: Int, last: Int, after: AnyScalar, before: AnyScalar): ${{toType}}Connection
+   ${{relationName}}(
+       where: ${{toType}}Where, 
+       cursorField: ${{toType}}Fields, 
+       first: Int, 
+       last: Int, 
+       after: AnyScalar, 
+       before: AnyScalar
+    ): ${{toType}}Connection
 }
 # if types don't have already the boilerplate i should write it now
 '''

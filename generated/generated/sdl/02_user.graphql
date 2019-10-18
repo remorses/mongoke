@@ -1,0 +1,37 @@
+
+extend type Query {
+    users(
+        where: UserWhere, 
+        cursorField: UserFields, 
+        first: Int, 
+        last: Int, 
+        after: AnyScalar, 
+        before: AnyScalar
+    ): UserConnection
+
+    user(
+        where: UserWhere,
+    ): User
+}
+
+type UserConnection {
+    nodes: [User]
+    pageInfo: PageInfo
+}
+
+input UserWhere { 
+    and: [UserWhere]
+    or: [UserWhere]
+    # $not: [UserWhere]
+    type: WhereString
+    _id: WhereID
+    name: WhereString
+    surname: WhereString
+}
+
+enum UserFields {
+    type
+    _id
+    name
+    surname
+}

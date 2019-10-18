@@ -10,20 +10,6 @@ enum Direction {
 }
 
 
-input WhereString {
-    in: [String]
-    nin: [String]
-    eq: String
-    neq: String
-}
-
-input WhereID {
-    in: [ID]
-    nin: [ID]
-    eq: ID
-    neq: ID
-}
-
 input WhereObjectId {
     in: [ObjectId]
     nin: [ObjectId]
@@ -31,11 +17,18 @@ input WhereObjectId {
     neq: ObjectId
 }
 
-input WhereBoolean {
-    in: [Boolean]
-    nin: [Boolean]
-    eq: Boolean
-    neq: Boolean
+input WhereString {
+    in: [String]
+    nin: [String]
+    eq: String
+    neq: String
+}
+
+input WhereFloat {
+    in: [Float]
+    nin: [Float]
+    eq: Float
+    neq: Float
 }
 
 input WhereInt {
@@ -45,18 +38,25 @@ input WhereInt {
     neq: Int
 }
 
+input WhereBoolean {
+    in: [Boolean]
+    nin: [Boolean]
+    eq: Boolean
+    neq: Boolean
+}
+
+input WhereID {
+    in: [ID]
+    nin: [ID]
+    eq: ID
+    neq: ID
+}
+
 input WhereJson {
     in: [Json]
     nin: [Json]
     eq: Json
     neq: Json
-}
-
-input WhereFloat {
-    in: [Float]
-    nin: [Float]
-    eq: Float
-    neq: Float
 }
 
 
