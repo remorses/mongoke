@@ -43,7 +43,7 @@ Url: Str
 - [types](#Types)
 - [guards](#Guards)
 - [relations](#Relations)
-- [jwt](#Jwt configuration)
+- [jwt](#Jwt-configuration)
 
 
 # Skema
