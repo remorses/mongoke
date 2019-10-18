@@ -8,7 +8,7 @@ from tartiflette_aiohttp import register_graphql_handlers
 from tartiflette_plugin_apollo_federation import ApolloFederationPlugin
 import asyncio
 
-from .engine import CustomEngine
+from .engine import CustomEngine, read
 ${{'\\n'.join([f'import {root_dir_name}.generated.resolvers.{name}' for name in resolver_names])}}
 import ${{root_dir_name}}.generated.scalars
 from ${{root_dir_name}}.generated.middleware import jwt_middleware
@@ -21,6 +21,8 @@ sdl_dir = f'{here}/generated/sdl/'
 sdl_files = sorted(os.listdir(sdl_dir))
 # print(sdl_files)
 sdl_files = [sdl_dir + f for f in sdl_files]
+
+GRAPHIQL_QUERY = os.getenv("GRAPHIQL_DEFAULT_QUERY", "") or read(os.getenv('GRAPHIQL_DEFAULT_QUERY_FILE_PATH', ''))
 
 def build(db):
     app = web.Application(middlewares=[jwt_middleware])
@@ -37,13 +39,12 @@ def build(db):
         executor_context=context,
         executor_http_endpoint='/',
         executor_http_methods=['POST', 'GET',],
-        graphiql_enabled=True,
         engine_modules=[
             ApolloFederationPlugin(engine_sdl=sdl_files)
         ],
         graphiql_enabled=os.getenv("DISABLE_GRAPHIQL", True),
         graphiql_options={
-            "default_query": os.getenv("GRAPHIQL_DEFAULT_QUERY", ""),
+            "default_query": GRAPHIQL_QUERY,
             "default_variables": {},
             "default_headers": {
                 "Authorization": "Bearer " + os.getenv("GRAPHIQL_DEFAULT_JWT", "")

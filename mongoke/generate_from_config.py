@@ -49,7 +49,7 @@ SCALARS_ALREADY_IMPLEMENTED = [
 
 
 def add_guards_defaults(guard):
-    guard["when"] = guard.get("when") or "before"
+    guard["when"] = guard.get("when") or "after"
     guard["excluded"] = guard.get("excluded") or []
     return guard
 

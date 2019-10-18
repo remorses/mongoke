@@ -5,6 +5,11 @@ from .generated.logger import logger
 from tartiflette.types.exceptions.tartiflette import TartifletteError
 import traceback
 
+def read(path):
+    if path:
+        with open(path) as f:
+            return f.read()
+    return ''
 
 async def my_error_coercer(
     exception: TartifletteError, error: Dict[str, Any]
