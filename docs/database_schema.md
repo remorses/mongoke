@@ -1,4 +1,4 @@
-## Database types
+# Database types
 
 mongodb is a schemaless database, you can put whatever you like inside it, but to generate automatically an api the configuration must specify a schema that describes the expected documents shape for every exposed collection.
 To do this in mongoke we use a language made just for types, skema.

@@ -1,4 +1,4 @@
-## Relations
+# Relations
 relations are defined in the configuration with the following shape
 ```
 skema:

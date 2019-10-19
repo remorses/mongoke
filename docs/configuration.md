@@ -1,12 +1,9 @@
-
-
-
 # Configuration
 
 Mongoke defines its entire configuration in a yaml file that can be used to generate the entire graphql server.
 This configuration can be used inside the docker image in the default path `/config.yml`.
-The configuration has the following shape:
-```
+The configuration has the following schema (the language used below is [skema](https://github.com/remorses/skema)):
+```yml
 Configuration:
     skema?: Str
     skema_url?: Url
@@ -37,11 +34,10 @@ Configuration:
         required?: Bool
         algorithms?: ["H256" | "HS512" | "HS384" | "RS256" | "RS384" | "RS512" | "ES256" | "ES384" | "ES521" | "ES512" | "PS256" | "PS384" | "PS512"]
 
-
 Url: Str
 ```
 
-# Index
+## Index
 - [skema](#Skema)
 - [types](#Types)
 - [guards](#Guards)
