@@ -1,6 +1,7 @@
 # Generated queries
 
-every type defined in the configurations and associated with a collection will generate a graphql query for a single document and for many documents in the form of a connection.
+Every type defined in the configurations and associated with a collection will generate a graphql query for a single document and for many documents in the form of a connection.
+The best way to explore the queries shape is follow the [quickstart](../README.md) guide and open graphiql to explore the possible queries
 
 For example having the following type you can do the following queries
 ```

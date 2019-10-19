@@ -23,7 +23,7 @@
 The fastest way to try Mongoke is via docker-compose.
 
 ### 1. Write the configuration to describe the database schema and relations
-The configuration uses the skema language to describe the database shape, to read more about skema go [here](https://github.com/remorses/skema)
+The configuration is written in yaml and uses the [`skema`](https://github.com/remorses/skema) language to describe the database shape, read more about skema [here](https://github.com/remorses/skema)
 ```yml
 # ./mongoke.yml
 skema: |
@@ -51,7 +51,7 @@ relations:
         where:
             author_id: ${{ parent['_id'] }}
 ```
-### 2. Run the mongoke image with the above configuration via docker-compose up
+### 2. Run the `mongoke` image with the above configuration
 To start the container mount copy paste the following content in a `docker-compose.yml` file, then execute `docker-compose up`.
 ```yml
 # docker-compose.yml
@@ -117,7 +117,7 @@ Please help the project making new tutorials and submit a issue to list it here!
 Low priority
 - ~~`required` config field, add verify the jwt with the secret if provided~~
 - ~~add schema validation to the configuration~~
-- add subscriptions
+- subscriptions
 - ~~add `edges` to make connection type be relay compliant~~
 - better performance of connection_resolver removing the $skip and $count
 - add a dataloader for single connections
