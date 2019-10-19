@@ -98,7 +98,7 @@ guards?: [
 ]
 ```
 
-### when 
+### when 
 decides if you want to evaluate the expression before or after querying the database, if you use before you save resources but have access to only the user jwt (if any) and not to the document to decide if user is authorized 
 
 ### expression
