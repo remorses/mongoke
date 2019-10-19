@@ -2,6 +2,7 @@
 The accepted evn vars are:
 - **DB_URL** the mongodb database url, **the url must contains the database name**, for example `mongodb://localhost/db`
 - **DISABLE_GRAPHIQL** disable graphiql endpoint
+- **HIDE_ERRORS_TRACEBACK** disables the console errors traceback, useful in production to not bloat the logs
 - **GRAPHIQL_DEFAULT_QUERY** the query showed in the graphiql panel, default is ''
 - **GRAPHIQL_DEFAULT_QUERY_FILE_PATH** the query showed in the graphiql panel, loaded inside a file
 - **GRAPHIQL_DEFAULT_JWT** the default jwt used in graphiql headers panel

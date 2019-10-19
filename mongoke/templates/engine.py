@@ -1,4 +1,5 @@
 engine = '''
+import os
 from tartiflette import Engine
 from typing import *
 from .generated.logger import logger
@@ -16,7 +17,7 @@ async def my_error_coercer(
 ) -> Dict[str, Any]:
 
     ex = exception.original_error
-    if ex:
+    if ex and not os.getenv('HIDE_ERRORS_TRACEBACK'):
         trace = "\\n".join(
             traceback.format_exception(etype=type(ex), value=ex, tb=ex.__traceback__)
         )
