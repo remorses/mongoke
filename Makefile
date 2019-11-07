@@ -5,6 +5,10 @@
 clean:
 	rm -rf generated
 
+.PHONY: clean
+image:
+	docker build . -t mongoke/mongoke
+
 config-schema:
 	skema generate configuration_schema.skema --jsonschema ./mongoke/config_schema.json
 

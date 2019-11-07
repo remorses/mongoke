@@ -10,7 +10,7 @@ from graphql.language import (
     EnumTypeDefinitionNode,
 )
 from .support import find, unique
-
+from .constants import SCALAR_TYPES
 
 @lru_cache(maxsize=10)
 def parse_graphql_schema(schema) -> DocumentNode:
@@ -61,8 +61,7 @@ def get_scalar_fields(graphql_schema, typename):
 
 
 def is_scalar(typename):
-    SCALARS = ["String", "Int", "Float", "Boolean", "ID"]
-    ok = typename in SCALARS
+    ok = typename in SCALAR_TYPES
     return ok
 
 @collecting

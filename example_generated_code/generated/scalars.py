@@ -17,9 +17,9 @@ ObjectIdScalar(ObjectId)
 
 
 
-AddressScalar = Scalar("Address")
-@AddressScalar
-class AddressClass:
+UrlScalar = Scalar("Url")
+@UrlScalar
+class UrlClass:
     @staticmethod
     def coerce_input(val):
         return val
@@ -33,9 +33,9 @@ class AddressClass:
 
 
 
-UrlScalar = Scalar("Url")
-@UrlScalar
-class UrlClass:
+AddressScalar = Scalar("Address")
+@AddressScalar
+class AddressClass:
     @staticmethod
     def coerce_input(val):
         return val

@@ -34,18 +34,7 @@ from .support import make_touch, pretty, get_types_schema
 from .graphql_support import get_scalar_fields, get_graphql_scalars
 from .naming import get_query_name, get_relation_filename, get_resolver_filenames
 from .generators import generate_relation_boilerplate, generate_type_boilerplate
-
-SCALAR_TYPES = ["String", "Float", "Int", "Boolean", "Json", "ID"]
-SCALARS_ALREADY_IMPLEMENTED = [
-    "ID",
-    "ObjectId",
-    "Json",
-    "Date",
-    "DateTime",
-    "Time",
-    *SCALAR_TYPES,
-]
-
+from .constants import SCALAR_TYPES, SCALARS_ALREADY_IMPLEMENTED
 
 def add_guards_defaults(guard):
     guard["when"] = guard.get("when") or "after"
