@@ -2,12 +2,11 @@
 
 Mongoke defines its entire configuration in a yaml file that can be used to generate the entire graphql server.
 This configuration can be used inside the docker image in the default path `/config.yml`.
-The configuration has the following schema (the language used below is [skema](https://github.com/remorses/skema)):
 ```yml
 Configuration:
-    skema?: Str
-    skema_url?: Url
-    skema_path?: Str
+    schema?: Str
+    schema_url?: Url
+    schema_path?: Str
     types:
         ...:
             collection: Str
@@ -44,18 +43,6 @@ Url: Str
 - [relations](#Relations)
 - [jwt](#Jwt-configuration)
 
-
-# Skema
-Skema defines the database documents shape, written in the skema language.
-The skema can be provided in 3 different ways:
-- inline as a string using the `skema` field
-- as a file providing the skema_path, the path is resolved relative to the configuration path.
-- as an url using `skema_url`, useful for big projects where the same skema is used for different things and can then be hosted as a github gist to be used to keep in sync all the other services generating the code types for other languages, read more about skema generation capabilities in the [skema](https://github.com/remorses/skema) repository.
-```
-    skema?: Str
-    skema_url?: Url
-    skema_path?: Str # relative to the configuration dir
-```
 
 # Types
 Individual types config defined as an object where keys are the type names and values are the type configuration.

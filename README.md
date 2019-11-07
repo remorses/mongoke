@@ -23,19 +23,21 @@
 The fastest way to try Mongoke is via docker-compose.
 
 ### 1. Write the configuration to describe the database schema and relations
-The configuration is written in yaml and uses the [`skema`](https://github.com/remorses/skema) language to describe the database shape, read more about skema [here](https://github.com/remorses/skema)
+The ObjectId scalar is already defined by default, it is converted to string when sent as json
 ```yml
 # ./mongoke.yml
-skema: |
-    User:
+schema: |
+    type User {
         _id: ObjectId
         username: Str
         email: Str
-    BlogPost:
+    }
+    type BlogPost {
         _id: ObjectId
         author_id: ObjectId
         title: Str
         content: Str
+    }
 
 types:
     User:
@@ -106,6 +108,7 @@ Please help the project making new tutorials and submit a issue to list it here!
 ------
 
 ## Todo:
+- ~~use graphql to define the schema~~
 - ~~publish the docker image (after tartiflette devs fix extend type issue)~~
 - ~~resolve issue connection nodes must all have an _id field because it is default cursor field~~
 - integration tests for all the resolver types

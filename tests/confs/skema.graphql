@@ -1,0 +1,43 @@
+type Event {
+    _id: ObjectId
+    bot_id: ObjectId
+    type: Type
+    likes: Int
+    timestamp: Float
+}
+
+type EventWindow {
+    value: Int
+    timestamp: Int
+}
+
+union Campaign = MessageCampaign | PostCampaign
+
+type PostCampaign {
+    _id: ObjectId
+    bot_id: ObjectId
+    posts: [String]
+}
+
+type MessageCampaign {
+    _id: ObjectId
+    bot_id: ObjectId
+    messages: [String]
+}
+
+type User {
+    bot_id: ObjectId
+    name: String
+    surname: String
+}
+
+type Bot {
+    _id: ObjectId
+    user_id: ObjectId
+    username: String
+}
+
+enum Type {
+    like
+    bo
+}

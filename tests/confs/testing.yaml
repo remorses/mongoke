@@ -4,9 +4,7 @@ jwt:
     secret: ''
     algorithms: [H256]
 
-# skema: |
-# skema_url: https://gist.githubusercontent.com/remorses/4f591ebbd772545147ba1b3a334b631e/raw/social-automata-domain.skema
-skema_path: skema
+schema_path: schema.graphql
 
 
 types:

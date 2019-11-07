@@ -10,7 +10,7 @@ services:
         command: /conf.yml
         volumes: 
             - ./confs/testing.yaml:/conf.yml
-            - ./confs/skema:/skema
+            - ./confs/schema.graphql:/schema.graphql
         environment: 
             - PYTHONUNBUFFERED=1
             - DB_URL=mongodb://mongo/db

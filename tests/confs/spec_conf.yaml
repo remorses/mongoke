@@ -49,9 +49,6 @@ schema: |
     union Human = User | Guest
 
 
-# skema_url: https://gist.githubusercontent.com/remorses/4f591ebbd772545147ba1b3a334b631e/raw/049d320dd3da36440d2bb0a8c0e85d3906b4b320/social-automata-domain.skema
-
-
 types:
     Task:
         collection: tasks

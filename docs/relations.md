@@ -1,7 +1,7 @@
 # Relations
 relations are defined in the configuration with the following shape
 ```
-skema:
+schema:
     ...
 types: 
     ...
@@ -17,13 +17,15 @@ relations?: [
 
 One example of a configuration with a one `to_one` relation:
 ```
-skema: |
-    Owner:
+schema: |
+    type Owner {
         _id: ObjectId
         email: Str
-    Pet:
+    }
+    type Pet {
         name: Str
         owner_id: ObjectId
+    }
 
 types:
     Owner:
@@ -40,17 +42,20 @@ relations:
 ```
 An example of a `to_many` relation:
 ```
-skema: |
-    Owner:
+schema: |
+    type Owner {
         _id: ObjectId
         email: Str
-    Pet:
+    }
+    type Pet {
         name: Str
         owner_id: ObjectId
         zoo_id: ObjectId
-    Zoo:
+    }
+    type Zoo {
         _id: ObjectId
         address: Str
+    }
 
 types:
     Owner:

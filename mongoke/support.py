@@ -9,13 +9,6 @@ def get_config_schema():
     with open(os.path.dirname(__file__) +  '/config_schema.json') as f:
         return json.loads(f.read())
 
-skema_defaults = '''
-ObjectId: Any
-DateTime: Any
-Date: Any
-Time: Any
-Json: Any
-'''
 
 def to_string(i, length=2):
     i = str(i)
@@ -77,5 +70,5 @@ def get_types_schema(config, here='./'):
             if not buf:
                 break
             skema += buf.decode()
-        return skema + skema_defaults
+        return skema
 

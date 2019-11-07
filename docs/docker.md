@@ -10,7 +10,7 @@ The accepted evn vars are:
 ## Compose
 The docker image is hosted on docker hub and has name `mongoke/mongoke`, every time the container is started the python code is generated based on the configuration given at path `/conf.yml`.
 When used in docker-compose the code won't be generated unless the configuration changed, to force the regeneration use the command `docker-compose up -V`
-When using an external skema configuration you must mount the file inside the container as a volume.
+When using an external schema configuration you must mount the file inside the container as a volume.
 An example on a docker-compose file:
 ```yml
 version: '3'
@@ -20,7 +20,7 @@ services:
         image: mongoke/mongoke
         volumes: 
             - ./confs/testing.yaml:/conf.yml
-            - ./confs/skema:/skema
+            - ./confs/schema:/schema
         environment: 
             - DB_URL=mongodb://mongo/db
     mongo:
@@ -38,7 +38,7 @@ services:
         image: mongoke/mongoke
         configs:
             - conf.yml
-            - domain.skema
+            - schema.graphql
         environment: 
             - DB_URL=mongodb://mongo/db
     mongo:
@@ -47,9 +47,9 @@ services:
             driver: none
 
 configs:
-    domain.skema:
-        name: domain-${domain_sum}.skema
-        file: domain.skema
+    schema.graphql:
+        name: domain-${domain_sum}.graphql
+        file: schema.graphql
     conf.yml:
         name: mongoke_conf-${mongoke_sum}.yml
         file: mongoke_conf.yaml
@@ -57,7 +57,7 @@ configs:
 Then to deploy the swarm add the env vars for the config versioning (configs in swarm are immutable and their name must change when the config content changes)
 ```sh
 mongoke_sum=`cat mongoke_conf.yaml | md5` \
-domain_sum=`cat domain.skema | md5` \
+domain_sum=`cat schema.graphql | md5` \
 docker --host ssh://your-server.com stack deploy -c stack.yml stackname
 ```
 
@@ -82,7 +82,7 @@ services:
         image: mongoke/mongoke
         volumes: 
             - ./confs/testing.yaml:/conf.yml
-            - ./confs/skema:/skema
+            - ./confs/schema:/schema
         environment: 
             - DB_URL=mongodb://mongo/db
     server:
