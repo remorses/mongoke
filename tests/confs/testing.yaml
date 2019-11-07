@@ -1,11 +1,10 @@
 
 
 jwt:
-    secret: ''
+    secret: 'xxx'
     algorithms: [H256]
 
 schema_path: schema.graphql
-
 
 types:
     User:
