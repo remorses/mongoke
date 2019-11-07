@@ -65,6 +65,9 @@ def is_scalar(typename):
     ok = typename in SCALARS
     return ok
 
-
+@collecting
 def get_graphql_scalars(schema,) -> List[str]:  # TODO
-    return []
+    doc = parse_graphql_schema(schema)
+    for node in  doc.definitions:
+        if isinstance(node, ScalarTypeDefinitionNode):
+            yield node.name.value

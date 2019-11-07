@@ -23,8 +23,12 @@ jwt:
 #     Human: User | Guest
 
 schema: |
+    scalar Address
+    scalar Url
+
     type Task {
         _id: ID
+        address: Address
     }
 
     type WindowedEvent {
@@ -44,6 +48,7 @@ schema: |
         name: String
         surname: String
         friends_ids: [ID]
+        url: Url
     }
 
     union Human = User | Guest
