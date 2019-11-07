@@ -14,8 +14,8 @@ def filter_nodes_by_guard(nodes, fields, jwt):
 
 
 map_fields_to_types = {
-        "value": "Float",
-        "timestamp": "Float"
+        "value": "Int",
+        "timestamp": "Int"
     }
 
 pipeline: list = [

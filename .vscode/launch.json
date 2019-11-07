@@ -9,7 +9,8 @@
             "name": "Python: Modulo",
             "type": "python",
             "request": "launch",
-            "module": "src"
+            "module": "mongoke",
+            "args": ["tests/confs/spec_conf.yaml","--generated-path","example_generated_code"]
         },
         {
             "name": "Python: Generated",

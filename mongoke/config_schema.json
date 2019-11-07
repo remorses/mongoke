@@ -10,30 +10,19 @@
                 "types"
             ],
             "properties": {
-                "db_url": {
+                "schema": {
                     "type": "string",
-                    "pattern": "mongodb://.*",
-                    "title": "db_url",
+                    "title": "schema",
                     "description": ""
                 },
-                "root_dir_path": {
-                    "type": "string",
-                    "title": "root_dir_path",
-                    "description": ""
-                },
-                "skema": {
-                    "type": "string",
-                    "title": "skema",
-                    "description": ""
-                },
-                "skema_url": {
+                "schema_url": {
                     "$ref": "#/definitions/Url",
-                    "title": "skema_url",
+                    "title": "schema_url",
                     "description": ""
                 },
-                "skema_path": {
+                "schema_path": {
                     "type": "string",
-                    "title": "skema_path",
+                    "title": "schema_path",
                     "description": ""
                 },
                 "types": {

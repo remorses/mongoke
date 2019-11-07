@@ -1,20 +1,15 @@
-union Human = User | Guest
-
 type Task {
     _id: ID
 }
-
 type WindowedEvent {
     value: Int
     timestamp: Int
 }
-
 type Guest {
     type: String
     _id: ObjectId
     name: String
 }
-
 type User {
     type: String
     _id: ID
@@ -22,3 +17,4 @@ type User {
     surname: String
     friends_ids: [ID]
 }
+union Human = User | Guest

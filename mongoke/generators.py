@@ -3,15 +3,14 @@ import sys
 from typing import *
 
 import requests
-import skema
+
 import yaml
 from funcy import collecting, lcat, lmap, merge, omit, remove
 from populate import populate_string
-from skema.to_graphql import to_graphql
 
 from .naming import get_query_name, get_relation_filename, get_resolver_filenames
-from .skema_support import get_scalar_fields, get_skema_aliases
-from .support import get_skema, make_touch, pretty
+from .graphql_support import get_scalar_fields
+from .support import get_types_schema, make_touch, pretty
 from .templates.engine import engine
 from .templates.graphql_query import (
     general_graphql,
@@ -84,12 +83,12 @@ def generate_type_sdl(schema, typename, guards, query_name, is_aggregation=False
 
 
 def generate_type_boilerplate(
-    touch, skema_schema, typename, guards, disambiguations, collection, pipeline
+    touch, schema, typename, guards, disambiguations, collection, pipeline
 ):
     query_name = get_query_name(typename)
 
     query_subset = generate_type_sdl(
-        skema_schema, guards=guards, typename=typename, query_name=query_name
+        schema, guards=guards, typename=typename, query_name=query_name
     )
     touch(f"generated/sdl/{query_name}.graphql", query_subset, index=True)
     single_resolver, many_resolver = generate_resolvers(
@@ -99,7 +98,7 @@ def generate_type_boilerplate(
         guards=guards,
         query_name=query_name,
         pipeline=pipeline,
-        map_fields_to_types=dict(get_scalar_fields(skema_schema, typename)),
+        map_fields_to_types=dict(get_scalar_fields(schema, typename)),
     )
     touch(f"generated/resolvers/{get_query_name(typename)}.py", single_resolver)
     touch(f"generated/resolvers/{get_query_name(typename)}s.py", many_resolver)
@@ -108,7 +107,7 @@ def generate_type_boilerplate(
 def generate_relation_boilerplate(
     where_filter,
     touch,
-    skema_schema,
+    schema,
     relation_type,
     relationName,
     fromType,
@@ -132,7 +131,7 @@ def generate_relation_boilerplate(
                 toType=toType,
                 fromType=fromType,
                 relationName=relationName,
-                fields=get_scalar_fields(skema_schema, toType),
+                fields=get_scalar_fields(schema, toType),
             ),
         )
     touch(f"generated/sdl/{fromType.lower()}_{relationName}.graphql", relation_sdl, index=True)
@@ -151,7 +150,7 @@ def generate_relation_boilerplate(
             disambiguations=[],  # TODO relation guards
             guards_before=[],
             guards_after=[],
-            map_fields_to_types=dict(get_scalar_fields(skema_schema, toType)),
+            map_fields_to_types=dict(get_scalar_fields(schema, toType)),
             **resolvers_dependencies,
         ),
     )

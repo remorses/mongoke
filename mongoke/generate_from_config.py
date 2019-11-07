@@ -1,4 +1,4 @@
-import skema
+
 from shutil import rmtree
 import requests
 from typing import *
@@ -6,7 +6,6 @@ import sys
 from funcy import merge, lmap, collecting, omit, remove, lcat
 from .checksum import make_checksum, existent_checksum
 import yaml
-from skema.to_graphql import to_graphql
 import os.path
 from populate import populate_string
 from .templates.resolvers import (
@@ -31,12 +30,12 @@ from .templates.main import main
 from .templates.jwt_middleware import jwt_middleware
 from .templates.logger import logger
 from .templates.engine import engine
-from .support import make_touch, pretty, get_skema
-from .skema_support import get_scalar_fields, get_skema_aliases
+from .support import make_touch, pretty, get_types_schema
+from .graphql_support import get_scalar_fields, get_graphql_scalars
 from .naming import get_query_name, get_relation_filename, get_resolver_filenames
 from .generators import generate_relation_boilerplate, generate_type_boilerplate
 
-SCALAR_TYPES = ["String", "Float", "Int", "Boolean", "Json"]
+SCALAR_TYPES = ["String", "Float", "Int", "Boolean", "Json", "ID"]
 SCALARS_ALREADY_IMPLEMENTED = [
     "ID",
     "ObjectId",
@@ -73,14 +72,11 @@ def generate_from_config(config, config_path, root_dir_path):
         rmtree(root_dir_path)
     db_url = config.get("db_url", "")
     touch = make_touch(base=os.path.abspath(root_dir_path))
-    skema_schema = get_skema(config, here=config_path)
+    main_graphql_schema = get_types_schema(config, here=config_path)
 
     # TODO add other scalars from the skema
-    scalars = {*SCALAR_TYPES, *get_skema_aliases(skema_schema)}
+    scalars = {*SCALAR_TYPES, *get_graphql_scalars(main_graphql_schema)}
     scalars = list(scalars)
-    main_graphql_schema = to_graphql(
-        skema_schema, hide=SCALARS_ALREADY_IMPLEMENTED
-    )
 
     touch(f"checksum", make_checksum(config, config_path))
     touch(f"__init__.py", "")
@@ -142,7 +138,7 @@ def generate_from_config(config, config_path, root_dir_path):
         disambiguations = lmap(add_disambiguations_defaults, disambiguations)
         generate_type_boilerplate(
             touch=touch,
-            skema_schema=skema_schema,
+            schema=main_graphql_schema,
             collection=type_config.get("collection", ""),
             typename=typename,
             guards=lmap(add_guards_defaults, type_config.get("guards", [])),
@@ -155,7 +151,7 @@ def generate_from_config(config, config_path, root_dir_path):
         toType = relation["to"]
         generate_relation_boilerplate(
             touch=touch,
-            skema_schema=skema_schema,
+            schema=main_graphql_schema,
             fromType=relation["from"],
             where_filter=relation["where"],
             toType=toType,

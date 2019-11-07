@@ -30,7 +30,7 @@ input HumanWhere {
     or: [HumanWhere]
     # $not: [HumanWhere]
     type: WhereString
-    _id: WhereObjectId
+    _id: WhereID
     name: WhereString
     surname: WhereString
 }

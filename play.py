@@ -7,6 +7,7 @@ type Query {
     y: String
 }
 '''
+
 definition: Node = parse(s).definitions[0]
 print(dir(definition)) # DefinitionNode: 'description', 'directives', 'fields', 'interfaces', 'keys', 'kind', 'loc', 'name'
 print(definition.name.value) # NameNode: 'value'

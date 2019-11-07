@@ -2,7 +2,8 @@ import json
 import os.path
 import os.path
 import requests
-from funcy import pluck, count, merge
+from funcy import pluck, count, merge, collecting
+from populate import indent_to
 
 def get_config_schema():
     with open(os.path.dirname(__file__) +  '/config_schema.json') as f:
@@ -46,16 +47,30 @@ def zip_pluck(d, keys, enumerate=False):
         args = [count(), *args]
     return zip(*args)
 
+def find(l, predicate):
+    for x in l:
+        if (predicate(x)):
+            return x
+    return None
 
-def get_skema(config, here='./'):
-    if "skema_path" in config:
-        path = here + config["skema_path"]
+@collecting
+def unique(l, key=lambda x: x):
+    found = []
+    for x in l:
+        id = key(x)
+        if not id in found:
+            found += [id]
+            yield x
+
+def get_types_schema(config, here='./'):
+    if "schema_path" in config:
+        path = here + config["schema_path"]
         with open(path) as f:
-            return f.read() + skema_defaults
-    if config.get("skema"):
-        return config.get("skema") + skema_defaults
-    if config.get("skema_url"):
-        r = requests.get(config.get("skema_url"), stream=True)
+            return f.read()
+    if config.get("schema"):
+        return indent_to('',  config.get("schema"))
+    if config.get("schema_url"):
+        r = requests.get(config.get("schema_url"), stream=True)
         skema = ""
         while 1:
             buf = r.raw.read(16 * 1024)

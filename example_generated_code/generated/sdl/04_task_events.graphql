@@ -22,8 +22,8 @@ type WindowedEventEdge {
 }
 
 input WindowedEventWhere { 
-    value: WhereFloat
-    timestamp: WhereFloat
+    value: WhereInt
+    timestamp: WhereInt
 }
 
 enum WindowedEventFields {
