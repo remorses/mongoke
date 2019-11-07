@@ -1,17 +1,23 @@
 
+import os
 from tartiflette import Engine
 from typing import *
 from .generated.logger import logger
 from tartiflette.types.exceptions.tartiflette import TartifletteError
 import traceback
 
+def read(path):
+    if path:
+        with open(path) as f:
+            return f.read()
+    return ''
 
 async def my_error_coercer(
     exception: TartifletteError, error: Dict[str, Any]
 ) -> Dict[str, Any]:
 
     ex = exception.original_error
-    if ex:
+    if ex and not os.getenv('HIDE_ERRORS_TRACEBACK'):
         trace = "\n".join(
             traceback.format_exception(etype=type(ex), value=ex, tb=ex.__traceback__)
         )

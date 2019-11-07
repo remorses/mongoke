@@ -4,7 +4,7 @@ from .support import strip_nones, connection_resolver, zip_pluck, select_keys, g
 from operator import setitem
 from funcy import omit
 
-def filter_nodes_by_guard(nodes, fields):
+def filter_nodes_by_guard(nodes, fields, jwt):
     for x in nodes:
         try:
             

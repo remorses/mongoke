@@ -35,9 +35,9 @@ types:
     Human:
         collection: humans
         guards:
-            -   expression: session['role'] == 'admin'
+            -   expression: jwt['role'] == 'admin'
                 when: after
-            -   expression: session['role'] == 'semi'
+            -   expression: jwt['role'] == 'semi'
                 excluded: [passwords, campaign_data]
         disambiguations:
             User: x['type'] == 'user'

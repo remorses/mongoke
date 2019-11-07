@@ -10,11 +10,32 @@ enum Direction {
 }
 
 
+input WhereDate {
+    in: [Date]
+    nin: [Date]
+    eq: Date
+    neq: Date
+}
+
+input WhereFloat {
+    in: [Float]
+    nin: [Float]
+    eq: Float
+    neq: Float
+}
+
 input WhereJson {
     in: [Json]
     nin: [Json]
     eq: Json
     neq: Json
+}
+
+input WhereDateTime {
+    in: [DateTime]
+    nin: [DateTime]
+    eq: DateTime
+    neq: DateTime
 }
 
 input WhereBoolean {
@@ -38,25 +59,11 @@ input WhereTime {
     neq: Time
 }
 
-input WhereDate {
-    in: [Date]
-    nin: [Date]
-    eq: Date
-    neq: Date
-}
-
 input WhereObjectId {
     in: [ObjectId]
     nin: [ObjectId]
     eq: ObjectId
     neq: ObjectId
-}
-
-input WhereInt {
-    in: [Int]
-    nin: [Int]
-    eq: Int
-    neq: Int
 }
 
 input WhereID {
@@ -66,18 +73,11 @@ input WhereID {
     neq: ID
 }
 
-input WhereFloat {
-    in: [Float]
-    nin: [Float]
-    eq: Float
-    neq: Float
-}
-
-input WhereDateTime {
-    in: [DateTime]
-    nin: [DateTime]
-    eq: DateTime
-    neq: DateTime
+input WhereInt {
+    in: [Int]
+    nin: [Int]
+    eq: Int
+    neq: Int
 }
 
 

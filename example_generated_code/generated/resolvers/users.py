@@ -4,7 +4,7 @@ from .support import strip_nones, connection_resolver, zip_pluck, select_keys, g
 from operator import setitem
 from funcy import omit
 
-def filter_nodes_by_guard(nodes, fields):
+def filter_nodes_by_guard(nodes, fields, jwt):
     for x in nodes:
         try:
             
@@ -39,7 +39,7 @@ async def resolve_query_users(parent, args, ctx, info):
         scalar_name=map_fields_to_types[cursorField],
         pipeline=pipeline,
     )
-    data['nodes'] = list(filter_nodes_by_guard(data['nodes'], fields))
+    data['nodes'] = list(filter_nodes_by_guard(data['nodes'], fields, jwt=jwt))
     # {{repr_many_disambiguations(disambiguations, '    ') if disambiguations else ''
     return data
 

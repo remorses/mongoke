@@ -22,17 +22,17 @@ async def resolve_query_human(parent, args, ctx, info):
     headers = ctx['req'].headers
     jwt = ctx['req'].jwt_payload
     fields = []
-    if not (session['role'] == 'semi'):
-        raise Exception("guard `session['role'] == 'semi'` not satisfied")
-    else:
-        fields += ['passwords', 'campaign_data']
     
     collection = ctx['db']['humans']
     x = await mongodb_streams.find_one(collection, match=where, pipeline=pipeline)
-    if not (session['role'] == 'admin'):
-        raise Exception("guard `session['role'] == 'admin'` not satisfied")
+    if not (jwt['role'] == 'admin'):
+        raise Exception("guard `jwt['role'] == 'admin'` not satisfied")
     else:
         fields += []
+    if not (jwt['role'] == 'semi'):
+        raise Exception("guard `jwt['role'] == 'semi'` not satisfied")
+    else:
+        fields += ['passwords', 'campaign_data']
     
     # {{repr_disambiguations(disambiguations, '    ')
     if fields:

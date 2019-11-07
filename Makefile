@@ -14,7 +14,7 @@ generate-spec: clean
 
 .PHONY: play
 play: generate-spec
-	python -m example_generated_code
+	DB_URL=mongodb://localhost/db python -m example_generated_code
 
 .PHONY: play
 tests: generate-pr

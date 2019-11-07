@@ -4,13 +4,17 @@ from .support import strip_nones, connection_resolver, zip_pluck, select_keys, g
 from operator import setitem
 from funcy import omit
 
-def filter_nodes_by_guard(nodes, fields):
+def filter_nodes_by_guard(nodes, fields, jwt):
     for x in nodes:
         try:
-            if not (session['role'] == 'admin'):
-                raise Exception("guard `session['role'] == 'admin'` not satisfied")
+            if not (jwt['role'] == 'admin'):
+                raise Exception("guard `jwt['role'] == 'admin'` not satisfied")
             else:
                 fields += []
+            if not (jwt['role'] == 'semi'):
+                raise Exception("guard `jwt['role'] == 'semi'` not satisfied")
+            else:
+                fields += ['passwords', 'campaign_data']
             
             yield omit(x or dict(), fields)
         except Exception:
@@ -33,10 +37,6 @@ async def resolve_query_humans(parent, args, ctx, info):
     headers = ctx['req'].headers
     jwt = ctx['req'].jwt_payload
     fields = []
-    if not (session['role'] == 'semi'):
-        raise Exception("guard `session['role'] == 'semi'` not satisfied")
-    else:
-        fields += ['passwords', 'campaign_data']
     
     pagination = get_pagination(args,)
     data = await connection_resolver(
@@ -47,7 +47,7 @@ async def resolve_query_humans(parent, args, ctx, info):
         scalar_name=map_fields_to_types[cursorField],
         pipeline=pipeline,
     )
-    data['nodes'] = list(filter_nodes_by_guard(data['nodes'], fields))
+    data['nodes'] = list(filter_nodes_by_guard(data['nodes'], fields, jwt=jwt))
     # {{repr_many_disambiguations(disambiguations, '    ') if disambiguations else ''
     return data
 
