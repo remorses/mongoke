@@ -9,8 +9,8 @@ services:
         # entrypoint: pip show tartiflette
         command: /conf.yml
         volumes: 
-            - ./confs/testing.yaml:/conf.yml
-            - ./confs/schema.graphql:/schema.graphql
+            - ./tests/confs/spec_conf.yaml:/conf.yml
+            - ./tests/confs/schema.graphql:/schema.graphql
         environment: 
             - PYTHONUNBUFFERED=1
             - DB_URL=mongodb://mongo/db
