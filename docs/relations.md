@@ -20,10 +20,10 @@ One example of a configuration with a one `to_one` relation:
 schema: |
     type Owner {
         _id: ObjectId
-        email: Str
+        email: String
     }
     type Pet {
-        name: Str
+        name: String
         owner_id: ObjectId
     }
 
@@ -45,16 +45,16 @@ An example of a `to_many` relation:
 schema: |
     type Owner {
         _id: ObjectId
-        email: Str
+        email: String
     }
     type Pet {
-        name: Str
+        name: String
         owner_id: ObjectId
         zoo_id: ObjectId
     }
     type Zoo {
         _id: ObjectId
-        address: Str
+        address: String
     }
 
 types:

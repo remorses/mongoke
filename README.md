@@ -29,14 +29,14 @@ The ObjectId scalar is already defined by default, it is converted to string whe
 schema: |
     type User {
         _id: ObjectId
-        username: Str
-        email: Str
+        username: String
+        email: String
     }
     type BlogPost {
         _id: ObjectId
         author_id: ObjectId
-        title: Str
-        content: Str
+        title: String
+        content: String
     }
 
 types:
