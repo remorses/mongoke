@@ -65,6 +65,6 @@ async def resolve_task_events(parent, args, ctx, info):
         scalar_name=map_fields_to_types[cursorField],
         pipeline=pipeline,
     )
-    data['nodes'] = list(filter_nodes_by_guard(data['nodes'], fields))
+    data['nodes'] = list(filter_nodes_by_guard(data['nodes'], fields, jwt=jwt))
     # {{repr_many_disambiguations(disambiguations, '    ') if disambiguations else ''
     return data

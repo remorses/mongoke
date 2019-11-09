@@ -1,0 +1,12 @@
+jwt:
+    algorithms: [H256]
+    required: false
+
+jsonschema_path: ./schema.json
+
+types:
+
+    User:
+        collection: users
+    Bot:
+        collection: bots

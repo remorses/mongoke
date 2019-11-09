@@ -5,12 +5,20 @@
     "version": "0.2.0",
     "configurations": [
 
+
         {
-            "name": "Python: Modulo",
+            "name": "Python: Play",
             "type": "python",
             "request": "launch",
             "module": "mongoke",
             "args": ["tests/confs/spec_conf.yaml","--generated-path","example_generated_code"]
+        },
+        {
+            "name": "Python: Json Example",
+            "type": "python",
+            "request": "launch",
+            "module": "mongoke",
+            "args": ["tests/confs/json_conf.yaml","--generated-path","play_json"]
         },
         {
             "name": "Python: Generated",

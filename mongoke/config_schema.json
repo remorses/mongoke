@@ -25,6 +25,16 @@
                     "title": "schema_path",
                     "description": ""
                 },
+                "jsonschema_path": {
+                    "type": "string",
+                    "title": "schema_path",
+                    "description": ""
+                },
+                "jsonschema": {
+                    "type": "string",
+                    "title": "schema_path",
+                    "description": ""
+                },
                 "types": {
                     "title": "types",
                     "description": "",
