@@ -4,9 +4,6 @@ import os.path
 import requests
 from funcy import pluck, count, merge, collecting
 from populate import indent_to
-from skema.reconstruct import from_jsonschema
-from skema import gen_graphql
-from .logger import logger
 
 def get_config_schema():
     with open(os.path.dirname(__file__) +  '/config_schema.json') as f:
@@ -58,31 +55,13 @@ def unique(l, key=lambda x: x):
             found += [id]
             yield x
 
-def read(path):
-        with open(path) as f:
-            return f.read()
-
-def jsonschema_to_graphql(schema):
-        tree = from_jsonschema(schema)
-        logger.info('generating graphql from jsonschema')
-        graphql = gen_graphql(tree)
-        logger.info(graphql)
-        return graphql
-
 def get_types_schema(config, here='./'):
-    if config.get("jsonschema"):
-        schema = indent_to('',  config.get("jsonschema"))
-        return jsonschema_to_graphql(schema)
-    if config.get("schema"):
-        return indent_to('',  config.get("schema"))
-    if "jsonschema_path" in config:
-        path = here + config["jsonschema_path"]
-        schema = json.loads(read(path))
-        return jsonschema_to_graphql(schema)
     if "schema_path" in config:
         path = here + config["schema_path"]
-        return read(path)
-
+        with open(path) as f:
+            return f.read()
+    if config.get("schema"):
+        return indent_to('',  config.get("schema"))
     if config.get("schema_url"):
         r = requests.get(config.get("schema_url"), stream=True)
         skema = ""

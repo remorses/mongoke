@@ -2,7 +2,6 @@ funcy
 populate>=0.0.8
 requests
 fire
-skema
 graphql-core>=3a
 jsonschema
 

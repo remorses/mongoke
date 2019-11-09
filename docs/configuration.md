@@ -7,8 +7,6 @@ Configuration:
     schema?: Str
     schema_url?: Url
     schema_path?: Str
-    jsonschema?: Str
-    jsonschema_path?: Str
     types:
         ...:
             collection: Str

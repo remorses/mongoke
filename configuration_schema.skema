@@ -2,8 +2,6 @@ Configuration:
     schema?: Str
     schema_url?: Url
     schema_path?: Str # relative to the configuration dir
-    jsonschema_path?: Str
-    jsonschema?: Str
     types:
         ...:
             collection: Str

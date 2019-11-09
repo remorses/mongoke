@@ -41,6 +41,6 @@ async def resolve_user_friends(parent, args, ctx, info):
         scalar_name=map_fields_to_types[cursorField],
         pipeline=pipeline,
     )
-    data['nodes'] = list(filter_nodes_by_guard(data['nodes'], fields, jwt=jwt))
+    data['nodes'] = list(filter_nodes_by_guard(data['nodes'], fields))
     # {{repr_many_disambiguations(disambiguations, '    ') if disambiguations else ''
     return data

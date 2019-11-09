@@ -23,6 +23,6 @@ Event:
     bot_id: ObjectId
     type: "like" | "bo"
     likes?: Int
-    timestamp: Int
+    timestamp: 0..
 ObjectId: Any # this will be added implictely
 ID: Any
