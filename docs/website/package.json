@@ -10,5 +10,9 @@
   },
   "devDependencies": {
     "docusaurus": "^1.14.0"
+  },
+  "dependencies": {
+    "react-landing-page-components": "^0.0.1",
+    "styled-components": "^4.4.1"
   }
 }
