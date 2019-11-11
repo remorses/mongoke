@@ -1,0 +1,15 @@
+{
+  "docs": {
+    "Index": [
+      "index",
+      "configuration",
+      "docker",
+      "queries",
+      "relations"
+    ]
+    
+  },
+  "docs-other": {
+    "First Category": []
+  }
+}

@@ -1,3 +1,8 @@
+---
+id: index
+title: Index
+---
+
 # Mongoke documentation
 
 Mongoke generates a graphql server based on a configuration file that describes the shape of the database via types and their corresponding collections.

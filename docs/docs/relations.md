@@ -1,3 +1,7 @@
+---
+id: relations
+---
+
 # Relations
 relations are defined in the configuration with the following shape
 ```

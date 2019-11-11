@@ -1,3 +1,9 @@
+---
+id: configuration
+title: Configuration
+---
+
+
 # Configuration
 
 Mongoke defines its entire configuration in a yaml file that can be used to generate the entire graphql server.

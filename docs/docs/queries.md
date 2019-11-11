@@ -1,3 +1,8 @@
+---
+id: queries
+title: queries
+---
+
 # Generated queries
 
 Every type defined in the configurations and associated with a collection will generate a graphql query for a single document and for many documents in the form of a connection.
