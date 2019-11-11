@@ -1,7 +1,9 @@
 {
     "compilerOptions": {
         "allowSyntheticDefaultImports": true,
-        "jsx": "preserve",
-        "rootDir": "pages"
+        "esModuleInterop": true,
+        "jsx": "react",
+        "rootDir": "pages",
+        "skipLibCheck": true
     }
 }
