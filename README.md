@@ -4,7 +4,7 @@
 <h1 align="center">mongoke</h1>
 <h3 align="center">Instantly serve your MongoDb database via graphql</h3>
 
-[**Docs**](./docs/index.md) • [**Examples**](https://github.com/remorses/mongoke-examples)
+[**Docs**](https://remorses.github.io/mongoke/docs) • [**Examples**](https://github.com/remorses/mongoke-examples)
 
 ## Features
 
