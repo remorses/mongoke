@@ -4,7 +4,8 @@ requests
 fire
 graphql-core>=3a
 jsonschema
-
+pyyaml
+coloredlogs
 # tests 
 prtty
 asynctest
