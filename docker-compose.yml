@@ -9,7 +9,7 @@ services:
         # entrypoint: pip show tartiflette
         command: /conf.yml
         ports:
-            - 8090:90
+            - 8090:80
         volumes: 
             - ./tests/confs/spec_conf.yaml:/conf.yml
             - ./tests/confs/schema.graphql:/schema.graphql

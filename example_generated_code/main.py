@@ -65,13 +65,13 @@ def make_app():
 
 class CatchAll(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, handler):
-        request.scope["path"] = MONGOKE_BASE_PATH
+        request.scope["path"] = MONGOKE_BASE_PATH # TODO subscriptions path
         return await handler(request)
 
 app = make_app()
 app = CORSMiddleware(app, allow_origins=["*"], allow_methods=["*"])
 app = JwtMiddleware(app,)
+# app = CatchAll(app,)
 app = ServerErrorMiddleware(app,)
-app = CatchAll(app,)
 
 

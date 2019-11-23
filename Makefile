@@ -18,7 +18,8 @@ generate-spec: clean
 
 .PHONY: play
 play: generate-spec
-	MONGOKE_BASE_PATH=/path DB_URL=mongodb://localhost/db uvicorn --reload example_generated_code.main:app
+	# MONGOKE_BASE_PATH=/path
+	DB_URL=mongodb://localhost/db uvicorn --reload example_generated_code.main:app
 
 .PHONY: play
 tests: generate-pr
