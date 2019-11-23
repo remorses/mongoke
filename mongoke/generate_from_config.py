@@ -71,7 +71,7 @@ def generate_from_config(config, config_path, root_dir_path):
     touch(f"__init__.py", "")
     touch(f"engine.py", engine)
     touch(
-        f"__main__.py",
+        f"main.py",
         populate_string(
             main,
             dict(
@@ -81,9 +81,10 @@ def generate_from_config(config, config_path, root_dir_path):
             ),
         ),
     )
+    touch('__main__.py', 'from .main import app')
     touch(f"generated/__init__.py", "")
     touch(f"generated/logger.py", logger)
-    touch(f"generated/middleware/__init__.py", 
+    touch(f"middleware.py",
         populate_string(
             jwt_middleware,
             dict(

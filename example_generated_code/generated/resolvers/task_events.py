@@ -53,7 +53,7 @@ async def resolve_task_events(parent, args, ctx, info):
     where = strip_nones(where)
     cursorField = args.get('cursorField',) or ('_id' if '_id' in map_fields_to_types else list(map_fields_to_types.keys())[0])
     headers = ctx['req'].headers
-    jwt = ctx['req'].jwt_payload
+    jwt = ctx['req'].state.jwt_payload
     fields = []
     
     pagination = get_pagination(args,)
@@ -65,6 +65,6 @@ async def resolve_task_events(parent, args, ctx, info):
         scalar_name=map_fields_to_types[cursorField],
         pipeline=pipeline,
     )
-    data['nodes'] = list(filter_nodes_by_guard(data['nodes'], fields))
+    data['nodes'] = list(filter_nodes_by_guard(data['nodes'], fields, jwt=jwt))
     # {{repr_many_disambiguations(disambiguations, '    ') if disambiguations else ''
     return data

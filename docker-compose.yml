@@ -8,6 +8,8 @@ services:
         # entrypoint: sh -c 'pip install tartiflette==1.0.0rc1 && python -m mongoke /conf.yml && ls generated/generated/sdl/*'
         # entrypoint: pip show tartiflette
         command: /conf.yml
+        ports:
+            - 8090:90
         volumes: 
             - ./tests/confs/spec_conf.yaml:/conf.yml
             - ./tests/confs/schema.graphql:/schema.graphql
@@ -15,6 +17,8 @@ services:
             - PYTHONUNBUFFERED=1
             - DB_URL=mongodb://mongo/db
     mongo:
+        ports:
+            - 27017:27017
         image: mongo
         logging: 
             driver: none

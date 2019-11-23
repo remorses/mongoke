@@ -20,7 +20,7 @@ pipeline: list = []
 async def resolve_query_human(parent, args, ctx, info):
     where = strip_nones(args.get('where', {}))
     headers = ctx['req'].headers
-    jwt = ctx['req'].jwt_payload
+    jwt = ctx['req'].state.jwt_payload
     fields = []
     
     collection = ctx['db']['humans']
