@@ -6,14 +6,15 @@ WORKDIR /src
 
 COPY *.txt /src/
 
-RUN pip install -r requirements.txt -r requirements-generated.txt
+RUN pip install -r requirements.txt
+RUN pip install -r requirements-generated.txt
 
 COPY mongoke /src/mongoke
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 # RUN python -m src 
-RUN pip show tartiflette
+# RUN pip show tartiflette
 
 ENV PYTHONUNBUFFERED=1
 
