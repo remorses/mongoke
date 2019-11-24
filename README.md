@@ -4,7 +4,7 @@
 <h1 align="center">mongoke</h1>
 <h3 align="center">Instantly serve your MongoDb database via graphql</h3>
 
-[**Site**](https://remorses.github.io/mongoke/) • [**Docs**](https://remorses.github.io/mongoke/docs) • [**Examples**](https://github.com/remorses/mongoke-examples) 
+[**Site**](https://remorses.github.io/mongoke/) • [**Docs**](https://remorses.github.io/mongoke/docs) • [**Examples**](https://github.com/remorses/mongoke-examples)
 
 ## Features
 
@@ -17,7 +17,7 @@
 
 ## Quickstart:
 
-### Docker compose
+## Docker compose
 
 The fastest way to try Mongoke is via docker-compose.
 
@@ -105,6 +105,11 @@ services:
     }
 }
 ```
+
+## Using Google Cloud
+
+The button below creates a new Cloud Run Service, will ask to input for the mongodb url and an url for the configuration
+[![Run on GoogleCloud](https://deploy.cloud.run/button.svg)](https://deploy.cloud.run/?git_repo=https://github.com/remorses/mongoke.git)
 
 ---
 

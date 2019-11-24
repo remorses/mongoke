@@ -1,0 +1,15 @@
+{
+    "name": "mongoke_example",
+    "env": {
+        "DB_URL": {
+            "description": "specify the mongodb url to connect to",
+            "value": "mongodb://mongo.com/database",
+            "required": true
+        },
+        "MONGOKE_CONFIG_URL": {
+            "description": "the mongoke config passed as an url",
+            "value": "http://github.com/remorses/mongoke/mongoke.yml",
+            "required": true
+        }
+    }
+}
