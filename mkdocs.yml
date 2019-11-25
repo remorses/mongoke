@@ -1,0 +1,17 @@
+site_name: Mongoke
+site_description: Instant Graphql with MongoDb.
+
+theme:
+    name: 'material'
+
+repo_name: remorses/mongoke
+repo_url: https://github.com/remorses/mongoke
+edit_uri: ""
+
+pages:
+    - Quick Start: 'index.md'
+
+
+markdown_extensions:
+  - markdown.extensions.codehilite:
+      guess_lang: false
