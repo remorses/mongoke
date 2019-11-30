@@ -4,7 +4,7 @@
 <h1 align="center">mongoke</h1>
 <h3 align="center">Instantly serve your MongoDb database via graphql</h3>
 
-[**Site**](https://remorses.github.io/mongoke/) • [**Docs**](https://remorses.github.io/mongoke/docs) • [**Examples**](https://github.com/remorses/mongoke-examples)
+[**Site**](https://mongoke.now.sh) • [**Docs**](https://mongoke.now.sh/docs/) • [**Examples**](https://github.com/remorses/mongoke-examples)
 
 ## Features
 
@@ -114,7 +114,7 @@ The button below creates a new Cloud Run Service, will ask to input for the mong
 
 ## Using Zeit Now Runtime
 
-__Coming soon...__
+_Coming soon..._
 
 ---
 
