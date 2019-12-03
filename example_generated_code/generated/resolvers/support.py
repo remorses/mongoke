@@ -174,7 +174,7 @@ MONGODB_OPERATORS = [
 def strip_nones(x: dict):
     result = {}
     for k, v in x.items():
-        if not v == None:
+        if not v == None and v != {}:
             if k in MONGODB_OPERATORS:
                 k = '$' + k
             if isinstance(v, dict):

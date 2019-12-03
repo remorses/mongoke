@@ -1,4 +1,4 @@
-FROM tiangolo/uvicorn-gunicorn:python3.6-alpine3.8
+FROM tiangolo/uvicorn-gunicorn:python3.7-alpine3.8
 
 RUN apk update && apk add --no-cache build-base libffi-dev dumb-init cmake bison flex
 
