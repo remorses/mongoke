@@ -126,7 +126,8 @@ Please help the project making new tutorials and submit a issue to list it here!
 
 ## Todo:
 
--   when a type is in a relation but not in the types section, KeyError is thrown
+-   when a type is in a relation but not in the types section, KeyError is thrown at launch
+-   ~~Enum and Scalar values are not searchable in where~~
 -   ~~dont lowercase the first letter of query fields~~
 -   make docker image with wheels
 -   ~~remove hard limit of resolved nodes, pass the limit in the configuration~~

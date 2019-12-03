@@ -31,7 +31,7 @@ from .templates.jwt_middleware import jwt_middleware
 from .templates.logger import logger
 from .templates.engine import engine
 from .support import make_touch, pretty, get_types_schema
-from .graphql_support import get_scalar_fields, get_graphql_scalars
+from .graphql_support import get_scalar_fields, get_graphql_scalars, get_graphql_enums
 from .naming import get_query_name, get_relation_filename, get_resolver_filenames
 from .generators import generate_relation_boilerplate, generate_type_boilerplate
 from .constants import SCALAR_TYPES, SCALARS_ALREADY_IMPLEMENTED
@@ -64,8 +64,9 @@ def generate_from_config(config, config_path, root_dir_path):
     main_graphql_schema = get_types_schema(config, here=config_path)
 
     # TODO add other scalars from the skema
-    scalars = {*SCALAR_TYPES, *get_graphql_scalars(main_graphql_schema)}
-    scalars = list(scalars)
+    scalars = list({*SCALAR_TYPES, *get_graphql_scalars(main_graphql_schema)})
+    enums = list({*get_graphql_enums(main_graphql_schema)})
+    searchables = [*scalars, *enums]
 
     touch(f"checksum", make_checksum(config, config_path))
     touch(f"__init__.py", "")
@@ -102,7 +103,7 @@ def generate_from_config(config, config_path, root_dir_path):
         f"generated/resolvers/support.py",
         populate_string(
             resolvers_support,
-            dict(scalars=[x for x in scalars if x not in SCALARS_ALREADY_IMPLEMENTED]),
+            
         ),
     )
     touch(
@@ -114,7 +115,7 @@ def generate_from_config(config, config_path, root_dir_path):
     )
     touch(
         f"generated/sdl/general.graphql",
-        populate_string(general_graphql, dict(scalars=scalars)),
+        populate_string(general_graphql, dict(searchables=searchables)),
         index=True
     )
     touch(f"generated/sdl/main.graphql", main_graphql_schema, index=True)

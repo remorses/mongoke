@@ -42,6 +42,12 @@ schema: |
         name: String
     }
 
+    enum Letter {
+        a
+        b
+        c
+    }
+
     type User {
         type: String
         _id: ID
@@ -49,6 +55,7 @@ schema: |
         surname: String
         friends_ids: [ID]
         url: Url
+        letter: Letter
     }
 
     union Human = User | Guest

@@ -12,11 +12,11 @@ from graphql.language import (
 from .support import find, unique
 from .constants import SCALAR_TYPES
 
+
 @lru_cache(maxsize=10)
 def parse_graphql_schema(schema) -> DocumentNode:
     doc = parse(schema)
     return doc
-
 
 
 def get_fields(graphql_schema, typename) -> Iterable[Tuple[str, str]]:
@@ -35,7 +35,7 @@ def get_fields(graphql_schema, typename) -> Iterable[Tuple[str, str]]:
             fields = unique(lcat(fields), key=lambda x: x[0])
             return fields
         elif isinstance(node, IGNORE_FIELDS):
-            print(f'ignoring {node}')
+            print(f"ignoring {node}")
             return []
         else:
             raise Exception(f"unrecognized type for {node}")
@@ -56,17 +56,32 @@ def get_type_name(node: Node):
 
 def get_scalar_fields(graphql_schema, typename):
     fields = get_fields(graphql_schema, typename)
-    fields = [(name, _type) for (name, _type) in fields if is_scalar(_type)]
+    fields = [
+        (name, _type) for (name, _type) in fields if is_scalar(graphql_schema, _type)
+    ]
     return fields
 
 
-def is_scalar(typename):
+def is_scalar(schema, typename):
     ok = typename in SCALAR_TYPES
+    ok = ok or typename in get_graphql_scalars(schema)
+    ok = ok or typename in get_graphql_enums(schema)
     return ok
 
+
 @collecting
-def get_graphql_scalars(schema,) -> List[str]:  # TODO
+def get_graphql_types(schema, instanceof) -> List[str]:  # TODO
     doc = parse_graphql_schema(schema)
-    for node in  doc.definitions:
-        if isinstance(node, ScalarTypeDefinitionNode):
+    for node in doc.definitions:
+        if isinstance(node, instanceof):
             yield node.name.value
+
+
+get_graphql_scalars = lambda schema: get_graphql_types(
+    schema, instanceof=ScalarTypeDefinitionNode
+)
+
+get_graphql_enums = lambda schema: get_graphql_types(
+    schema, instanceof=EnumTypeDefinitionNode
+)
+

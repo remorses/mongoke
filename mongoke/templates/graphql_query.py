@@ -1,6 +1,6 @@
 from populate import populate_string
 
-# scalars
+# searchable
 general_graphql = '''
 
 type Query {
@@ -20,7 +20,7 @@ input Where{scalar} {'{'}
     eq: {scalar}
     neq: {scalar}
 {'}'}
-""" for scalar in map(str, scalars)])
+""" for scalar in map(str, searchables)])
 }}
 
 

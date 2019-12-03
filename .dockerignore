@@ -1,5 +1,7 @@
 tests
 example_generated_code
+docs
+index
 node_modules
 .cache
 public

@@ -265,9 +265,9 @@ async def connection_resolver(
     first, last = pagination.get('first'), pagination.get('last'),
     after, before = pagination.get('after'), pagination.get('before')
     if after:
-        after = INPUT_COERCERS[scalar_name](after)
+        after = INPUT_COERCERS.get(scalar_name, lambda x: x)(after)
     if before:
-        before = INPUT_COERCERS[scalar_name](before)
+        before = INPUT_COERCERS.get(scalar_name, lambda x: x)(before)
 
     first = first or 0
     last = last or 0
