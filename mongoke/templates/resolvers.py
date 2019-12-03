@@ -219,7 +219,6 @@ from ..scalars import scalar_classes
 
 gt = '$gt'
 lt = '$lt'
-MAX_NODES = 20
 DEFAULT_NODES_COUNT = 20
 
 INPUT_COERCERS = {
@@ -329,6 +328,7 @@ async def connection_resolver(
         count = await mongodb_streams.count_documents(collection, where, pipeline=pipeline)
         toSkip = count - (last + 1)
         args.update(dict(skip=max(toSkip, 0)))
+    args.update(dict(max_len=10000))
     # pretty(args)
     nodes = await mongodb_streams.find(collection, **args)
 
