@@ -205,6 +205,7 @@ async def resolve_${{'_'.join([x.lower() for x in resolver_path.split('.')])}}(p
 # nothing
 resolvers_support = '''
 import collections
+import os
 from prtty import pretty
 from motor.motor_asyncio import AsyncIOMotorDatabase, AsyncIOMotorCollection
 import mongodb_streams
@@ -262,6 +263,16 @@ async def connection_resolver(
     scalar_name,
     pipeline=[]
 ):
+    if os.getenv('DEBUG'):
+        print('executing connection_resolver')
+        pretty({
+            'where': where,
+            'cursorField': cursorField,
+            'pagination': pagination,
+            'scalar_name': scalar_name,
+            'collection': collection,
+            'pipeline': pipeline,
+        })
     first, last = pagination.get('first'), pagination.get('last'),
     after, before = pagination.get('after'), pagination.get('before')
     if after:
@@ -379,7 +390,7 @@ MONGODB_OPERATORS = [
 def strip_nones(x: dict):
     result = {}
     for k, v in x.items():
-        if not v == None:
+        if not v == None and v != {}:
             if k in MONGODB_OPERATORS:
                 k = '$' + k
             if isinstance(v, dict):
