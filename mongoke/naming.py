@@ -18,4 +18,5 @@ def get_resolver_filenames(config):
 
 
 def get_query_name(typename):
-    return typename[0].lower() + typename[1:]
+    return typename
+    # return typename[0].lower() + typename[1:]

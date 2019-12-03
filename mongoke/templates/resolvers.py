@@ -220,7 +220,7 @@ from ..scalars import scalar_classes
 gt = '$gt'
 lt = '$lt'
 MAX_NODES = 20
-DEFAULT_NODES_COUNT = 10
+DEFAULT_NODES_COUNT = 20
 
 INPUT_COERCERS = {
     None: lambda x: x,
@@ -270,8 +270,8 @@ async def connection_resolver(
     if before:
         before = INPUT_COERCERS[scalar_name](before)
 
-    first = min(MAX_NODES, first or 0)
-    last = min(MAX_NODES, last or 0)
+    first = first or 0
+    last = last or 0
 
     if not first and not last:
         if after:

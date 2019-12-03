@@ -126,6 +126,9 @@ Please help the project making new tutorials and submit a issue to list it here!
 
 ## Todo:
 
+-   ~~dont lowercase the first letter of query fields~~
+-   make docker image with wheels
+-   ~~remove hard limit of resolved nodes, pass the limit in the configuration~~
 -   ~~use graphql to define the schema~~
 -   ~~publish the docker image (after tartiflette devs fix extend type issue)~~
 -   ~~resolve issue connection nodes must all have an \_id field because it is default cursor field~~
