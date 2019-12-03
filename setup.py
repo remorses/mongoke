@@ -4,7 +4,7 @@ NAME = 'mongoke'
 setup(
     name=NAME,
     # [bump]
-    version='1.1.20',
+    version='1.1.21',
     description=NAME,
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
