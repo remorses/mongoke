@@ -62,7 +62,7 @@ class CatchAll(BaseHTTPMiddleware):
         return await handler(request)
 
 app = make_app()
-app = CORSMiddleware(app, allow_origins=["*"], allow_methods=["*"])
+app = CORSMiddleware(app, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"], )
 app = JwtMiddleware(app,)
 # app = CatchAll(app,)
 app = ServerErrorMiddleware(app,)
