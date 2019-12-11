@@ -36,6 +36,9 @@ class CatchAll(BaseHTTPMiddleware):
         request.scope["path"] = MONGOKE_BASE_PATH # TODO subscriptions path
         return await handler(request)
 
+engine = CustomEngine(
+    sdl=sdl_files, modules=[ApolloFederationPlugin(engine_sdl=sdl_files)]
+)
 
 def make_app(db: AsyncIOMotorClient=None):
     if not db:
@@ -46,10 +49,6 @@ def make_app(db: AsyncIOMotorClient=None):
         if GRAPHIQL_DEFAULT_JWT
         else {},
         default_query=GRAPHIQL_QUERY,
-    )
-
-    engine = CustomEngine(
-        sdl=sdl_files, modules=[ApolloFederationPlugin(engine_sdl=sdl_files)]
     )
 
     context = {"db": db, "loop": None}
