@@ -15,7 +15,7 @@ _ = mock.ANY
 @pytest.fixture
 def client():
     app = make_app(db=mock.MagicMock(name="db"))
-    
+
     with TestClient(app) as client:
         yield client
     del app
@@ -92,19 +92,19 @@ def test_many_resolver(query):
         m.return_value = bots
         r = query(
             """
-{
-  Users(where: {surname: {eq: "xxx"}}) {
-    nodes {
-      surname
-      friends {
-        nodes {
-          surname
-        }
-      }
-    }
-  }
-}
-    """
+            {
+                Users(where: { surname: { eq: "xxx" } }) {
+                    nodes {
+                        surname
+                        friends {
+                            nodes {
+                                surname
+                            }
+                        }
+                    }
+                }
+            }
+            """
         )
         pretty(r)
         print(m.call_args)

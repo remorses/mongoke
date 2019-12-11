@@ -37,8 +37,6 @@ class CustomEngine(Engine):
         modules: Optional[Union[str, List[str], List[Dict[str, Any]]]] = None,
         schema_name: str = None,
     ):
-        if self._cooked:
-            return
         await super().cook(
             sdl, my_error_coercer, custom_default_resolver, custom_default_type_resolver, modules, schema_name
         )

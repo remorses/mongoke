@@ -1,3 +1,5 @@
+
+
 import os
 from tartiflette import Resolver, Engine
 from tartiflette_asgi import TartifletteApp, GraphiQL
@@ -38,16 +40,14 @@ sdl_files = [sdl_dir + f for f in sdl_files]
 
 class CatchAll(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, handler):
-        request.scope["path"] = MONGOKE_BASE_PATH  # TODO subscriptions path
+        request.scope["path"] = MONGOKE_BASE_PATH # TODO subscriptions path
         return await handler(request)
-
 
 engine = CustomEngine(
     sdl=sdl_files, modules=[ApolloFederationPlugin(engine_sdl=sdl_files)]
 )
 
-
-def make_app(db: AsyncIOMotorClient = None):
+def make_app(db: AsyncIOMotorClient=None):
     if not db:
         db = AsyncIOMotorClient(DB_URL).get_database()
     graphiql = GraphiQL(
@@ -66,11 +66,15 @@ def make_app(db: AsyncIOMotorClient = None):
         path=MONGOKE_BASE_PATH,
         graphiql=graphiql if not DISABLE_GRAPHIQL else False,
     )
-    app = CORSMiddleware(
-        app, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"]
-    )
-    app = JwtMiddleware(app)
+    app = CORSMiddleware(app, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"], )
+    app = JwtMiddleware(app,)
     # app = CatchAll(app,)
-    app = ServerErrorMiddleware(app)
+    app = ServerErrorMiddleware(app,)
     return app
+
+
+
+
+
+
 
