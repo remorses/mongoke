@@ -17,12 +17,14 @@ map_fields_to_types = {
         "type": "String",
         "_id": "ID",
         "name": "String",
-        "surname": "String"
+        "surname": "String",
+        "url": "Url",
+        "letter": "Letter"
     }
 
 pipeline: list = []
 
-@Resolver('Query.users')
+@Resolver('Query.Users')
 async def resolve_query_users(parent, args, ctx, info):
     where = strip_nones(args.get('where', {}))
     cursorField = args.get('cursorField',) or ('_id' if '_id' in map_fields_to_types else list(map_fields_to_types.keys())[0])

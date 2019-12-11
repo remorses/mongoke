@@ -9,7 +9,7 @@ from funcy import omit
 
 pipeline: list = []
 
-@Resolver('Query.user')
+@Resolver('Query.User')
 async def resolve_query_user(parent, args, ctx, info):
     where = strip_nones(args.get('where', {}))
     headers = ctx['req'].headers

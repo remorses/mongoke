@@ -55,6 +55,10 @@ def unique(l, key=lambda x: x):
             found += [id]
             yield x
 
+def download_file(url) -> str:
+    r = requests.get(url, )
+    return r.text
+
 def get_types_schema(config, here='./'):
     if "schema_path" in config:
         path = here + config["schema_path"]
@@ -63,12 +67,6 @@ def get_types_schema(config, here='./'):
     if config.get("schema"):
         return indent_to('',  config.get("schema"))
     if config.get("schema_url"):
-        r = requests.get(config.get("schema_url"), stream=True)
-        skema = ""
-        while 1:
-            buf = r.raw.read(16 * 1024)
-            if not buf:
-                break
-            skema += buf.decode()
-        return skema
+        return download_file(config.get("schema_url"))
+        
 

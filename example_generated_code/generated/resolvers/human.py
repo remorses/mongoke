@@ -16,7 +16,7 @@ def resolve_type(result, context, info, abstract_type):
 
 pipeline: list = []
 
-@Resolver('Query.human')
+@Resolver('Query.Human')
 async def resolve_query_human(parent, args, ctx, info):
     where = strip_nones(args.get('where', {}))
     headers = ctx['req'].headers

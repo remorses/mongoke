@@ -17,11 +17,11 @@ input WhereUrl {
     neq: Url
 }
 
-input WhereFloat {
-    in: [Float]
-    nin: [Float]
-    eq: Float
-    neq: Float
+input WhereObjectId {
+    in: [ObjectId]
+    nin: [ObjectId]
+    eq: ObjectId
+    neq: ObjectId
 }
 
 input WhereID {
@@ -38,11 +38,18 @@ input WhereBoolean {
     neq: Boolean
 }
 
-input WhereObjectId {
-    in: [ObjectId]
-    nin: [ObjectId]
-    eq: ObjectId
-    neq: ObjectId
+input WhereInt {
+    in: [Int]
+    nin: [Int]
+    eq: Int
+    neq: Int
+}
+
+input WhereFloat {
+    in: [Float]
+    nin: [Float]
+    eq: Float
+    neq: Float
 }
 
 input WhereString {
@@ -52,18 +59,18 @@ input WhereString {
     neq: String
 }
 
-input WhereInt {
-    in: [Int]
-    nin: [Int]
-    eq: Int
-    neq: Int
-}
-
 input WhereAddress {
     in: [Address]
     nin: [Address]
     eq: Address
     neq: Address
+}
+
+input WhereLetter {
+    in: [Letter]
+    nin: [Letter]
+    eq: Letter
+    neq: Letter
 }
 
 

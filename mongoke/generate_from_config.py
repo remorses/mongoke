@@ -26,7 +26,7 @@ from .templates.graphql_query import (
     to_many_relation_boilerplate,
     to_one_relation,
 )
-from .templates.main import main
+from .templates.make_app import make_app
 from .templates.jwt_middleware import jwt_middleware
 from .templates.logger import logger
 from .templates.engine import engine
@@ -72,9 +72,9 @@ def generate_from_config(config, config_path, root_dir_path):
     touch(f"__init__.py", "")
     touch(f"engine.py", engine)
     touch(
-        f"main.py",
+        f"make_app.py",
         populate_string(
-            main,
+            make_app,
             dict(
                 root_dir_name=root_dir_path.split("/")[-1],
                 db_url=db_url,
@@ -82,7 +82,7 @@ def generate_from_config(config, config_path, root_dir_path):
             ),
         ),
     )
-    touch('__main__.py', 'from .main import app')
+    touch('__main__.py', 'from .make_app import make_app\napp = make_app()')
     touch(f"generated/__init__.py", "")
     touch(f"generated/logger.py", logger)
     touch(f"middleware.py",

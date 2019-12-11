@@ -12,14 +12,14 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from .middleware import JwtMiddleware
 from .engine import CustomEngine, read
 
-import example_generated_code.generated.resolvers.user
-import example_generated_code.generated.resolvers.users
-import example_generated_code.generated.resolvers.human
-import example_generated_code.generated.resolvers.humans
-import example_generated_code.generated.resolvers.task_events
-import example_generated_code.generated.resolvers.user_friends
-import example_generated_code.generated.resolvers.user_likes_over_time
-import example_generated_code.generated.resolvers.user_father
+import example_generated_code.generated.resolvers.User
+import example_generated_code.generated.resolvers.Users
+import example_generated_code.generated.resolvers.Human
+import example_generated_code.generated.resolvers.Humans
+import example_generated_code.generated.resolvers.Task_events
+import example_generated_code.generated.resolvers.User_friends
+import example_generated_code.generated.resolvers.User_likes_over_time
+import example_generated_code.generated.resolvers.User_father
 import example_generated_code.generated.scalars
 
 MONGOKE_BASE_PATH = os.getenv("MONGOKE_BASE_PATH", "/")
@@ -38,7 +38,15 @@ sdl_files = sorted(os.listdir(sdl_dir))
 sdl_files = [sdl_dir + f for f in sdl_files]
 
 
-def make_app():
+class CatchAll(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, handler):
+        request.scope["path"] = MONGOKE_BASE_PATH # TODO subscriptions path
+        return await handler(request)
+
+
+def make_app(db: AsyncIOMotorClient=None):
+    if not db:
+        db = AsyncIOMotorClient(DB_URL).get_database()
     graphiql = GraphiQL(
         # path=MONGOKE_BASE_PATH,
         default_headers={"Authorization": "Bearer " + GRAPHIQL_DEFAULT_JWT}
@@ -51,8 +59,6 @@ def make_app():
         sdl=sdl_files, modules=[ApolloFederationPlugin(engine_sdl=sdl_files)]
     )
 
-    db: AsyncIOMotorClient = AsyncIOMotorClient(DB_URL).get_database()
-
     context = {"db": db, "loop": None}
 
     app = TartifletteApp(
@@ -61,17 +67,15 @@ def make_app():
         path=MONGOKE_BASE_PATH,
         graphiql=graphiql if not DISABLE_GRAPHIQL else False,
     )
+    app = CORSMiddleware(app, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"], )
+    app = JwtMiddleware(app,)
+    # app = CatchAll(app,)
+    app = ServerErrorMiddleware(app,)
     return app
 
-class CatchAll(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, handler):
-        request.scope["path"] = MONGOKE_BASE_PATH # TODO subscriptions path
-        return await handler(request)
 
-app = make_app()
-app = CORSMiddleware(app, allow_origins=["*"], allow_methods=["*"])
-app = JwtMiddleware(app,)
-# app = CatchAll(app,)
-app = ServerErrorMiddleware(app,)
+
+
+
 
 

@@ -21,7 +21,7 @@ from .templates.graphql_query import (
 )
 from .templates.jwt_middleware import jwt_middleware
 from .templates.logger import logger
-from .templates.main import main
+
 from .templates.resolvers import (
     generated_init,
     many_items_resolvers,
@@ -134,7 +134,7 @@ def generate_relation_boilerplate(
                 fields=get_scalar_fields(schema, toType),
             ),
         )
-    touch(f"generated/sdl/{fromType.lower()}_{relationName}.graphql", relation_sdl, index=True)
+    touch(f"generated/sdl/{fromType}_{relationName}.graphql", relation_sdl, index=True)
     relation_template = (
         single_relation_resolver
         if relation_type == "to_one"

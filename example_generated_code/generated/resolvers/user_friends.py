@@ -17,7 +17,9 @@ map_fields_to_types = {
         "type": "String",
         "_id": "ID",
         "name": "String",
-        "surname": "String"
+        "surname": "String",
+        "url": "Url",
+        "letter": "Letter"
     }
 
 pipeline: list = []

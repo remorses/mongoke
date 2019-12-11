@@ -16,7 +16,7 @@
             "name": "Python: Generated",
             "type": "python",
             "request": "launch",
-            "module": "generated",
+            "module": "example_generated_code",
             "justMyCode": false
         },
     ]

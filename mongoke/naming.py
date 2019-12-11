@@ -4,7 +4,7 @@ from funcy import collecting
 def get_relation_filename(relation):
     fromType = relation["from"]
     relationName = relation["field"]
-    return f"{fromType.lower()}_{relationName}"
+    return f"{fromType}_{relationName}"
 
 
 @collecting

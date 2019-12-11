@@ -6,11 +6,16 @@ from .support import get_config_schema
 import jsonschema
 import sys
 import yaml
+from mongoke.support import download_file
 
 
 
 def main(path, force=False, generated_path=None):
-    config = yaml.safe_load(open(path).read())
+    if os.getenv('MONGOKE_CONFIG_URL'):
+        config = download_file(os.getenv('MONGOKE_CONFIG_URL'))
+    else:
+        config = open(path).read()
+    config = yaml.safe_load(config)
     jsonschema.validate(config, get_config_schema())
     config_path = os.path.abspath(os.path.dirname(path))
     if not force:

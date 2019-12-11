@@ -1,106 +1,112 @@
 import asyncio
 import mongodb_streams
 import pytest
-from aiohttp.test_utils import TestClient, TestServer
-from generated.__main__ import build
+from starlette.testclient import TestClient
+from example_generated_code.make_app import make_app
 from unittest.mock import _Call, call
 from asynctest import mock
 from prtty import pretty
+from starlette.routing import Lifespan, Router
+
 
 _ = mock.ANY
 
 
-@pytest.fixture()
-async def query():
-    print('quering')
-    loop = asyncio.get_event_loop()
-    loop.set_debug(True)
-    app = build(db=mock.MagicMock(name='db'),)
-    async with TestClient(TestServer(app), loop=loop) as client:
-        async def func(query, variables={}):
-            r = await client.post('/', json=dict(query=query, variables=variables))
-            return await r.json()
-        yield func
+@pytest.fixture
+def client():
+    app = make_app(db=mock.MagicMock(name="db"))
+    
+    with TestClient(app) as client:
+        yield client
+    del app
 
 
-@pytest.mark.asyncio
-async def test_single_resolver(query):
-    with mock.patch('mongodb_streams.find_one', ) as m:
-        m.side_effect = [
-            dict(username='hello'),
-            dict(name='name')
-        ]
-        r = await query('''
-        {
-            bot(where: {username: {eq: "ciao"}}) {
-                username
-                user {
-                    name
-                }
-            }
-        }
-        ''')
-        pretty(r)
-        pretty(m.call_args_list)
-        assert r == {
-            "data": {
-                "bot": {
-                    "username": "hello",
-                    "user": {
-                        "name": "name"
-                    }
-                }
-            }
-        }
+@pytest.fixture
+def query(client):
+    def func(query, variables={}):
+        r = client.post("/", json=dict(query=query, variables=variables))
+        return r.json()
 
-@pytest.mark.asyncio
-async def test_many_relation(query):
-    with mock.patch('mongodb_streams.find_one', ) as m:
-        m.side_effect = [
-            [dict(username='hello'),],
-            [dict(value=89, timestamp=34)]
-        ]
-        r = await query('''
+    # await client.wait_startup()
+    # client.__enter__()
+    return func
+    # client.__exit__(None)
+
+
+def test_get_user(query):
+    q = """
+    {
+    User {
+      _id
+      name
+    }
+  }
+  """
+    res = query(q)
+    print(res)
+
+
+def test_single_resolver(query):
+    with mock.patch("mongodb_streams.find_one") as m:
+        m.side_effect = [dict(surname="xxx")]
+        r = query(
+            """
             {
-                bots(
-                    last: 50,
-                ) {
-                    nodes {
-                        username
-                        _id
-                        likes_over_time(
-                            first: 20
-                            cursorField: value
-                        ) {
-                            nodes {
-                                value
-                                timestamp
-                            }
-                        }
-                    }
+                User(where: {surname: {eq: "xxx"}}) {
+                    _id
+                    name
+                    surname
                 }
             }
-        ''')
+        """
+        )
         pretty(r)
         pretty(m.call_args_list)
-        
+        assert r["data"]["User"]["surname"] == "xxx"
 
 
-@pytest.mark.asyncio
-async def test_many_resolver(query):
-    with mock.patch('mongodb_streams.find', ) as m:
+def test_many_users(query):
+    with mock.patch("mongodb_streams.find") as m:
+        m.side_effect = [[dict(surname="xxx")], [dict(surname="xxx")]]
+        r = query(
+            """
+{
+  Users(where: {surname: {eq: "xxx"}}) {
+    nodes {
+      surname
+    }
+  }
+}
+        """
+        )
+        pretty(r)
+        pretty(m.call_args_list)
+        nodes = r["data"]["Users"]["nodes"]
+        assert len(nodes) == 1
+        assert nodes[0]["surname"] == "xxx"
+
+
+def test_many_resolver(query):
+    with mock.patch("mongodb_streams.find") as m:
         bots = [dict(_id=str(i), username=str(i)) for i in range(20)]
         m.return_value = bots
-        r = await query('''
-        {
-            bots(first: 3) {
-                nodes {
-                    username
-                }
-            }
+        r = query(
+            """
+{
+  Users(where: {surname: {eq: "xxx"}}) {
+    nodes {
+      surname
+      friends {
+        nodes {
+          surname
         }
-        ''')
-        pretty(r, )
+      }
+    }
+  }
+}
+    """
+        )
+        pretty(r)
         print(m.call_args)
-        
+
         # m.assert_called_with(_, where={'username': {'$eq': 'ciao'}}, pipeline=_)

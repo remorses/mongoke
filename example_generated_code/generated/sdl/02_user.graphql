@@ -1,10 +1,10 @@
 
 extend type Query {
-    user(
+    User(
         where: UserWhere,
     ): User
 
-    users(
+    Users(
         where: UserWhere, 
         cursorField: UserFields, 
         first: Int, 
@@ -33,6 +33,8 @@ input UserWhere {
     _id: WhereID
     name: WhereString
     surname: WhereString
+    url: WhereUrl
+    letter: WhereLetter
 }
 
 enum UserFields {
@@ -40,4 +42,6 @@ enum UserFields {
     _id
     name
     surname
+    url
+    letter
 }

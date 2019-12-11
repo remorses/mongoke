@@ -13,6 +13,11 @@ type Guest {
     _id: ObjectId
     name: String
 }
+enum Letter {
+    a
+    b
+    c
+}
 type User {
     type: String
     _id: ID
@@ -20,5 +25,6 @@ type User {
     surname: String
     friends_ids: [ID]
     url: Url
+    letter: Letter
 }
 union Human = User | Guest

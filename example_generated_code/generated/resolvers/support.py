@@ -1,5 +1,6 @@
 
 import collections
+import os
 from prtty import pretty
 from motor.motor_asyncio import AsyncIOMotorDatabase, AsyncIOMotorCollection
 import mongodb_streams
@@ -14,8 +15,7 @@ from ..scalars import scalar_classes
 
 gt = '$gt'
 lt = '$lt'
-MAX_NODES = 20
-DEFAULT_NODES_COUNT = 10
+DEFAULT_NODES_COUNT = 20
 
 INPUT_COERCERS = {
     None: lambda x: x,
@@ -58,15 +58,25 @@ async def connection_resolver(
     scalar_name,
     pipeline=[]
 ):
+    if os.getenv('DEBUG'):
+        print('executing connection_resolver')
+        pretty({
+            'where': where,
+            'cursorField': cursorField,
+            'pagination': pagination,
+            'scalar_name': scalar_name,
+            'collection': collection,
+            'pipeline': pipeline,
+        })
     first, last = pagination.get('first'), pagination.get('last'),
     after, before = pagination.get('after'), pagination.get('before')
     if after:
-        after = INPUT_COERCERS[scalar_name](after)
+        after = INPUT_COERCERS.get(scalar_name, lambda x: x)(after)
     if before:
-        before = INPUT_COERCERS[scalar_name](before)
+        before = INPUT_COERCERS.get(scalar_name, lambda x: x)(before)
 
-    first = min(MAX_NODES, first or 0)
-    last = min(MAX_NODES, last or 0)
+    first = first or 0
+    last = last or 0
 
     if not first and not last:
         if after:
@@ -124,6 +134,7 @@ async def connection_resolver(
         count = await mongodb_streams.count_documents(collection, where, pipeline=pipeline)
         toSkip = count - (last + 1)
         args.update(dict(skip=max(toSkip, 0)))
+    args.update(dict(max_len=10000))
     # pretty(args)
     nodes = await mongodb_streams.find(collection, **args)
 
