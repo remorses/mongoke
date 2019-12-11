@@ -18,7 +18,6 @@ def client():
 
     with TestClient(app) as client:
         yield client
-    del app
 
 
 @pytest.fixture
@@ -44,7 +43,7 @@ def test_get_user(query):
 
       """
     res = query(q)
-    print(res)
+    pretty(res)
 
 
 def test_single_resolver(query):
