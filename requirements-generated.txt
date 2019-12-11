@@ -5,6 +5,7 @@ tartiflette>=1.0.0rc2
 tartiflette-asgi
 uvicorn
 tartiflette_plugin_apollo_federation
+pymongo[tls, srv]
 motor
 tartiflette_scalars>=0.0.6
 aiohttp-cors
