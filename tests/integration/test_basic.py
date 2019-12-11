@@ -8,7 +8,7 @@ from asynctest import mock
 from prtty import pretty
 from starlette.routing import Lifespan, Router
 
-
+LETTERS = "abcdefghilmnopqrs"
 _ = mock.ANY
 
 
@@ -35,13 +35,14 @@ def query(client):
 
 def test_get_user(query):
     q = """
-    {
-    User {
-      _id
-      name
-    }
-  }
-  """
+        {
+            User {
+                _id
+                name
+            }
+        }
+
+      """
     res = query(q)
     print(res)
 
@@ -70,14 +71,15 @@ def test_many_users(query):
         m.side_effect = [[dict(surname="xxx")], [dict(surname="xxx")]]
         r = query(
             """
-{
-  Users(where: {surname: {eq: "xxx"}}) {
-    nodes {
-      surname
-    }
-  }
-}
-        """
+                {
+                    Users(where: { surname: { eq: "xxx" } }) {
+                        nodes {
+                            surname
+                        }
+                    }
+                }
+
+            """
         )
         pretty(r)
         pretty(m.call_args_list)
@@ -108,5 +110,27 @@ def test_many_resolver(query):
         )
         pretty(r)
         print(m.call_args)
+
+
+def test_cursor_field(query):
+    with mock.patch("mongodb_streams.find") as m:
+        xs = [dict(surname=i) for i in iter(LETTERS)]
+        m.return_value = xs
+        r = query(
+            """
+            {
+                Users(cursorField: surname) {
+                    nodes {
+                        surname
+                    }
+                }
+            }
+            """
+        )
+        pretty(r)
+        print(m.call_args)
+        nodes = r["data"]["Users"]["nodes"]
+        assert len(nodes) == len(LETTERS)
+        assert sorted(nodes, key=lambda x: x["surname"]) == nodes
 
         # m.assert_called_with(_, where={'username': {'$eq': 'ciao'}}, pipeline=_)
