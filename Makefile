@@ -8,6 +8,7 @@ clean:
 .PHONY: image
 image:
 	docker build . -t mongoke/mongoke
+	docker push mongoke/mongoke
 
 .PHONY: config-schema
 config-schema:
