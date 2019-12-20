@@ -10,6 +10,11 @@ image:
 	docker build . -t mongoke/mongoke
 	docker push mongoke/mongoke
 
+.PHONY: gcr
+gcr:
+	docker build . -t eu.gcr.io/molten-enigma-261612/mongoke
+	docker push eu.gcr.io/molten-enigma-261612/mongoke
+
 .PHONY: config-schema
 config-schema:
 	skema generate configuration_schema.skema --jsonschema ./mongoke/config_schema.json
