@@ -1,7 +1,8 @@
 scalar Address
 scalar Url
+# scalar ObjectId
 type Task {
-    _id: ID
+    _id: ObjectId
     address: Address
 }
 type WindowedEvent {
@@ -20,10 +21,10 @@ enum Letter {
 }
 type User {
     type: String
-    _id: ID
+    _id: ObjectId
     name: String
     surname: String
-    friends_ids: [ID]
+    friends_ids: [ObjectId]
     url: Url
     letter: Letter
 }

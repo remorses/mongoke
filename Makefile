@@ -30,5 +30,6 @@ play: generate-spec
 
 .PHONY: test
 test: generate-spec
+	docker-compose up -d mongo
 	pytest -sv
 
