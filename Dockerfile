@@ -16,7 +16,7 @@ RUN chmod +x /entrypoint.sh
 # RUN python -m src 
 # RUN pip show tartiflette
 
-ENV PYTHONUNBUFFERED=1
+ENV PYTHONUNBUFFERED=1 PORT=80
 
 ENTRYPOINT ["dumb-init", "--", "/entrypoint.sh"]
 CMD ["/conf.yml"]
