@@ -70,6 +70,7 @@ services:
         image: mongoke/mongoke
         environment:
             DB_URL: mongodb://mongo/db
+            PORT: '80'
         volumes:
             - ./mongoke.yml:/conf.yml
     mongo:
