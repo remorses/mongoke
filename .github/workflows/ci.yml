@@ -21,6 +21,13 @@ jobs:
         name: mongoke/mongoke
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Publish to Dockerhub
+      uses: elgohr/Publish-Docker-Github-Action@master
+      with:
+        name: containerful/mongoke
+        registry: gcr.io
+        username: _json_key
+        password: ${{ secrets.GCP_KEY_JSON }}
     - name: Publish to Pypi
       uses: remorses/pypi@master
       with:
