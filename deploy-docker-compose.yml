@@ -22,7 +22,7 @@ x-deploy-data:
       MONGODB_URL:
         type: string
         description: The url to connect the database, it will be kept encrypted
-        pattern: ^(mongodb:(?:\/{2})?)((\w+?):(\w+?)@|:?@?)(\S+?):(\d+)\/(\S+?)(\?replicaSet=(\S+?))?$
+        pattern: ^(mongodb:(?:\/{2})?)((\w+?):(\w+?)@|:?@?)(\S+?):(\d+)\/(\S+?)(\?replicaSet=(\S+?))?$$
         default: mongodb://yourdatabaseurl/database-name
 
 services:
