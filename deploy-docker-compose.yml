@@ -3,12 +3,13 @@ version: "3"
 x-deploy-data:
   envSchema:
     required:
-      - CONFIG    
+      - CONFIG
       - MONGODB_URL
     properties:
       CONFIG:
         type: string
         format: code/yaml
+        description: The config that describes how to generate the graphql server
         default: |
           schema: |
             type User {
@@ -20,7 +21,7 @@ x-deploy-data:
               collection: users
       MONGODB_URL:
         type: string
-        format: text
+        description: The url to connect the database, it will be kept encrypted
         pattern: ^(mongodb:(?:\/{2})?)((\w+?):(\w+?)@|:?@?)(\S+?):(\d+)\/(\S+?)(\?replicaSet=(\S+?))?$
         default: mongodb://yourdatabaseurl/database-name
 
