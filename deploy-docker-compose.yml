@@ -27,7 +27,7 @@ x-deploy-data:
 
 services:
   mongoke:
-    image: mongoke/mongoke
+    image: gcr.io/containerful/mongoke
     environment:
       - PYTHONUNBUFFERED=1
       - DB_URL=${MONGODB_URL}
