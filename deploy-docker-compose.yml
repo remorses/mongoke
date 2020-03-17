@@ -1,0 +1,33 @@
+version: "3"
+
+x-deploy-data:
+  envSchema:
+    required:
+      - CONFIG    
+      - MONGODB_URL
+    properties:
+      CONFIG:
+        type: string
+        format: code/yaml
+        default: |
+          schema: |
+            type User {
+              _id: ObjectId
+              name: String
+            }
+          types:
+            User:
+              collection: users
+      MONGODB_URL:
+        type: string
+        format: text
+        pattern: ^(mongodb:(?:\/{2})?)((\w+?):(\w+?)@|:?@?)(\S+?):(\d+)\/(\S+?)(\?replicaSet=(\S+?))?$
+        default: mongodb://yourdatabaseurl/database-name
+
+services:
+  mongoke:
+    image: mongoke/mongoke
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DB_URL=${MONGODB_URL}
+      - CONFIG=${CONFIG}
