@@ -103,13 +103,13 @@ def test_id_is_searchable(query, users: Collection):
     assert res["data"]["User"]["_id"] == str(id)
 
 
-def test_after_and_last(query, users: Collection):
+def test_first_and_after(query, users: Collection):
     assert not list(users.find({}))
     LENGTH = 20
     users.insert_many([dict(_id=ObjectId(), name=str(i)) for i in range(LENGTH)])
     q = r"""
-        query search($last: Int!, $before: AnyScalar) {
-            Users(last: $last, before: $before) {
+        query search($first: Int!, $after: AnyScalar) {
+            Users(first: $first, after: $after, cursorField: _id) {
                 nodes {
                     _id
                     name
@@ -117,7 +117,41 @@ def test_after_and_last(query, users: Collection):
                 }
                 pageInfo {
                     hasPreviousPage
+                    hasNextPage
                     startCursor
+                    endCursor
+                }
+            }
+        }
+      """
+    res = query(q, dict(first=10))
+    pretty(res)
+    assert res["data"]["Users"]["nodes"]
+    assert len(res["data"]["Users"]["nodes"]) == 10
+    after = res["data"]["Users"]["pageInfo"]["endCursor"]
+    res = query(q, dict(first=10, after=after))
+    pretty(res)
+    assert res["data"]["Users"]["nodes"]
+    assert len(res["data"]["Users"]["nodes"]) == 10
+
+
+def test_before_and_last(query, users: Collection):
+    assert not list(users.find({}))
+    LENGTH = 20
+    users.insert_many([dict(_id=ObjectId(), name=str(i)) for i in range(LENGTH)])
+    q = r"""
+        query search($last: Int!, $before: AnyScalar) {
+            Users(last: $last, before: $before, cursorField: _id) {
+                nodes {
+                    _id
+                    name
+                    url
+                }
+                pageInfo {
+                    hasPreviousPage
+                    hasNextPage
+                    startCursor
+                    endCursor
                 }
             }
         }

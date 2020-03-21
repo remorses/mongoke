@@ -13,8 +13,7 @@ from funcy import pluck, select_keys, omit, lmap
 from ..scalars import scalar_classes
 
 
-gt = '$gt'
-lt = '$lt'
+
 DEFAULT_NODES_COUNT = 20
 
 INPUT_COERCERS = {
@@ -94,7 +93,8 @@ async def connection_resolver(
         raise Exception('no sense using first and last together')
 
     args: dict = dict()
-
+    lt = '$gt'
+    gt = '$lt'
     if after != None and before != None:
         args.update(dict(
             match={
@@ -127,13 +127,16 @@ async def connection_resolver(
         args = dict(match=where, )
     if pipeline:
         args.update(dict(pipeline=pipeline))
-    args.update(dict(sort={cursorField: ASCENDING}))
+    sorting = ASCENDING if last else DESCENDING
+    args.update(dict(sort={cursorField: sorting}))
+    if last:
+        args.update(dict(limit=last + 1, ))
     if first:
         args.update(dict(limit=first + 1, ))
-    elif last:
-        count = await mongodb_streams.count_documents(collection, args['match'], pipeline=pipeline)
-        toSkip = count - (last + 1)
-        args.update(dict(skip=max(toSkip, 0)))
+    # elif first:
+    #     count = await mongodb_streams.count_documents(collection, args['match'], pipeline=pipeline)
+    #     toSkip = count - (last + 1)
+    #     args.update(dict(skip=max(toSkip, 0)))
     args.update(dict(max_len=10000))
     # pretty(args)
     nodes = await mongodb_streams.find(collection, **args)
@@ -146,7 +149,8 @@ async def connection_resolver(
         nodes = nodes[:-1] if hasNext else nodes
 
     if last:
-        hasPrevious = len(nodes) == last + 1
+        nodes = list(reversed(nodes))
+        hasPrevious = len(nodes) == (last + 1)
         nodes = nodes[1:] if hasPrevious else nodes
 
     end_cursor = nodes[-1].get(cursorField) if nodes else None
