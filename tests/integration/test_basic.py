@@ -131,5 +131,3 @@ def test_cursor_field(query):
         nodes = r["data"]["Users"]["nodes"]
         assert len(nodes) == len(LETTERS)
         assert sorted(nodes, key=lambda x: x["surname"]) == nodes
-
-        # m.assert_called_with(_, where={'username': {'$eq': 'ciao'}}, pipeline=_)

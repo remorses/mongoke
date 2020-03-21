@@ -14,9 +14,8 @@ from prtty import pretty
 from starlette.routing import Lifespan, Router
 
 LETTERS = "abcdefghilmnopqrs"
-DB_URL = 'mongodb://localhost/testdb'
+DB_URL = "mongodb://localhost/testdb"
 _ = mock.ANY
-
 
 
 @pytest.fixture
@@ -24,17 +23,20 @@ def mongo(event_loop):
     mongo = AsyncIOMotorClient(DB_URL)
     return mongo
 
+
 @pytest.fixture
 async def db(mongo):
     mongo: MongoClient = mongo.delegate
-    return mongo.get_database()
+    return mongo.get_database("testingdatabase")
+
 
 @pytest.fixture
 async def asyncdb(event_loop, mongo):
-    db = mongo.get_database()
+    db = mongo.get_database("testingdatabase")
     yield db
     # for c in await db.list_collection_names():
     #     await db.drop_collection(c)
+
 
 @pytest.fixture
 def client(asyncdb):
@@ -55,17 +57,17 @@ def query(client, db):
     return func
     # client.__exit__(None)
 
+
 @pytest.fixture
 def users(db):
     users: Collection = db.users
     yield users
     users.delete_many({})
 
+
 def test_get_user_real(query, users: Collection):
     assert not list(users.find({}))
-    users.insert_one(dict(
-        name='xxx'
-    ))
+    users.insert_one(dict(name="xxx"))
     q = """
         {
             User {
@@ -78,15 +80,13 @@ def test_get_user_real(query, users: Collection):
       """
     res = query(q)
     pretty(res)
-    assert res['data']['User']
+    assert res["data"]["User"]
+
 
 def test_id_is_searchable(query, users: Collection):
     assert not list(users.find({}))
     id = ObjectId()
-    users.insert_one(dict(
-        _id=id,
-        name='xxx'
-    ))
+    users.insert_one(dict(_id=id, name="xxx"))
     q = """
         query search($id: ObjectId!) {
             User(where: {_id: {eq: $id}}) {
@@ -99,6 +99,35 @@ def test_id_is_searchable(query, users: Collection):
       """
     res = query(q, dict(id=str(id)))
     pretty(res)
-    assert res['data']['User']
-    assert res['data']['User']['_id'] == str(id)
+    assert res["data"]["User"]
+    assert res["data"]["User"]["_id"] == str(id)
 
+
+def test_after_and_last(query, users: Collection):
+    assert not list(users.find({}))
+    LENGTH = 20
+    users.insert_many([dict(_id=ObjectId(), name=str(i)) for i in range(LENGTH)])
+    q = r"""
+        query search($last: Int!, $before: AnyScalar) {
+            Users(last: $last, before: $before) {
+                nodes {
+                    _id
+                    name
+                    url
+                }
+                pageInfo {
+                    hasPreviousPage
+                    startCursor
+                }
+            }
+        }
+      """
+    res = query(q, dict(last=10))
+    pretty(res)
+    assert res["data"]["Users"]["nodes"]
+    assert len(res["data"]["Users"]["nodes"]) == 10
+    before = res["data"]["Users"]["pageInfo"]["startCursor"]
+    res = query(q, dict(last=10, before=before))
+    pretty(res)
+    assert res["data"]["Users"]["nodes"]
+    assert len(res["data"]["Users"]["nodes"]) == 10

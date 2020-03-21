@@ -1,4 +1,5 @@
 
+resolvers_support = '''
 import collections
 import os
 from prtty import pretty
@@ -24,7 +25,7 @@ INPUT_COERCERS = {
     'Float': float,
     'Bool': bool,
     'ID': str,
-    **{scalar.name: scalar._implementation.coerce_input for scalar in scalar_classes},
+    ${{'**{scalar.name: scalar._implementation.coerce_input for scalar in scalar_classes},' }}
 }
 
 OUTPUT_COERCERS = {
@@ -34,7 +35,7 @@ OUTPUT_COERCERS = {
     'Float': float,
     'Bool': bool,
     'ID': str,
-    **{scalar.name: scalar._implementation.coerce_output for scalar in scalar_classes},
+    ${{'**{scalar.name: scalar._implementation.coerce_output for scalar in scalar_classes},' }}
 }
 
 def zip_pluck(d, *keys):
@@ -194,3 +195,4 @@ def strip_nones(x: dict):
                 result[k] = v
     return result
 
+'''
