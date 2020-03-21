@@ -50,7 +50,8 @@ extend type Query {
         first: Int, 
         last: Int, 
         after: AnyScalar, 
-        before: AnyScalar
+        before: AnyScalar,
+        direction: Direction
     ): ${{type_name}}Connection!
 }
 
@@ -93,7 +94,8 @@ extend type ${{fromType}} {
        first: Int, 
        last: Int, 
        after: AnyScalar, 
-       before: AnyScalar
+       before: AnyScalar,
+       direction: Direction
     ): ${{toType}}Connection!
 }
 '''

@@ -6,6 +6,7 @@ extend type User {
        first: Int, 
        last: Int, 
        after: AnyScalar, 
-       before: AnyScalar
+       before: AnyScalar,
+       direction: Direction
     ): WindowedEventConnection!
 }

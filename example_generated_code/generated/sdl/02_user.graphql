@@ -10,7 +10,8 @@ extend type Query {
         first: Int, 
         last: Int, 
         after: AnyScalar, 
-        before: AnyScalar
+        before: AnyScalar,
+        direction: Direction
     ): UserConnection!
 }
 

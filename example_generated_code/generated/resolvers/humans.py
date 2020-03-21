@@ -48,7 +48,6 @@ async def resolve_query_humans(parent, args, ctx, info):
         pagination=pagination,
         scalar_name=map_fields_to_types[cursorField],
         pipeline=pipeline,
-        # direction=args
     )
     data['nodes'] = list(filter_nodes_by_guard(data['nodes'], fields, jwt=jwt))
     # {{repr_many_disambiguations(disambiguations, '    ') if disambiguations else ''

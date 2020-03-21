@@ -103,13 +103,13 @@ def test_id_is_searchable(query, users: Collection):
     assert res["data"]["User"]["_id"] == str(id)
 
 
-def test_first_and_after(query, users: Collection):
+def test_first_and_after_asc(query, users: Collection):
     assert not list(users.find({}))
     LENGTH = 20
     users.insert_many([dict(_id=ObjectId(), name=str(i)) for i in range(LENGTH)])
     q = r"""
         query search($first: Int!, $after: AnyScalar) {
-            Users(first: $first, after: $after, cursorField: _id) {
+            Users(first: $first, after: $after, cursorField: _id, direction: ASC) {
                 nodes {
                     _id
                     name
@@ -135,13 +135,45 @@ def test_first_and_after(query, users: Collection):
     assert len(res["data"]["Users"]["nodes"]) == 10
 
 
-def test_before_and_last(query, users: Collection):
+def test_first_and_after_desc(query, users: Collection):
+    assert not list(users.find({}))
+    LENGTH = 20
+    users.insert_many([dict(_id=ObjectId(), name=str(i)) for i in range(LENGTH)])
+    q = r"""
+        query search($first: Int!, $after: AnyScalar) {
+            Users(first: $first, after: $after, cursorField: _id, direction: DESC) {
+                nodes {
+                    _id
+                    name
+                    url
+                }
+                pageInfo {
+                    hasPreviousPage
+                    hasNextPage
+                    startCursor
+                    endCursor
+                }
+            }
+        }
+      """
+    res = query(q, dict(first=10))
+    pretty(res)
+    assert res["data"]["Users"]["nodes"]
+    assert len(res["data"]["Users"]["nodes"]) == 10
+    after = res["data"]["Users"]["pageInfo"]["endCursor"]
+    res = query(q, dict(first=10, after=after))
+    pretty(res)
+    assert res["data"]["Users"]["nodes"]
+    assert len(res["data"]["Users"]["nodes"]) == 10
+
+
+def test_before_and_last_asc(query, users: Collection):
     assert not list(users.find({}))
     LENGTH = 20
     users.insert_many([dict(_id=ObjectId(), name=str(i)) for i in range(LENGTH)])
     q = r"""
         query search($last: Int!, $before: AnyScalar) {
-            Users(last: $last, before: $before, cursorField: _id) {
+            Users(last: $last, before: $before, cursorField: _id, direction: ASC) {
                 nodes {
                     _id
                     name
@@ -166,12 +198,45 @@ def test_before_and_last(query, users: Collection):
     assert res["data"]["Users"]["nodes"]
     assert len(res["data"]["Users"]["nodes"]) == 10
 
+
+def test_before_and_last_desc(query, users: Collection):
+    assert not list(users.find({}))
+    LENGTH = 20
+    users.insert_many([dict(_id=ObjectId(), name=str(i)) for i in range(LENGTH)])
+    q = r"""
+        query search($last: Int!, $before: AnyScalar) {
+            Users(last: $last, before: $before, cursorField: _id, direction: DESC) {
+                nodes {
+                    _id
+                    name
+                    url
+                }
+                pageInfo {
+                    hasPreviousPage
+                    hasNextPage
+                    startCursor
+                    endCursor
+                }
+            }
+        }
+      """
+    res = query(q, dict(last=10))
+    pretty(res)
+    assert res["data"]["Users"]["nodes"]
+    assert len(res["data"]["Users"]["nodes"]) == 10
+    before = res["data"]["Users"]["pageInfo"]["startCursor"]
+    res = query(q, dict(last=10, before=before))
+    pretty(res)
+    assert res["data"]["Users"]["nodes"]
+    assert len(res["data"]["Users"]["nodes"]) == 10
+
+
 def test_before_and_last_different_cursor(query, users: Collection):
     assert not list(users.find({}))
     users.insert_many([dict(_id=ObjectId(), name=str(i)) for i in LETTERS])
     q = r"""
         query search($last: Int!, $before: AnyScalar) {
-            Users(last: $last, before: $before, cursorField: name) {
+            Users(last: $last, before: $before, cursorField: name, direction: ASC) {
                 nodes {
                     _id
                     name

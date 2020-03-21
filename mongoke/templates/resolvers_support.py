@@ -40,6 +40,11 @@ OUTPUT_COERCERS = {
 def zip_pluck(d, *keys):
     return zip(*[pluck(k, d) for k in keys])
 
+direction_map = {
+    'ASC': ASCENDING,
+    'DESC': DESCENDING,
+}
+
 def get_pagination(args,):
     after = args.get('after')
     before = args.get('before')
@@ -48,6 +53,7 @@ def get_pagination(args,):
         'before': before,
         'first': args.get('first'),
         'last': args.get('last'),
+        'direction': direction_map[args.get('direction', 'DESC')],
     }
 
 def opposite_direction(dir):
@@ -62,7 +68,6 @@ async def connection_resolver(
     pagination: dict,
     scalar_name,
     pipeline=[],
-    direction=DESCENDING,
 ):
     if os.getenv('DEBUG'):
         print('executing connection_resolver')
@@ -74,6 +79,7 @@ async def connection_resolver(
             'collection': collection,
             'pipeline': pipeline,
         })
+    direction = pagination['direction']
     first, last = pagination.get('first'), pagination.get('last'),
     after, before = pagination.get('after'), pagination.get('before')
     if after:

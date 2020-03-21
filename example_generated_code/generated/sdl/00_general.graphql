@@ -10,11 +10,11 @@ enum Direction {
 }
 
 
-input WhereID {
-    in: [ID]
-    nin: [ID]
-    eq: ID
-    neq: ID
+input WhereFloat {
+    in: [Float]
+    nin: [Float]
+    eq: Float
+    neq: Float
 }
 
 input WhereUrl {
@@ -24,11 +24,11 @@ input WhereUrl {
     neq: Url
 }
 
-input WhereFloat {
-    in: [Float]
-    nin: [Float]
-    eq: Float
-    neq: Float
+input WhereID {
+    in: [ID]
+    nin: [ID]
+    eq: ID
+    neq: ID
 }
 
 input WhereInt {
