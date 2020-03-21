@@ -49,13 +49,19 @@ def get_pagination(args,):
         'last': args.get('last'),
     }
 
+def opposite_direction(dir):
+    if dir == ASCENDING:
+        return DESCENDING
+    return ASCENDING
+
 async def connection_resolver(
     collection: AsyncIOMotorCollection,
     where: dict,
     cursorField,  # needs to exist always at least one, the fisrst is the cursorField
     pagination: dict,
     scalar_name,
-    pipeline=[]
+    pipeline=[],
+    direction=DESCENDING,
 ):
     if os.getenv('DEBUG'):
         print('executing connection_resolver')
@@ -93,8 +99,8 @@ async def connection_resolver(
         raise Exception('no sense using first and last together')
 
     args: dict = dict()
-    lt = '$gt'
-    gt = '$lt'
+    lt = '$gt' if direction == DESCENDING else '$lt'
+    gt = '$lt' if direction == DESCENDING else '$gt'
     if after != None and before != None:
         args.update(dict(
             match={
@@ -127,7 +133,7 @@ async def connection_resolver(
         args = dict(match=where, )
     if pipeline:
         args.update(dict(pipeline=pipeline))
-    sorting = ASCENDING if last else DESCENDING
+    sorting = direction if not last else opposite_direction(direction)
     args.update(dict(sort={cursorField: sorting}))
     if last:
         args.update(dict(limit=last + 1, ))

@@ -13,7 +13,7 @@ from asynctest import mock
 from prtty import pretty
 from starlette.routing import Lifespan, Router
 
-LETTERS = "abcdefghilmnopqrs"
+LETTERS = "abcdefghilmnopqrstuvz"
 DB_URL = "mongodb://localhost/testdb"
 _ = mock.ANY
 
@@ -142,6 +142,36 @@ def test_before_and_last(query, users: Collection):
     q = r"""
         query search($last: Int!, $before: AnyScalar) {
             Users(last: $last, before: $before, cursorField: _id) {
+                nodes {
+                    _id
+                    name
+                    url
+                }
+                pageInfo {
+                    hasPreviousPage
+                    hasNextPage
+                    startCursor
+                    endCursor
+                }
+            }
+        }
+      """
+    res = query(q, dict(last=10))
+    pretty(res)
+    assert res["data"]["Users"]["nodes"]
+    assert len(res["data"]["Users"]["nodes"]) == 10
+    before = res["data"]["Users"]["pageInfo"]["startCursor"]
+    res = query(q, dict(last=10, before=before))
+    pretty(res)
+    assert res["data"]["Users"]["nodes"]
+    assert len(res["data"]["Users"]["nodes"]) == 10
+
+def test_before_and_last_different_cursor(query, users: Collection):
+    assert not list(users.find({}))
+    users.insert_many([dict(_id=ObjectId(), name=str(i)) for i in LETTERS])
+    q = r"""
+        query search($last: Int!, $before: AnyScalar) {
+            Users(last: $last, before: $before, cursorField: name) {
                 nodes {
                     _id
                     name
