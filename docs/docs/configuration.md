@@ -6,9 +6,9 @@ name: Configuration
 ## Configuration
 
 Mongoke defines its entire configuration in a yaml file that can be used to generate the entire graphql server.
-This configuration can be used inside the docker image in the default path `/config.yml`.
+This configuration can be used inside the docker image in the default path `/config.yml` .
 
-```yaml
+``` yaml
 Configuration:
     schema?: Str
     schema_url?: Url
@@ -42,12 +42,11 @@ Configuration:
 Url: Str
 ```
 
-
 ## Types
 
 Individual types config defined as an object where keys are the type names and values are the type configuration.
 
-```
+``` 
 types:
     ...:
         collection: Str
@@ -84,7 +83,7 @@ The expressions are evaluated until one is found true and the right \_\_type is 
 
 List of expressions to limit the access of the type fields to only certain users, based on jwt payload and the document data.
 
-```
+``` 
 guards?: [
     expression: Str
     excluded?: [Str]
@@ -100,19 +99,19 @@ decides if you want to evaluate the expression before or after querying the data
 
 python expression that can evaluate to true if you want to give user access to the type, expression is evaluated in python and has access to
 
--   x: the current document, available only if using when=after
--   jwt: the user jwt payload, can contain whatever you put inside it, by default extracted from the Authorization header and not verified.
+*   x: the current document, available only if using when=after
+*   jwt: the user jwt payload, can contain whatever you put inside it, by default extracted from the Authorization header and not verified.
 
 ### excluded
 
-By default the guards give access to all the document fields, you can limit the fileds you give access to by putting them inside `exclude`.
+By default the guards give access to all the document fields, you can limit the fileds you give access to by putting them inside `exclude` .
 To implement different levels of authorization with access to different fields you can use many guards where the most protected is the first so that the evaluation stops at the weakest permissions required possible.
 
 ## Relations
 
 Defined as a list of configurations to add connections between types.
 
-```
+``` 
 relations?: [
     from: Str
     to: Str
@@ -138,7 +137,7 @@ The field added to the `from` type to connect the `to` type
 
 if "to_one" the field in graphql will be a simple type reference and can be queried with
 
-```gql
+``` gql
 {
     owner {
         email
@@ -151,7 +150,7 @@ if "to_one" the field in graphql will be a simple type reference and can be quer
 
 If "to_many" the field will resolve to a connection and can be queried like this
 
-```gql
+``` gql
 {
     zoo {
         pets(first: 10) {
@@ -172,7 +171,7 @@ The code inside \${{ }} will be evaluated during every query that needs the rela
 
 Configure how to handle jwt authentication, by default the jwt is not verified, to verify it add the `secret` field with the secret used to sign the jwt. You can require a jwt for all the query fields adding the `required` field.
 
-```
+``` 
     jwt?:
         secret?: Str
         header_name?: Str # default is "Authorization"
@@ -193,3 +192,4 @@ Used when required is present to check if jwt is signed
 ### algorithms
 
 A list of algotihtm to decode the jwt, to see the full list chech the python pyJwt library
+

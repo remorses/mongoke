@@ -3,14 +3,13 @@ route: /docs/queries
 title: queries
 ---
 
-## Generated queries
+Every type defined in the configurations and associated with a collection will generate a graphql query for a single document and for many documents.
 
-Every type defined in the configurations and associated with a collection will generate a graphql query for a single document and for many documents in the form of a connection.
-The best way to explore the queries shape is follow the quickstart guide and open graphiql to explore the possible queries
+The best way to explore the queries shape is follow the quickstart guide and open graphiql to explore the possible queries.
 
 For example having the following type you can do the following queries
 
-```
+``` 
 User:
     type: "user"
     _id: ID
@@ -21,7 +20,7 @@ User:
 
 Some examples pf queries for this type:
 
-```gql
+``` gql
 
 {
     user(where: {name: {eq: "jon"}) {
@@ -32,9 +31,9 @@ Some examples pf queries for this type:
 }
 ```
 
-Every type generates a where argument where you can query the mongodb database with the `eq`, `in`, `nin` and other mongodb operators.
+Every type generates a where argument where you can query the mongodb database with the `eq` , `in` , `nin` and other mongodb operators.
 
-```gql
+``` gql
 {
     users(first: 20, after: "Micky", cursosorField: name) {
         nodes {
@@ -57,7 +56,7 @@ The pageInfo field returns the information to handle pagination, the endCursor a
 
 The generated graphql is below.
 
-```graphql
+``` graphql
 extend type Query {
     user(where: UserWhere): User
 
@@ -101,7 +100,7 @@ type PageInfo {
 
 The relations are similar, for a to_one relation:
 
-```graphql
+``` graphql
 extend type User {
     father: User
 }
@@ -109,7 +108,7 @@ extend type User {
 
 For to_many relations:
 
-```gql
+``` gql
 extend type User {
     friends(
         where: UserWhere
@@ -121,3 +120,4 @@ extend type User {
     ): UserConnection
 }
 ```
+

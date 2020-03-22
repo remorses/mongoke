@@ -17,7 +17,7 @@ The fastest way to try Mongoke is via docker-compose.
 
 The ObjectId scalar is already defined by default, it is converted to string when sent as json
 
-```yaml
+``` yaml
 # ./mongoke.yml
 schema: |
     type User {
@@ -39,7 +39,9 @@ types:
         collection: posts
 
 relations:
+
     - field: posts
+
       from: User
       to: BlogPost
       relation_type: to_many
@@ -49,21 +51,25 @@ relations:
 
 ### 2. Run the `mongoke` image with the above configuration
 
-To start the container mount copy paste the following content in a `docker-compose.yml` file, then execute `docker-compose up`.
+To start the container mount copy paste the following content in a `docker-compose.yml` file, then execute `docker-compose up` .
 
-```yaml
+``` yaml
 # docker-compose.yml
 version: '3'
 
 services:
     mongoke:
         ports:
+
             - 4000:80
+
         image: mongoke/mongoke
         environment:
             DB_URL: mongodb://mongo/db
         volumes:
+
             - ./mongoke.yml:/conf.yml
+
     mongo:
         image: mongo
         logging:
@@ -72,7 +78,7 @@ services:
 
 ### 3. Query the generated service via graphql or go to [http://localhost:4000/graphiql](http://localhost:4000/graphiql) to open graphiql
 
-```graphql
+``` graphql
 {
     user(where: { username: { eq: "Mike" } }) {
         _id
@@ -97,3 +103,4 @@ services:
     }
 }
 ```
+

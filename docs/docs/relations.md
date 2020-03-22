@@ -7,7 +7,7 @@ name: Relations
 
 relations are defined in the configuration with the following shape
 
-```
+``` 
 schema:
     ...
 types:
@@ -25,7 +25,7 @@ relations?: [
 
 One example of a configuration with a one `to_one` relation:
 
-```
+``` yaml
 schema: |
     type Owner {
         _id: ObjectId
@@ -43,7 +43,9 @@ types:
         collection: pets
 
 relations:
+
     -   field: pet
+
         relation_type: to_one
         from: Owner
         to: Pet
@@ -52,7 +54,7 @@ relations:
 
 An example of a `to_many` relation:
 
-```
+``` yaml
 schema: |
     type Owner {
         _id: ObjectId
@@ -76,11 +78,13 @@ types:
     Zoo:
         collection: zoos
 
-
 relations:
+
     -   field: pets
+
         relation_type: to_many
         from: Zoo
         to: Pet
         where: { "zoo_id": ${{ parent['_id'] }}}
 ```
+

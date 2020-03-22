@@ -86,7 +86,7 @@ Remember that to make queries efficent you should add MongoDb indexes to the `cu
 
     The `cursorFiled` argument is not a string but an enum, you don't need to add the `"` string quotes around the argument.
 
-```
+``` 
 query Users($first: Int, $after: AnyScalar, cursorField: name) {
   Users(first: $first, after: $after) {
     nodes {
