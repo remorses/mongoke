@@ -1,12 +1,12 @@
 {
     "version": 2,
-    
+
     "routes": [
-        { "handle": "filesystem" },
         {
             "src": "(.*)/docs",
             "status": 308,
             "headers": { "Location": "$1/docs/" }
-        }
+        },
+        { "handle": "filesystem" }
     ]
 }
