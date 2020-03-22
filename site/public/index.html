@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charSet="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <title>Mongoke - Instant Graphql for MongoDb</title>
+    <meta name="description" content="Mongoke connects to your MongoDb and auto-generates a production-ready GraphQL backend." />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="twitter:title" content="Mongoke - Instant Graphql for MongoDb" />
+    <meta name="twitter:description" content="Mongoke connects to your MongoDb and auto-generates a production-ready GraphQL backend." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta property="og:image" content="https://cdn.landen.co/53hof8a89mko/assets/rj4wajpj.jpg?w=1200&amp;h=630&amp;fit=crop" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:image" content="https://cdn.landen.co/53hof8a89mko/assets/rj4wajpj.jpg?w=1200&amp;h=630&amp;fit=crop" />
+    <link rel="canonical" href="https://53hof8a89mko.landen.co" />
+    <link rel="icon" href="https://cdn.landen.co/defaults/favicon.ico" />
+    <link rel="stylesheet" href="/css/b8c834914a8915ae7b87565a7727a622.css" />
+    <style tyle="text/css">
+        body {
+            font-family: Helvetica, sans-serif;
+            font-size: 14px;
+            font-weight: 400;
+            --title-scale: 1;
+        }
+
+        @media only screen and (max-width: 750px) {
+            body {
+                --title-scale: 0.7;
+            }
+        }
+
+        .wr {
+            max-width: 1200px;
+            max-width: var(--wr-max);
+        }
+
+        .section:not(.dark),
+        .theme--light,
+        .section:not(.dark) .color-2,
+        .theme--light .color-2 {
+            color: #fff;
+        }
+
+        .section.dark,
+        .theme--dark,
+        .section.dark .color-2,
+        .theme--dark .color-2 {
+            color: rgba(40, 40, 40, 1);
+        }
+
+        .section:not(.dark) .color-1,
+        .theme--light .color-1 {
+            color: #fff;
+        }
+
+        .section.dark .color-1,
+        .theme--dark .color-1 {
+            color: rgba(40, 40, 40, 1);
+        }
+
+        .section:not(.dark) .color-2,
+        .theme--light .color-2 {
+            color: #fff;
+        }
+
+        .section.dark .color-2,
+        .theme--light .color-2 {
+            color: rgba(40, 40, 40, 1);
+        }
+
+        a:not(.btn),
+        .link {
+            color: rgba(186, 186, 245, 1);
+            --link-hover-bg: rgba(186, 186, 245, 0.05);
+            --link-hover: rgb(97, 97, 232);
+        }
+
+        .dark a:not(.btn),
+        .dark .link,
+        .theme--dark .link,
+        .theme--dark a:not(.btn) {
+            color: rgba(72, 72, 240, 1);
+            --link-hover-bg: rgba(72, 72, 240, 0.05);
+            --link-hover: rgb(16, 16, 194);
+        }
+
+        mark {
+            background-color: rgba(255, 235, 0, 1);
+        }
+
+        .dark mark,
+        .theme--dark mark {
+            background-color: rgba(255, 235, 0, 1);
+        }
+
+        .weight-text {
+            font-weight: 400;
+        }
+
+        .weight-text-m {
+            font-weight: 500;
+        }
+
+        .weight-text-h {
+            font-weight: 600;
+        }
+
+        .weight-title {
+            font-weight: 400;
+        }
+
+        .weight-title-m {
+            font-weight: 500;
+        }
+
+        .weight-title-h {
+            font-weight: 700;
+        }
+
+        .font-title {
+            font-family: Helvetica, sans-serif;
+        }
+
+        a,
+        .link {
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        a:not(.btn):hover {
+            text-decoration: underline
+        }
+    </style>
+</head>
+
+<body>
+    <header id="header" class="section header dark" style="--wr-max:1200px">
+        <div class="wr color-1"><a id="headerLogo" href="/" class="header__logo" style="font-weight:700;font-size:25px">Mongoke</a>
+            <nav id="headerNav" class="header__nav">
+                <div class="headerNav__links"><a href="/docs">Docs</a><a href="https://github.com/remorses/mongoke">Github</a></div>
+                <div class="header__navCtas"></div>
+            </nav>
+            <nav id="headerMenu" class="header__nav header__nav--hidden">
+                <div id="headerMenuButton" class="burger">Menu</div>
+            </nav>
+        </div>
+        <nav id="headerDrawer" class="headerMenu col-dark-sec">
+            <div id="headerDrawerBackdrop" class="headerMenu__backdrop"></div>
+            <div class="headerMenu__wrapper" style="background-color:rgb(255, 255, 255)"><button id="headerDrawerClose" class="headerMenu__close btn"></button>
+                <ul class="headerMenu__links">
+                    <li><a href="/docs" class="drawerLink">Docs </a></li>
+                    <li><a href="https://github.com/remorses/mongoke" class="drawerLink">Github </a></li>
+                </ul>
+            </div>
+        </nav>
+        <script>
+            (function() {
+                var buffer = 10;
+                var margin = 60 + 40 + buffer;
+                // button
+                var button = document.getElementById('headerMenuButton');
+                var buttonWrapper = document.getElementById('headerMenu');
+                // drawer
+                var drawer = document.getElementById('headerDrawer');
+                var drawerBackdrop = document.getElementById('headerDrawerBackdrop');
+                var drawerClose = document.getElementById('headerDrawerClose');
+                // header UI
+                var logo = document.getElementById('headerLogo');
+                var nav = document.getElementById('headerNav');
+                var logoWidth = logo.offsetWidth;
+                var navWidth = nav.offsetWidth;
+
+                var determineVisibility = function() {
+                    var parent = window.innerWidth;
+                    if (logoWidth + navWidth > parent - margin) {
+                        nav.classList.add('header__nav--hidden');
+                        buttonWrapper.classList.add('headerMenu--visible');
+                    } else {
+                        nav.classList.remove('header__nav--hidden');
+                        buttonWrapper.classList.remove('headerMenu--visible');
+                    }
+                };
+
+                var showDrawer = function() {
+                    drawer.classList.add('headerMenu--visible');
+                };
+
+                var hideDrawer = function() {
+                    drawer.classList.remove('headerMenu--visible');
+                };
+
+                button.onclick = showDrawer;
+                drawerBackdrop.onclick = hideDrawer;
+                drawerClose.onclick = hideDrawer;
+
+                window.addEventListener('resize', determineVisibility);
+                determineVisibility();
+            })();
+        </script>
+    </header>
+    <div id="hero" class="section section--hero section--noPadding section--center dark section--zkf3t8rhagi" style="background-color:rgba(255,255,255,1);--pdx-min-height:700px;--wr-max:1200px;font-size:14px">
+        <div class="ft ft--center ft--isFirst" style="--pdx-pt:0;--pdx-pb:0">
+            <div class="ft__half">
+                <div class="ft__wrapper" style="max-width:570px">
+                    <div class="ft__content">
+                        <h1 class="hero__title color-1 weight-title-h font-title">Instant Graphql for MongoDb</h1>
+                        <p class="hero__subtitle weight-text">Connects frontend and database with graphql</p>
+                        <div class="ctas"><a href="https://github.com/remorses/mongoke" class="btn btn--c btn--secondary btn--large" style="color:rgba(72,72,240,1)">Github</a><a href="/docs" class="btn btn--c btn--primary btn--large" style="color:#fff;background-color:rgba(72,72,240,1)">Read The Documentation<svg width="13" height="12" xmlns="http://www.w3.org/2000/svg"><path d="M9.6 7H1a1 1 0 1 1 0-2h8.6L7 2.4A1 1 0 0 1 8.4 1l4.3 4.2c.2.3.3.5.3.8 0 .3-.1.5-.3.7L8.4 11A1 1 0 1 1 7 9.5L9.6 7z" fill="#fff"></path></svg></a></div>
+                    </div>
+                </div>
+            </div>
+            <div class="ft__half pdx pdxParent--img-transparent" style="--pdx-maxheight:2">
+                <div class="pdxItem pdxItem--img-transparent"><img src="https://cdn.landen.co/53hof8a89mko/assets/bzs7r6lk.svg" alt="mongoke.svg" /></div>
+            </div>
+        </div>
+    </div>
+    <div id="press" class="section section--logos section--center dark" style="background-color:#fafafa;padding-bottom:30px;padding-top:30px;--pdx-min-height:0px;--wr-max:1200px">
+        <div class="wr">
+            <div class="logos logos--fill">
+                <div class="logos__logo" style="background-image:url(https://landen.imgix.net/defaults/logos/entrepreneur.svg);filter:invert(1)"></div>
+                <div class="logos__logo" style="background-image:url(https://landen.imgix.net/defaults/logos/forbes.svg);filter:invert(1)"></div>
+                <div class="logos__logo" style="background-image:url(https://landen.imgix.net/defaults/logos/fortune.svg);filter:invert(1)"></div>
+                <div class="logos__logo" style="background-image:url(https://landen.imgix.net/defaults/logos/inc500.svg);filter:invert(1)"></div>
+                <div class="logos__logo" style="background-image:url(https://landen.imgix.net/defaults/logos/huffingtonpost.svg);filter:invert(1)"></div>
+            </div>
+        </div>
+    </div>
+    <div id="feature" class="section section--feature section--noPadding section--left dark" style="background-color:rgba(255,255,255,1);--pdx-min-height:500px;--wr-max:1200px">
+        <div class="ft ft--left" style="--pdx-pt:0;--pdx-pb:0">
+            <div class="ft__half">
+                <div class="ft__wrapper" style="max-width:570px">
+                    <div class="ft__content">
+                        <h2 class="color-1 weight-title-h font-title section__title left noMargin">Your database data directly available to your frontend</h2>
+                        <p class="weight-text section__subtitle left noMargin">Query your database data directly from your frontend, easily add authorization and pagination.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="ft__half pdx pdxParent--img-transparent" style="--pdx-maxheight:0.85">
+                <div class="pdxItem pdxItem--img-transparent"><img src="https://assets.landen.co/1/convert_2gjv.svg" alt="Convert" /></div>
+            </div>
+        </div>
+    </div>
+    <div id="feature" class="section section--feature section--noPadding section--right dark" style="background-color:#fafafa;--pdx-min-height:500px;--wr-max:1200px">
+        <div class="ft ft--right" style="--pdx-pt:0;--pdx-pb:0">
+            <div class="ft__half pdx pdxParent--img-transparent" style="--pdx-maxheight:1">
+                <div class="pdxItem pdxItem--img-transparent"><img src="https://assets.landen.co/1/outer_space_drqu.svg" alt="Outer space" /></div>
+            </div>
+            <div class="ft__half">
+                <div class="ft__wrapper" style="max-width:570px">
+                    <div class="ft__content">
+                        <h2 class="color-1 weight-title-h font-title section__title right noMargin">Horizontally Scalable</h2>
+                        <p class="weight-text section__subtitle right noMargin">Mongoke is a stateless application, can be deployed with docker and be replicated infine times.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="feature" class="section section--feature section--noPadding section--left dark" style="background-color:rgba(255,255,255,1);--pdx-min-height:500px;--wr-max:1200px">
+        <div class="ft ft--left ft--twoBg" style="--pdx-pt:0;--pdx-pb:0">
+            <div class="ft__half">
+                <div class="ft__wrapper" style="max-width:570px">
+                    <div class="ft__content">
+                        <h2 class="color-1 weight-title-h font-title section__title left noMargin">Composable with Apollo Federation</h2>
+                        <p class="weight-text section__subtitle left noMargin">Mongoke supports apollo federation, this means that you can connect you own graphql apis and easily integrate it with your current stack</p>
+                    </div>
+                </div>
+            </div>
+            <div class="ft__half pdx pdxParent--img-transparent" style="background-color:rgba(255, 255, 255, 1);--pdx-maxheight:1.62">
+                <div class="pdxItem pdxItem--img-transparent"><img src="https://cdn.landen.co/53hof8a89mko/assets/xw1xu9lr.svg" alt="apollo-714f10c79e593430c2c7df247e3957ba.svg" /></div>
+            </div>
+        </div>
+    </div>
+    <div id="feature" class="section section--feature section--noPadding section--right dark" style="background-color:#fafafa;--pdx-min-height:500px;--wr-max:1200px">
+        <div class="ft ft--right" style="--pdx-pt:0;--pdx-pb:0">
+            <div class="ft__half pdx pdxParent--img-transparent" style="--pdx-maxheight:0.76">
+                <div class="pdxItem pdxItem--img-transparent"><img src="https://assets.landen.co/1/files1_9ool.svg" alt="Files" /></div>
+            </div>
+            <div class="ft__half">
+                <div class="ft__wrapper" style="max-width:570px">
+                    <div class="ft__content">
+                        <h2 class="color-1 weight-title-h font-title section__title right noMargin">Generate 1 month dev work with 1 config file</h2>
+                        <p class="weight-text section__subtitle right noMargin">The generated service follows state of the art graphql guidelines, solves the N + 1 problem for you and has many more features just by using a config file</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="cta" class="section section--cta section--center dark" style="background-color:rgba(255,255,255,1);padding-bottom:60px;padding-top:60px;--pdx-min-height:0px;--wr-max:1200px">
+        <div class="wr">
+            <div class="cta__titles">
+                <h2 class="color-1 weight-title-h font-title section__title center">Get started now with the docker image</h2>
+                <p class="weight-text section__subtitle center">You can deploy your own mongoke instance in seconds</p>
+            </div>
+            <div class="ctas"><a href="/docs" class="btn btn--c btn--primary btn--large" style="color:#fff;background-color:rgba(72,72,240,1)">Deploy with docker</a></div>
+        </div>
+    </div>
+    <footer id="footer" class="section section--footer section--center dark" style="background-color:#fafafa;padding-bottom:15px;padding-top:15px;--pdx-min-height:0px;--wr-max:1200px">
+        <div class="wr">
+            <div class="footer footer--simple">
+                <div class="footer__primary"><span>© 2020 My Company</span>
+                    <nav class="footer__linkRow"><a href="">Terms of Service</a><a href="">Privacy Policy</a></nav>
+                </div>
+                <ul class="footer__social">
+                    <li><a href="" target="_blank" class="color-2"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z" fill="currentColor"></path></svg></a></li>
+                    <li><a href="" target="_blank" class="color-2"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3zM135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5zm282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9V416z" fill="currentColor"></path></svg></a></li>
+                    <li><a href="" target="_blank" class="color-2"><svg viewBox="0 0 448 512"><path d="M448 56.7v398.5c0 13.7-11.1 24.7-24.7 24.7H309.1V306.5h58.2l8.7-67.6h-67v-43.2c0-19.6 5.4-32.9 33.5-32.9h35.8v-60.5c-6.2-.8-27.4-2.7-52.2-2.7-51.6 0-87 31.5-87 89.4v49.9h-58.4v67.6h58.4V480H24.7C11.1 480 0 468.9 0 455.3V56.7C0 43.1 11.1 32 24.7 32h398.5c13.7 0 24.8 11.1 24.8 24.7z" fill="currentColor"></path></svg></a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+    <div style="position:relative"><a href="https://www.landen.co/?utm_source=litebadge" class="footerBadge footerBadge--production">Made with <span>Landen</span></a></div>
+    <script>
+        /*! smooth-scroll v14.2.1 | (c) 2018 Chris Ferdinandi | MIT License | http://github.com/cferdinandi/smooth-scroll */ !(function(e, t) {
+            "function" == typeof define && define.amd ? define([], (function() {
+                return t(e)
+            })) : "object" == typeof exports ? module.exports = t(e) : e.SmoothScroll = t(e)
+        })("undefined" != typeof global ? global : "undefined" != typeof window ? window : this, (function(e) {
+            "use strict";
+            var t = {
+                    ignore: "[data-scroll-ignore]",
+                    header: null,
+                    topOnEmptyHash: !0,
+                    speed: 500,
+                    clip: !0,
+                    offset: 0,
+                    easing: "easeInOutCubic",
+                    customEasing: null,
+                    updateURL: !0,
+                    popstate: !0,
+                    emitEvents: !0
+                },
+                n = function() {
+                    return "querySelector" in document && "addEventListener" in e && "requestAnimationFrame" in e && "closest" in e.Element.prototype
+                },
+                o = function() {
+                    for (var e = {}, t = 0; t < arguments.length; t++) !(function(t) {
+                        for (var n in t) t.hasOwnProperty(n) && (e[n] = t[n])
+                    })(arguments[t]);
+                    return e
+                },
+                r = function(t) {
+                    return !!("matchMedia" in e && e.matchMedia("(prefers-reduced-motion)").matches)
+                },
+                a = function(t) {
+                    return parseInt(e.getComputedStyle(t).height, 10)
+                },
+                i = function(e) {
+                    var t;
+                    try {
+                        t = decodeURIComponent(e)
+                    } catch (n) {
+                        t = e
+                    }
+                    return t
+                },
+                c = function(e) {
+                    "#" === e.charAt(0) && (e = e.substr(1));
+                    for (var t, n = String(e), o = n.length, r = -1, a = "", i = n.charCodeAt(0); ++r < o;) {
+                        if (0 === (t = n.charCodeAt(r))) throw new InvalidCharacterError("Invalid character: the input contains U+0000.");
+                        t >= 1 && t <= 31 || 127 == t || 0 === r && t >= 48 && t <= 57 || 1 === r && t >= 48 && t <= 57 && 45 === i ? a += "\\" + t.toString(16) + " " : a += t >= 128 || 45 === t || 95 === t || t >= 48 && t <= 57 || t >= 65 && t <= 90 || t >= 97 && t <= 122 ? n.charAt(r) : "\\" + n.charAt(r)
+                    }
+                    var c;
+                    try {
+                        c = decodeURIComponent("#" + a)
+                    } catch (e) {
+                        c = "#" + a
+                    }
+                    return c
+                },
+                u = function(e, t) {
+                    var n;
+                    return "easeInQuad" === e.easing && (n = t * t), "easeOutQuad" === e.easing && (n = t * (2 - t)), "easeInOutQuad" === e.easing && (n = t < .5 ? 2 * t * t : (4 - 2 * t) * t - 1), "easeInCubic" === e.easing && (n = t * t * t), "easeOutCubic" === e.easing && (n = --t * t * t + 1), "easeInOutCubic" === e.easing && (n = t < .5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1), "easeInQuart" === e.easing && (n = t * t * t * t), "easeOutQuart" === e.easing && (n = 1 - --t * t * t * t), "easeInOutQuart" === e.easing && (n = t < .5 ? 8 * t * t * t * t : 1 - 8 * --t * t * t * t), "easeInQuint" === e.easing && (n = t * t * t * t * t), "easeOutQuint" === e.easing && (n = 1 + --t * t * t * t * t), "easeInOutQuint" === e.easing && (n = t < .5 ? 16 * t * t * t * t * t : 1 + 16 * --t * t * t * t * t), e.customEasing && (n = e.customEasing(t)), n || t
+                },
+                s = function() {
+                    return Math.max(document.body.scrollHeight, document.documentElement.scrollHeight, document.body.offsetHeight, document.documentElement.offsetHeight, document.body.clientHeight, document.documentElement.clientHeight)
+                },
+                l = function(t, n, o, r) {
+                    var a = 0;
+                    if (t.offsetParent)
+                        do {
+                            a += t.offsetTop, t = t.offsetParent
+                        } while (t);
+                    return a = Math.max(a - n - o, 0), r && (a = Math.min(a, s() - e.innerHeight)), a
+                },
+                d = function(e) {
+                    return e ? a(e) + e.offsetTop : 0
+                },
+                f = function(e, t, n) {
+                    t || history.pushState && n.updateURL && history.pushState({
+                        smoothScroll: JSON.stringify(n),
+                        anchor: e.id
+                    }, document.title, e === document.documentElement ? "#top" : "#" + e.id)
+                },
+                m = function(t, n, o) {
+                    0 === t && document.body.focus(), o || (t.focus(), document.activeElement !== t && (t.setAttribute("tabindex", "-1"), t.focus(), t.style.outline = "none"), e.scrollTo(0, n))
+                },
+                h = function(t, n, o, r) {
+                    if (n.emitEvents && "function" == typeof e.CustomEvent) {
+                        var a = new CustomEvent(t, {
+                            bubbles: !0,
+                            detail: {
+                                anchor: o,
+                                toggle: r
+                            }
+                        });
+                        document.dispatchEvent(a)
+                    }
+                };
+            return function(a, p) {
+                var g, v, y, S, E, b, O, I = {};
+                I.cancelScroll = function(e) {
+                    cancelAnimationFrame(O), O = null, e || h("scrollCancel", g)
+                }, I.animateScroll = function(n, r, a) {
+                    var i = o(g || t, a || {}),
+                        c = "[object Number]" === Object.prototype.toString.call(n),
+                        p = c || !n.tagName ? null : n;
+                    if (c || p) {
+                        var v = e.pageYOffset;
+                        i.header && !S && (S = document.querySelector(i.header)), E || (E = d(S));
+                        var y, b, C, w = c ? n : l(p, E, parseInt("function" == typeof i.offset ? i.offset(n, r) : i.offset, 10), i.clip),
+                            L = w - v,
+                            A = s(),
+                            H = 0,
+                            q = function(t, o) {
+                                var a = e.pageYOffset;
+                                if (t == o || a == o || (v < o && e.innerHeight + a) >= A) return I.cancelScroll(!0), m(n, o, c), h("scrollStop", i, n, r), y = null, O = null, !0
+                            },
+                            Q = function(t) {
+                                y || (y = t), H += t - y, b = H / parseInt(i.speed, 10), b = b > 1 ? 1 : b, C = v + L * u(i, b), e.scrollTo(0, Math.floor(C)), q(C, w) || (O = e.requestAnimationFrame(Q), y = t)
+                            };
+                        0 === e.pageYOffset && e.scrollTo(0, 0), f(n, c, i), h("scrollStart", i, n, r), I.cancelScroll(!0), e.requestAnimationFrame(Q)
+                    }
+                };
+                var C = function(t) {
+                        if (!r() && 0 === t.button && !t.metaKey && !t.ctrlKey && "closest" in t.target && (y = t.target.closest(a)) && "a" === y.tagName.toLowerCase() && !t.target.closest(g.ignore) && y.hostname === e.location.hostname && y.pathname === e.location.pathname && /#/.test(y.href)) {
+                            var n = c(i(y.hash)),
+                                o = g.topOnEmptyHash && "#" === n ? document.documentElement : document.querySelector(n);
+                            o = o || "#top" !== n ? o : document.documentElement, o && (t.preventDefault(), I.animateScroll(o, y))
+                        }
+                    },
+                    w = function(e) {
+                        if (null !== history.state && history.state.smoothScroll && history.state.smoothScroll === JSON.stringify(g) && history.state.anchor) {
+                            var t = document.querySelector(c(i(history.state.anchor)));
+                            t && I.animateScroll(t, null, {
+                                updateURL: !1
+                            })
+                        }
+                    },
+                    L = function(e) {
+                        b || (b = setTimeout((function() {
+                            b = null, E = d(S)
+                        }), 66))
+                    };
+                return I.destroy = function() {
+                    g && (document.removeEventListener("click", C, !1), e.removeEventListener("resize", L, !1), e.removeEventListener("popstate", w, !1), I.cancelScroll(), g = null, v = null, y = null, S = null, E = null, b = null, O = null)
+                }, I.init = function(r) {
+                    if (!n()) throw "Smooth Scroll: This browser does not support the required JavaScript methods and browser APIs.";
+                    I.destroy(), g = o(t, r || {}), S = g.header ? document.querySelector(g.header) : null, E = d(S), document.addEventListener("click", C, !1), S && e.addEventListener("resize", L, !1), g.updateURL && g.popstate && e.addEventListener("popstate", w, !1)
+                }, I.init(p), I
+            }
+        }));
+    </script>
+    <script>
+        ;
+        (function() {
+            var offset = 0
+
+            if (document.getElementsByClassName('header--fixed').length) {
+                offset = document.getElementsByClassName('header--fixed')[0].clientHeight
+            }
+
+            // smooth scrolling to all anchor links
+            new window.SmoothScroll('a[href*="#"]', {
+                offset: offset
+            })
+        })()
+
+        ;
+        (function() {
+            // buttons
+            var elements = document.querySelectorAll('a')
+            Array.prototype.forEach.call(elements, function(el, i) {
+                el.addEventListener('click', function(e) {
+                    var data = JSON.stringify({
+                        siteId: '%v',
+                        category: 'button',
+                        name: e.target.innerText,
+                        data: {
+                            url: e.target.href
+                        }
+                    })
+                    if (navigator.sendBeacon) {
+                        navigator.sendBeacon('/api/event', data)
+                    }
+                })
+            })
+
+            var request = new XMLHttpRequest()
+            request.open('POST', '/api/view', true)
+            request.setRequestHeader(
+                'Content-Type',
+                'application/x-www-form-urlencoded; charset=UTF-8'
+            )
+            request.send(
+                JSON.stringify({
+                    referrer: document.referrer,
+                    path: window.location.pathname
+                })
+            )
+
+        })()
+    </script>
+</body>
+
+</html>
