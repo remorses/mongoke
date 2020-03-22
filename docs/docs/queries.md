@@ -23,7 +23,7 @@ Some examples pf queries for this type:
 ``` gql
 
 {
-    user(where: {name: {eq: "jon"}) {
+    User(where: {name: {eq: "jon"}) {
         _id
         name
         surname
@@ -35,7 +35,7 @@ Every type generates a where argument where you can query the mongodb database w
 
 ``` gql
 {
-    users(first: 20, after: "Micky", cursosorField: name) {
+    Users(first: 20, after: "Micky", cursosorField: name) {
         nodes {
             _id
             name

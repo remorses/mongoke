@@ -83,7 +83,7 @@ services:
 
 ```graphql
 {
-    user(where: { username: { eq: "Mike" } }) {
+    User(where: { username: { eq: "Mike" } }) {
         _id
         username
         email
@@ -94,7 +94,7 @@ services:
         }
     }
 
-    blogPosts(first: 10, after: "Post 1", cursorField: title) {
+    BlogPosts(first: 10, after: "Post 1", cursorField: title) {
         nodes {
             title
             content
