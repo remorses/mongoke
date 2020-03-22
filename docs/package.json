@@ -9,7 +9,7 @@
     },
     "scripts": {
         "dev": "PORT=${PORT:=6060} echo $PORT && mkdocs serve -a localhost:$PORT",
-        "build": "pip3 install mkdocs pygments mkdocs-material && mkdocs build -d public"
+        "build": "pip3 install mkdocs pygments mkdocs-material && mkdocs build -d public/docs"
     },
     "keywords": [],
     "author": "",
