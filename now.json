@@ -1,0 +1,21 @@
+{
+    "version": 2,
+    "builds": [
+        { "src": "docs/package.json", "use": "@now/static-build" }
+    ],
+    "routes": [
+        {
+            "src": "(.*)/docs",
+            "status": 308,
+            "headers": { "Location": "$1/docs/" }
+        },
+        {
+            "src": "/docs/(.*)",
+            "dest": "/docs/$1"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/index/$1"
+        }
+    ]
+}

@@ -1,0 +1,39 @@
+site_name: Mongoke
+site_description: Instant Graphql with MongoDb.
+site_author: Tommaso De Rossi
+
+theme:
+  name: "material"
+  include_search_page: false
+  search_index_only: true
+  palette:
+    primary: indigo
+    accent: indigo
+  font:
+    text: Roboto
+    code: Roboto Mono
+  favicon: assets/images/favicon.png
+
+repo_name: remorses/mongoke
+repo_url: https://github.com/remorses/mongoke/
+edit_uri: ""
+
+plugins:
+  - search
+
+extra_css:
+  - style.css
+
+nav:
+  - Quick Start: "index.md"
+  - Configuration: "configuration.md"
+  - Docker: "docker.md"
+  - Queries: "queries.md"
+  - Relations: "relations.md"
+
+markdown_extensions:
+  - admonition
+  - codehilite:
+      guess_lang: false
+  - toc:
+      permalink: true
