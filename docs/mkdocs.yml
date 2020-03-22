@@ -30,6 +30,7 @@ nav:
   - Docker: "docker.md"
   - Queries: "queries.md"
   - Relations: "relations.md"
+  - Pagination: "pagination.md"
 
 markdown_extensions:
   - admonition

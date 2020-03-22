@@ -5,6 +5,10 @@
     font-weight: 500;
     color: #222;
 }
+
+article  p {
+    opacity: .9;
+}
 /* 
 body {
     background-color: aqua;
