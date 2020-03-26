@@ -110,6 +110,7 @@ venv.bak/
 # Spyder project settings
 .spyderproject
 .spyproject
+.docz
 
 # Rope project settings
 .ropeproject
