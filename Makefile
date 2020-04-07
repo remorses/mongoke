@@ -29,7 +29,8 @@ play: generate-spec
 	DB_URL=mongodb://localhost/db uvicorn --reload example_generated_code.__main__:app
 
 .PHONY: test
-test: generate-spec
+test:
 	docker-compose up -d mongo
+	make generate-spec
 	pytest -sv
 
