@@ -33,7 +33,7 @@ class {scalar}Class:
         return self.coerce_input(ast.value)
 
 
-""" for scalar in scalars])
+""" for scalar in sorted(scalars)])
 }}
 # print(dir(AnyScalar))
 scalar_classes = [var for name, var in locals().items() if getattr(var, '_implementation', None)]

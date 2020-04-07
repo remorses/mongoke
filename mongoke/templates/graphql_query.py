@@ -20,7 +20,7 @@ input Where{scalar} {'{'}
     eq: {scalar}
     neq: {scalar}
 {'}'}
-""" for scalar in map(str, searchables)])
+""" for scalar in map(str, sorted(searchables))])
 }}
 
 

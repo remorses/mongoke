@@ -17,8 +17,8 @@ services:
             - PYTHONUNBUFFERED=1
             - DB_URL=mongodb://mongo/db
     mongo:
-        # ports:
-        #     - 27017:27017
+        ports:
+            - 27017:27017
         image: mongo
         logging: 
             driver: none
