@@ -17,6 +17,22 @@ LETTERS = "abcdefghilmnopqrstuvz"
 _ = mock.ANY
 
 
+def test_no_error(query, users: Collection):
+    assert not list(users.find({}))
+    q = """
+        {
+            User {
+                _id
+                name
+            }
+        }
+
+      """
+    res = query(q)
+    pretty(res)
+    assert not res.get("errors")
+
+
 def test_objectid_error(query, users: Collection):
     assert not list(users.find({}))
     q = """

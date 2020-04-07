@@ -24,7 +24,8 @@ async def my_error_coercer(
         logger.error(trace)
     else:
         logger.error(exception)
-    return error
+    better_error = {**error, 'message': f'Error in Mongoke server: {str(ex)}'}
+    return better_error
 
 
 class CustomEngine(Engine):
