@@ -117,8 +117,9 @@ Please help the project making new tutorials and submit a issue to list it here!
 
 ## Todo:
 
+-   exceptions are returned as `Server got an error`, use an error with `coerce_value` to return e better message
 -   ~~empty variables search gets nothing~~
--   option to allow only some origins in cors, default is *
+-   option to allow only some origins in cors, default is \*
 -   when a type is in a relation but not in the types section, KeyError is thrown at launch
 -   ~~Enum and Scalar values are not searchable in where~~
 -   ~~dont lowercase the first letter of query fields~~
