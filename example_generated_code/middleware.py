@@ -21,12 +21,13 @@ class JwtMiddleware(BaseHTTPMiddleware):
                 jwt_token, verify=False, secret=None, algorithms=[JWT_ALGORITHMS]
             )
         except (jwt.InvalidTokenError) as exc:
-            logger.exception(exc, exc_info=exc)
-            msg = "Invalid authorization token, " + str(exc)
-            return Response(status_code=403, content=msg)
+            logger.error("Cannot decode authorization token, " + str(exc))
+            if jwt_required:
+                logger.error("returning error 403 as jwt is required")
+                msg = "Invalid authorization token, " + str(exc)
+                return Response(status_code=403, content=msg)
         except Exception as exc:
-            logger.error("Cannot deocde authorization token, " + str(exc))
-            
+            logger.error("Cannot decode authorization token, " + str(exc))
         else:
             request.state.jwt_payload = payload
         return await handler(request)
