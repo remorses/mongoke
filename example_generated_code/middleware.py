@@ -24,6 +24,9 @@ class JwtMiddleware(BaseHTTPMiddleware):
             logger.exception(exc, exc_info=exc)
             msg = "Invalid authorization token, " + str(exc)
             return Response(status_code=403, content=msg)
+        except Exception as exc:
+            logger.error("Cannot deocde authorization token, " + str(exc))
+            
         else:
             request.state.jwt_payload = payload
         return await handler(request)
