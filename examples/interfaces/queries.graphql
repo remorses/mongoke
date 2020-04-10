@@ -1,0 +1,22 @@
+{
+  zoo {
+    address
+    animals {
+      nodes {
+        __typename
+        animal_type
+        ...on Tiger {
+          humans_killed
+        }
+        ...on Bear {
+          likes_honey
+        }
+        ...on Panthera {
+          black_nuance
+        }
+      }
+    }
+  }
+}
+
+

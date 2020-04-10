@@ -1,0 +1,31 @@
+
+version: '3'
+
+services:    
+    another_service:
+        build: another_service
+    gateway:
+        image: xmorse/apollo-federation-gateway
+        ports:
+            - 8090:80
+        environment:
+            URL_0: "http://mongoke/"
+            URL_1: "http://another_service/"
+    mongoke:
+        image: mongoke/mongoke:latest
+        environment: 
+            - DB_URL=mongodb://mongo/db
+            - PYTHONUNBUFFERED=1
+        volumes: 
+            - ./mongoke.yml:/conf.yml
+    populate-db:
+        image: mongoke/populate-mongo
+        volumes:
+            - ./mongoke.yml/:/conf.yml
+        environment:
+            - DB_URL=mongodb://mongo/db
+    mongo:
+        image: mongo
+        logging: 
+            driver: none
+

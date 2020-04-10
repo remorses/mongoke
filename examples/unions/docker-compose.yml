@@ -1,0 +1,27 @@
+
+version: '3'
+
+services:
+    mongoke:
+        ports:
+            - 8090:80
+        image: mongoke/mongoke:latest
+        environment: 
+            - DB_URL=mongodb://mongo/db
+            - GRAPHIQL_DEFAULT_QUERY_FILE_PATH=/queries.graphql
+        volumes: 
+            - ./mongoke.yml:/conf.yml
+            - ./schema.graphql:/schema.graphql
+            - ./queries.graphql:/queries.graphql
+    populate-db:
+        image: mongoke/populate-mongo
+        volumes:
+            - ./mongoke.yml:/conf.yml
+            - ./schema.graphql:/schema.graphql
+        environment:
+            - DB_URL=mongodb://mongo/db
+    mongo:
+        image: mongo
+        logging: 
+            driver: none
+

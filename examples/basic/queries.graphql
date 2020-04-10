@@ -1,0 +1,12 @@
+{
+  user(where: {username: {neq: "hidden"}}) {
+    username
+    email
+    posts {
+      nodes {
+        title
+      }
+    }
+  }
+}
+

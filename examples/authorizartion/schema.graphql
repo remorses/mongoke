@@ -1,0 +1,13 @@
+type Note {
+    title: String
+    tags: [String]
+    content: String
+    author_id: ObjectId
+}
+
+type User {
+    _id: ObjectId
+    username: String
+    notes_count: Int
+}
+

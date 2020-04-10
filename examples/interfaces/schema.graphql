@@ -1,0 +1,45 @@
+type Bear implements Animal_ {
+    _id: ObjectId
+    animal_type: Animal_type
+    likes_honey: Boolean
+}
+
+type Tiger implements Animal_ {
+    _id: ObjectId
+    animal_type: Animal_type
+    humans_killed: Int
+}
+
+type Panthera implements Animal_ {
+    _id: ObjectId
+    animal_type: Animal_type
+    black_nuance: Black_nuance
+}
+
+type Animal {
+    _id: ObjectId
+    animal_type: Animal_type
+}
+
+type Zoo {
+    _id: ObjectId
+    address: String
+    animal_ids: [ObjectId]
+}
+
+enum Black_nuance {
+    super_dark
+    dark
+    light
+}
+
+enum Animal_type {
+    panthera
+    tiger
+    bear
+}
+
+interface Animal_ {
+    _id: ObjectId
+    animal_type: Animal_type
+}

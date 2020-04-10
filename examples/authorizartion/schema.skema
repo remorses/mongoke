@@ -1,0 +1,12 @@
+User:
+    _id: ObjectId
+    username: Str
+    notes_count: Int
+
+Note:
+    title: Str
+    tags: [Str]
+    content: Str
+    author_id: ObjectId
+
+

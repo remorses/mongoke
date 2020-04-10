@@ -1,0 +1,22 @@
+{
+  store {
+    url
+    products(last: 10, cursorField: title) {
+      nodes {
+        _id
+        title
+        tags {
+          code
+        }
+      }
+      pageInfo {
+        endCursor
+      }
+    }
+    seller {
+      _id
+      email
+    }
+  }
+}
+

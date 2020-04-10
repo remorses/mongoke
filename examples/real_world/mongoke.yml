@@ -1,0 +1,98 @@
+# This configuration is for a site where people share their computer configuration and can post comments.
+# For examples queries see the queries.graphql file
+
+schema: |
+
+    type ComputerConfiguration {
+        _id: ObjectId
+        cpuName: String
+        moboName: String
+        gpuName: String
+        osName: OsVersionName
+        osVersion: String
+        madeByUid: String
+        uploadedAt: String # DateTime
+        fileUrl: String
+        commentIds: [ObjectId]
+    }
+
+    type User {
+        _id: ObjectId
+        uid: String
+        username: String
+        profileImg: String
+    }
+
+    type Comment {
+        _id: ObjectId
+        madeById: ObjectId
+        text: String
+        replyIds: [ObjectId]
+    }
+
+    type CPU {
+        _id: ObjectId
+        name: String
+        alreadyUsed: Boolean
+    }
+
+    type GPU {
+        _id: ObjectId
+        name: String
+        alreadyUsed: Boolean
+    }
+
+    type MOBO {
+        _id: ObjectId
+        name: String
+        alreadyUsed: Boolean
+    }
+
+    enum OsVersionName {
+        Catalina
+        Mojave
+        High_Sierra
+        Sierra
+    }
+
+types:
+    ComputerConfiguration:
+        collection: computers
+    CPU:
+        collection: cpus
+    MOBO:
+        collection: mobos
+    User:
+        collection: users
+    GPU:
+        collection: gpus
+    Comment:
+        collection: comments
+
+relations:
+    - from: ComputerConfiguration
+      to: User
+      field: madeBy
+      relation_type: to_one
+      where:
+          uid: ${{ parent.get('madeByUid') }}
+    - from: Comment
+      to: User
+      field: madeBy
+      relation_type: to_one
+      where:
+          _id: ${{ parent.get('madeById') }}
+    - from: ComputerConfiguration
+      to: Comment
+      field: comments
+      relation_type: to_many
+      where:
+          _id:
+              $in: ${{ parent.get('commentIds') }}
+    - from: Comment
+      to: Comment
+      field: replies
+      relation_type: to_many
+      where:
+          _id:
+              $in: ${{ parent.get('replyIds') }}

@@ -1,0 +1,30 @@
+# ./mongoke.yml
+
+schema_path: ./schema.graphql
+
+
+types:
+    Store:
+        collection: stores
+    Seller:
+        collection: sellers
+        exposed: false
+    Product:
+        collection: products
+        exposed: false
+
+
+relations:
+    -   field: seller
+        from: Store
+        to: Seller
+        relation_type: to_one
+        where:
+            _id: ${{ parent['seller_id'] }}
+    -   field: products
+        from: Store
+        to: Product
+        relation_type: to_many
+        where:
+            _id: 
+                $in: ${{ parent['product_ids'] }}
