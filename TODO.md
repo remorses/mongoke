@@ -2,14 +2,15 @@
 
 -   add a default graphql text to show how mongoke queries work
 -   add an introduction on how to install docker compose
+-   remove plurals and use the Nodes postfix instead
 
--   exceptions are returned as `Server got an error`, use an error with `coerce_value` to return e better message
+-   ~~exceptions are returned as `Server got an error`, use an error with `coerce_value` to return e better message~~
 -   ~~empty variables search gets nothing~~
 -   option to allow only some origins in cors, default is \*
 -   when a type is in a relation but not in the types section, KeyError is thrown at launch
 -   ~~Enum and Scalar values are not searchable in where~~
 -   ~~dont lowercase the first letter of query fields~~
--   make docker image with wheels
+-   make smaller docker image
 -   ~~remove hard limit of resolved nodes, pass the limit in the configuration~~
 -   ~~use graphql to define the schema~~
 -   ~~publish the docker image (after tartiflette devs fix extend type issue)~~
@@ -26,5 +27,5 @@ Low priority
 -   ~~add schema validation to the configuration~~
 -   subscriptions
 -   ~~add `edges` to make connection type be relay compliant~~
--   better performance of connection_resolver removing the $skip and $count
+-   ~~better performance of connection_resolver removing the $skip and $count~~
 -   add a dataloader for single connections
