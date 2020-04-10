@@ -21,7 +21,7 @@ config-schema:
 
 .PHONY: generate-spec
 generate-spec: clean
-	python -m mongoke tests/confs/spec_conf.yaml --generated-path example_generated_code
+	python -m mongoke tests/confs/spec_conf.yaml --generated-path example_generated_code --force
 
 .PHONY: play
 play: generate-spec

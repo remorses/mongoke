@@ -1,6 +1,6 @@
 ## Todo:
 
--   add a default graphql text to show how mongoke queries work
+-   ~~add a default graphql text to show how mongoke queries work~~
 -   add an introduction on how to install docker compose
 -   remove plurals and use the Nodes postfix instead
 

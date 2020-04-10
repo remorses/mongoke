@@ -15,12 +15,73 @@ from .engine import CustomEngine, read
 ${{'\\n'.join([f'import {root_dir_name}.generated.resolvers.{name}' for name in resolver_names])}}
 import ${{root_dir_name}}.generated.scalars
 
+
+
+GRAPHIQL_DEFAULT_QUERY = """
+# welcome to mongoke
+# ╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╭╮
+# ╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱┃┃
+# ╭╮╭┳━━┳━╮╭━━┳━━┫┃╭┳━━╮
+# ┃╰╯┃╭╮┃╭╮┫╭╮┃╭╮┃╰╯┫┃━┫
+# ┃┃┃┃╰╯┃┃┃┃╰╯┃╰╯┃╭╮┫┃━┫
+# ╰┻┻┻━━┻╯╰┻━╮┣━━┻╯╰┻━━╯
+# ╱╱╱╱╱╱╱╱╱╭━╯┃
+# ╱╱╱╱╱╱╱╱╱╰━━╯
+
+# Mongoke generates graphql queries for your mongodb data
+# To get started try a one document query like this
+# query OneDocument {
+#     YourTypeName {
+#         yourField
+#     }
+# }
+
+
+# you can use the where argument to filter documents
+# query OneDocument {
+#     YourTypeName(where: { color: { eq: "red" } }) {
+#         yourField
+#     }
+# }
+
+
+# try now querying multiple documents
+# the objects are returned with the pageInfo data, useful for pagination
+# the sorting direction and pageInfo.endCursor are based on the 'cursorField' argument, this can be any scalar field of your document
+# query MultipleDocuments  {
+#     YourTypeNames(cursorField: color) {
+#         nodes {
+#             color
+#         }
+#         pageInfo {
+#             hasNextPage
+#             endCursor # use this as the after field for the next query
+#         }
+#     }
+# }
+
+# you can use the pageInfo.endCursor to fetch the next documents
+# query MultipleDocuments  {
+#     YourTypeNames(first: 10, after: "red", cursorField: color) {
+#         nodes {
+#             field
+#         }
+#         pageInfo {
+#             hasNextPage
+#             endCursor # use this as the after field for the next query
+#         }
+#     }
+# }
+
+"""
+
+
 MONGOKE_BASE_PATH = os.getenv("MONGOKE_BASE_PATH", "/")
 DISABLE_GRAPHIQL = bool(os.getenv("DISABLE_GRAPHIQL", False))
 GRAPHIQL_DEFAULT_JWT = os.getenv("GRAPHIQL_DEFAULT_JWT", "")
 GRAPHIQL_QUERY = os.getenv("GRAPHIQL_DEFAULT_QUERY", "") or read(
     os.getenv("GRAPHIQL_DEFAULT_QUERY_FILE_PATH", "")
-)
+) or GRAPHIQL_DEFAULT_QUERY
 DB_URL = os.getenv("DB_URL") or "${{db_url}}" or None
 
 
