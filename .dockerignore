@@ -2,6 +2,7 @@ tests
 example_generated_code
 docs
 index
+examples
 node_modules
 .cache
 public
