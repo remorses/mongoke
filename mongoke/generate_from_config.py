@@ -82,7 +82,7 @@ def generate_from_config(config, config_path, root_dir_path):
             ),
         ),
     )
-    touch('__main__.py', 'from .make_app import make_app\napp = make_app()')
+    touch('__main__.py', main_code)
     touch(f"generated/__init__.py", "")
     touch(f"generated/logger.py", logger)
     touch(f"middleware.py",
@@ -155,3 +155,12 @@ def generate_from_config(config, config_path, root_dir_path):
         )
         implemented_types += [toType]
 
+
+
+main_code = '''
+from .make_app import make_app
+try:
+    app = make_app()
+except Exception as e:
+    print(e)
+'''

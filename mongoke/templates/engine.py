@@ -1,5 +1,6 @@
 engine = '''
 import os
+import sys
 from tartiflette import Engine
 from typing import *
 from .generated.logger import logger
@@ -17,7 +18,7 @@ async def my_error_coercer(
 ) -> Dict[str, Any]:
 
     ex = exception.original_error
-    if ex and not os.getenv('HIDE_ERRORS_TRACEBACK'):
+    if ex and os.getenv('DEBUG'):
         trace = "\\n".join(
             traceback.format_exception(etype=type(ex), value=ex, tb=ex.__traceback__)
         )
@@ -41,8 +42,13 @@ class CustomEngine(Engine):
         modules: Optional[Union[str, List[str], List[Dict[str, Any]]]] = None,
         schema_name: str = None,
     ):
-        await super().cook(
-            sdl, my_error_coercer, custom_default_resolver, custom_default_type_resolver, modules, schema_name
-        )
+        try:
+            await super().cook(
+                sdl, my_error_coercer, custom_default_resolver, custom_default_type_resolver, modules, schema_name
+            )
+        except Exception as e:
+            print('ERROR parsing graphql schema:')
+            print(e)
+            raise e
 
 '''

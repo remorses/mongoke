@@ -105,11 +105,12 @@ class CatchAll(BaseHTTPMiddleware):
         request.scope["path"] = MONGOKE_BASE_PATH # TODO subscriptions path
         return await handler(request)
 
-engine = CustomEngine(
-    sdl=sdl_files, modules=[ApolloFederationPlugin(engine_sdl=sdl_files)]
-)
 
 def make_app(db: AsyncIOMotorClient=None):
+    try:
+        engine = CustomEngine(
+            sdl=sdl_files, modules=[ApolloFederationPlugin(engine_sdl=sdl_files)]
+        )
         if not db:
             db = AsyncIOMotorClient(DB_URL).get_database()
         graphiql = GraphiQL(
@@ -133,7 +134,10 @@ def make_app(db: AsyncIOMotorClient=None):
         # app = CatchAll(app,)
         app = ServerErrorMiddleware(app,)
         return app
-    
+    except Exception as e:
+        print('got an error starting the Mongoke server:')
+        print(e)
+        return
 
 
 

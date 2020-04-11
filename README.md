@@ -70,13 +70,10 @@ services:
         image: mongoke/mongoke
         environment:
             DB_URL: mongodb://mongo/db
-            PORT: '80'
         volumes:
             - ./mongoke.yml:/conf.yml
     mongo:
         image: mongo
-        logging:
-            driver: none
 ```
 
 ### 3. Query the generated service via graphql or go to [http://localhost:4000/graphiql](http://localhost:4000/graphiql) to open graphiql
@@ -94,7 +91,7 @@ services:
         }
     }
 
-    BlogPosts(first: 10, after: "Post 1", cursorField: title) {
+    BlogPostNodes(first: 10, after: "Post 1", cursorField: title) {
         nodes {
             title
             content
