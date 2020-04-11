@@ -15,7 +15,7 @@ After executing this query with `{first: 10}` you can get the next page with `{f
 
 ``` 
 query Users($first: Int, $after: AnyScalar) {
-  Users(first: $first, after: $after) {
+  UserNodes(first: $first, after: $after) {
     nodes {
       name
       _id
@@ -38,7 +38,7 @@ To use this query in you frontend remember that you will have to stack the fetch
 
 ``` 
 query Users($last: Int, $before: AnyScalar) {
-  Users(first: $last, after: $before) {
+  UserNodes(first: $last, after: $before) {
     nodes {
       name
       _id
@@ -60,8 +60,8 @@ If you want the opposite behviour you can set the `direction` argument to `ASC`
 The following query will fetch the 10 first created users.
 
 ``` 
-query Users($first: Int, $after: AnyScalar) {
-  Users(first: $first, after: $after) {
+query UserNodes($first: Int, $after: AnyScalar) {
+  UserNodes(first: $first, after: $after) {
     nodes {
       name
       _id
@@ -88,7 +88,7 @@ Remember that to make queries efficent you should add MongoDb indexes to the `cu
 
 ``` 
 query Users($first: Int, $after: AnyScalar, cursorField: name) {
-  Users(first: $first, after: $after) {
+  UserNodes(first: $first, after: $after) {
     nodes {
       name
       _id

@@ -58,9 +58,9 @@ The generated graphql is below.
 
 ``` graphql
 extend type Query {
-    user(where: UserWhere): User
+    User(where: UserWhere): User
 
-    users(
+    UserNodes(
         where: UserWhere
         cursorField: UserFields
         first: Int

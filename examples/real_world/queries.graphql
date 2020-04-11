@@ -1,16 +1,16 @@
 # get the available hardware components to display a search bar
 query GetSpecsList {
-    CPUs(first: 10000) {
+    CPUNodes(first: 10000) {
         nodes {
             name
         }
     }
-    GPUs(first: 10000) {
+    GPUNodes(first: 10000) {
         nodes {
             name
         }
     }
-    MOBOs(first: 10000) {
+    MOBONodes(first: 10000) {
         nodes {
             name
         }
@@ -23,30 +23,6 @@ query GetSpecsList {
     }
 }
 
-# Get the hardware components that have been already used in a pc configuration, to be used in a select element
-query GetSpecsListAlreadyUsed {
-    CPUs(first: 10000, where: { alreadyUsed: { eq: true } }) {
-        nodes {
-            name
-        }
-    }
-    GPUs(first: 10000, where: { alreadyUsed: { eq: true } }) {
-        nodes {
-            name
-        }
-    }
-    MOBOs(first: 10000, where: { alreadyUsed: { eq: true } }) {
-        nodes {
-            name
-        }
-    }
-    osNames: __type(name: "OsVersionName") {
-        name
-        enumValues {
-            name
-        }
-    }
-}
 
 # search for a configuration with the specified hardware
 query SearchComputerConfigurations(
@@ -55,7 +31,7 @@ query SearchComputerConfigurations(
     $gpu: String
     $mobo: String
 ) {
-    ComputerConfigurations(
+    ComputerConfigurationNodes(
         where: {
             cpuName: { eq: $cpu }
             moboName: { eq: $mobo }

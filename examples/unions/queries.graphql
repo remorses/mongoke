@@ -1,5 +1,5 @@
 {
-  zoo {
+  Zoo {
     address
     animals {
       nodes {

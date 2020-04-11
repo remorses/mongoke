@@ -1,5 +1,5 @@
 {
-  user(where: {username: {neq: "hidden"}}) {
+  User(where: {username: {neq: "hidden"}}) {
     username
     email
     posts {

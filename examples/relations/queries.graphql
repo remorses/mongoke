@@ -1,7 +1,7 @@
 {
-  store {
+  Store {
     url
-    products(last: 10, cursorField: title) {
+    ProductNodes(last: 10, cursorField: title) {
       nodes {
         _id
         title
@@ -13,7 +13,7 @@
         endCursor
       }
     }
-    seller {
+    Seller {
       _id
       email
     }
