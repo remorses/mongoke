@@ -11,16 +11,20 @@ from mongoke.support import download_file
 
 
 def main(path, force=False, generated_path=None):
-    if os.getenv('MONGOKE_CONFIG_URL'):
-        config = download_file(os.getenv('MONGOKE_CONFIG_URL'))
-    else:
-        config = open(path).read()
-    config = yaml.safe_load(config)
-    jsonschema.validate(config, get_config_schema())
-    config_path = os.path.abspath(os.path.dirname(path))
-    if not force:
-        checksum = make_checksum(config, config_path + '/')
-        if existent_checksum(config, ) == checksum:
-            print('already generated')
-            return
-    generate_from_config(config, config_path + '/', generated_path)
+    try:
+        if os.getenv('MONGOKE_CONFIG_URL'):
+            config = download_file(os.getenv('MONGOKE_CONFIG_URL'))
+        else:
+            config = open(path).read()
+        config = yaml.safe_load(config)
+        jsonschema.validate(config, get_config_schema())
+        config_path = os.path.abspath(os.path.dirname(path))
+        if not force:
+            checksum = make_checksum(config, config_path + '/')
+            if existent_checksum(config, ) == checksum:
+                print('already generated')
+                return
+        generate_from_config(config, config_path + '/', generated_path)
+    except Exception as error:
+        print('got an error during generation phase:')
+        print(error)

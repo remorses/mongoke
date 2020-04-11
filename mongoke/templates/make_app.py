@@ -1,6 +1,7 @@
 make_app = '''
 
 import os
+import sys
 from tartiflette import Resolver, Engine
 from tartiflette_asgi import TartifletteApp, GraphiQL
 from tartiflette_plugin_apollo_federation import ApolloFederationPlugin
@@ -102,29 +103,34 @@ engine = CustomEngine(
 )
 
 def make_app(db: AsyncIOMotorClient=None):
-    if not db:
-        db = AsyncIOMotorClient(DB_URL).get_database()
-    graphiql = GraphiQL(
-        # path=MONGOKE_BASE_PATH,
-        default_headers={"Authorization": "Bearer " + GRAPHIQL_DEFAULT_JWT}
-        if GRAPHIQL_DEFAULT_JWT
-        else {},
-        default_query=GRAPHIQL_QUERY,
-    )
+    try:
+        if not db:
+            db = AsyncIOMotorClient(DB_URL).get_database()
+        graphiql = GraphiQL(
+            # path=MONGOKE_BASE_PATH,
+            default_headers={"Authorization": "Bearer " + GRAPHIQL_DEFAULT_JWT}
+            if GRAPHIQL_DEFAULT_JWT
+            else {},
+            default_query=GRAPHIQL_QUERY,
+        )
 
-    context = {"db": db, "loop": None}
+        context = {"db": db, "loop": None}
 
-    app = TartifletteApp(
-        context=context,
-        engine=engine,
-        path=MONGOKE_BASE_PATH,
-        graphiql=graphiql if not DISABLE_GRAPHIQL else False,
-    )
-    app = CORSMiddleware(app, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"], )
-    app = JwtMiddleware(app,)
-    # app = CatchAll(app,)
-    app = ServerErrorMiddleware(app,)
-    return app
+        app = TartifletteApp(
+            context=context,
+            engine=engine,
+            path=MONGOKE_BASE_PATH,
+            graphiql=graphiql if not DISABLE_GRAPHIQL else False,
+        )
+        app = CORSMiddleware(app, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"], )
+        app = JwtMiddleware(app,)
+        # app = CatchAll(app,)
+        app = ServerErrorMiddleware(app,)
+        return app
+    except Exception as e:
+        print('got an error starting the Mongoke server:')
+        print(e)
+        return
 
 
 
