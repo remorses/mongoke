@@ -1,6 +1,5 @@
 scalar Address
 scalar Url
-scalar Url
 # scalar ObjectId
 type Task {
     _id: ObjectId

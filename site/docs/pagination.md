@@ -5,7 +5,7 @@ title: pagination
 
 Mongoke generates queries that can be paginated via the fileds `first` and `after` or `last` and `before` .
 
-By default Mongoke sorts the documents in descending order, this means that using the query `Users(first: 10)` fill fetch the 10 users most recently created.
+By default Mongoke sorts the documents in descending order, this means that using the query `UserNodes(first: 10)` fill fetch the 10 users most recently created.
 
 ### Paging forward
 
@@ -14,7 +14,7 @@ You page forward using forst and after arguments.
 After executing this query with `{first: 10}` you can get the next page with `{first: 10, after: pageInfo.endCursor}` .
 
 ``` 
-query Users($first: Int, $after: AnyScalar) {
+query UserNodes($first: Int, $after: AnyScalar) {
   UserNodes(first: $first, after: $after) {
     nodes {
       name
@@ -37,7 +37,7 @@ After executing this query with `{last: 10}` you can get the next page with `{la
 To use this query in you frontend remember that you will have to stack the fetched items one over the over, as if you are paging backwards.
 
 ``` 
-query Users($last: Int, $before: AnyScalar) {
+query UserNodes($last: Int, $before: AnyScalar) {
   UserNodes(first: $last, after: $before) {
     nodes {
       name
@@ -53,7 +53,7 @@ query Users($last: Int, $before: AnyScalar) {
 
 ## Change paging direction
 
-By default Mongoke sorts the documents in descending order, this means that using the query `Users(first: 10)` fill fetch the 10 users most recently created.
+By default Mongoke sorts the documents in descending order, this means that using the query `UserNodes(first: 10)` fill fetch the 10 users most recently created.
 
 If you want the opposite behviour you can set the `direction` argument to `ASC` 
 
@@ -87,7 +87,7 @@ Remember that to make queries efficent you should add MongoDb indexes to the `cu
     The `cursorFiled` argument is not a string but an enum, you don't need to add the `"` string quotes around the argument.
 
 ``` 
-query Users($first: Int, $after: AnyScalar, cursorField: name) {
+query UserNodes($first: Int, $after: AnyScalar, cursorField: name) {
   UserNodes(first: $first, after: $after) {
     nodes {
       name

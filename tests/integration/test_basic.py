@@ -71,7 +71,7 @@ def test_many_users(query):
         r = query(
             """
                 {
-                    Users(where: { surname: { eq: "xxx" } }) {
+                    UserNodes(where: { surname: { eq: "xxx" } }) {
                         nodes {
                             surname
                         }
@@ -82,7 +82,7 @@ def test_many_users(query):
         )
         pretty(r)
         pretty(m.call_args_list)
-        nodes = r["data"]["Users"]["nodes"]
+        nodes = r["data"]["UserNodes"]["nodes"]
         assert len(nodes) == 1
         assert nodes[0]["surname"] == "xxx"
 
@@ -94,7 +94,7 @@ def test_many_resolver(query):
         r = query(
             """
             {
-                Users(where: { surname: { eq: "xxx" } }) {
+                UserNodes(where: { surname: { eq: "xxx" } }) {
                     nodes {
                         surname
                         friends {
@@ -118,7 +118,7 @@ def test_cursor_field(query):
         r = query(
             """
             {
-                Users(cursorField: surname) {
+                UserNodes(cursorField: surname) {
                     nodes {
                         surname
                     }
@@ -128,6 +128,6 @@ def test_cursor_field(query):
         )
         pretty(r)
         print(m.call_args)
-        nodes = r["data"]["Users"]["nodes"]
+        nodes = r["data"]["UserNodes"]["nodes"]
         assert len(nodes) == len(LETTERS)
         assert sorted(nodes, key=lambda x: x["surname"]) == nodes

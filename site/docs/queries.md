@@ -35,7 +35,7 @@ Every type generates a where argument where you can query the mongodb database w
 
 ``` gql
 {
-    Users(first: 20, after: "Micky", cursosorField: name) {
+    UserNodes(first: 20, after: "Micky", cursosorField: name) {
         nodes {
             _id
             name

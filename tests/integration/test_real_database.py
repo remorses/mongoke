@@ -62,7 +62,7 @@ def test_first_and_after_asc(query, users: Collection):
     users.insert_many([dict(_id=ObjectId(), name=str(i)) for i in range(LENGTH)])
     q = r"""
         query search($first: Int!, $after: AnyScalar) {
-            Users(first: $first, after: $after, cursorField: _id, direction: ASC) {
+            UserNodes(first: $first, after: $after, cursorField: _id, direction: ASC) {
                 nodes {
                     _id
                     name
@@ -79,13 +79,13 @@ def test_first_and_after_asc(query, users: Collection):
       """
     res = query(q, dict(first=10))
     pretty(res)
-    assert res["data"]["Users"]["nodes"]
-    assert len(res["data"]["Users"]["nodes"]) == 10
-    after = res["data"]["Users"]["pageInfo"]["endCursor"]
+    assert res["data"]["UserNodes"]["nodes"]
+    assert len(res["data"]["UserNodes"]["nodes"]) == 10
+    after = res["data"]["UserNodes"]["pageInfo"]["endCursor"]
     res = query(q, dict(first=10, after=after))
     pretty(res)
-    assert res["data"]["Users"]["nodes"]
-    assert len(res["data"]["Users"]["nodes"]) == 10
+    assert res["data"]["UserNodes"]["nodes"]
+    assert len(res["data"]["UserNodes"]["nodes"]) == 10
 
 
 def test_first_and_after_desc(query, users: Collection):
@@ -94,7 +94,7 @@ def test_first_and_after_desc(query, users: Collection):
     users.insert_many([dict(_id=ObjectId(), name=str(i)) for i in range(LENGTH)])
     q = r"""
         query search($first: Int!, $after: AnyScalar) {
-            Users(first: $first, after: $after, cursorField: _id, direction: DESC) {
+            UserNodes(first: $first, after: $after, cursorField: _id, direction: DESC) {
                 nodes {
                     _id
                     name
@@ -111,13 +111,13 @@ def test_first_and_after_desc(query, users: Collection):
       """
     res = query(q, dict(first=10))
     pretty(res)
-    assert res["data"]["Users"]["nodes"]
-    assert len(res["data"]["Users"]["nodes"]) == 10
-    after = res["data"]["Users"]["pageInfo"]["endCursor"]
+    assert res["data"]["UserNodes"]["nodes"]
+    assert len(res["data"]["UserNodes"]["nodes"]) == 10
+    after = res["data"]["UserNodes"]["pageInfo"]["endCursor"]
     res = query(q, dict(first=10, after=after))
     pretty(res)
-    assert res["data"]["Users"]["nodes"]
-    assert len(res["data"]["Users"]["nodes"]) == 10
+    assert res["data"]["UserNodes"]["nodes"]
+    assert len(res["data"]["UserNodes"]["nodes"]) == 10
 
 
 def test_before_and_last_asc(query, users: Collection):
@@ -126,7 +126,7 @@ def test_before_and_last_asc(query, users: Collection):
     users.insert_many([dict(_id=ObjectId(), name=str(i)) for i in range(LENGTH)])
     q = r"""
         query search($last: Int!, $before: AnyScalar) {
-            Users(last: $last, before: $before, cursorField: _id, direction: ASC) {
+            UserNodes(last: $last, before: $before, cursorField: _id, direction: ASC) {
                 nodes {
                     _id
                     name
@@ -143,13 +143,13 @@ def test_before_and_last_asc(query, users: Collection):
       """
     res = query(q, dict(last=10))
     pretty(res)
-    assert res["data"]["Users"]["nodes"]
-    assert len(res["data"]["Users"]["nodes"]) == 10
-    before = res["data"]["Users"]["pageInfo"]["startCursor"]
+    assert res["data"]["UserNodes"]["nodes"]
+    assert len(res["data"]["UserNodes"]["nodes"]) == 10
+    before = res["data"]["UserNodes"]["pageInfo"]["startCursor"]
     res = query(q, dict(last=10, before=before))
     pretty(res)
-    assert res["data"]["Users"]["nodes"]
-    assert len(res["data"]["Users"]["nodes"]) == 10
+    assert res["data"]["UserNodes"]["nodes"]
+    assert len(res["data"]["UserNodes"]["nodes"]) == 10
 
 
 def test_before_and_last_desc(query, users: Collection):
@@ -158,7 +158,7 @@ def test_before_and_last_desc(query, users: Collection):
     users.insert_many([dict(_id=ObjectId(), name=str(i)) for i in range(LENGTH)])
     q = r"""
         query search($last: Int!, $before: AnyScalar) {
-            Users(last: $last, before: $before, cursorField: _id, direction: DESC) {
+            UserNodes(last: $last, before: $before, cursorField: _id, direction: DESC) {
                 nodes {
                     _id
                     name
@@ -175,13 +175,13 @@ def test_before_and_last_desc(query, users: Collection):
       """
     res = query(q, dict(last=10))
     pretty(res)
-    assert res["data"]["Users"]["nodes"]
-    assert len(res["data"]["Users"]["nodes"]) == 10
-    before = res["data"]["Users"]["pageInfo"]["startCursor"]
+    assert res["data"]["UserNodes"]["nodes"]
+    assert len(res["data"]["UserNodes"]["nodes"]) == 10
+    before = res["data"]["UserNodes"]["pageInfo"]["startCursor"]
     res = query(q, dict(last=10, before=before))
     pretty(res)
-    assert res["data"]["Users"]["nodes"]
-    assert len(res["data"]["Users"]["nodes"]) == 10
+    assert res["data"]["UserNodes"]["nodes"]
+    assert len(res["data"]["UserNodes"]["nodes"]) == 10
 
 
 def test_before_and_last_different_cursor(query, users: Collection):
@@ -189,7 +189,7 @@ def test_before_and_last_different_cursor(query, users: Collection):
     users.insert_many([dict(_id=ObjectId(), name=str(i)) for i in LETTERS])
     q = r"""
         query search($last: Int!, $before: AnyScalar) {
-            Users(last: $last, before: $before, cursorField: name, direction: ASC) {
+            UserNodes(last: $last, before: $before, cursorField: name, direction: ASC) {
                 nodes {
                     _id
                     name
@@ -206,10 +206,10 @@ def test_before_and_last_different_cursor(query, users: Collection):
       """
     res = query(q, dict(last=10))
     pretty(res)
-    assert res["data"]["Users"]["nodes"]
-    assert len(res["data"]["Users"]["nodes"]) == 10
-    before = res["data"]["Users"]["pageInfo"]["startCursor"]
+    assert res["data"]["UserNodes"]["nodes"]
+    assert len(res["data"]["UserNodes"]["nodes"]) == 10
+    before = res["data"]["UserNodes"]["pageInfo"]["startCursor"]
     res = query(q, dict(last=10, before=before))
     pretty(res)
-    assert res["data"]["Users"]["nodes"]
-    assert len(res["data"]["Users"]["nodes"]) == 10
+    assert res["data"]["UserNodes"]["nodes"]
+    assert len(res["data"]["UserNodes"]["nodes"]) == 10
