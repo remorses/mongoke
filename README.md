@@ -108,6 +108,6 @@ services:
 
 ## Tutorials
 
-Check out the examples directory in this repo
+Check out the /examples directory in this repo
 
 Please help the project making new tutorials and submit a issue to list it here!
