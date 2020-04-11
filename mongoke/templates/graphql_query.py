@@ -44,7 +44,7 @@ extend type Query {
         where: ${{type_name}}Where,
     ): ${{type_name}}
 
-    ${{query_name}}s(
+    ${{query_name}}Nodes(
         where: ${{type_name}}Where, 
         cursorField: ${{type_name}}Fields, 
         first: Int, 

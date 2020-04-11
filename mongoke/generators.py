@@ -59,7 +59,7 @@ def generate_resolvers(
             #  query_name=query_name,
             typename=typename,
             collection=collection,
-            resolver_path="Query." + query_name + "s",
+            resolver_path="Query." + query_name + "Nodes",
             disambiguations=disambiguations,
             guards_before=[g for g in guards if g["when"] == "before"],
             guards_after=[g for g in guards if g["when"] == "after"],
@@ -101,7 +101,7 @@ def generate_type_boilerplate(
         map_fields_to_types=dict(get_scalar_fields(schema, typename)),
     )
     touch(f"generated/resolvers/{get_query_name(typename)}.py", single_resolver)
-    touch(f"generated/resolvers/{get_query_name(typename)}s.py", many_resolver)
+    touch(f"generated/resolvers/{get_query_name(typename)}Nodes.py", many_resolver)
 
 
 def generate_relation_boilerplate(

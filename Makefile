@@ -20,7 +20,8 @@ config-schema:
 	skema generate configuration_schema.skema --jsonschema ./mongoke/config_schema.json
 
 .PHONY: generate-spec
-generate-spec: clean
+generate-spec:
+	rm -rf example_generated_code
 	python -m mongoke tests/confs/spec_conf.yaml --generated-path example_generated_code --force
 
 .PHONY: play

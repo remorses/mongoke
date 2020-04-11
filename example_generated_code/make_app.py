@@ -13,9 +13,9 @@ from .middleware import JwtMiddleware
 from .engine import CustomEngine, read
 
 import example_generated_code.generated.resolvers.User
-import example_generated_code.generated.resolvers.Users
+import example_generated_code.generated.resolvers.UserNodes
 import example_generated_code.generated.resolvers.Human
-import example_generated_code.generated.resolvers.Humans
+import example_generated_code.generated.resolvers.HumanNodes
 import example_generated_code.generated.resolvers.Task_events
 import example_generated_code.generated.resolvers.User_friends
 import example_generated_code.generated.resolvers.User_likes_over_time
@@ -25,7 +25,7 @@ import example_generated_code.generated.scalars
 
 
 GRAPHIQL_DEFAULT_QUERY = """
-# welcome to
+# welcome to mongoke
 # ╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╭╮
 # ╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱┃┃
 # ╭╮╭┳━━┳━╮╭━━┳━━┫┃╭┳━━╮
@@ -79,6 +79,7 @@ GRAPHIQL_DEFAULT_QUERY = """
 #         }
 #     }
 # }
+
 """
 
 

@@ -12,7 +12,7 @@ def get_resolver_filenames(config):
     for typename, type_config in config.get("types", {}).items():
         if type_config.get("exposed", True):
             yield get_query_name(typename)
-            yield get_query_name(typename) + "s"
+            yield get_query_name(typename) + "Nodes"
     for relation in config.get("relations", []):
         yield get_relation_filename(relation)
 

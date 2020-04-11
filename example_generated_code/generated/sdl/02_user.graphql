@@ -4,7 +4,7 @@ extend type Query {
         where: UserWhere,
     ): User
 
-    Users(
+    UserNodes(
         where: UserWhere, 
         cursorField: UserFields, 
         first: Int, 
