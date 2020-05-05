@@ -1,0 +1,7 @@
+github.com/bhoriuchi/graphql-go-tools v0.0.0-20190911192059-fe56277415a1 h1:9HAhaOMcG5fHaiuLjFHOauktFYxIcdLPST8lHzGiAA0=
+github.com/bhoriuchi/graphql-go-tools v0.0.0-20190911192059-fe56277415a1/go.mod h1:RCXP/JsuA9ChoSfDDKZkBc/ojtZOqJU72JCO9copJbw=
+github.com/carted/graphql v0.7.6 h1:1DAom3l7Irln/hHlPMBR6w/RirCXjopsCY9WCZc7WUc=
+github.com/carted/graphql v0.7.6/go.mod h1:aIVByVaa4avHzEnahcnHbP48OrkT/+gTtxBT+dPV2R0=
+github.com/graphql-go/graphql v0.7.9 h1:5Va/Rt4l5g3YjwDnid3vFfn43faaQBq7rMcIZ0VnV34=
+github.com/graphql-go/graphql v0.7.9/go.mod h1:k6yrAYQaSP59DC5UVxbgxESlmVyojThKdORUqGDGmrI=
+github.com/graphql/graphql v0.0.0-20200430170520-a1c1348c252e h1:q9nSBkV5qQT+UHB5ROnB4kNICoOfNLHxZv7yYn+zPkY=
