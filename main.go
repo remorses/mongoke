@@ -9,20 +9,13 @@ import (
 	"github.com/graphql-go/graphql"
 )
 
-func main() {
+type Config struct {
+	schemaString string
+}
+
+func main(config Config) {
 	schema, err := tools.MakeExecutableSchema(tools.ExecutableSchema{
-		TypeDefs: `
-	  directive @description(value: String!) on FIELD_DEFINITION
-  
-	  type Foo {
-		id: ID!
-		name: String!
-		description: String
-	  }
-	  
-	  type Query {
-		foo(id: ID!): Foo @description(value: "bazqux")
-	  }`,
+		TypeDefs: config.schemaString,
 		Resolvers: tools.ResolverMap{
 			"Query": &tools.ObjectResolver{
 				Fields: tools.FieldResolveMap{
@@ -34,6 +27,11 @@ func main() {
 			},
 		},
 	})
+
+	// for _, field := range schema.QueryType().Fields() {
+	// 	name := field.Name
+	// 	println(name)
+	// }
 
 	if err != nil {
 		log.Fatalf("Failed to build schema, error: %v", err)
