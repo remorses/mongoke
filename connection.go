@@ -25,16 +25,33 @@ var pageInfo = graphql.NewObject(
 	},
 )
 
-func connectionType(object graphql.Object) *graphql.ObjectConfig {
+func connectionType(object *graphql.Object) graphql.ObjectConfig {
+	node := graphql.NewObject(
+		graphql.ObjectConfig{
+			Name:        object.Name() + "Edge",
+			Description: "Edge",
+			Fields: graphql.Fields{
+				"node": &graphql.Field{
+					Type: object,
+				},
+				"cursor": &graphql.Field{
+					Type: graphql.String,
+				},
+			},
+		},
+	)
 	fields := graphql.Fields{
 		"nodes": &graphql.Field{
-			Type: graphql.NewList(&object),
+			Type: graphql.NewList(object),
+		},
+		"edges": &graphql.Field{
+			Type: graphql.NewList(node),
 		},
 		"pageInfo": &graphql.Field{
 			Type: pageInfo,
 		},
 	}
-	connection := &graphql.ObjectConfig{
+	connection := graphql.ObjectConfig{
 		Name:   object.Name() + "Connection",
 		Fields: fields,
 	}

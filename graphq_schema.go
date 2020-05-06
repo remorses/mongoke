@@ -19,7 +19,8 @@ func generateSchema(config Config) (graphql.Schema, error) {
 		if !ok {
 			continue
 		}
-		queryFields["findOne"+object.Name()] = findOneResolver(findOneResolverConfig{returnType: object})
+		// queryFields["findOne"+object.Name()] = findOneResolver(findOneResolverConfig{returnType: object})
+		queryFields["findMany"+object.Name()] = findManyResolver(findManyResolverConfig{returnType: object})
 		mutationFields["putSome"+object.Name()] = &graphql.Field{
 			Type: object,
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {

@@ -4,7 +4,7 @@ import (
 	"github.com/graphql-go/graphql"
 )
 
-type findOneResolverConfig struct {
+type findManyResolverConfig struct {
 	collection string
 	database   string
 	returnType *graphql.Object
@@ -25,7 +25,7 @@ var directionEnum = graphql.NewEnum(graphql.EnumConfig{
 	},
 })
 
-func findOneResolver(conf findOneResolverConfig) *graphql.Field {
+func findManyResolver(conf findManyResolverConfig) *graphql.Field {
 	// TODO create the where argument based on the object fields
 
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
@@ -37,7 +37,7 @@ func findOneResolver(conf findOneResolverConfig) *graphql.Field {
 		return "world", nil
 	}
 	return &graphql.Field{
-		Type: conf.returnType,
+		Type: graphql.NewObject(connectionType(conf.returnType)),
 		Args: graphql.FieldConfigArgument{
 			"where":     whereArgument(*conf.returnType),
 			"first":     &graphql.ArgumentConfig{Type: graphql.Int},

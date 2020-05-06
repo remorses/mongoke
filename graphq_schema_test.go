@@ -10,7 +10,7 @@ import (
 )
 
 var schema1 = `
-type xxx {
+type User {
 	name: String
 	surname: Int
 }
@@ -31,12 +31,13 @@ func TestSchema(t *testing.T) {
 
 	})
 }
+
 func TestServer(t *testing.T) {
 	t.Run("server", func(t *testing.T) {
 		if os.Getenv("server") == "" {
 			t.Skip()
 		}
-		println("listening")
+		println("listening on http://localhost:8080")
 		main(Config{schemaString: schema1})
 	})
 }
