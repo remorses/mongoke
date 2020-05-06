@@ -1,22 +1,60 @@
 package mongoke
 
-import "github.com/graphql-go/graphql"
+import (
+	"github.com/graphql-go/graphql"
+	tools "github.com/remorses/graphql-go-tools"
+)
 
-func generateSchema(resources []Resource) graphql.Schema {
+const fakeQueryPlaceHolder = `
+type Query {
+	nothing: String
+}
+`
+
+func generateSchema(typeDefs string) (graphql.Schema, error) {
+
 	queryFields := graphql.Fields{}
 	mutationFields := graphql.Fields{}
-	for _, resource := range resources {
-		// add related types like Where, Connection, ... to the schema
-		// create the findOne findMany fields and resolvers
-		println(resource.Name)
+	baseSchemaConfig, err := tools.MakeSchemaConfig(tools.ExecutableSchema{TypeDefs: []string{typeDefs}})
+	if err != nil {
+		return graphql.Schema{}, err
 	}
-	var schema, _ = graphql.NewSchema(
-		graphql.SchemaConfig{
-			Query:    graphql.NewObject(graphql.ObjectConfig{Name: "Query", Fields: queryFields}),
-			Mutation: graphql.NewObject(graphql.ObjectConfig{Name: "Mutation", Fields: mutationFields}),
-		},
+	for _, gqlType := range baseSchemaConfig.Types {
+		// TODO handle unions
+		object, ok := gqlType.(*graphql.Object)
+		if !ok {
+			continue
+		}
+		queryFields["getSome"+object.Name()] = &graphql.Field{
+			Type: object,
+			// Name: "getSome" + object.Name(),
+			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				return "world", nil
+			},
+		}
+		mutationFields["putSome"+object.Name()] = &graphql.Field{
+			Type: object,
+			// Name: "putSome" + object.Name(),
+			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				return "world", nil
+			},
+		}
+
+	}
+	config := graphql.SchemaConfig{
+		Types:      baseSchemaConfig.Types,
+		Extensions: baseSchemaConfig.Extensions,
+		Query:      graphql.NewObject(graphql.ObjectConfig{Name: "Query", Fields: queryFields}),
+		Mutation:   graphql.NewObject(graphql.ObjectConfig{Name: "Mutation", Fields: mutationFields}),
+	}
+	schema, err := graphql.NewSchema(
+		config,
 	)
-	return schema
+
+	if err != nil {
+		return graphql.Schema{}, err
+	}
+	return schema, nil
 }
 
 /*
