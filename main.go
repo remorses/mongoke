@@ -11,7 +11,7 @@ type Config struct {
 }
 
 func main(config Config) {
-	schema, _ := generateSchema(config.schemaString)
+	schema, _ := generateSchema(config)
 
 	h := handler.New(&handler.Config{
 		Schema:   &schema,

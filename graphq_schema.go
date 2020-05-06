@@ -5,14 +5,8 @@ import (
 	tools "github.com/remorses/graphql-go-tools"
 )
 
-const fakeQueryPlaceHolder = `
-type Query {
-	nothing: String
-}
-`
-
-func generateSchema(typeDefs string) (graphql.Schema, error) {
-
+func generateSchema(config Config) (graphql.Schema, error) {
+	typeDefs := config.schemaString
 	queryFields := graphql.Fields{}
 	mutationFields := graphql.Fields{}
 	baseSchemaConfig, err := tools.MakeSchemaConfig(tools.ExecutableSchema{TypeDefs: []string{typeDefs}})
@@ -25,30 +19,22 @@ func generateSchema(typeDefs string) (graphql.Schema, error) {
 		if !ok {
 			continue
 		}
-		queryFields["getSome"+object.Name()] = &graphql.Field{
-			Type: object,
-			// Name: "getSome" + object.Name(),
-			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return "world", nil
-			},
-		}
+		queryFields["findOne"+object.Name()] = findOneResolver(findOneResolverConfig{resolvedType: object})
 		mutationFields["putSome"+object.Name()] = &graphql.Field{
 			Type: object,
-			// Name: "putSome" + object.Name(),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 				return "world", nil
 			},
 		}
+	}
 
-	}
-	config := graphql.SchemaConfig{
-		Types:      baseSchemaConfig.Types,
-		Extensions: baseSchemaConfig.Extensions,
-		Query:      graphql.NewObject(graphql.ObjectConfig{Name: "Query", Fields: queryFields}),
-		Mutation:   graphql.NewObject(graphql.ObjectConfig{Name: "Mutation", Fields: mutationFields}),
-	}
 	schema, err := graphql.NewSchema(
-		config,
+		graphql.SchemaConfig{
+			Types:      baseSchemaConfig.Types,
+			Extensions: baseSchemaConfig.Extensions,
+			Query:      graphql.NewObject(graphql.ObjectConfig{Name: "Query", Fields: queryFields}),
+			Mutation:   graphql.NewObject(graphql.ObjectConfig{Name: "Mutation", Fields: mutationFields}),
+		},
 	)
 
 	if err != nil {

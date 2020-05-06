@@ -18,7 +18,7 @@ type xxx {
 
 func TestSchema(t *testing.T) {
 	t.Run("schema", func(t *testing.T) {
-		schema, err := generateSchema(schema1)
+		schema, err := generateSchema(Config{schemaString: schema1})
 		if err != nil {
 			t.Error(err)
 		}
