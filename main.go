@@ -20,5 +20,5 @@ func main(config Config) {
 	})
 
 	http.Handle("/", h)
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe("localhost:8080", nil)
 }
