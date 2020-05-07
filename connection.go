@@ -26,6 +26,7 @@ var pageInfo = graphql.NewObject(
 )
 
 func connectionType(object *graphql.Object) graphql.ObjectConfig {
+	name := object.Name() + "Connection"
 	node := graphql.NewObject(
 		graphql.ObjectConfig{
 			Name:        object.Name() + "Edge",
@@ -52,9 +53,8 @@ func connectionType(object *graphql.Object) graphql.ObjectConfig {
 		},
 	}
 	connection := graphql.ObjectConfig{
-		Name:   object.Name() + "Connection",
+		Name:   name,
 		Fields: fields,
 	}
-
 	return connection
 }

@@ -5,6 +5,7 @@ import (
 )
 
 func whereArgument(object graphql.Object) *graphql.ArgumentConfig {
+	name := object.Name() + "Where"
 	scalars := takeScalarFields(object, []string{}) // TODO add here the enums and scalars names
 	inputFields := graphql.InputObjectConfigFieldMap{}
 	for _, field := range scalars {
@@ -15,7 +16,7 @@ func whereArgument(object graphql.Object) *graphql.ArgumentConfig {
 		}
 	}
 	where := graphql.NewInputObject(graphql.InputObjectConfig{
-		Name:   object.Name() + "Where",
+		Name:   name,
 		Fields: inputFields,
 	})
 	inputFields["or"] = &graphql.InputObjectFieldConfig{Type: where}
@@ -28,10 +29,11 @@ func whereArgument(object graphql.Object) *graphql.ArgumentConfig {
 }
 
 func fieldWhereArgument(field *graphql.FieldDefinition) *graphql.InputObject {
+	name := field.Name + "FieldMatch"
 	currentType := &graphql.InputObjectFieldConfig{Type: field.Type}
 	fieldWhere := graphql.NewInputObject(
 		graphql.InputObjectConfig{
-			Name: field.Name + "Where",
+			Name: name,
 			Fields: graphql.InputObjectConfigFieldMap{
 				"eq":  currentType,
 				"neq": currentType,

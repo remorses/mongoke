@@ -11,7 +11,10 @@ type Config struct {
 }
 
 func main(config Config) {
-	schema, _ := generateSchema(config)
+	schema, err := generateSchema(config)
+	if err != nil {
+		panic(err)
+	}
 
 	h := handler.New(&handler.Config{
 		Schema:   &schema,
