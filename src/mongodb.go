@@ -67,8 +67,10 @@ const (
 	DEFAULT_NODES_COUNT = 40
 )
 
-const ASC = 1
-const DESC = -1
+const (
+	ASC  = 1
+	DESC = -1
+)
 
 func findMany(collection *mongo.Collection, _filter interface{}, pagination Pagination, cursorField string, direction int) (interface{}, error) {
 	filter, ok := _filter.(map[string]interface{}) // TODO for testing it would be cooler to use bson.M
@@ -154,24 +156,29 @@ func findMany(collection *mongo.Collection, _filter interface{}, pagination Pagi
 		return nil, err
 	}
 
-	pageInfo := makePageInfo(nodes, pagination, cursorField)
+	connection := makeConnection(nodes, pagination, cursorField)
 
 	// make the edge interface
-	return map[string]interface{}{
-		"nodes":    nodes,
-		"pageInfo": pageInfo,
-	}, nil
+	return connection, nil
 
 }
 
-func makePageInfo(nodes []map[string]interface{}, pagination Pagination, cursorField string) map[string]interface{} {
+type PageInfo struct {
+	StartCursor     interface{} `json:startCursor` // TODO should be string hash made from any object (scalar, enum, ...)
+	EndCursor       interface{} `json:endCursor`
+	HasNextPage     bool        `json:hasNextPage`
+	HasPreviousPage bool        `json:hasPreviousPage`
+}
+
+type Connection struct {
+	Nodes    []map[string]interface{} `json:nodes`
+	PageInfo PageInfo                 `json:pageInfo`
+}
+
+// removes last or first node, adds pageInfo data
+func makeConnection(nodes []map[string]interface{}, pagination Pagination, cursorField string) Connection {
 	if len(nodes) == 0 {
-		return map[string]interface{}{
-			"startCursor":     nil,
-			"endCursor":       nil,
-			"hasNextPage":     false,
-			"hasPreviousPage": false,
-		}
+		return Connection{}
 	}
 	var hasNext bool
 	var hasPrev bool
@@ -194,11 +201,14 @@ func makePageInfo(nodes []map[string]interface{}, pagination Pagination, cursorF
 		endCursor = nodes[len(nodes)-1][cursorField]
 		startCursor = nodes[0][cursorField]
 	}
-	return map[string]interface{}{
-		"startCursor":     startCursor,
-		"endCursor":       endCursor,
-		"hasNextPage":     hasNext,
-		"hasPreviousPage": hasPrev,
+	return Connection{
+		Nodes: nodes,
+		PageInfo: PageInfo{
+			StartCursor:     startCursor,
+			EndCursor:       endCursor,
+			HasNextPage:     hasNext,
+			HasPreviousPage: hasPrev,
+		},
 	}
 }
 
