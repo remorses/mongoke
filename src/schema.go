@@ -5,11 +5,14 @@ import (
 	tools "github.com/remorses/graphql-go-tools"
 )
 
-func generateSchema(config Config) (graphql.Schema, error) {
-	typeDefs := config.schemaString
+func (mongoke *Mongoke) generateSchema() (graphql.Schema, error) {
 	queryFields := graphql.Fields{}
 	mutationFields := graphql.Fields{}
-	baseSchemaConfig, err := tools.MakeSchemaConfig(tools.ExecutableSchema{TypeDefs: []string{typeDefs}})
+	baseSchemaConfig, err := tools.MakeSchemaConfig(
+		tools.ExecutableSchema{
+			TypeDefs: []string{mongoke.typeDefs},
+		},
+	)
 	if err != nil {
 		return graphql.Schema{}, err
 	}
@@ -19,9 +22,9 @@ func generateSchema(config Config) (graphql.Schema, error) {
 		if !ok {
 			continue
 		}
-		// queryFields["findOne"+object.Name()] = findOneField(findOneFieldConfig{returnType: object})
-		// TODO types cannot be duplicated, cache the result for the where and connection types
-		queryFields["findMany"+object.Name()] = findManyField(findManyFieldConfig{returnType: object})
+		// TODO add mutaiton fields
+		queryFields["findOne"+object.Name()] = mongoke.findOneField(findOneFieldConfig{returnType: object})
+		queryFields["findMany"+object.Name()] = mongoke.findManyField(findManyFieldConfig{returnType: object})
 		mutationFields["putSome"+object.Name()] = &graphql.Field{
 			Type: object,
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {

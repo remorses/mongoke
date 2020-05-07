@@ -4,7 +4,7 @@ import (
 	"github.com/graphql-go/graphql"
 )
 
-func takeScalarFields(object graphql.Object, scalars []string) []*graphql.FieldDefinition {
+func takeScalarFields(object *graphql.Object, scalars []string) []*graphql.FieldDefinition {
 	scalarFields := make([]*graphql.FieldDefinition, 0)
 	for _, v := range object.Fields() {
 		typeName := v.Type.Name()
