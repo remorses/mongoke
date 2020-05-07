@@ -31,6 +31,25 @@ func TestInitMongo(t *testing.T) {
 		}
 		prettyPrint("findOne", x)
 	})
+	t.Run("findMany", func(t *testing.T) {
+		db, err := initMongo(testutil.MONGODB_URI)
+		coll := db.Collection("users")
+		coll.InsertMany(context.TODO(), []interface{}{bson.M{"username": "xxx"}, bson.M{"username": "yyy"}})
+		if err != nil {
+			t.Error(err)
+		}
+		x, err := findMany(
+			coll,
+			map[string]interface{}{"username": map[string]interface{}{"eq": "xxx"}},
+			Pagination{first: 10},
+			"username",
+			ASC,
+		)
+		if err != nil {
+			t.Error(err)
+		}
+		prettyPrint("findMany", x)
+	})
 	t.Run("findOne nil", func(t *testing.T) {
 		db, err := initMongo(testutil.MONGODB_URI)
 		if err != nil {

@@ -22,9 +22,12 @@ func (mongoke *Mongoke) generateSchema() (graphql.Schema, error) {
 		if !ok {
 			continue
 		}
-		// TODO add mutaiton fields
+
+		// TODO collection based on type config
 		queryFields["findOne"+object.Name()] = mongoke.findOneField(findOneFieldConfig{returnType: object, collection: "users"})
 		queryFields["findMany"+object.Name()] = mongoke.findManyField(findManyFieldConfig{returnType: object, collection: "users"})
+
+		// TODO add mutaiton fields
 		mutationFields["putSome"+object.Name()] = &graphql.Field{
 			Type: object,
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
