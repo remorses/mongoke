@@ -2,8 +2,10 @@ package mongoke
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/graphql-go/graphql"
+	"github.com/mitchellh/mapstructure"
 )
 
 const TIMEOUT_FIND = 10
@@ -99,31 +101,13 @@ func (mongoke *Mongoke) findManyField(conf findManyFieldConfig) *graphql.Field {
 	}
 }
 
-func paginationFromArgs(x interface{}) Pagination {
-	args, ok := x.(map[string]interface{})
-	if !ok {
+func paginationFromArgs(args interface{}) Pagination {
+	var pag Pagination
+	err := mapstructure.Decode(args, &pag)
+	if err != nil {
+		fmt.Println(err)
 		return Pagination{}
 	}
-	var first int
-	var last int
-	var after string
-	var before string
-	if args["first"] != nil {
-		first = args["first"].(int)
-	}
-	if args["last"] != nil {
-		last = args["last"].(int)
-	}
-	if args["after"] != nil {
-		after = args["after"].(string)
-	}
-	if args["before"] != nil {
-		before = args["before"].(string)
-	}
-	return Pagination{
-		first:  first,
-		last:   last,
-		after:  after,
-		before: before,
-	}
+	// prettyPrint(pag)
+	return pag
 }

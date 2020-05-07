@@ -41,7 +41,7 @@ func TestInitMongo(t *testing.T) {
 		x, err := findMany(
 			coll,
 			map[string]interface{}{"name": map[string]interface{}{"eq": "xxx"}},
-			Pagination{first: 10},
+			Pagination{First: 10},
 			"name",
 			ASC,
 		)

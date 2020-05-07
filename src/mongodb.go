@@ -57,10 +57,10 @@ func findOne(collection *mongo.Collection, _filter interface{}) (interface{}, er
 }
 
 type Pagination struct {
-	first  int
-	last   int
-	after  string
-	before string
+	First  int    `mapstructure:first`
+	Last   int    `mapstructure:last`
+	After  string `mapstructure:after`
+	Before string `mapstructure:before`
 }
 
 const (
@@ -79,10 +79,10 @@ func findMany(collection *mongo.Collection, _filter interface{}, pagination Pagi
 	}
 	ctx, _ := context.WithTimeout(context.Background(), TIMEOUT_FIND*time.Second)
 
-	after := pagination.after
-	before := pagination.before
-	last := pagination.last
-	first := pagination.first
+	after := pagination.After
+	before := pagination.Before
+	last := pagination.Last
+	first := pagination.First
 
 	opts := options.Find()
 
@@ -143,7 +143,7 @@ func findMany(collection *mongo.Collection, _filter interface{}, pagination Pagi
 	}
 
 	// execute
-	prettyPrint(rewriteFilter(filter), opts)
+	prettyPrint(rewriteFilter(filter))
 	res, err := collection.Find(ctx, rewriteFilter(filter), opts)
 	if err != nil {
 		// log.Print("Error in findMany", err)
@@ -183,15 +183,15 @@ func makeConnection(nodes []map[string]interface{}, pagination Pagination, curso
 	var hasPrev bool
 	var endCursor interface{} // TODO should be string
 	var startCursor interface{}
-	if pagination.first != 0 {
-		hasNext = len(nodes) == int(pagination.first+1)
+	if pagination.First != 0 {
+		hasNext = len(nodes) == int(pagination.First+1)
 		if hasNext {
 			nodes = nodes[:len(nodes)-1] // TODO is right?
 		}
 	}
-	if pagination.last != 0 {
+	if pagination.Last != 0 {
 		nodes = reverse(nodes)
-		hasPrev = len(nodes) == int(pagination.last+1)
+		hasPrev = len(nodes) == int(pagination.Last+1)
 		if hasPrev {
 			nodes = nodes[1:]
 		}
@@ -211,6 +211,7 @@ func makeConnection(nodes []map[string]interface{}, pagination Pagination, curso
 	}
 }
 
+// TODO use a Match type with eq, lt, ...
 // only works if the mongo operators are at second level of the match, like { field: { eq: "xxx" } }
 func rewriteFilter(filter map[string]interface{}) map[string]map[string]interface{} {
 	newFilter := make(map[string]map[string]interface{})
