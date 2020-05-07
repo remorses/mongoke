@@ -12,5 +12,6 @@ require (
 	github.com/kofalt/go-memoize v0.0.0-20190519021333-cf756f0462a4 // indirect
 	github.com/remorses/graphql-go-tools v0.0.0-20200506161536-a31d9b4aa896
 	github.com/stretchr/testify v1.5.1 // indirect
+	go.mongodb.org/mongo-driver v1.3.3
 	golang.org/x/net v0.0.0-20200505041828-1ed23360d12c // indirect
 )
