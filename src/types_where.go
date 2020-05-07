@@ -21,7 +21,7 @@ func (mongoke *Mongoke) getWhereArg(object *graphql.Object) (*graphql.InputObjec
 	scalars := takeScalarFields(object, []string{}) // TODO add here the enums and scalars names
 	inputFields := graphql.InputObjectConfigFieldMap{}
 	for _, field := range scalars {
-		fieldWhere, err := mongoke.fieldWhereArgument(field, object.PrivateName)
+		fieldWhere, err := mongoke.getFieldWhereArg(field, object.PrivateName)
 		if err != nil {
 			return nil, err
 		}
@@ -41,7 +41,7 @@ func (mongoke *Mongoke) getWhereArg(object *graphql.Object) (*graphql.InputObjec
 }
 
 // this is be based on a type, like scalars, enums, ..., cache it in mongoke and replace name
-func (mongoke *Mongoke) fieldWhereArgument(field *graphql.FieldDefinition, parentName string) (*graphql.InputObject, error) {
+func (mongoke *Mongoke) getFieldWhereArg(field *graphql.FieldDefinition, parentName string) (*graphql.InputObject, error) {
 	name := field.Type.Name() + "Where"
 	if item, ok := mongoke.typeMap[name]; ok {
 		if t, ok := item.(*graphql.InputObject); ok {
