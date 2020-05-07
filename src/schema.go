@@ -19,9 +19,9 @@ func generateSchema(config Config) (graphql.Schema, error) {
 		if !ok {
 			continue
 		}
-		// queryFields["findOne"+object.Name()] = findOneResolver(findOneResolverConfig{returnType: object})
+		// queryFields["findOne"+object.Name()] = findOneField(findOneFieldConfig{returnType: object})
 		// TODO types cannot be duplicated, cache the result for the where and connection types
-		queryFields["findMany"+object.Name()] = findManyResolver(findManyResolverConfig{returnType: object})
+		queryFields["findMany"+object.Name()] = findManyField(findManyFieldConfig{returnType: object})
 		mutationFields["putSome"+object.Name()] = &graphql.Field{
 			Type: object,
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {

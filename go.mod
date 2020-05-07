@@ -1,4 +1,4 @@
-module github.com/remorses/mongoke
+module github.com/remorses/mongoke/src
 
 go 1.13
 

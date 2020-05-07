@@ -4,30 +4,9 @@ import (
 	"github.com/graphql-go/graphql"
 )
 
-var pageInfo = graphql.NewObject(
-	graphql.ObjectConfig{
-		Name:        "PageInfo",
-		Description: "Pagination information",
-		Fields: graphql.Fields{
-			"startCursor": &graphql.Field{
-				Type: graphql.String, // TODO should be anyscalar
-			},
-			"endCursor": &graphql.Field{
-				Type: graphql.String,
-			},
-			"hasNextPage": &graphql.Field{
-				Type: graphql.Boolean,
-			},
-			"hasPreviousPage": &graphql.Field{
-				Type: graphql.Boolean,
-			},
-		},
-	},
-)
-
 func connectionType(object *graphql.Object) graphql.ObjectConfig {
 	name := object.Name() + "Connection"
-	node := graphql.NewObject(
+	edgeNode := graphql.NewObject(
 		graphql.ObjectConfig{
 			Name:        object.Name() + "Edge",
 			Description: "Edge",
@@ -46,7 +25,7 @@ func connectionType(object *graphql.Object) graphql.ObjectConfig {
 			Type: graphql.NewList(object),
 		},
 		"edges": &graphql.Field{
-			Type: graphql.NewList(node),
+			Type: graphql.NewList(edgeNode),
 		},
 		"pageInfo": &graphql.Field{
 			Type: pageInfo,
