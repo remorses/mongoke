@@ -34,15 +34,15 @@ func TestInitMongo(t *testing.T) {
 	t.Run("findMany", func(t *testing.T) {
 		db, err := initMongo(testutil.MONGODB_URI)
 		coll := db.Collection("users")
-		coll.InsertMany(context.TODO(), []interface{}{bson.M{"username": "xxx"}, bson.M{"username": "yyy"}})
+		coll.InsertMany(context.TODO(), []interface{}{bson.M{"name": "xxx"}, bson.M{"name": "yyy"}})
 		if err != nil {
 			t.Error(err)
 		}
 		x, err := findMany(
 			coll,
-			map[string]interface{}{"username": map[string]interface{}{"eq": "xxx"}},
+			map[string]interface{}{"name": map[string]interface{}{"eq": "xxx"}},
 			Pagination{first: 10},
-			"username",
+			"name",
 			ASC,
 		)
 		if err != nil {

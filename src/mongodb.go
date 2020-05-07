@@ -57,8 +57,8 @@ func findOne(collection *mongo.Collection, _filter interface{}) (interface{}, er
 }
 
 type Pagination struct {
-	first  int64
-	last   int64
+	first  int
+	last   int
 	after  string
 	before string
 }
@@ -130,14 +130,14 @@ func findMany(collection *mongo.Collection, _filter interface{}, pagination Pagi
 	if last != 0 {
 		sorting = -direction
 	}
-	opts.SetSort(bson.D{{cursorField, sorting}})
+	opts.SetSort(bson.M{cursorField: sorting})
 
 	// limit
 	if last != 0 {
-		opts.SetLimit(last + 1)
+		opts.SetLimit(int64(last + 1))
 	}
 	if first != 0 {
-		opts.SetLimit(first + 1)
+		opts.SetLimit(int64(first + 1))
 	}
 
 	// execute
