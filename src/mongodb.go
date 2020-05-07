@@ -185,7 +185,7 @@ func makePageInfo(nodes []map[string]interface{}, pagination Pagination, cursorF
 	}
 	if pagination.last != 0 {
 		nodes = reverse(nodes)
-		hasNext = len(nodes) == int(pagination.last+1)
+		hasPrev = len(nodes) == int(pagination.last+1)
 		if hasPrev {
 			nodes = nodes[1:]
 		}
