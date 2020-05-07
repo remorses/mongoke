@@ -5,30 +5,29 @@ import (
 	"os"
 	"testing"
 
-	"github.com/graphql-go/graphql"
 	"github.com/remorses/mongoke/src/testutil"
 )
 
-var schema1 = `
-type User {
-	name: String
-	surname: Int
-}
-`
-
 func TestSchema(t *testing.T) {
 	t.Run("schema", func(t *testing.T) {
-		schema, err := MakeMongokeSchema(Config{schemaString: schema1})
+		schema, err := MakeMongokeSchema(Config{schemaString: testutil.UserSchema})
 		if err != nil {
 			t.Error(err)
 		}
-		res := graphql.Do(graphql.Params{Schema: schema, RequestString: testutil.IntrospectionQuery})
-		_, err = json.MarshalIndent(res.Data, "", "   ")
+		data := testutil.QuerySchema(t, schema, testutil.UserQuery1)
+		_, err = json.MarshalIndent(data, "", "   ")
 		if err != nil {
 			t.Error(err)
 		}
-
 		// println(string(json))
+	})
+	t.Run("query user", func(t *testing.T) {
+		schema, err := MakeMongokeSchema(Config{schemaString: testutil.UserSchema})
+		if err != nil {
+			t.Error(err)
+		}
+		data := testutil.QuerySchema(t, schema, testutil.UserQuery1)
+		prettyPrint("query for user", data)
 	})
 }
 
@@ -39,7 +38,7 @@ func TestServer(t *testing.T) {
 		}
 		println("listening on http://localhost:8080")
 		main(Config{
-			schemaString: schema1,
+			schemaString: testutil.UserSchema,
 			mongoDbUri:   "mongodb://localhost/testdb",
 		})
 	})

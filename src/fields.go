@@ -1,6 +1,8 @@
 package mongoke
 
 import (
+	"errors"
+
 	"github.com/graphql-go/graphql"
 )
 
@@ -13,13 +15,15 @@ type findOneFieldConfig struct {
 
 func (mongoke *Mongoke) findOneField(conf findOneFieldConfig) *graphql.Field {
 	// TODO create the where argument based on the object fields
-
+	if conf.collection == "" {
+		panic(errors.New("missing collection name for " + conf.returnType.Name() + " findOneField"))
+	}
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
 		db, _ := initMongo(mongoke.mongoDbUri)
 		document, _ := findOne(db.Collection(conf.collection), args["where"])
 		// document, err := mongoke.database.findOne()
-		prettyPrint(args)
+		// prettyPrint(args)
 		return document, nil
 	}
 	whereArg, err := mongoke.getWhereArg(conf.returnType)

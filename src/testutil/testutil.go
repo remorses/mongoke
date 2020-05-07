@@ -1,8 +1,38 @@
 package testutil
 
+import (
+	"testing"
+
+	"github.com/graphql-go/graphql"
+)
+
 const MONGODB_URI = "mongodb://localhost/testdb"
 
-var IntrospectionQuery = `
+func QuerySchema(t *testing.T, schema graphql.Schema, query string) interface{} {
+	res := graphql.Do(graphql.Params{Schema: schema, RequestString: query})
+	if res.Errors != nil && len(res.Errors) > 0 {
+		t.Error(res.Errors[0])
+		return nil
+	}
+	return res.Data
+}
+
+var UserSchema = `
+type User {
+	name: String
+	age: Int
+}
+`
+
+var UserQuery1 = `
+{
+	findOneUser(where: {name: {eq: "dsf"}}) {
+		name
+		age
+	}
+}`
+
+const IntrospectionQuery = `
   query IntrospectionQuery {
     __schema {
       queryType { name }
