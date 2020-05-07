@@ -27,3 +27,13 @@ for every type attach a field in the final schema
 generates a field with resolver for the given type, takes other necessary types from the typeMap
 
 
+
+/support
+
+`makeMongodbMatch(map[string]interface{})`
+replaces the `eq` `neq` fields with `$eq` `$neq`
+
+`connectionResolver(collection, first, last, after, ...)`
+get the requested segment from the database, i also have to redeclare the Connection struct with right json names
+
+
