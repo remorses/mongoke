@@ -158,7 +158,6 @@ func findMany(collection *mongo.Collection, _filter interface{}, pagination Pagi
 
 	connection := makeConnection(nodes, pagination, cursorField)
 
-	// make the edge interface
 	return connection, nil
 
 }

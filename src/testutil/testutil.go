@@ -32,6 +32,22 @@ var UserQuery1 = `
 	}
 }`
 
+var UserQuery2 = `
+{
+	findManyUser(last: 1, where: {name: {eq: "sdfsdf"}}) {
+	  nodes {
+		name
+		age
+	  }
+	  pageInfo {
+		endCursor
+		hasNextPage
+		hasPreviousPage
+		startCursor
+	  }
+	}
+}`
+
 const IntrospectionQuery = `
   query IntrospectionQuery {
     __schema {
