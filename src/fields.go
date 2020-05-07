@@ -20,8 +20,14 @@ func (mongoke *Mongoke) findOneField(conf findOneFieldConfig) *graphql.Field {
 	}
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
-		db, _ := initMongo(mongoke.mongoDbUri)
-		document, _ := findOne(db.Collection(conf.collection), args["where"])
+		db, err := initMongo(mongoke.mongoDbUri)
+		if err != nil {
+			return nil, err
+		}
+		document, err := findOne(db.Collection(conf.collection), args["where"])
+		if err != nil {
+			return nil, err
+		}
 		// document, err := mongoke.database.findOne()
 		// prettyPrint(args)
 		return document, nil
