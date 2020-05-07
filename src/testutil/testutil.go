@@ -1,5 +1,7 @@
 package testutil
 
+const MONGODB_URI = "mongodb://localhost/testdb"
+
 var IntrospectionQuery = `
   query IntrospectionQuery {
     __schema {

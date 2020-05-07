@@ -4,9 +4,10 @@ import (
 	"github.com/graphql-go/graphql"
 )
 
+const TIMEOUT_FIND = 10
+
 type findOneFieldConfig struct {
 	collection string
-	database   string
 	returnType *graphql.Object
 }
 
@@ -15,11 +16,11 @@ func (mongoke *Mongoke) findOneField(conf findOneFieldConfig) *graphql.Field {
 
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
-		// TODO get item from database
-		// check authorization guards
-		// if interface or union set the right __typeName
+		db, _ := initMongo(mongoke.mongoDbUri)
+		document, _ := findOne(db.Collection(conf.collection), args["where"])
+		// document, err := mongoke.database.findOne()
 		prettyPrint(args)
-		return "world", nil
+		return document, nil
 	}
 	whereArg, err := mongoke.getWhereArg(conf.returnType)
 	if err != nil {
@@ -36,14 +37,12 @@ func (mongoke *Mongoke) findOneField(conf findOneFieldConfig) *graphql.Field {
 
 type findManyFieldConfig struct {
 	collection string
-	database   string
 	returnType *graphql.Object
 }
 
 func (mongoke *Mongoke) findManyField(conf findManyFieldConfig) *graphql.Field {
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
-		// TODO get item from database
 		// check authorization guards
 		// if interface or union set the right __typeName
 		prettyPrint(args)

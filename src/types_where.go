@@ -21,7 +21,10 @@ func (mongoke *Mongoke) getWhereArg(object *graphql.Object) (*graphql.InputObjec
 	scalars := takeScalarFields(object, []string{}) // TODO add here the enums and scalars names
 	inputFields := graphql.InputObjectConfigFieldMap{}
 	for _, field := range scalars {
-		fieldWhere := fieldWhereArgument(field, object.PrivateName)
+		fieldWhere, err := mongoke.fieldWhereArgument(field, object.PrivateName)
+		if err != nil {
+			return nil, err
+		}
 		inputFields[field.Name] = &graphql.InputObjectFieldConfig{
 			Type:        fieldWhere,
 			Description: "The Mongodb match object for the field " + field.Name,
@@ -37,8 +40,15 @@ func (mongoke *Mongoke) getWhereArg(object *graphql.Object) (*graphql.InputObjec
 	return where, nil
 }
 
-func fieldWhereArgument(field *graphql.FieldDefinition, parentName string) *graphql.InputObject {
-	name := parentName + field.Name + "FieldMatch"
+// this is be based on a type, like scalars, enums, ..., cache it in mongoke and replace name
+func (mongoke *Mongoke) fieldWhereArgument(field *graphql.FieldDefinition, parentName string) (*graphql.InputObject, error) {
+	name := field.Type.Name() + "Where"
+	if item, ok := mongoke.typeMap[name]; ok {
+		if t, ok := item.(*graphql.InputObject); ok {
+			return t, nil
+		}
+		return nil, errors.New("cannot cast field where type for " + name)
+	}
 	currentType := &graphql.InputObjectFieldConfig{Type: field.Type}
 	fieldWhere := graphql.NewInputObject(
 		graphql.InputObjectConfig{
@@ -55,5 +65,6 @@ func fieldWhereArgument(field *graphql.FieldDefinition, parentName string) *grap
 			},
 		},
 	)
-	return fieldWhere
+	mongoke.typeMap[name] = fieldWhere
+	return fieldWhere, nil
 }

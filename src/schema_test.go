@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/graphql-go/graphql"
-	"github.com/remorses/mongoke/src/src/testutil"
+	"github.com/remorses/mongoke/src/testutil"
 )
 
 var schema1 = `
@@ -23,20 +23,24 @@ func TestSchema(t *testing.T) {
 			t.Error(err)
 		}
 		res := graphql.Do(graphql.Params{Schema: schema, RequestString: testutil.IntrospectionQuery})
-		json, err := json.MarshalIndent(res.Data, "", "   ")
+		_, err = json.MarshalIndent(res.Data, "", "   ")
 		if err != nil {
 			t.Error(err)
 		}
-		println(string(json))
+
+		// println(string(json))
 	})
 }
 
 func TestServer(t *testing.T) {
 	t.Run("server", func(t *testing.T) {
 		if os.Getenv("server") == "" {
-			// t.Skip()
+			t.Skip()
 		}
 		println("listening on http://localhost:8080")
-		main(Config{schemaString: schema1})
+		main(Config{
+			schemaString: schema1,
+			mongoDbUri:   "mongodb://localhost/testdb",
+		})
 	})
 }
