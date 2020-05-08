@@ -6,7 +6,7 @@ import (
 
 //go:generate moq -out database_interface_mock.go . DatabaseFunctionsInterface
 
-type DatabaseFunctionsInterface interface {
+type DatabaseInterface interface {
 	FindOne(p FindOneParams) (interface{}, error)
 	FindMany(p FindManyParams) (Connection, error)
 	// TODO add mutations in databaseFunctions
