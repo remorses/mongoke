@@ -29,6 +29,17 @@ func (mongoke *Mongoke) generateSchema() (graphql.Schema, error) {
 	}
 	for _, gqlType := range baseSchemaConfig.Types {
 		// TODO handle unions types, adding a Field function to Object and creating a shared interface
+
+		switch gqlType.(type) {
+		case *graphql.Union:
+			return graphql.Schema{}, errors.New("union types are still not supported, for union type" + gqlType.Name())
+		// case *graphql.Scalar: // TODO interfaces are not found, throws no definition found for {interfaceName}
+		// 	return graphql.Schema{}, errors.New("scalar types are still not supported, for scalar type" + gqlType.Name())
+		case *graphql.Interface:
+			println("interface")
+			return graphql.Schema{}, errors.New("interface types are still not supported, for interface type" + gqlType.Name())
+		}
+
 		object, ok := gqlType.(*graphql.Object)
 		if !ok {
 			continue

@@ -33,6 +33,7 @@ schema: |
         letter: String
     }
     
+    
 
 types:
     Task:
