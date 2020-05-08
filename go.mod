@@ -11,6 +11,7 @@ require (
 	github.com/graphql-go/handler v0.2.3
 	github.com/graphql-go/relay v0.0.0-20171208134043-54350098cfe5 // indirect
 	github.com/kofalt/go-memoize v0.0.0-20190519021333-cf756f0462a4 // indirect
+	github.com/matryer/moq v0.0.0-20200310130814-7721994d1b54 // indirect
 	github.com/mitchellh/mapstructure v1.3.0
 	github.com/remorses/graphql-go-tools v0.0.0-20200506161536-a31d9b4aa896
 	github.com/stretchr/testify v1.5.1 // indirect

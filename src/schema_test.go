@@ -1,7 +1,6 @@
 package mongoke
 
 import (
-	"os"
 	"testing"
 
 	"github.com/remorses/mongoke/src/testutil"
@@ -15,10 +14,8 @@ var config = Config{
 	},
 }
 
-// TODO add tests
-
 func TestSchema(t *testing.T) {
-	schema, err := MakeMongokeSchema(config)
+	schema, err := MakeMongokeSchema(config, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -32,15 +29,5 @@ func TestSchema(t *testing.T) {
 	t.Run("query user", func(t *testing.T) {
 		data := testutil.QuerySchema(t, schema, testutil.UserQuery1)
 		prettyPrint("query for user", data)
-	})
-}
-
-func TestServer(t *testing.T) {
-	t.Run("server", func(t *testing.T) {
-		if os.Getenv("server") == "" {
-			t.Skip()
-		}
-		println("listening on http://localhost:8080")
-		main(config)
 	})
 }

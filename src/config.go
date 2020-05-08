@@ -28,6 +28,8 @@ type RelationConfig struct {
 func MakeConfigFromYaml(data string) (Config, error) {
 	t := Config{}
 
+	// TODO add databaseUri overwite from environment
+
 	err := yaml.Unmarshal([]byte(data), &t)
 	if err != nil {
 		return Config{}, err

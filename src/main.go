@@ -10,7 +10,7 @@ import (
 )
 
 type Mongoke struct {
-	databaseFunctions DatabaseFunctions
+	databaseFunctions DatabaseFunctionsInterface
 	typeDefs          string
 	databaseUri       string
 	typeMap           map[string]graphql.Type
@@ -18,7 +18,7 @@ type Mongoke struct {
 }
 
 // MakeMongokeSchema generates the schema
-func MakeMongokeSchema(config Config, databaseFunctions DatabaseFunctions) (graphql.Schema, error) {
+func MakeMongokeSchema(config Config, databaseFunctions DatabaseFunctionsInterface) (graphql.Schema, error) {
 	if databaseFunctions == nil {
 		databaseFunctions = MongodbDatabaseFunctions{}
 	}
@@ -43,10 +43,11 @@ func MakeMongokeSchema(config Config, databaseFunctions DatabaseFunctions) (grap
 	return schema, nil
 }
 
-func main(config Config) {
-	schema, err := MakeMongokeSchema(config, nil)
+// MakeMongokeHandler creates an http handler
+func MakeMongokeHandler(config Config, databaseFunctions DatabaseFunctionsInterface) (http.Handler, error) {
+	schema, err := MakeMongokeSchema(config, databaseFunctions)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	h := handler.New(&handler.Config{
@@ -58,7 +59,5 @@ func main(config Config) {
 			return make(map[string]interface{})
 		},
 	})
-
-	http.Handle("/", h)
-	http.ListenAndServe("localhost:8080", nil)
+	return h, nil
 }
