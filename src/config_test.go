@@ -12,5 +12,4 @@ func TestMakeConfigFromYaml(t *testing.T) {
 		t.Error(err)
 	}
 	prettyPrint(conf)
-
 }

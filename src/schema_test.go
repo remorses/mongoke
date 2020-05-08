@@ -7,7 +7,7 @@ import (
 	"github.com/remorses/mongoke/src/testutil"
 )
 
-var config = Config{Schema: testutil.UserSchema, DatabaseUri: testutil.MONGODB_URI, Types: map[string]TypeConfig{"User": TypeConfig{Collection: "users"}}}
+var config = Config{Schema: testutil.UserSchema, DatabaseUri: testutil.MONGODB_URI, Types: map[string]TypeConfig{"User": {Collection: "users"}}}
 
 func TestSchema(t *testing.T) {
 	schema, err := MakeMongokeSchema(config)

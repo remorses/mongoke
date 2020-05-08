@@ -178,7 +178,6 @@ func (c MongodbDatabaseFunctions) FindMany(p FindManyParams) (Connection, error)
 	connection := makeConnection(nodes, p.Pagination, p.CursorField)
 
 	return connection, nil
-
 }
 
 func (c *MongodbDatabaseFunctions) initMongo(uri string) (*mongo.Database, error) {

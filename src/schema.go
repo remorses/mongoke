@@ -64,7 +64,6 @@ func (mongoke *Mongoke) generateSchema() (graphql.Schema, error) {
 			Mutation:   graphql.NewObject(graphql.ObjectConfig{Name: "Mutation", Fields: mutationFields}),
 		},
 	)
-
 	if err != nil {
 		return graphql.Schema{}, err
 	}

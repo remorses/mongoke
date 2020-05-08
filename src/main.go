@@ -36,7 +36,6 @@ func MakeMongokeSchema(config Config) (graphql.Schema, error) {
 
 func main(config Config) {
 	schema, err := MakeMongokeSchema(config)
-
 	if err != nil {
 		panic(err)
 	}
