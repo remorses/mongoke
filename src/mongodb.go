@@ -214,7 +214,7 @@ type PageInfo struct {
 
 type Connection struct {
 	Nodes    []bson.M `json:nodes` // TODO remove bson.M from func definition so other can replace with postgres, ...
-	Edges    []Edge   `json:nodes`
+	Edges    []Edge   `json:edges`
 	PageInfo PageInfo `json:pageInfo`
 }
 
