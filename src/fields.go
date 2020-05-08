@@ -54,12 +54,13 @@ type findManyFieldConfig struct {
 func (mongoke *Mongoke) findManyField(conf findManyFieldConfig) *graphql.Field {
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
+		pagination := paginationFromArgs(args)
 		opts := FindManyParams{
 			DatabaseUri: mongoke.databaseUri, // here i set the defaults
 			Collection:  conf.collection,
 			Direction:   ASC,
 			CursorField: "_id",
-			Pagination:  paginationFromArgs(args),
+			Pagination:  pagination,
 		}
 		err := mapstructure.Decode(args, &opts)
 		if err != nil {
@@ -106,6 +107,13 @@ func paginationFromArgs(args interface{}) Pagination {
 		fmt.Println(err)
 		return Pagination{}
 	}
+	// increment nodes count so createConnection knows how to set `hasNextPage`
+	if pag.First != 0 {
+		pag.First++
+	}
+	if pag.Last != 0 {
+		pag.Last++
+	}
 	// prettyPrint(pag)
 	return pag
 }
@@ -119,14 +127,14 @@ func makeConnection(nodes []Map, pagination Pagination, cursorField string) Conn
 	var endCursor interface{}
 	var startCursor interface{}
 	if pagination.First != 0 {
-		hasNext = len(nodes) == int(pagination.First+1)
+		hasNext = len(nodes) == int(pagination.First)
 		if hasNext {
 			nodes = nodes[:len(nodes)-1]
 		}
 	}
 	if pagination.Last != 0 {
 		nodes = reverse(nodes)
-		hasPrev = len(nodes) == int(pagination.Last+1)
+		hasPrev = len(nodes) == int(pagination.Last)
 		if hasPrev {
 			nodes = nodes[1:]
 		}

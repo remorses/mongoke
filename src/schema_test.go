@@ -89,7 +89,8 @@ func TestQueryArgs(t *testing.T) {
 		require.Equal(t, 1, calls)
 		p := databaseMock.calls.FindMany[0].P
 		t.Log("params", pretty(p))
-		require.Equal(t, 10, p.Pagination.First)
+		// + 1 because we need to know hasNextPage
+		require.Equal(t, 10+1, p.Pagination.First)
 		require.Equal(t, "xxx", p.Pagination.After)
 	})
 }

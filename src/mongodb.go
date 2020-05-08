@@ -123,10 +123,10 @@ func (c MongodbDatabaseFunctions) FindMany(p FindManyParams) ([]Map, error) {
 
 	// limit
 	if last != 0 {
-		opts.SetLimit(int64(min(MAX_NODES_COUNT, last+1)))
+		opts.SetLimit(int64(min(MAX_NODES_COUNT, last)))
 	}
 	if first != 0 {
-		opts.SetLimit(int64(min(MAX_NODES_COUNT, first+1)))
+		opts.SetLimit(int64(min(MAX_NODES_COUNT, first)))
 	}
 	if first == 0 && last == 0 { // when using `after` and `before`
 		opts.SetLimit(int64(MAX_NODES_COUNT))

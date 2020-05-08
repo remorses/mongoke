@@ -46,7 +46,7 @@ func TestMongodbFunctions(t *testing.T) {
 		}
 	}
 
-	t.Run("FindOne", func(t *testing.T) {
+	t.Run("FindOne with eq", func(t *testing.T) {
 		m := MongodbDatabaseFunctions{}
 		user, err := m.FindOne(
 			FindOneParams{
@@ -67,6 +67,30 @@ func TestMongodbFunctions(t *testing.T) {
 		}
 		require.Equal(t, x.Name, "01")
 		require.Equal(t, x.Age, 1)
+	})
+	t.Run("FindMany with first", func(t *testing.T) {
+		m := MongodbDatabaseFunctions{}
+		users, err := m.FindMany(
+			FindManyParams{
+				Collection:  collection,
+				DatabaseUri: uri,
+				Direction:   ASC,
+				Pagination: Pagination{
+					First: 2,
+				},
+			},
+		)
+		if err != nil {
+			t.Error(err)
+		}
+		t.Log(pretty(users))
+		var x []userStruct
+		if err := mapstructure.Decode(users, &x); err != nil {
+			t.Error(err)
+		}
+		require.Equal(t, 2, len(x))
+		require.Equal(t, x[0].Name, "01")
+		require.Equal(t, x[1].Name, "02")
 	})
 	t.Run("FindMany with neq", func(t *testing.T) {
 		m := MongodbDatabaseFunctions{}
@@ -90,8 +114,32 @@ func TestMongodbFunctions(t *testing.T) {
 		if err := mapstructure.Decode(users, &x); err != nil {
 			t.Error(err)
 		}
-		require.Equal(t, len(x), 2)
+		require.Equal(t, 2, len(x))
 		require.Equal(t, x[0].Name, "02")
 		require.Equal(t, x[1].Name, "03")
+	})
+	t.Run("FindMany direction DESC", func(t *testing.T) {
+		m := MongodbDatabaseFunctions{}
+		users, err := m.FindMany(
+			FindManyParams{
+				Collection:  collection,
+				DatabaseUri: uri,
+				Direction:   DESC,
+				Pagination: Pagination{
+					First: 2,
+				},
+			},
+		)
+		if err != nil {
+			t.Error(err)
+		}
+		t.Log(pretty(users))
+		var x []userStruct
+		if err := mapstructure.Decode(users, &x); err != nil {
+			t.Error(err)
+		}
+		require.Equal(t, 2, len(x))
+		require.Equal(t, x[0].Name, "03")
+		require.Equal(t, x[1].Name, "02")
 	})
 }
