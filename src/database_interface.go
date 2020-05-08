@@ -8,7 +8,8 @@ import (
 
 type DatabaseInterface interface {
 	FindOne(p FindOneParams) (interface{}, error)
-	FindMany(p FindManyParams) (Connection, error)
+	// FindMany should return p.First + 1 nodes, or p.Last + 1 nodes, so mongoke can compute `hasNextPage` and `hasPreviousPage`
+	FindMany(p FindManyParams) ([]bson.M, error)
 	// TODO add mutations in databaseFunctions
 }
 

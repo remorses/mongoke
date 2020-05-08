@@ -5,6 +5,7 @@ import (
 
 	"github.com/graphql-go/graphql"
 	"github.com/mitchellh/mapstructure"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 const TIMEOUT_FIND = 10
@@ -65,15 +66,16 @@ func (mongoke *Mongoke) findManyField(conf findManyFieldConfig) *graphql.Field {
 		if err != nil {
 			return nil, err
 		}
-		document, err := mongoke.databaseFunctions.FindMany(
+		nodes, err := mongoke.databaseFunctions.FindMany(
 			opts,
 		)
+		connection := makeConnection(nodes, opts.Pagination, opts.CursorField)
 		if err != nil {
 			return nil, err
 		}
 		// document, err := mongoke.database.findOne()
 		// prettyPrint(args)
-		return document, nil
+		return connection, nil
 	}
 	whereArg, err := mongoke.getWhereArg(conf.returnType)
 	if err != nil {
@@ -107,4 +109,60 @@ func paginationFromArgs(args interface{}) Pagination {
 	}
 	// prettyPrint(pag)
 	return pag
+}
+
+func makeConnection(nodes []bson.M, pagination Pagination, cursorField string) Connection {
+	if len(nodes) == 0 {
+		return Connection{}
+	}
+	var hasNext bool
+	var hasPrev bool
+	var endCursor interface{}
+	var startCursor interface{}
+	if pagination.First != 0 {
+		hasNext = len(nodes) == int(pagination.First+1)
+		if hasNext {
+			nodes = nodes[:len(nodes)-1]
+		}
+	}
+	if pagination.Last != 0 {
+		nodes = reverse(nodes)
+		hasPrev = len(nodes) == int(pagination.Last+1)
+		if hasPrev {
+			nodes = nodes[1:]
+		}
+	}
+	if len(nodes) != 0 {
+		endCursor = nodes[len(nodes)-1][cursorField]
+		startCursor = nodes[0][cursorField]
+	}
+	return Connection{
+		Nodes: nodes,
+		Edges: makeEdges(nodes, cursorField),
+		PageInfo: PageInfo{
+			StartCursor:     startCursor,
+			EndCursor:       endCursor,
+			HasNextPage:     hasNext,
+			HasPreviousPage: hasPrev,
+		},
+	}
+}
+
+func makeEdges(nodes []bson.M, cursorField string) []Edge {
+	var edges []Edge
+	for _, node := range nodes {
+		edges = append(edges, Edge{
+			Node:   node,
+			Cursor: node[cursorField],
+		})
+	}
+	return edges
+}
+
+func reverse(input []bson.M) []bson.M {
+	if len(input) == 0 {
+		return input
+	}
+	// TODO remove recursion
+	return append(reverse(input[1:]), input[0])
 }

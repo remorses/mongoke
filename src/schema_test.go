@@ -3,8 +3,10 @@ package mongoke
 import (
 	"testing"
 
+	"github.com/mitchellh/mapstructure"
 	"github.com/remorses/mongoke/src/testutil"
 	"github.com/stretchr/testify/require"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 var config = Config{
@@ -20,10 +22,10 @@ var config = Config{
 	},
 }
 
-func TestSchema(t *testing.T) {
+func TestQueryArgs(t *testing.T) {
 	databaseMock := &DatabaseInterfaceMock{
-		FindManyFunc: func(p FindManyParams) (Connection, error) {
-			return Connection{}, nil
+		FindManyFunc: func(p FindManyParams) ([]bson.M, error) {
+			return nil, nil
 		},
 		FindOneFunc: func(p FindOneParams) (interface{}, error) {
 			return nil, nil
@@ -72,17 +74,13 @@ func TestSchema(t *testing.T) {
 		t.Log(pretty(where))
 		require.Equal(t, "xxx", where["name"].Eq)
 	})
-	t.Run("findMany query with first, after", func(t *testing.T) {
+	t.Run("findMany query with first, after, where", func(t *testing.T) {
 		databaseMock.calls.FindMany = nil
 		query := `
 		{
 			UserNodes(first: 10, after: "xxx", where: {name: {eq: "xxx"}}) {
 				nodes {
 					name
-				}
-				pageInfo {
-					hasNextPage
-					endCursor
 				}
 			}
 		}
@@ -94,6 +92,78 @@ func TestSchema(t *testing.T) {
 		t.Log("params", pretty(p))
 		require.Equal(t, 10, p.Pagination.First)
 		require.Equal(t, "xxx", p.Pagination.After)
-
 	})
+}
+
+func TestQueryReturnValues(t *testing.T) {
+	type user struct {
+		Name string `json:name`
+		Age  int    `json:age`
+	}
+
+	type userStruct struct {
+		Name string
+		Age  int
+	}
+
+	var exampleUsers = []bson.M{
+		{"name": "01", "age": 1},
+		{"name": "02", "age": 2},
+		{"name": "03", "age": 3},
+	}
+	exampleUser := exampleUsers[0]
+	databaseMock := &DatabaseInterfaceMock{
+		FindManyFunc: func(p FindManyParams) ([]bson.M, error) {
+			return exampleUsers, nil
+		},
+		FindOneFunc: func(p FindOneParams) (interface{}, error) {
+			return exampleUser, nil
+		},
+	}
+	schema, err := MakeMongokeSchema(config, databaseMock)
+	if err != nil {
+		t.Error(err)
+	}
+
+	t.Run("findOne query without args", func(t *testing.T) {
+		query := `
+		{
+			User {
+				name
+				age
+			}
+		}
+		`
+		type Res struct {
+			User userStruct
+		}
+		res := testutil.QuerySchema(t, schema, query)
+		var x Res
+		mapstructure.Decode(res, &x)
+		require.Equal(t, exampleUser["name"], x.User.Name)
+	})
+
+	t.Run("findMany query without args", func(t *testing.T) {
+		query := `
+		{
+			UserNodes {
+				nodes {
+					name
+					age
+				}
+			}
+		}
+		`
+		type Res struct {
+			UserNodes struct {
+				Nodes []userStruct
+			}
+		}
+		res := testutil.QuerySchema(t, schema, query)
+		var x Res
+		mapstructure.Decode(res, &x)
+		require.Equal(t, exampleUsers[0]["name"], x.UserNodes.Nodes[0].Name)
+		require.Equal(t, exampleUsers[0]["age"], x.UserNodes.Nodes[0].Age)
+	})
+
 }

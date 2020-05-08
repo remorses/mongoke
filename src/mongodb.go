@@ -57,11 +57,11 @@ const (
 	DESC = -1
 )
 
-func (c MongodbDatabaseFunctions) FindMany(p FindManyParams) (Connection, error) {
+func (c MongodbDatabaseFunctions) FindMany(p FindManyParams) ([]bson.M, error) {
 	ctx, _ := context.WithTimeout(context.Background(), TIMEOUT_FIND*time.Second)
 	db, err := c.initMongo(p.DatabaseUri)
 	if err != nil {
-		return Connection{}, err
+		return nil, err
 	}
 	after := p.Pagination.After
 	before := p.Pagination.Before
@@ -83,13 +83,13 @@ func (c MongodbDatabaseFunctions) FindMany(p FindManyParams) (Connection, error)
 
 	// assertion for arguments
 	if after != "" && (first == 0 || before == "") {
-		return Connection{}, errors.New("need `first` or `before` if using `after`")
+		return nil, errors.New("need `first` or `before` if using `after`")
 	}
 	if before != "" && (last == 0 || after == "") {
-		return Connection{}, errors.New("need `last` or `after` if using `before`")
+		return nil, errors.New("need `last` or `after` if using `before`")
 	}
 	if first != 0 && last != 0 {
-		return Connection{}, errors.New("need `last` or `after` if using `before`")
+		return nil, errors.New("need `last` or `after` if using `before`")
 	}
 
 	// gt and lt
@@ -132,18 +132,15 @@ func (c MongodbDatabaseFunctions) FindMany(p FindManyParams) (Connection, error)
 	res, err := db.Collection(p.Collection).Find(ctx, p.Where, opts)
 	if err != nil {
 		// log.Print("Error in findMany", err)
-		return Connection{}, err
+		return nil, err
 	}
 	defer res.Close(ctx)
 	nodes := make([]bson.M, 0)
 	err = res.All(ctx, &nodes)
 	if err != nil {
-		return Connection{}, err
+		return nil, err
 	}
-
-	connection := makeConnection(nodes, p.Pagination, p.CursorField)
-
-	return connection, nil
+	return nodes, nil
 }
 
 func (c *MongodbDatabaseFunctions) initMongo(uri string) (*mongo.Database, error) {
@@ -169,62 +166,6 @@ func (c *MongodbDatabaseFunctions) initMongo(uri string) (*mongo.Database, error
 }
 
 // removes last or first node, adds pageInfo data
-
-func makeConnection(nodes []bson.M, pagination Pagination, cursorField string) Connection {
-	if len(nodes) == 0 {
-		return Connection{}
-	}
-	var hasNext bool
-	var hasPrev bool
-	var endCursor interface{}
-	var startCursor interface{}
-	if pagination.First != 0 {
-		hasNext = len(nodes) == int(pagination.First+1)
-		if hasNext {
-			nodes = nodes[:len(nodes)-1]
-		}
-	}
-	if pagination.Last != 0 {
-		nodes = reverse(nodes)
-		hasPrev = len(nodes) == int(pagination.Last+1)
-		if hasPrev {
-			nodes = nodes[1:]
-		}
-	}
-	if len(nodes) != 0 {
-		endCursor = nodes[len(nodes)-1][cursorField]
-		startCursor = nodes[0][cursorField]
-	}
-	return Connection{
-		Nodes: nodes,
-		Edges: makeEdges(nodes, cursorField),
-		PageInfo: PageInfo{
-			StartCursor:     startCursor,
-			EndCursor:       endCursor,
-			HasNextPage:     hasNext,
-			HasPreviousPage: hasPrev,
-		},
-	}
-}
-
-func makeEdges(nodes []bson.M, cursorField string) []Edge {
-	var edges []Edge
-	for _, node := range nodes {
-		edges = append(edges, Edge{
-			Node:   node,
-			Cursor: node[cursorField],
-		})
-	}
-	return edges
-}
-
-func reverse(input []bson.M) []bson.M {
-	if len(input) == 0 {
-		return input
-	}
-	// TODO remove recursion
-	return append(reverse(input[1:]), input[0])
-}
 
 func min(x, y int) int {
 	if x > y {
