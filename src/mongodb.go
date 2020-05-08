@@ -10,7 +10,10 @@ import (
 	"go.mongodb.org/mongo-driver/x/mongo/driver/connstring"
 )
 
-const TIMEOUT_CONNECT = 5
+const (
+	TIMEOUT_CONNECT = 5
+	MAX_QUERY_TIME  = 10
+)
 
 // type findOneParams struct {
 // 	collection
@@ -131,6 +134,8 @@ func (c MongodbDatabaseFunctions) FindMany(p FindManyParams) ([]Map, error) {
 	if first == 0 && last == 0 { // when using `after` and `before`
 		opts.SetLimit(int64(MAX_NODES_COUNT))
 	}
+
+	opts.SetMaxTime(MAX_QUERY_TIME * time.Second)
 
 	prettyPrint(p)
 
