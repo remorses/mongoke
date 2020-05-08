@@ -1,72 +1,97 @@
 package mongoke
 
 import (
+	"context"
 	"testing"
+
+	"github.com/mitchellh/mapstructure"
+	"github.com/remorses/mongoke/src/testutil"
+	"github.com/stretchr/testify/require"
 )
 
-func TestInitMongo(t *testing.T) {
-	// db, err := initMongo(testutil.MONGODB_URI)
-	// if err != nil {
-	// 	t.Error(err)
-	// }
-	// t.Run("init mongo", func(t *testing.T) {
+func TestMongodbFunctions(t *testing.T) {
+	collection := "users"
+	ctx := context.Background()
+	uri := testutil.MONGODB_URI
+	type user struct {
+		Name string `json:name`
+		Age  int    `json:age`
+	}
 
-	// 	names, err := db.Client().ListDatabaseNames(context.TODO(), bson.D{{}})
-	// 	if err != nil {
-	// 		t.Error(err)
-	// 	}
-	// 	prettyPrint(names)
-	// })
-	// t.Run("findOne", func(t *testing.T) {
+	type userStruct struct {
+		Name string
+		Age  int
+	}
 
-	// 	x, err := findOne(FindOneParams{Collection: "users", D})
-	// 	if err != nil {
-	// 		t.Error(err)
-	// 	}
-	// 	prettyPrint("findOne", x)
-	// })
-	// t.Run("findMany", func(t *testing.T) {
-	// 	coll := db.Collection("users")
-	// 	coll.InsertMany(context.TODO(), []interface{}{bson.M{"name": "aaa", "obj": bson.M{"xxx": bson.M{"yyy": 3}}}})
-	// 	if err != nil {
-	// 		t.Error(err)
-	// 	}
-	// 	x, err := findMany(
-	// 		coll,
-	// 		map[string]interface{}{"name": map[string]interface{}{"eq": "aaa"}},
-	// 		Pagination{First: 10},
-	// 		"name",
-	// 		ASC,
-	// 	)
-	// 	if err != nil {
-	// 		t.Error(err)
-	// 	}
-	// 	prettyPrint("findMany", x)
-	// })
-	// t.Run("findOne nil", func(t *testing.T) {
-	// 	x, err := findOne(db.Collection("users"), nil)
-	// 	if err != nil {
-	// 		t.Error(err)
-	// 	}
-	// 	prettyPrint("findOne nil", x)
-	// })
-	// t.Run("findOne with Filter", func(t *testing.T) {
-	// 	// opts := options.FindOne().SetProjection(bson.M{"name": Filter{Eq: "xxx"}})
-	// 	// prettyPrint("opts", opts.Projection)
-	// 	// fmt.Println(opts.Projection)
-	// 	// res, err := bson.Marshal(bson.M{"name": Filter{Eq: "xxx"}})
-	// 	res := db.Collection("users").FindOne(context.TODO(), bson.M{"name": Filter{Eq: "aaa"}})
-	// 	if res.Err() == mongo.ErrNoDocuments {
-	// 		t.Log("no docs")
-	// 	}
-	// 	if res.Err() != nil {
-	// 		t.Error(err)
-	// 	}
-	// 	var x bson.M
-	// 	res.Decode(&x)
-	// 	prettyPrint("findOne with filter", x)
-	// 	fmt.Printf("%v\n", x)
-	// })
+	exampleUsers := []Map{
+		{"name": "01", "age": 1},
+		{"name": "02", "age": 2},
+		{"name": "03", "age": 3},
+	}
+	// clear and insert some docs
+	m := MongodbDatabaseFunctions{}
+	db, err := m.initMongo(uri)
+	if err != nil {
+		t.Error(err)
+	}
+	// clear
+	_, err = db.Collection(collection).DeleteMany(ctx, Map{})
+	if err != nil {
+		t.Error(err)
+	}
+	for _, user := range exampleUsers {
+		_, err := db.Collection(collection).InsertOne(ctx, user)
+		if err != nil {
+			t.Error(err)
+		}
+	}
+
+	t.Run("FindOne", func(t *testing.T) {
+		m := MongodbDatabaseFunctions{}
+		user, err := m.FindOne(
+			FindOneParams{
+				Collection:  collection,
+				DatabaseUri: uri,
+				Where: map[string]Filter{
+					"name": {Eq: "01"},
+				},
+			},
+		)
+		if err != nil {
+			t.Error(err)
+		}
+		t.Log(pretty(user))
+		var x userStruct
+		if err := mapstructure.Decode(user, &x); err != nil {
+			t.Error(err)
+		}
+		require.Equal(t, x.Name, "01")
+		require.Equal(t, x.Age, 1)
+	})
+	t.Run("FindMany with neq", func(t *testing.T) {
+		m := MongodbDatabaseFunctions{}
+		users, err := m.FindMany(
+			FindManyParams{
+				Collection:  collection,
+				DatabaseUri: uri,
+				Where: map[string]Filter{
+					"name": {Neq: "01"},
+				},
+				Pagination: Pagination{
+					First: 2,
+				},
+			},
+		)
+		if err != nil {
+			t.Error(err)
+		}
+		t.Log(pretty(users))
+		var x []userStruct
+		if err := mapstructure.Decode(users, &x); err != nil {
+			t.Error(err)
+		}
+		require.Equal(t, len(x), 2)
+		require.Equal(t, x[0].Name, "02")
+		require.Equal(t, x[1].Name, "03")
+	})
 }
-
-type Match = map[string]interface{}

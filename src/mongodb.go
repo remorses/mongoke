@@ -5,7 +5,6 @@ import (
 	"errors"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/x/mongo/driver/connstring"
@@ -38,7 +37,7 @@ func (c MongodbDatabaseFunctions) FindOne(p FindOneParams) (interface{}, error) 
 	if res.Err() != nil {
 		return nil, res.Err()
 	}
-	var document bson.M = make(bson.M)
+	var document Map = make(Map)
 	err = res.Decode(document)
 	if err != nil {
 		return nil, err
@@ -57,7 +56,13 @@ const (
 	DESC = -1
 )
 
-func (c MongodbDatabaseFunctions) FindMany(p FindManyParams) ([]bson.M, error) {
+func (c MongodbDatabaseFunctions) FindMany(p FindManyParams) ([]Map, error) {
+	if p.Direction == 0 {
+		p.Direction = ASC
+	}
+	if p.CursorField == "" {
+		p.CursorField = "_id"
+	}
 	ctx, _ := context.WithTimeout(context.Background(), TIMEOUT_FIND*time.Second)
 	db, err := c.initMongo(p.DatabaseUri)
 	if err != nil {
@@ -114,7 +119,7 @@ func (c MongodbDatabaseFunctions) FindMany(p FindManyParams) ([]bson.M, error) {
 	if last != 0 {
 		sorting = -p.Direction
 	}
-	opts.SetSort(bson.M{p.CursorField: sorting})
+	opts.SetSort(Map{p.CursorField: sorting})
 
 	// limit
 	if last != 0 {
@@ -135,7 +140,7 @@ func (c MongodbDatabaseFunctions) FindMany(p FindManyParams) ([]bson.M, error) {
 		return nil, err
 	}
 	defer res.Close(ctx)
-	nodes := make([]bson.M, 0)
+	nodes := make([]Map, 0)
 	err = res.All(ctx, &nodes)
 	if err != nil {
 		return nil, err

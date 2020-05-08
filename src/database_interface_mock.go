@@ -4,7 +4,6 @@
 package mongoke
 
 import (
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"sync"
 )
 
@@ -23,7 +22,7 @@ var _ DatabaseInterface = &DatabaseInterfaceMock{}
 //
 //         // make and configure a mocked DatabaseInterface
 //         mockedDatabaseInterface := &DatabaseInterfaceMock{
-//             FindManyFunc: func(p FindManyParams) ([]primitive.M, error) {
+//             FindManyFunc: func(p FindManyParams) ([]Map, error) {
 // 	               panic("mock out the FindMany method")
 //             },
 //             FindOneFunc: func(p FindOneParams) (interface{}, error) {
@@ -37,7 +36,7 @@ var _ DatabaseInterface = &DatabaseInterfaceMock{}
 //     }
 type DatabaseInterfaceMock struct {
 	// FindManyFunc mocks the FindMany method.
-	FindManyFunc func(p FindManyParams) ([]primitive.M, error)
+	FindManyFunc func(p FindManyParams) ([]Map, error)
 
 	// FindOneFunc mocks the FindOne method.
 	FindOneFunc func(p FindOneParams) (interface{}, error)
@@ -58,7 +57,7 @@ type DatabaseInterfaceMock struct {
 }
 
 // FindMany calls FindManyFunc.
-func (mock *DatabaseInterfaceMock) FindMany(p FindManyParams) ([]primitive.M, error) {
+func (mock *DatabaseInterfaceMock) FindMany(p FindManyParams) ([]Map, error) {
 	if mock.FindManyFunc == nil {
 		panic("DatabaseInterfaceMock.FindManyFunc: method is nil but DatabaseInterface.FindMany was just called")
 	}

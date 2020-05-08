@@ -6,7 +6,6 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/remorses/mongoke/src/testutil"
 	"github.com/stretchr/testify/require"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 var config = Config{
@@ -24,7 +23,7 @@ var config = Config{
 
 func TestQueryArgs(t *testing.T) {
 	databaseMock := &DatabaseInterfaceMock{
-		FindManyFunc: func(p FindManyParams) ([]bson.M, error) {
+		FindManyFunc: func(p FindManyParams) ([]Map, error) {
 			return nil, nil
 		},
 		FindOneFunc: func(p FindOneParams) (interface{}, error) {
@@ -106,14 +105,14 @@ func TestQueryReturnValues(t *testing.T) {
 		Age  int
 	}
 
-	var exampleUsers = []bson.M{
+	var exampleUsers = []Map{
 		{"name": "01", "age": 1},
 		{"name": "02", "age": 2},
 		{"name": "03", "age": 3},
 	}
 	exampleUser := exampleUsers[0]
 	databaseMock := &DatabaseInterfaceMock{
-		FindManyFunc: func(p FindManyParams) ([]bson.M, error) {
+		FindManyFunc: func(p FindManyParams) ([]Map, error) {
 			return exampleUsers, nil
 		},
 		FindOneFunc: func(p FindOneParams) (interface{}, error) {

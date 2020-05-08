@@ -5,7 +5,6 @@ import (
 
 	"github.com/graphql-go/graphql"
 	"github.com/mitchellh/mapstructure"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 const TIMEOUT_FIND = 10
@@ -111,7 +110,7 @@ func paginationFromArgs(args interface{}) Pagination {
 	return pag
 }
 
-func makeConnection(nodes []bson.M, pagination Pagination, cursorField string) Connection {
+func makeConnection(nodes []Map, pagination Pagination, cursorField string) Connection {
 	if len(nodes) == 0 {
 		return Connection{}
 	}
@@ -148,7 +147,7 @@ func makeConnection(nodes []bson.M, pagination Pagination, cursorField string) C
 	}
 }
 
-func makeEdges(nodes []bson.M, cursorField string) []Edge {
+func makeEdges(nodes []Map, cursorField string) []Edge {
 	var edges []Edge
 	for _, node := range nodes {
 		edges = append(edges, Edge{
@@ -159,7 +158,7 @@ func makeEdges(nodes []bson.M, cursorField string) []Edge {
 	return edges
 }
 
-func reverse(input []bson.M) []bson.M {
+func reverse(input []Map) []Map {
 	if len(input) == 0 {
 		return input
 	}

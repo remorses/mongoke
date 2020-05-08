@@ -1,15 +1,13 @@
 package mongoke
 
-import (
-	"go.mongodb.org/mongo-driver/bson"
-)
-
 //go:generate moq -out database_interface_mock.go . DatabaseInterface
+
+type Map map[string]interface{}
 
 type DatabaseInterface interface {
 	FindOne(p FindOneParams) (interface{}, error)
 	// FindMany should return p.First + 1 nodes, or p.Last + 1 nodes, so mongoke can compute `hasNextPage` and `hasPreviousPage`
-	FindMany(p FindManyParams) ([]bson.M, error)
+	FindMany(p FindManyParams) ([]Map, error)
 	// TODO add mutations in databaseFunctions
 }
 
@@ -52,12 +50,12 @@ type PageInfo struct {
 }
 
 type Connection struct {
-	Nodes    []bson.M `json:nodes` // TODO remove bson.M from func definition so other can replace with postgres, ...
+	Nodes    []Map    `json:nodes` // TODO remove Map from func definition so other can replace with postgres, ...
 	Edges    []Edge   `json:edges`
 	PageInfo PageInfo `json:pageInfo`
 }
 
 type Edge struct {
-	Node   bson.M      `json:node`
+	Node   Map         `json:node`
 	Cursor interface{} `json:cursor`
 }
