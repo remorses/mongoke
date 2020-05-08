@@ -36,16 +36,18 @@ func initMongo(uri string) (*mongo.Database, error) { // TODO dont reconnect eve
 // }
 
 type Filter struct {
-	Eq  interface{} `bson:"$eq"`
-	neq interface{} `bson:"$neq"`
-	in  interface{} `bson:"$in"`
-	nin interface{} `bson:"$nin"`
+	Eq  interface{}   `bson:"$eq,omitempty"`
+	Neq interface{}   `bson:"$ne,omitempty"`
+	In  []interface{} `bson:"$in,omitempty"`
+	Nin []interface{} `bson:"$nin,omitempty"`
+	Gt  interface{}   `bson:"$gt,omitempty"`
+	Lt  interface{}   `bson:"$lt,omitempty"`
 }
 
 type FindOneParams struct {
 	Collection  string
 	DatabaseUri string
-	Where       map[string]Filter
+	Where       map[string]Filter `mapstructure:"where"`
 }
 
 func findOne(p FindOneParams) (interface{}, error) {
@@ -55,6 +57,7 @@ func findOne(p FindOneParams) (interface{}, error) {
 		return nil, err
 	}
 	collection := db.Collection(p.Collection)
+	prettyPrint(p.Where)
 	res := collection.FindOne(ctx, p.Where)
 
 	if res.Err() == mongo.ErrNoDocuments {
@@ -88,17 +91,25 @@ const (
 	DESC = -1
 )
 
-func findMany(collection *mongo.Collection, _filter interface{}, pagination Pagination, cursorField string, direction int) (interface{}, error) {
-	filter, ok := _filter.(map[string]interface{}) // TODO for testing it would be cooler to use bson.M
-	if !ok && _filter != nil {
-		return nil, errors.New("the where argument filter must be an object or nil")
-	}
-	ctx, _ := context.WithTimeout(context.Background(), TIMEOUT_FIND*time.Second)
+type FindManyParams struct {
+	Collection  string
+	DatabaseUri string
+	Where       map[string]Filter `mapstructure:"where"`
+	Pagination  Pagination
+	CursorField string `mapstructure:"cursorField"`
+	Direction   int    `mapstructure:"direction"`
+}
 
-	after := pagination.After
-	before := pagination.Before
-	last := pagination.Last
-	first := pagination.First
+func findMany(p FindManyParams) (interface{}, error) {
+	ctx, _ := context.WithTimeout(context.Background(), TIMEOUT_FIND*time.Second)
+	db, err := initMongo(p.DatabaseUri)
+	if err != nil {
+		return nil, err
+	}
+	after := p.Pagination.After
+	before := p.Pagination.Before
+	last := p.Pagination.Last
+	first := p.Pagination.First
 
 	opts := options.Find()
 
@@ -124,31 +135,29 @@ func findMany(collection *mongo.Collection, _filter interface{}, pagination Pagi
 		return nil, errors.New("need `last` or `after` if using `before`")
 	}
 
-	// set right lt and gt
-	lt := "$lt"
-	gt := "$gt"
-	if direction == DESC {
-		lt = "$gt"
-		gt = "$lt"
-	}
-
 	// gt and lt
-	cursorFieldMatch := make(map[string]interface{}) // TODO add already existing match
+	cursorFieldMatch := p.Where[p.CursorField] // TODO add already existing match
 	if after != "" {
-		cursorFieldMatch[gt] = after
-		filter[cursorField] = cursorFieldMatch
+		if p.Direction == DESC {
+			cursorFieldMatch.Lt = after
+		} else {
+			cursorFieldMatch.Gt = after
+		}
 	}
 	if before != "" {
-		cursorFieldMatch[lt] = before
-		filter[cursorField] = cursorFieldMatch
+		if p.Direction == DESC {
+			cursorFieldMatch.Gt = before
+		} else {
+			cursorFieldMatch.Lt = before
+		}
 	}
 
 	// sort order
-	sorting := direction
+	sorting := p.Direction
 	if last != 0 {
-		sorting = -direction
+		sorting = -p.Direction
 	}
-	opts.SetSort(bson.M{cursorField: sorting})
+	opts.SetSort(bson.M{p.CursorField: sorting})
 
 	// limit
 	if last != 0 {
@@ -159,20 +168,20 @@ func findMany(collection *mongo.Collection, _filter interface{}, pagination Pagi
 	}
 
 	// execute
-	prettyPrint(rewriteFilter(filter))
-	res, err := collection.Find(ctx, rewriteFilter(filter), opts)
+	// prettyPrint(rewriteFilter(p.Where))
+	res, err := db.Collection(p.Collection).Find(ctx, p.Where, opts)
 	if err != nil {
 		// log.Print("Error in findMany", err)
 		return nil, err
 	}
 	defer res.Close(ctx)
-	nodes := make([]map[string]interface{}, 0)
+	nodes := make([]bson.M, 0)
 	err = res.All(ctx, &nodes) // TODO limit to maxlen
 	if err != nil {
 		return nil, err
 	}
 
-	connection := makeConnection(nodes, pagination, cursorField)
+	connection := makeConnection(nodes, p.Pagination, p.CursorField)
 
 	return connection, nil
 
@@ -186,12 +195,12 @@ type PageInfo struct {
 }
 
 type Connection struct {
-	Nodes    []map[string]interface{} `json:nodes`
-	PageInfo PageInfo                 `json:pageInfo`
+	Nodes    []bson.M `json:nodes`
+	PageInfo PageInfo `json:pageInfo`
 }
 
 // removes last or first node, adds pageInfo data
-func makeConnection(nodes []map[string]interface{}, pagination Pagination, cursorField string) Connection {
+func makeConnection(nodes []bson.M, pagination Pagination, cursorField string) Connection {
 	if len(nodes) == 0 {
 		return Connection{}
 	}
@@ -247,7 +256,7 @@ func addDollarSigns(filter map[string]interface{}) map[string]interface{} {
 	return newFilter
 }
 
-func reverse(input []map[string]interface{}) []map[string]interface{} {
+func reverse(input []bson.M) []bson.M {
 	if len(input) == 0 {
 		return input
 	}

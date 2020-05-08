@@ -16,7 +16,6 @@ type findOneFieldConfig struct {
 }
 
 func (mongoke *Mongoke) findOneField(conf findOneFieldConfig) *graphql.Field {
-	// TODO create the where argument based on the object fields
 	if conf.collection == "" {
 		panic(errors.New("missing collection name for " + conf.returnType.Name() + " findOneField"))
 	}
@@ -56,24 +55,19 @@ type findManyFieldConfig struct {
 func (mongoke *Mongoke) findManyField(conf findManyFieldConfig) *graphql.Field {
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
-		db, err := initMongo(mongoke.mongoDbUri)
+		opts := FindManyParams{
+			DatabaseUri: mongoke.mongoDbUri,
+			Collection:  "users", // here i set the defaults
+			Direction:   ASC,
+			CursorField: "_id",
+			Pagination:  paginationFromArgs(args),
+		}
+		err := mapstructure.Decode(args, &opts)
 		if err != nil {
 			return nil, err
 		}
-		var cursorField string = "_id"
-		var direction int = ASC
-		if args["cursorField"] != nil {
-			cursorField = args["cursorField"].(string)
-		}
-		if args["direction"] != nil {
-			direction = args["direction"].(int)
-		}
 		document, err := findMany(
-			db.Collection(conf.collection),
-			args["where"],
-			paginationFromArgs(args),
-			cursorField, // TODO how does casting work?
-			direction,
+			opts,
 		)
 		if err != nil {
 			return nil, err

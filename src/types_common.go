@@ -11,11 +11,11 @@ var directionEnum = graphql.NewEnum(graphql.EnumConfig{
 	Description: "asc or desc",
 	Values: graphql.EnumValueConfigMap{
 		"ASC": &graphql.EnumValueConfig{
-			Value:       1,
+			Value:       ASC,
 			Description: "ascending",
 		},
 		"DESC": &graphql.EnumValueConfig{
-			Value:       2,
+			Value:       DESC,
 			Description: "Descending",
 		},
 	},

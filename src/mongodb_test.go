@@ -25,30 +25,30 @@ func TestInitMongo(t *testing.T) {
 	})
 	// t.Run("findOne", func(t *testing.T) {
 
-	// 	x, err := findOne(db.Collection("users"), map[string]interface{}{"eq": "ciao"})
+	// 	x, err := findOne(FindOneParams{Collection: "users", D})
 	// 	if err != nil {
 	// 		t.Error(err)
 	// 	}
 	// 	prettyPrint("findOne", x)
 	// })
-	t.Run("findMany", func(t *testing.T) {
-		coll := db.Collection("users")
-		coll.InsertMany(context.TODO(), []interface{}{bson.M{"name": "xxx"}, bson.M{"name": "yyy"}})
-		if err != nil {
-			t.Error(err)
-		}
-		x, err := findMany(
-			coll,
-			map[string]interface{}{"name": map[string]interface{}{"eq": "xxx"}},
-			Pagination{First: 10},
-			"name",
-			ASC,
-		)
-		if err != nil {
-			t.Error(err)
-		}
-		prettyPrint("findMany", x)
-	})
+	// t.Run("findMany", func(t *testing.T) {
+	// 	coll := db.Collection("users")
+	// 	coll.InsertMany(context.TODO(), []interface{}{bson.M{"name": "aaa", "obj": bson.M{"xxx": bson.M{"yyy": 3}}}})
+	// 	if err != nil {
+	// 		t.Error(err)
+	// 	}
+	// 	x, err := findMany(
+	// 		coll,
+	// 		map[string]interface{}{"name": map[string]interface{}{"eq": "aaa"}},
+	// 		Pagination{First: 10},
+	// 		"name",
+	// 		ASC,
+	// 	)
+	// 	if err != nil {
+	// 		t.Error(err)
+	// 	}
+	// 	prettyPrint("findMany", x)
+	// })
 	// t.Run("findOne nil", func(t *testing.T) {
 	// 	x, err := findOne(db.Collection("users"), nil)
 	// 	if err != nil {
@@ -61,14 +61,14 @@ func TestInitMongo(t *testing.T) {
 		// prettyPrint("opts", opts.Projection)
 		// fmt.Println(opts.Projection)
 		// res, err := bson.Marshal(bson.M{"name": Filter{Eq: "xxx"}})
-		res := db.Collection("users").FindOne(context.TODO(), bson.M{"name": Filter{Eq: "xxx"}})
+		res := db.Collection("users").FindOne(context.TODO(), bson.M{"name": Filter{Eq: "aaa"}})
 		if res.Err() == mongo.ErrNoDocuments {
 			t.Log("no docs")
 		}
 		if res.Err() != nil {
 			t.Error(err)
 		}
-		var x interface{}
+		var x bson.M
 		res.Decode(&x)
 		prettyPrint("findOne with filter", x)
 		fmt.Printf("%v\n", x)
