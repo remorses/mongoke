@@ -4,7 +4,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-//go:generate moq -out database_interface_mock.go . DatabaseFunctionsInterface
+//go:generate moq -out database_interface_mock.go . DatabaseInterface
 
 type DatabaseInterface interface {
 	FindOne(p FindOneParams) (interface{}, error)

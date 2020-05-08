@@ -15,7 +15,15 @@ var config = Config{
 }
 
 func TestSchema(t *testing.T) {
-	schema, err := MakeMongokeSchema(config, nil)
+	databaseMock := &DatabaseInterfaceMock{
+		FindManyFunc: func(p FindManyParams) (Connection, error) {
+			return Connection{}, nil
+		},
+		FindOneFunc: func(p FindOneParams) (interface{}, error) {
+			return nil, nil
+		},
+	}
+	schema, err := MakeMongokeSchema(config, databaseMock)
 	if err != nil {
 		t.Error(err)
 	}
@@ -24,10 +32,9 @@ func TestSchema(t *testing.T) {
 			t.Error(err)
 		}
 		testutil.QuerySchema(t, schema, testutil.IntrospectionQuery)
-		// prettyPrint("introspection", data)
 	})
 	t.Run("query user", func(t *testing.T) {
-		data := testutil.QuerySchema(t, schema, testutil.UserQuery1)
-		prettyPrint("query for user", data)
+		testutil.QuerySchema(t, schema, testutil.UserQuery1)
+		prettyPrint("query for user", databaseMock.FindOneCalls())
 	})
 }
