@@ -7,7 +7,13 @@ import (
 	"github.com/remorses/mongoke/src/testutil"
 )
 
-var config = Config{Schema: testutil.UserSchema, DatabaseUri: testutil.MONGODB_URI, Types: map[string]TypeConfig{"User": {Collection: "users"}}}
+var config = Config{
+	Schema:      testutil.UserSchema,
+	DatabaseUri: testutil.MONGODB_URI,
+	Types: map[string]TypeConfig{
+		"User": {Collection: "users"},
+	},
+}
 
 func TestSchema(t *testing.T) {
 	schema, err := MakeMongokeSchema(config)
@@ -33,9 +39,6 @@ func TestServer(t *testing.T) {
 			t.Skip()
 		}
 		println("listening on http://localhost:8080")
-		main(Config{
-			Schema:      testutil.UserSchema,
-			DatabaseUri: "mongodb://localhost/testdb",
-		})
+		main(config)
 	})
 }
