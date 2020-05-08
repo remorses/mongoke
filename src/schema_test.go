@@ -15,6 +15,8 @@ var config = Config{
 	},
 }
 
+// TODO add tests
+
 func TestSchema(t *testing.T) {
 	schema, err := MakeMongokeSchema(config)
 	if err != nil {
