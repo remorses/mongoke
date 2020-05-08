@@ -21,12 +21,15 @@ func (mongoke *Mongoke) findOneField(conf findOneFieldConfig) *graphql.Field {
 	}
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
-		var filter map[string]Filter
-		err := mapstructure.Decode(args["where"], &filter)
+		opts := FindOneParams{
+			Collection:  "users", // TODO based on config and current type name
+			DatabaseUri: mongoke.mongoDbUri,
+		}
+		err := mapstructure.Decode(args, &opts)
 		if err != nil {
 			return nil, err
 		}
-		document, err := findOne(FindOneParams{Collection: "users", DatabaseUri: mongoke.mongoDbUri, Where: filter})
+		document, err := mongoke.databaseFunctions.FindOne(opts)
 		if err != nil {
 			return nil, err
 		}
@@ -66,7 +69,7 @@ func (mongoke *Mongoke) findManyField(conf findManyFieldConfig) *graphql.Field {
 		if err != nil {
 			return nil, err
 		}
-		document, err := findMany(
+		document, err := mongoke.databaseFunctions.FindMany(
 			opts,
 		)
 		if err != nil {

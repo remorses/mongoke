@@ -13,21 +13,10 @@ import (
 
 const TIMEOUT_CONNECT = 5
 
-func initMongo(uri string) (*mongo.Database, error) { // TODO dont reconnect every time, save the instance
-	uriOptions, err := connstring.Parse(uri)
-	if err != nil {
-		return nil, err
-	}
-	dbName := uriOptions.Database
-	if dbName == "" {
-		return nil, errors.New("the db uri must contain the database name")
-	}
-	ctx, _ := context.WithTimeout(context.Background(), TIMEOUT_CONNECT*time.Second)
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
-	if err != nil {
-		return nil, err
-	}
-	return client.Database(dbName), nil
+type DatabaseFunctions interface {
+	FindOne(p FindOneParams) (interface{}, error)
+	FindMany(p FindManyParams) (Connection, error)
+	// TODO add mutations
 }
 
 // type findOneParams struct {
@@ -50,9 +39,13 @@ type FindOneParams struct {
 	Where       map[string]Filter `mapstructure:"where"`
 }
 
-func findOne(p FindOneParams) (interface{}, error) {
+type MongodbDatabaseFunctions struct {
+	db *mongo.Database
+}
+
+func (c MongodbDatabaseFunctions) FindOne(p FindOneParams) (interface{}, error) {
 	ctx, _ := context.WithTimeout(context.Background(), TIMEOUT_FIND*time.Second)
-	db, err := initMongo(p.DatabaseUri)
+	db, err := c.initMongo(p.DatabaseUri)
 	if err != nil {
 		return nil, err
 	}
@@ -100,11 +93,11 @@ type FindManyParams struct {
 	Direction   int    `mapstructure:"direction"`
 }
 
-func findMany(p FindManyParams) (interface{}, error) {
+func (c MongodbDatabaseFunctions) FindMany(p FindManyParams) (Connection, error) {
 	ctx, _ := context.WithTimeout(context.Background(), TIMEOUT_FIND*time.Second)
-	db, err := initMongo(p.DatabaseUri)
+	db, err := c.initMongo(p.DatabaseUri)
 	if err != nil {
-		return nil, err
+		return Connection{}, err
 	}
 	after := p.Pagination.After
 	before := p.Pagination.Before
@@ -126,13 +119,13 @@ func findMany(p FindManyParams) (interface{}, error) {
 
 	// assertion for arguments
 	if after != "" && (first == 0 || before == "") {
-		return nil, errors.New("need `first` or `before` if using `after`")
+		return Connection{}, errors.New("need `first` or `before` if using `after`")
 	}
 	if before != "" && (last == 0 || after == "") {
-		return nil, errors.New("need `last` or `after` if using `before`")
+		return Connection{}, errors.New("need `last` or `after` if using `before`")
 	}
 	if first != 0 && last != 0 {
-		return nil, errors.New("need `last` or `after` if using `before`")
+		return Connection{}, errors.New("need `last` or `after` if using `before`")
 	}
 
 	// gt and lt
@@ -173,19 +166,41 @@ func findMany(p FindManyParams) (interface{}, error) {
 	res, err := db.Collection(p.Collection).Find(ctx, p.Where, opts)
 	if err != nil {
 		// log.Print("Error in findMany", err)
-		return nil, err
+		return Connection{}, err
 	}
 	defer res.Close(ctx)
 	nodes := make([]bson.M, 0)
 	err = res.All(ctx, &nodes) // TODO limit to maxlen
 	if err != nil {
-		return nil, err
+		return Connection{}, err
 	}
 
 	connection := makeConnection(nodes, p.Pagination, p.CursorField)
 
 	return connection, nil
 
+}
+
+func (c *MongodbDatabaseFunctions) initMongo(uri string) (*mongo.Database, error) { // TODO dont reconnect every time, save the instance
+	if c.db != nil {
+		return c.db, nil
+	}
+	uriOptions, err := connstring.Parse(uri)
+	if err != nil {
+		return nil, err
+	}
+	dbName := uriOptions.Database
+	if dbName == "" {
+		return nil, errors.New("the db uri must contain the database name")
+	}
+	ctx, _ := context.WithTimeout(context.Background(), TIMEOUT_CONNECT*time.Second)
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
+	if err != nil {
+		return nil, err
+	}
+	db := client.Database(dbName)
+	c.db = db
+	return db, nil
 }
 
 type PageInfo struct {
@@ -196,7 +211,7 @@ type PageInfo struct {
 }
 
 type Connection struct {
-	Nodes    []bson.M `json:nodes`
+	Nodes    []bson.M `json:nodes` // TODO remove bson.M so other can replace with postgres, ...
 	PageInfo PageInfo `json:pageInfo`
 }
 
