@@ -32,8 +32,6 @@ func MakeMongokeSchema(config Config) (graphql.Schema, error) {
 	return schema, nil
 }
 
-// TODO read the yaml and parse into Config
-
 func main(config Config) {
 	schema, err := MakeMongokeSchema(config)
 	if err != nil {

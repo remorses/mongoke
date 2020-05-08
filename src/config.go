@@ -5,11 +5,11 @@ import (
 )
 
 type Config struct {
-	DatabaseUri string                `yaml:"database_uri"`
-	Schema      string                `yaml:"schema"`
-	SchemaPath  string                `yaml:"schema_path"`
-	Types       map[string]TypeConfig `yaml:"types"`
-	Relations   []RelationConfig      `yaml:"relations"`
+	DatabaseUri string                 `yaml:"database_uri"`
+	Schema      string                 `yaml:"schema"`
+	SchemaPath  string                 `yaml:"schema_path"`
+	Types       map[string]*TypeConfig `yaml:"types"`
+	Relations   []RelationConfig       `yaml:"relations"`
 }
 
 type TypeConfig struct {
@@ -36,11 +36,11 @@ func MakeConfigFromYaml(data string) (Config, error) {
 	return t, nil
 }
 
-func (config Config) getTypeConfig(typeName string) TypeConfig {
+func (config Config) getTypeConfig(typeName string) *TypeConfig {
 	for name, conf := range config.Types {
 		if name == typeName {
 			return conf
 		}
 	}
-	return TypeConfig{}
+	return nil
 }

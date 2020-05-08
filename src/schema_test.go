@@ -10,7 +10,7 @@ import (
 var config = Config{
 	Schema:      testutil.UserSchema,
 	DatabaseUri: testutil.MONGODB_URI,
-	Types: map[string]TypeConfig{
+	Types: map[string]*TypeConfig{
 		"User": {Collection: "users"},
 	},
 }

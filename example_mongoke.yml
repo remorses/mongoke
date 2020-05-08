@@ -1,0 +1,71 @@
+jwt:
+    algorithms: [H256]
+    required: false
+
+schema: |
+
+    scalar ObjectId
+    type Task {
+        _id: ObjectId
+        address: String
+    }
+    type WindowedEvent {
+        value: Int
+        timestamp: Int
+    }
+    type Guest {
+        type: String
+        _id: ObjectId
+        name: String
+    }
+    enum Letter {
+        a
+        b
+        c
+    }
+    type User {
+        type: String
+        _id: ObjectId
+        name: String
+        surname: String
+        friends_ids: [ObjectId]
+        url: String
+        letter: String
+    }
+    
+
+types:
+    Task:
+        collection: tasks
+        exposed: false
+    User:
+        collection: users
+        
+
+relations:
+    -   from: Task
+        to: WindowedEvent
+        relation_type: to_many
+        field: events
+        where: {}
+    -   from: User
+        to: User
+        relation_type: to_many
+        field: friends
+        where: {}
+    -   from: User
+        to: WindowedEvent
+        relation_type: to_many
+        field: likes_over_time
+        where:
+            bot_id:
+                $in: ${{ parent['_id'] }}
+            type: like
+    -   from: User
+        to: Human
+        field: father
+        relation_type: to_one
+        where:
+            _id:
+                $in: ${{ parent['father_id'] }}
+

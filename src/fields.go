@@ -90,7 +90,7 @@ func (mongoke *Mongoke) findManyField(conf findManyFieldConfig) *graphql.Field {
 			"first":       &graphql.ArgumentConfig{Type: graphql.Int},
 			"last":        &graphql.ArgumentConfig{Type: graphql.Int},
 			"direction":   &graphql.ArgumentConfig{Type: directionEnum},
-			"cursorField": &graphql.ArgumentConfig{Type: graphql.String}, // TODO make cursorField as the indexable fields enum
+			"cursorField": &graphql.ArgumentConfig{Type: graphql.String}, // TODO make cursorField as the indexable fields enum, so people dont get access to private fields
 		},
 		Resolve: resolver,
 	}

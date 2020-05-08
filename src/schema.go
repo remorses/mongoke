@@ -13,6 +13,15 @@ func (mongoke *Mongoke) generateSchema() (graphql.Schema, error) {
 	baseSchemaConfig, err := tools.MakeSchemaConfig(
 		tools.ExecutableSchema{
 			TypeDefs: []string{mongoke.typeDefs},
+			Resolvers: map[string]tools.Resolver{
+				objectID.Name(): &tools.ScalarResolver{
+					Serialize:    objectID.Serialize,
+					ParseLiteral: objectID.ParseLiteral,
+					ParseValue:   objectID.ParseValue,
+				},
+				// TODO add dummy anyScalar resolver for all the scalars found inside the model schema
+				// TODO add typeResolver for every union and interface object, using an evaluation
+			},
 		},
 	)
 	if err != nil {
@@ -27,13 +36,15 @@ func (mongoke *Mongoke) generateSchema() (graphql.Schema, error) {
 
 		typeConf := mongoke.Config.getTypeConfig(gqlType.Name())
 
-		if typeConf.Collection == "" {
-			return graphql.Schema{}, errors.New("no collection given for type " + gqlType.Name())
-		}
-		if typeConf.Exposed != nil && !*typeConf.Exposed {
+		if typeConf == nil || (typeConf.Exposed != nil && !*typeConf.Exposed) {
 			println("ignoring not exposed type " + gqlType.Name())
 			continue
 		}
+
+		if typeConf.Collection == "" {
+			return graphql.Schema{}, errors.New("no collection given for type " + gqlType.Name())
+		}
+
 		queryFields["findOne"+object.Name()] = mongoke.findOneField(
 			findOneFieldConfig{
 				returnType: object,
