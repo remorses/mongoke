@@ -35,24 +35,40 @@ func initMongo(uri string) (*mongo.Database, error) { // TODO dont reconnect eve
 // 	database
 // }
 
-func findOne(collection *mongo.Collection, _filter interface{}) (interface{}, error) {
-	filter, ok := _filter.(map[string]interface{})
-	if !ok && filter != nil {
-		return nil, errors.New("the where argument filter must be an object or nil")
-	}
+type Filter struct {
+	Eq  interface{} `bson:"$eq"`
+	neq interface{} `bson:"$neq"`
+	in  interface{} `bson:"$in"`
+	nin interface{} `bson:"$nin"`
+}
+
+type FindOneParams struct {
+	Collection  string
+	DatabaseUri string
+	Where       map[string]Filter
+}
+
+func findOne(p FindOneParams) (interface{}, error) {
 	ctx, _ := context.WithTimeout(context.Background(), TIMEOUT_FIND*time.Second)
-	res := collection.FindOne(ctx, rewriteFilter(filter))
+	db, err := initMongo(p.DatabaseUri)
+	if err != nil {
+		return nil, err
+	}
+	collection := db.Collection(p.Collection)
+	res := collection.FindOne(ctx, p.Where)
+
 	if res.Err() == mongo.ErrNoDocuments {
 		return nil, nil
 	}
 	if res.Err() != nil {
 		return nil, res.Err()
 	}
-	var document interface{}
-	err := res.Decode(&document)
+	var document bson.M = make(bson.M)
+	err = res.Decode(document)
 	if err != nil {
 		return nil, err
 	}
+	prettyPrint(document)
 	return document, nil
 }
 

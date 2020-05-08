@@ -22,11 +22,12 @@ func (mongoke *Mongoke) findOneField(conf findOneFieldConfig) *graphql.Field {
 	}
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
-		db, err := initMongo(mongoke.mongoDbUri)
+		var filter map[string]Filter
+		err := mapstructure.Decode(args["where"], &filter)
 		if err != nil {
 			return nil, err
 		}
-		document, err := findOne(db.Collection(conf.collection), args["where"])
+		document, err := findOne(FindOneParams{Collection: "users", DatabaseUri: mongoke.mongoDbUri, Where: filter})
 		if err != nil {
 			return nil, err
 		}

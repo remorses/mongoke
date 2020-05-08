@@ -2,37 +2,36 @@ package mongoke
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/remorses/mongoke/src/testutil"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func TestInitMongo(t *testing.T) {
+	db, err := initMongo(testutil.MONGODB_URI)
+	if err != nil {
+		t.Error(err)
+	}
 	t.Run("init mongo", func(t *testing.T) {
-		db, err := initMongo(testutil.MONGODB_URI)
-		if err != nil {
-			t.Error(err)
-		}
+
 		names, err := db.Client().ListDatabaseNames(context.TODO(), bson.D{{}})
 		if err != nil {
 			t.Error(err)
 		}
 		prettyPrint(names)
 	})
-	t.Run("findOne", func(t *testing.T) {
-		db, err := initMongo(testutil.MONGODB_URI)
-		if err != nil {
-			t.Error(err)
-		}
-		x, err := findOne(db.Collection("users"), map[string]interface{}{"eq": "ciao"})
-		if err != nil {
-			t.Error(err)
-		}
-		prettyPrint("findOne", x)
-	})
+	// t.Run("findOne", func(t *testing.T) {
+
+	// 	x, err := findOne(db.Collection("users"), map[string]interface{}{"eq": "ciao"})
+	// 	if err != nil {
+	// 		t.Error(err)
+	// 	}
+	// 	prettyPrint("findOne", x)
+	// })
 	t.Run("findMany", func(t *testing.T) {
-		db, err := initMongo(testutil.MONGODB_URI)
 		coll := db.Collection("users")
 		coll.InsertMany(context.TODO(), []interface{}{bson.M{"name": "xxx"}, bson.M{"name": "yyy"}})
 		if err != nil {
@@ -50,16 +49,29 @@ func TestInitMongo(t *testing.T) {
 		}
 		prettyPrint("findMany", x)
 	})
-	t.Run("findOne nil", func(t *testing.T) {
-		db, err := initMongo(testutil.MONGODB_URI)
-		if err != nil {
+	// t.Run("findOne nil", func(t *testing.T) {
+	// 	x, err := findOne(db.Collection("users"), nil)
+	// 	if err != nil {
+	// 		t.Error(err)
+	// 	}
+	// 	prettyPrint("findOne nil", x)
+	// })
+	t.Run("findOne with Filter", func(t *testing.T) {
+		// opts := options.FindOne().SetProjection(bson.M{"name": Filter{Eq: "xxx"}})
+		// prettyPrint("opts", opts.Projection)
+		// fmt.Println(opts.Projection)
+		// res, err := bson.Marshal(bson.M{"name": Filter{Eq: "xxx"}})
+		res := db.Collection("users").FindOne(context.TODO(), bson.M{"name": Filter{Eq: "xxx"}})
+		if res.Err() == mongo.ErrNoDocuments {
+			t.Log("no docs")
+		}
+		if res.Err() != nil {
 			t.Error(err)
 		}
-		x, err := findOne(db.Collection("users"), nil)
-		if err != nil {
-			t.Error(err)
-		}
-		prettyPrint("findOne nil", x)
+		var x interface{}
+		res.Decode(&x)
+		prettyPrint("findOne with filter", x)
+		fmt.Printf("%v\n", x)
 	})
 }
 
