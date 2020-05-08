@@ -1,3 +1,6 @@
+
+database_uri: mongodb://localhost/testdb
+
 jwt:
     algorithms: [H256]
     required: false
