@@ -76,7 +76,8 @@ type Pagination struct {
 }
 
 const (
-	DEFAULT_NODES_COUNT = 40
+	DEFAULT_NODES_COUNT = 20
+	MAX_NODES_COUNT     = 40
 )
 
 const (
@@ -154,13 +155,15 @@ func (c MongodbDatabaseFunctions) FindMany(p FindManyParams) (Connection, error)
 
 	// limit
 	if last != 0 {
-		opts.SetLimit(int64(last + 1))
+		opts.SetLimit(int64(min(MAX_NODES_COUNT, last+1)))
 	}
 	if first != 0 {
-		opts.SetLimit(int64(first + 1))
+		opts.SetLimit(int64(min(MAX_NODES_COUNT, first+1)))
+	}
+	if first == 0 && last == 0 { // when using `after` and `before`
+		opts.SetLimit(int64(MAX_NODES_COUNT))
 	}
 
-	// execute
 	prettyPrint(p)
 
 	res, err := db.Collection(p.Collection).Find(ctx, p.Where, opts)
@@ -170,7 +173,7 @@ func (c MongodbDatabaseFunctions) FindMany(p FindManyParams) (Connection, error)
 	}
 	defer res.Close(ctx)
 	nodes := make([]bson.M, 0)
-	err = res.All(ctx, &nodes) // TODO limit find result number to maxlen
+	err = res.All(ctx, &nodes)
 	if err != nil {
 		return Connection{}, err
 	}
@@ -258,4 +261,11 @@ func reverse(input []bson.M) []bson.M {
 	}
 	// TODO remove recursion
 	return append(reverse(input[1:]), input[0])
+}
+
+func min(x, y int) int {
+	if x > y {
+		return y
+	}
+	return x
 }
