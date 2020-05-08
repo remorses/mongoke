@@ -214,10 +214,17 @@ type PageInfo struct {
 
 type Connection struct {
 	Nodes    []bson.M `json:nodes` // TODO remove bson.M from func definition so other can replace with postgres, ...
+	Edges    []Edge   `json:nodes`
 	PageInfo PageInfo `json:pageInfo`
 }
 
+type Edge struct {
+	Node   bson.M      `json:node`
+	Cursor interface{} `json:cursor`
+}
+
 // removes last or first node, adds pageInfo data
+
 func makeConnection(nodes []bson.M, pagination Pagination, cursorField string) Connection {
 	if len(nodes) == 0 {
 		return Connection{}
@@ -245,7 +252,7 @@ func makeConnection(nodes []bson.M, pagination Pagination, cursorField string) C
 	}
 	return Connection{
 		Nodes: nodes,
-		// TODO add edges
+		Edges: makeEdges(nodes, cursorField),
 		PageInfo: PageInfo{
 			StartCursor:     startCursor,
 			EndCursor:       endCursor,
@@ -253,6 +260,17 @@ func makeConnection(nodes []bson.M, pagination Pagination, cursorField string) C
 			HasPreviousPage: hasPrev,
 		},
 	}
+}
+
+func makeEdges(nodes []bson.M, cursorField string) []Edge {
+	var edges []Edge
+	for _, node := range nodes {
+		edges = append(edges, Edge{
+			Node:   node,
+			Cursor: node[cursorField],
+		})
+	}
+	return edges
 }
 
 func reverse(input []bson.M) []bson.M {
