@@ -87,10 +87,11 @@ func (mongoke *Mongoke) findManyField(conf findManyFieldConfig) *graphql.Field {
 	return &graphql.Field{
 		Type: connectionType,
 		Args: graphql.FieldConfigArgument{
-			"where":     &graphql.ArgumentConfig{Type: whereArg},
-			"first":     &graphql.ArgumentConfig{Type: graphql.Int},
-			"last":      &graphql.ArgumentConfig{Type: graphql.Int},
-			"direction": &graphql.ArgumentConfig{Type: directionEnum},
+			"where":       &graphql.ArgumentConfig{Type: whereArg},
+			"first":       &graphql.ArgumentConfig{Type: graphql.Int},
+			"last":        &graphql.ArgumentConfig{Type: graphql.Int},
+			"direction":   &graphql.ArgumentConfig{Type: directionEnum},
+			"cursorField": &graphql.ArgumentConfig{Type: graphql.String}, // TODO make the indexable fields enum
 		},
 		Resolve: resolver,
 	}

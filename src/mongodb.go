@@ -136,7 +136,7 @@ func findMany(p FindManyParams) (interface{}, error) {
 	}
 
 	// gt and lt
-	cursorFieldMatch := p.Where[p.CursorField] // TODO add already existing match
+	cursorFieldMatch := p.Where[p.CursorField]
 	if after != "" {
 		if p.Direction == DESC {
 			cursorFieldMatch.Lt = after
@@ -168,7 +168,8 @@ func findMany(p FindManyParams) (interface{}, error) {
 	}
 
 	// execute
-	// prettyPrint(rewriteFilter(p.Where))
+	prettyPrint(p)
+
 	res, err := db.Collection(p.Collection).Find(ctx, p.Where, opts)
 	if err != nil {
 		// log.Print("Error in findMany", err)
@@ -228,7 +229,7 @@ func makeConnection(nodes []bson.M, pagination Pagination, cursorField string) C
 	return Connection{
 		Nodes: nodes,
 		PageInfo: PageInfo{
-			StartCursor:     startCursor,
+			StartCursor:     startCursor, // TODO make the anyscalar so that ObjectId, int, bool, ... are serialized correctly
 			EndCursor:       endCursor,
 			HasNextPage:     hasNext,
 			HasPreviousPage: hasPrev,
