@@ -32,7 +32,9 @@ func (c MongodbDatabaseFunctions) FindOne(p FindOneParams) (interface{}, error) 
 	}
 	collection := db.Collection(p.Collection)
 	prettyPrint(p.Where)
-	res := collection.FindOne(ctx, p.Where)
+
+	opts := options.FindOne().SetMaxTime(MAX_QUERY_TIME * time.Second)
+	res := collection.FindOne(ctx, p.Where, opts)
 
 	if res.Err() == mongo.ErrNoDocuments {
 		return nil, nil
