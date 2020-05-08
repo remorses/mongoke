@@ -56,13 +56,13 @@ func (mongoke *Mongoke) generateSchema() (graphql.Schema, error) {
 			return graphql.Schema{}, errors.New("no collection given for type " + gqlType.Name())
 		}
 
-		queryFields["findOne"+object.Name()] = mongoke.findOneField(
+		queryFields[object.Name()] = mongoke.findOneField(
 			findOneFieldConfig{
 				returnType: object,
 				collection: typeConf.Collection,
 			},
 		)
-		queryFields["findMany"+object.Name()] = mongoke.findManyField(
+		queryFields[object.Name()+"Nodes"] = mongoke.findManyField(
 			findManyFieldConfig{
 				returnType: object,
 				collection: typeConf.Collection,

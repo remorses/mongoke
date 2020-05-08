@@ -14,7 +14,7 @@ require (
 	github.com/matryer/moq v0.0.0-20200310130814-7721994d1b54 // indirect
 	github.com/mitchellh/mapstructure v1.3.0
 	github.com/remorses/graphql-go-tools v0.0.0-20200506161536-a31d9b4aa896
-	github.com/stretchr/testify v1.5.1 // indirect
+	github.com/stretchr/testify v1.5.1
 	github.com/urfave/cli/v2 v2.2.0
 	go.mongodb.org/mongo-driver v1.3.3
 	golang.org/x/net v0.0.0-20200505041828-1ed23360d12c // indirect

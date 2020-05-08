@@ -12,3 +12,15 @@ func prettyPrint(x ...interface{}) {
 	}
 	println()
 }
+func pretty(x ...interface{}) string {
+	res := ""
+	for _, x := range x {
+		json, err := json.MarshalIndent(x, "", "   ")
+		if err != nil {
+			panic(err)
+		}
+		res += string(json)
+		res += "\n"
+	}
+	return res
+}
