@@ -237,26 +237,6 @@ func makeConnection(nodes []bson.M, pagination Pagination, cursorField string) C
 	}
 }
 
-// TODO use a Match type with eq, lt, ...
-// only works if the mongo operators are at second level of the match, like { field: { eq: "xxx" } }
-func rewriteFilter(filter map[string]interface{}) map[string]map[string]interface{} {
-	newFilter := make(map[string]map[string]interface{})
-	for k, v := range filter {
-		if v, ok := v.(map[string]interface{}); ok {
-			newFilter[k] = addDollarSigns(v)
-		}
-	}
-	return newFilter
-}
-
-func addDollarSigns(filter map[string]interface{}) map[string]interface{} {
-	newFilter := make(map[string]interface{})
-	for k, v := range filter {
-		newFilter["$"+k] = v
-	}
-	return newFilter
-}
-
 func reverse(input []bson.M) []bson.M {
 	if len(input) == 0 {
 		return input
