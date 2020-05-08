@@ -2,6 +2,7 @@ package mongoke
 
 import (
 	"context"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/graphql-go/graphql"
@@ -17,11 +18,21 @@ type Mongoke struct {
 }
 
 // MakeMongokeSchema generates the schema
-func MakeMongokeSchema(config Config) (graphql.Schema, error) {
+func MakeMongokeSchema(config Config, databaseFunctions DatabaseFunctions) (graphql.Schema, error) {
+	if databaseFunctions == nil {
+		databaseFunctions = MongodbDatabaseFunctions{}
+	}
+	if config.Schema == "" && config.SchemaPath != "" {
+		data, e := ioutil.ReadFile(config.SchemaPath)
+		if e != nil {
+			return graphql.Schema{}, e
+		}
+		config.Schema = string(data)
+	}
 	mongoke := Mongoke{
 		Config:            config,
-		typeDefs:          config.Schema,              // TODO could be schemaPath
-		databaseFunctions: MongodbDatabaseFunctions{}, // TODO databaseFunctions should be customizable
+		typeDefs:          config.Schema,
+		databaseFunctions: databaseFunctions,
 		typeMap:           make(map[string]graphql.Type),
 		databaseUri:       config.DatabaseUri,
 	}
@@ -33,7 +44,7 @@ func MakeMongokeSchema(config Config) (graphql.Schema, error) {
 }
 
 func main(config Config) {
-	schema, err := MakeMongokeSchema(config)
+	schema, err := MakeMongokeSchema(config, nil)
 	if err != nil {
 		panic(err)
 	}
