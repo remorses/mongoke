@@ -11,7 +11,7 @@ import (
 type Mongoke struct {
 	databaseFunctions DatabaseFunctions
 	typeDefs          string
-	mongoDbUri        string
+	databaseUri       string
 	typeMap           map[string]graphql.Type
 }
 
@@ -21,7 +21,7 @@ func MakeMongokeSchema(config Config) (graphql.Schema, error) {
 		typeDefs:          config.schemaString,
 		databaseFunctions: MongodbDatabaseFunctions{}, // TODO databaseFunctions should be customizable
 		typeMap:           make(map[string]graphql.Type),
-		mongoDbUri:        config.mongoDbUri,
+		databaseUri:       config.mongoDbUri,
 	}
 	schema, err := mongoke.generateSchema()
 	if err != nil {

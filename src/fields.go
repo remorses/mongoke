@@ -23,7 +23,7 @@ func (mongoke *Mongoke) findOneField(conf findOneFieldConfig) *graphql.Field {
 		args := params.Args
 		opts := FindOneParams{
 			Collection:  "users", // TODO collection based on config and current type name
-			DatabaseUri: mongoke.mongoDbUri,
+			DatabaseUri: mongoke.databaseUri,
 		}
 		err := mapstructure.Decode(args, &opts)
 		if err != nil {
@@ -59,7 +59,7 @@ func (mongoke *Mongoke) findManyField(conf findManyFieldConfig) *graphql.Field {
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
 		opts := FindManyParams{
-			DatabaseUri: mongoke.mongoDbUri,
+			DatabaseUri: mongoke.databaseUri,
 			Collection:  "users", // here i set the defaults
 			Direction:   ASC,
 			CursorField: "_id",
