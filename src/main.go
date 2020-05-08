@@ -1,16 +1,12 @@
 package mongoke
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/handler"
 )
-
-type Config struct {
-	schemaString string
-	mongoDbUri   string
-}
 
 type Mongoke struct {
 	typeDefs   string
@@ -45,6 +41,10 @@ func main(config Config) {
 		Schema:   &schema,
 		Pretty:   true,
 		GraphiQL: true,
+		RootObjectFn: func(ctx context.Context, r *http.Request) map[string]interface{} {
+			// TODO add user jwt data here, resolver can return an error if user not authenticated
+			return make(map[string]interface{})
+		},
 	})
 
 	http.Handle("/", h)

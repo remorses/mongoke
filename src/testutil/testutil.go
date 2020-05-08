@@ -48,6 +48,107 @@ var UserQuery2 = `
 	}
 }`
 
+var YamlConfig = `
+jwt:
+    algorithms: [H256]
+    required: false
+
+schema: |
+    scalar Address
+    scalar Url
+    # scalar ObjectId
+    type Task {
+        _id: ObjectId
+        address: Address
+    }
+    type WindowedEvent {
+        value: Int
+        timestamp: Int
+    }
+    type Guest {
+        type: String
+        _id: ObjectId
+        name: String
+    }
+    enum Letter {
+        a
+        b
+        c
+    }
+    type User {
+        type: String
+        _id: ObjectId
+        name: String
+        surname: String
+        friends_ids: [ObjectId]
+        url: Url
+        letter: Letter
+    }
+    union Human = User | Guest
+
+types:
+    Task:
+        collection: tasks
+        exposed: false
+    User:
+        collection: users
+        
+    Human:
+        collection: humans
+        guards:
+            -   expression: jwt['role'] == 'admin'
+                when: after
+            -   expression: jwt['role'] == 'semi'
+                excluded: [passwords, campaign_data]
+        disambiguations:
+            User: x['type'] == 'user'
+            Guest: x['type'] == 'guest'
+    WindowedEvent:
+        exposed: False
+        collection: events
+        pipeline:
+            -   $group:
+                    _id:
+                        $substartct:
+                            - $timestamp
+                            - $mod: [$timestamp, 60000] # minute 60 * 1000
+                    value:
+                        $sum: $likes
+            -   $project:
+                    _id: 0
+                    value: 1
+                    timestamp: $_id
+
+relations:
+    -   from: Task
+        to: WindowedEvent
+        relation_type: to_many
+        field: events
+        where: {}
+    -   from: User
+        to: User
+        relation_type: to_many
+        field: friends
+        where: {}
+    -   from: User
+        to: WindowedEvent
+        relation_type: to_many
+        field: likes_over_time
+        where:
+            bot_id:
+                $in: ${{ parent['_id'] }}
+            type: like
+    -   from: User
+        to: Human
+        field: father
+        relation_type: to_one
+        where:
+            _id:
+                $in: ${{ parent['father_id'] }}
+
+
+`
+
 const IntrospectionQuery = `
   query IntrospectionQuery {
     __schema {
@@ -60,12 +161,12 @@ const IntrospectionQuery = `
       directives {
         name
         description
-		locations
+        locations
         args {
           ...InputValue
         }
         # deprecated, but included for coverage till removed
-		onOperation
+        onOperation
         onFragment
         onField
       }
