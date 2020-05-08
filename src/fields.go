@@ -1,7 +1,6 @@
 package mongoke
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/graphql-go/graphql"
@@ -16,13 +15,10 @@ type findOneFieldConfig struct {
 }
 
 func (mongoke *Mongoke) findOneField(conf findOneFieldConfig) *graphql.Field {
-	if conf.collection == "" {
-		panic(errors.New("missing collection name for " + conf.returnType.Name() + " findOneField"))
-	}
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
 		opts := FindOneParams{
-			Collection:  "users", // TODO collection based on config and current type name
+			Collection:  conf.collection,
 			DatabaseUri: mongoke.databaseUri,
 		}
 		err := mapstructure.Decode(args, &opts)
@@ -59,8 +55,8 @@ func (mongoke *Mongoke) findManyField(conf findManyFieldConfig) *graphql.Field {
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
 		opts := FindManyParams{
-			DatabaseUri: mongoke.databaseUri,
-			Collection:  "users", // here i set the defaults
+			DatabaseUri: mongoke.databaseUri, // here i set the defaults
+			Collection:  conf.collection,
 			Direction:   ASC,
 			CursorField: "_id",
 			Pagination:  paginationFromArgs(args),

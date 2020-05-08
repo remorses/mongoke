@@ -5,16 +5,15 @@ import (
 )
 
 type Config struct {
-	schemaString string
-	mongoDbUri   string
-	Schema       string                `yaml:"schema"`
-	SchemaPath   string                `yaml:"schema_path"`
-	Types        map[string]TypeConfig `yaml:"types"`
-	Relations    []RelationConfig      `yaml:"relations"`
+	DatabaseUri string                `yaml:"database_uri"`
+	Schema      string                `yaml:"schema"`
+	SchemaPath  string                `yaml:"schema_path"`
+	Types       map[string]TypeConfig `yaml:"types"`
+	Relations   []RelationConfig      `yaml:"relations"`
 }
 
 type TypeConfig struct {
-	Exposed    bool   `yaml:"exposed"`
+	Exposed    *bool  `yaml:"exposed"`
 	Collection string `yaml:"collection"`
 }
 
@@ -35,4 +34,13 @@ func MakeConfigFromYaml(data string) (Config, error) {
 	}
 
 	return t, nil
+}
+
+func (config Config) getTypeConfig(typeName string) TypeConfig {
+	for name, conf := range config.Types {
+		if name == typeName {
+			return conf
+		}
+	}
+	return TypeConfig{}
 }

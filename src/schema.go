@@ -1,6 +1,8 @@
 package mongoke
 
 import (
+	"errors"
+
 	"github.com/graphql-go/graphql"
 	tools "github.com/remorses/graphql-go-tools"
 )
@@ -23,10 +25,27 @@ func (mongoke *Mongoke) generateSchema() (graphql.Schema, error) {
 			continue
 		}
 
-		// TODO collection should based on type config
-		// TODO add auth guards based on rootObject
-		queryFields["findOne"+object.Name()] = mongoke.findOneField(findOneFieldConfig{returnType: object, collection: "users"})
-		queryFields["findMany"+object.Name()] = mongoke.findManyField(findManyFieldConfig{returnType: object, collection: "users"})
+		typeConf := mongoke.Config.getTypeConfig(gqlType.Name())
+
+		if typeConf.Collection == "" {
+			return graphql.Schema{}, errors.New("no collection given for type " + gqlType.Name())
+		}
+		if typeConf.Exposed != nil && !*typeConf.Exposed {
+			println("ignoring not exposed type " + gqlType.Name())
+			continue
+		}
+		queryFields["findOne"+object.Name()] = mongoke.findOneField(
+			findOneFieldConfig{
+				returnType: object,
+				collection: typeConf.Collection,
+			},
+		)
+		queryFields["findMany"+object.Name()] = mongoke.findManyField(
+			findManyFieldConfig{
+				returnType: object,
+				collection: typeConf.Collection,
+			},
+		)
 
 		// TODO add mutaiton fields
 		mutationFields["putSome"+object.Name()] = &graphql.Field{

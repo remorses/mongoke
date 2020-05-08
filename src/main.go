@@ -13,15 +13,17 @@ type Mongoke struct {
 	typeDefs          string
 	databaseUri       string
 	typeMap           map[string]graphql.Type
+	Config            Config
 }
 
 // MakeMongokeSchema generates the schema
 func MakeMongokeSchema(config Config) (graphql.Schema, error) {
 	mongoke := Mongoke{
-		typeDefs:          config.schemaString,
+		Config:            config,
+		typeDefs:          config.Schema,              // TODO could be schemaPath
 		databaseFunctions: MongodbDatabaseFunctions{}, // TODO databaseFunctions should be customizable
 		typeMap:           make(map[string]graphql.Type),
-		databaseUri:       config.mongoDbUri,
+		databaseUri:       config.DatabaseUri,
 	}
 	schema, err := mongoke.generateSchema()
 	if err != nil {
