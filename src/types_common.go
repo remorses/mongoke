@@ -3,6 +3,7 @@ package mongoke
 import (
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/graphql/language/ast"
+	"github.com/graphql-go/graphql/language/kinds"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -27,10 +28,10 @@ var pageInfo = graphql.NewObject(
 		Description: "Pagination information",
 		Fields: graphql.Fields{
 			"startCursor": &graphql.Field{
-				Type: graphql.String, // TODO should be anyscalar
+				Type: AnyScalar,
 			},
 			"endCursor": &graphql.Field{
-				Type: graphql.String,
+				Type: AnyScalar,
 			},
 			"hasNextPage": &graphql.Field{
 				Type: graphql.Boolean,
@@ -80,3 +81,48 @@ var objectID = graphql.NewScalar(graphql.ScalarConfig{
 		return nil
 	},
 })
+
+func parseAnyScalarLiteral(astValue ast.Value) interface{} {
+	kind := astValue.GetKind()
+
+	switch kind {
+	case kinds.StringValue:
+		return astValue.GetValue()
+	case kinds.BooleanValue:
+		return astValue.GetValue()
+	case kinds.IntValue:
+		return astValue.GetValue()
+	case kinds.FloatValue:
+		return astValue.GetValue()
+	case kinds.ObjectValue:
+		obj := make(map[string]interface{})
+		for _, v := range astValue.GetValue().([]*ast.ObjectField) {
+			obj[v.Name.Value] = parseAnyScalarLiteral(v.Value)
+		}
+		return obj
+	case kinds.ListValue:
+		list := make([]interface{}, 0)
+		for _, v := range astValue.GetValue().([]ast.Value) {
+			list = append(list, parseAnyScalarLiteral(v))
+		}
+		return list
+	default:
+		return nil
+	}
+}
+
+// AnyScalar json type
+var AnyScalar = graphql.NewScalar(
+	graphql.ScalarConfig{
+		Name:        "AnyScalar",
+		Description: "The `AnyScalar` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf)",
+		Serialize: func(value interface{}) interface{} {
+			// TODO handle ObjectId and generic scalars
+			return value
+		},
+		ParseValue: func(value interface{}) interface{} {
+			return value
+		},
+		ParseLiteral: parseAnyScalarLiteral,
+	},
+)
