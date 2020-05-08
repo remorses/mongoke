@@ -22,7 +22,7 @@ func (mongoke *Mongoke) findOneField(conf findOneFieldConfig) *graphql.Field {
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
 		opts := FindOneParams{
-			Collection:  "users", // TODO based on config and current type name
+			Collection:  "users", // TODO collection based on config and current type name
 			DatabaseUri: mongoke.mongoDbUri,
 		}
 		err := mapstructure.Decode(args, &opts)
@@ -94,7 +94,7 @@ func (mongoke *Mongoke) findManyField(conf findManyFieldConfig) *graphql.Field {
 			"first":       &graphql.ArgumentConfig{Type: graphql.Int},
 			"last":        &graphql.ArgumentConfig{Type: graphql.Int},
 			"direction":   &graphql.ArgumentConfig{Type: directionEnum},
-			"cursorField": &graphql.ArgumentConfig{Type: graphql.String}, // TODO make the indexable fields enum
+			"cursorField": &graphql.ArgumentConfig{Type: graphql.String}, // TODO make cursorField as the indexable fields enum
 		},
 		Resolve: resolver,
 	}

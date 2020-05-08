@@ -16,7 +16,7 @@ const TIMEOUT_CONNECT = 5
 type DatabaseFunctions interface {
 	FindOne(p FindOneParams) (interface{}, error)
 	FindMany(p FindManyParams) (Connection, error)
-	// TODO add mutations
+	// TODO add mutations in databaseFunctions
 }
 
 // type findOneParams struct {
@@ -170,7 +170,7 @@ func (c MongodbDatabaseFunctions) FindMany(p FindManyParams) (Connection, error)
 	}
 	defer res.Close(ctx)
 	nodes := make([]bson.M, 0)
-	err = res.All(ctx, &nodes) // TODO limit to maxlen
+	err = res.All(ctx, &nodes) // TODO limit find result number to maxlen
 	if err != nil {
 		return Connection{}, err
 	}
@@ -181,7 +181,7 @@ func (c MongodbDatabaseFunctions) FindMany(p FindManyParams) (Connection, error)
 
 }
 
-func (c *MongodbDatabaseFunctions) initMongo(uri string) (*mongo.Database, error) { // TODO dont reconnect every time, save the instance
+func (c *MongodbDatabaseFunctions) initMongo(uri string) (*mongo.Database, error) {
 	if c.db != nil {
 		return c.db, nil
 	}
@@ -204,14 +204,14 @@ func (c *MongodbDatabaseFunctions) initMongo(uri string) (*mongo.Database, error
 }
 
 type PageInfo struct {
-	StartCursor     interface{} `json:startCursor` // TODO should be string hash made from any object (scalar, enum, ...)
+	StartCursor     interface{} `json:startCursor`
 	EndCursor       interface{} `json:endCursor`
 	HasNextPage     bool        `json:hasNextPage`
 	HasPreviousPage bool        `json:hasPreviousPage`
 }
 
 type Connection struct {
-	Nodes    []bson.M `json:nodes` // TODO remove bson.M so other can replace with postgres, ...
+	Nodes    []bson.M `json:nodes` // TODO remove bson.M from func definition so other can replace with postgres, ...
 	PageInfo PageInfo `json:pageInfo`
 }
 
@@ -222,12 +222,12 @@ func makeConnection(nodes []bson.M, pagination Pagination, cursorField string) C
 	}
 	var hasNext bool
 	var hasPrev bool
-	var endCursor interface{} // TODO should be string
+	var endCursor interface{}
 	var startCursor interface{}
 	if pagination.First != 0 {
 		hasNext = len(nodes) == int(pagination.First+1)
 		if hasNext {
-			nodes = nodes[:len(nodes)-1] // TODO is right?
+			nodes = nodes[:len(nodes)-1]
 		}
 	}
 	if pagination.Last != 0 {
@@ -243,8 +243,9 @@ func makeConnection(nodes []bson.M, pagination Pagination, cursorField string) C
 	}
 	return Connection{
 		Nodes: nodes,
+		// TODO add edges
 		PageInfo: PageInfo{
-			StartCursor:     startCursor, // TODO make the anyscalar so that ObjectId, int, bool, ... are serialized correctly
+			StartCursor:     startCursor,
 			EndCursor:       endCursor,
 			HasNextPage:     hasNext,
 			HasPreviousPage: hasPrev,

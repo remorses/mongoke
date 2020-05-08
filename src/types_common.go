@@ -117,7 +117,7 @@ var AnyScalar = graphql.NewScalar(
 		Name:        "AnyScalar",
 		Description: "The `AnyScalar` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf)",
 		Serialize: func(value interface{}) interface{} {
-			// TODO handle ObjectId and generic scalars
+			//  it seems it can already handle ObjectId and generic scalars, but how?
 			return value
 		},
 		ParseValue: func(value interface{}) interface{} {

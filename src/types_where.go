@@ -18,7 +18,7 @@ func (mongoke *Mongoke) getWhereArg(object *graphql.Object) (*graphql.InputObjec
 		}
 		return nil, errors.New("cannot cast where type for " + name)
 	}
-	scalars := takeScalarFields(object, []string{}) // TODO add here the enums and scalars names
+	scalars := takeScalarFields(object, []string{}) // TODO add here the enums and scalars names taken from the root schema and saved under mongoke.indexableTypes
 	inputFields := graphql.InputObjectConfigFieldMap{}
 	for _, field := range scalars {
 		fieldWhere, err := mongoke.getFieldWhereArg(field, object.PrivateName)

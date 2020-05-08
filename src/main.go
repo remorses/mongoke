@@ -19,7 +19,7 @@ type Mongoke struct {
 func MakeMongokeSchema(config Config) (graphql.Schema, error) {
 	mongoke := Mongoke{
 		typeDefs:          config.schemaString,
-		databaseFunctions: MongodbDatabaseFunctions{}, // TODO should be customizable
+		databaseFunctions: MongodbDatabaseFunctions{}, // TODO databaseFunctions should be customizable
 		typeMap:           make(map[string]graphql.Type),
 		mongoDbUri:        config.mongoDbUri,
 	}

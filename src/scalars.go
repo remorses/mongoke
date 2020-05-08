@@ -4,6 +4,7 @@ import (
 	"github.com/graphql-go/graphql"
 )
 
+// indexableFields
 func takeScalarFields(object *graphql.Object, scalars []string) []*graphql.FieldDefinition {
 	scalarFields := make([]*graphql.FieldDefinition, 0)
 	for _, v := range object.Fields() {
@@ -23,7 +24,7 @@ func takeScalarFields(object *graphql.Object, scalars []string) []*graphql.Field
 func takeScalarTypeNames(baseSchemaConfig graphql.SchemaConfig) []string {
 	names := make([]string, 0)
 	enums := takeEnumTypes(baseSchemaConfig)
-	for _, scalar := range append(enums) {
+	for _, scalar := range append(enums) { // TODO add scalar typeNames to compute indexable fields, i could use graphql.IsLeafType
 		names = append(names, scalar.Name())
 	}
 	return names

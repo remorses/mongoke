@@ -17,13 +17,14 @@ func (mongoke *Mongoke) generateSchema() (graphql.Schema, error) {
 		return graphql.Schema{}, err
 	}
 	for _, gqlType := range baseSchemaConfig.Types {
-		// TODO handle unions
+		// TODO handle unions types, adding a Field function to Object and creating a shared interface
 		object, ok := gqlType.(*graphql.Object)
 		if !ok {
 			continue
 		}
 
-		// TODO collection based on type config
+		// TODO collection should based on type config
+		// TODO add auth guards based on rootObject
 		queryFields["findOne"+object.Name()] = mongoke.findOneField(findOneFieldConfig{returnType: object, collection: "users"})
 		queryFields["findMany"+object.Name()] = mongoke.findManyField(findManyFieldConfig{returnType: object, collection: "users"})
 
