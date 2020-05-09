@@ -3,6 +3,7 @@ package mongoke
 import (
 	"fmt"
 
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/graphql-go/graphql"
 	"github.com/mitchellh/mapstructure"
 )
@@ -30,7 +31,7 @@ func (mongoke *Mongoke) findOneField(conf createFieldParams) *graphql.Field {
 		if err != nil {
 			return nil, err
 		}
-		jwt := Map{} // TODO take jwt from rootObject
+		jwt := getJwt(params)
 		// don't compute permissions if document is nil
 		document, err = applyGuardsOnDocument(applyGuardsOnDocumentParams{
 			document:  document,
@@ -85,7 +86,7 @@ func (mongoke *Mongoke) findManyField(conf createFieldParams) *graphql.Field {
 		// 	return connection, nil
 		// }
 
-		jwt := Map{} // TODO take jwt from rootObject
+		jwt := getJwt(params)
 		var accessibleNodes []Map
 		for _, document := range nodes {
 			node, err := applyGuardsOnDocument(applyGuardsOnDocumentParams{
@@ -215,4 +216,21 @@ func reverseStrings(input []string) []string {
 	}
 	// TODO remove recursion
 	return append(reverseStrings(input[1:]), input[0])
+}
+
+func getJwt(params graphql.ResolveParams) jwt.MapClaims {
+	root := params.Info.RootValue
+	rootMap, ok := root.(Map)
+	if !ok {
+		return jwt.MapClaims{}
+	}
+	v, ok := rootMap["jwt"]
+	if !ok {
+		return jwt.MapClaims{}
+	}
+	jwtMap, ok := v.(jwt.MapClaims)
+	if !ok {
+		return jwt.MapClaims{}
+	}
+	return jwtMap
 }

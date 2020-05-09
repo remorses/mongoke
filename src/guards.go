@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/PaesslerAG/gval"
+	jwt "github.com/dgrijalva/jwt-go"
 )
 
 func (guard AuthGuard) Evaluate(params Map) (interface{}, error) {
@@ -25,7 +26,7 @@ func (guard AuthGuard) Evaluate(params Map) (interface{}, error) {
 type applyGuardsOnDocumentParams struct {
 	document  interface{}
 	guards    []AuthGuard
-	jwt       Map
+	jwt       jwt.MapClaims
 	operation string
 }
 
@@ -65,7 +66,7 @@ func hideFieldsFromDocument(document interface{}, toHide []string) interface{} {
 
 }
 
-func evaluateAuthPermission(guards []AuthGuard, jwt Map, document interface{}) (AuthGuard, error) {
+func evaluateAuthPermission(guards []AuthGuard, jwt jwt.MapClaims, document interface{}) (AuthGuard, error) {
 	// TODO if user if admin return the max AuthGuard here
 	// if guards are empty default to read permission
 	if len(guards) == 0 {
