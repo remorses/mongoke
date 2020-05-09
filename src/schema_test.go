@@ -183,6 +183,50 @@ func TestQueryReturnValues(t *testing.T) {
 		// require.Equal(t, err, "")
 	})
 
+	t.Run("findOne query with permissions HideFields", func(t *testing.T) {
+		config := Config{
+			Schema: `
+			type User {
+				name: String
+				age: Int
+			}
+			`,
+			DatabaseUri: testutil.MONGODB_URI,
+			Types: map[string]*TypeConfig{
+				"User": {
+					Collection: "users",
+					Permissions: []AuthGuard{
+						{
+							Expression: "true",
+							HideFields: []string{"name"},
+						},
+					},
+				},
+			},
+		}
+		schema, err := MakeMongokeSchema(config, databaseMock)
+		if err != nil {
+			t.Error(err)
+		}
+		query := `
+		{
+			User {
+				name
+				age
+			}
+		}
+		`
+		type Res struct {
+			User userStruct
+		}
+		res := testutil.QuerySchema(t, schema, query)
+		t.Log(pretty(res))
+		var x Res
+		mapstructure.Decode(res, &x)
+		require.Equal(t, "", x.User.Name)
+		require.Equal(t, exampleUser["age"], x.User.Age)
+	})
+
 	t.Run("findMany query without args", func(t *testing.T) {
 		query := `
 		{

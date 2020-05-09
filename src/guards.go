@@ -48,6 +48,7 @@ func applyGuardsOnDocument(p applyGuardsOnDocumentParams) (interface{}, error) {
 	return p.document, nil
 }
 
+// TODO copying document when hiding fields could be not performant
 func hideFieldsFromDocument(document interface{}, toHide []string) interface{} {
 	if document == nil {
 		return nil
@@ -56,13 +57,19 @@ func hideFieldsFromDocument(document interface{}, toHide []string) interface{} {
 	if !ok {
 		return document
 	}
+	// clone the map
+	copy := Map{}
+	for k, v := range documentMap {
+		copy[k] = v
+	}
+	// remove the names from the copy
 	for _, name := range toHide {
 		_, ok := documentMap[name]
 		if ok {
-			delete(documentMap, name)
+			delete(copy, name)
 		}
 	}
-	return documentMap
+	return copy
 
 }
 
