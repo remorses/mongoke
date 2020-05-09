@@ -85,6 +85,10 @@ func (mongoke *Mongoke) findManyField(conf findManyFieldConfig) *graphql.Field {
 	if err != nil {
 		panic(err)
 	}
+	indexableFieldsEnum, err := mongoke.getIndexableFieldsEnum(conf.returnType)
+	if err != nil {
+		panic(err)
+	}
 	return &graphql.Field{
 		Type: connectionType,
 		Args: graphql.FieldConfigArgument{
@@ -94,7 +98,7 @@ func (mongoke *Mongoke) findManyField(conf findManyFieldConfig) *graphql.Field {
 			"after":       &graphql.ArgumentConfig{Type: AnyScalar},
 			"before":      &graphql.ArgumentConfig{Type: AnyScalar},
 			"direction":   &graphql.ArgumentConfig{Type: directionEnum},
-			"cursorField": &graphql.ArgumentConfig{Type: graphql.String}, // TODO make cursorField as the indexable fields enum, so people dont get access to private fields
+			"cursorField": &graphql.ArgumentConfig{Type: indexableFieldsEnum},
 		},
 		Resolve: resolver,
 	}
