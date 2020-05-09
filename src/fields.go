@@ -16,7 +16,6 @@ type createFieldParams struct {
 }
 
 func (mongoke *Mongoke) findOneField(conf createFieldParams) *graphql.Field {
-	operation := Operations.READ
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
 		opts := FindOneParams{
@@ -37,7 +36,7 @@ func (mongoke *Mongoke) findOneField(conf createFieldParams) *graphql.Field {
 			document:  document,
 			guards:    conf.permissions,
 			jwt:       jwt,
-			operation: operation,
+			operation: Operations.READ,
 		})
 		if err != nil {
 			return nil, err
@@ -78,6 +77,16 @@ func (mongoke *Mongoke) findManyField(conf createFieldParams) *graphql.Field {
 			opts,
 		)
 		connection := makeConnection(nodes, opts.Pagination, opts.CursorField)
+		jwt := Map{} // TODO take jwt from rootObject
+		for i, document := range connection.Nodes {
+			connection.Nodes[i], err = applyGuardsOnDocument(applyGuardsOnDocumentParams{
+				document:  document,
+				guards:    conf.permissions,
+				jwt:       jwt,
+				operation: Operations.READ,
+			})
+		}
+
 		if err != nil {
 			return nil, err
 		}
