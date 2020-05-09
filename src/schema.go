@@ -4,29 +4,13 @@ import (
 	"errors"
 
 	"github.com/graphql-go/graphql"
-	tools "github.com/remorses/graphql-go-tools"
 )
 
 func (mongoke *Mongoke) generateSchema() (graphql.Schema, error) {
 	queryFields := graphql.Fields{}
 	mutationFields := graphql.Fields{}
-	baseSchemaConfig, err := tools.MakeSchemaConfig(
-		tools.ExecutableSchema{
-			TypeDefs: []string{mongoke.typeDefs},
-			Resolvers: map[string]tools.Resolver{
-				objectID.Name(): &tools.ScalarResolver{
-					Serialize:    objectID.Serialize,
-					ParseLiteral: objectID.ParseLiteral,
-					ParseValue:   objectID.ParseValue,
-				},
-				// TODO add dummy anyScalar resolver for all the scalars found inside the model schema
-				// TODO add typeResolver for every union and interface object, using an evaluation
-			},
-		},
-	)
-	if err != nil {
-		return graphql.Schema{}, err
-	}
+
+	baseSchemaConfig := mongoke.schemaConfig
 	for _, gqlType := range baseSchemaConfig.Types {
 		// TODO handle unions types, adding a Field function to Object and creating a shared interface
 

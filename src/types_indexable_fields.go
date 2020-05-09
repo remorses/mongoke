@@ -18,7 +18,7 @@ func (mongoke *Mongoke) getIndexableFieldsEnum(object *graphql.Object) (*graphql
 		}
 		return nil, errors.New("cannot cast indexable fields type for " + name)
 	}
-	scalars := takeScalarFields(object, []string{}) // TODO add here the enums and scalars names taken from the root schema and saved under mongoke.indexableTypes
+	scalars := mongoke.takeIndexableFields(object)
 	enumValues := graphql.EnumValueConfigMap{}
 	for _, field := range scalars {
 		enumValues[field.Name] = &graphql.EnumValueConfig{

@@ -7,14 +7,17 @@ import (
 
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/handler"
+	tools "github.com/remorses/graphql-go-tools"
 )
 
 type Mongoke struct {
-	databaseFunctions DatabaseInterface
-	typeDefs          string
-	databaseUri       string
-	typeMap           map[string]graphql.Type
-	Config            Config
+	databaseFunctions  DatabaseInterface
+	typeDefs           string
+	databaseUri        string
+	indexableTypeNames []string
+	typeMap            map[string]graphql.Type
+	Config             Config
+	schemaConfig       graphql.SchemaConfig
 }
 
 // MakeMongokeSchema generates the schema
@@ -29,18 +32,39 @@ func MakeMongokeSchema(config Config, databaseFunctions DatabaseInterface) (grap
 		}
 		config.Schema = string(data)
 	}
+	schemaConfig, err := makeSchemaConfig(config.Schema)
+	if err != nil {
+		return graphql.Schema{}, err
+	}
 	mongoke := Mongoke{
 		Config:            config,
 		typeDefs:          config.Schema,
 		databaseFunctions: databaseFunctions,
 		typeMap:           make(map[string]graphql.Type),
 		databaseUri:       config.DatabaseUri,
+		schemaConfig:      schemaConfig,
 	}
 	schema, err := mongoke.generateSchema()
 	if err != nil {
 		return schema, err
 	}
 	return schema, nil
+}
+
+func makeSchemaConfig(typeDefs string) (graphql.SchemaConfig, error) {
+	baseSchemaConfig, err := tools.MakeSchemaConfig(
+		tools.ExecutableSchema{
+			TypeDefs: []string{typeDefs},
+			Resolvers: map[string]tools.Resolver{
+				objectID.Name(): &tools.ScalarResolver{
+					Serialize:    objectID.Serialize,
+					ParseLiteral: objectID.ParseLiteral,
+					ParseValue:   objectID.ParseValue,
+				},
+			},
+		},
+	)
+	return baseSchemaConfig, err
 }
 
 // MakeMongokeHandler creates an http handler

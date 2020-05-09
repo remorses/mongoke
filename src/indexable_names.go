@@ -5,27 +5,29 @@ import (
 )
 
 // indexableFields
-func takeScalarFields(object *graphql.Object, scalars []string) []*graphql.FieldDefinition {
-	scalarFields := make([]*graphql.FieldDefinition, 0)
+func (m Mongoke) takeIndexableFields(object *graphql.Object) []*graphql.FieldDefinition {
+	indexableNames := takeIndexableTypeNames(m.schemaConfig)
+	indexableFields := make([]*graphql.FieldDefinition, 0)
 	for _, v := range object.Fields() {
 		typeName := v.Type.Name()
 		switch typeName {
 		case "String", "Boolean", "Int", "Float", "ID", "DateTime":
-			scalarFields = append(scalarFields, v)
+			indexableFields = append(indexableFields, v)
 		}
-		if contains(scalars, typeName) {
-			scalarFields = append(scalarFields, v)
+		if contains(indexableNames, typeName) {
+			indexableFields = append(indexableFields, v)
 		}
 	}
-	return scalarFields
+	return indexableFields
 }
 
 // to be used in takeScalarFields
-func takeScalarTypeNames(baseSchemaConfig graphql.SchemaConfig) []string {
+func takeIndexableTypeNames(baseSchemaConfig graphql.SchemaConfig) []string {
 	names := make([]string, 0)
-	enums := takeEnumTypes(baseSchemaConfig)
-	for _, scalar := range append(enums) { // TODO add scalar typeNames to compute indexable fields, i could use graphql.IsLeafType
-		names = append(names, scalar.Name())
+	for _, gqlType := range baseSchemaConfig.Types {
+		if graphql.IsLeafType(gqlType) {
+			names = append(names, gqlType.Name())
+		}
 	}
 	return names
 }

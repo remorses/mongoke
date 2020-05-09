@@ -50,7 +50,7 @@ type PageInfo struct {
 }
 
 type Connection struct {
-	Nodes    []Map    `json:nodes` // TODO remove Map from func definition so other can replace with postgres, ...
+	Nodes    []Map    `json:nodes`
 	Edges    []Edge   `json:edges`
 	PageInfo PageInfo `json:pageInfo`
 }
