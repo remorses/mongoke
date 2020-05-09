@@ -81,10 +81,9 @@ func (mongoke *Mongoke) findManyField(conf createFieldParams) *graphql.Field {
 			return nil, err
 		}
 
-		// TODO skip auth if no auth guards present
-		// if len(conf.permissions) == 0 {
-		// 	return connection, nil
-		// }
+		if len(conf.permissions) == 0 {
+			return makeConnection(nodes, opts.Pagination, opts.CursorField), nil
+		}
 
 		jwt := getJwt(params)
 		var accessibleNodes []Map
@@ -223,6 +222,7 @@ func getJwt(params graphql.ResolveParams) jwt.MapClaims {
 	rootMap, ok := root.(Map)
 	if !ok {
 		return jwt.MapClaims{}
+
 	}
 	v, ok := rootMap["jwt"]
 	if !ok {
