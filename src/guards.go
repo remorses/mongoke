@@ -67,7 +67,7 @@ func hideFieldsFromDocument(document interface{}, toHide []string) interface{} {
 }
 
 func evaluateAuthPermission(guards []AuthGuard, jwt jwt.MapClaims, document interface{}) (AuthGuard, error) {
-	// TODO if user if admin return the max AuthGuard here
+	// TODO if user is admin return the max AuthGuard here
 	// if guards are empty default to read permission
 	if len(guards) == 0 {
 		return AuthGuard{
@@ -99,9 +99,9 @@ func evaluateAuthPermission(guards []AuthGuard, jwt jwt.MapClaims, document inte
 			return guard, nil
 		}
 	}
-	// default last permission is nothing when permissions list not empty
+	// default last permission is nothing when permissions list not empty and error
 	permission := AuthGuard{
 		AllowedOperations: nil,
 	}
-	return permission, nil // TODO should return an error here?
+	return permission, errors.New("no required permission for this resource")
 }
