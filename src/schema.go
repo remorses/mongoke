@@ -6,12 +6,6 @@ import (
 	"github.com/graphql-go/graphql"
 )
 
-type AuthGuard struct {
-	Expression string   `yaml:"if"`
-	Actions    []string `yaml:"actions"`
-	HideFields []string `yaml:"hide_fields"`
-}
-
 func (mongoke *Mongoke) generateSchema() (graphql.Schema, error) {
 	queryFields := graphql.Fields{}
 	mutationFields := graphql.Fields{}
@@ -45,19 +39,13 @@ func (mongoke *Mongoke) generateSchema() (graphql.Schema, error) {
 		if typeConf.Collection == "" {
 			return graphql.Schema{}, errors.New("no collection given for type " + gqlType.Name())
 		}
-
-		queryFields[object.Name()] = mongoke.findOneField(
-			findOneFieldConfig{
-				returnType: object,
-				collection: typeConf.Collection,
-			},
-		)
-		queryFields[object.Name()+"Nodes"] = mongoke.findManyField(
-			findManyFieldConfig{
-				returnType: object,
-				collection: typeConf.Collection,
-			},
-		)
+		p := createFieldParams{
+			returnType:  object,
+			permissions: typeConf.Permissions,
+			collection:  typeConf.Collection,
+		}
+		queryFields[object.Name()] = mongoke.findOneField(p)
+		queryFields[object.Name()+"Nodes"] = mongoke.findManyField(p)
 
 		// TODO add mutaiton fields
 		mutationFields["putSome"+object.Name()] = &graphql.Field{

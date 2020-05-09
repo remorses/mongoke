@@ -1,8 +1,21 @@
 package mongoke
 
 import (
+	"github.com/PaesslerAG/gval"
 	yaml "gopkg.in/yaml.v2"
 )
+
+var Operations = struct {
+	READ   string
+	UPDATE string
+	DELETE string
+	CREATE string
+}{
+	READ:   "read",
+	UPDATE: "update",
+	DELETE: "delete",
+	CREATE: "create",
+}
 
 type Config struct {
 	DatabaseUri string                 `yaml:"database_uri"`
@@ -13,8 +26,16 @@ type Config struct {
 }
 
 type TypeConfig struct {
-	Exposed    *bool  `yaml:"exposed"`
-	Collection string `yaml:"collection"`
+	Exposed     *bool       `yaml:"exposed"`
+	Collection  string      `yaml:"collection"`
+	Permissions []AuthGuard `yaml:"permissions"`
+}
+
+type AuthGuard struct {
+	Expression        string   `yaml:"if"`
+	AllowedOperations []string `yaml:"actions"`
+	HideFields        []string `yaml:"hide_fields"`
+	eval              gval.Evaluable
 }
 
 type RelationConfig struct {

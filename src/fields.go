@@ -9,12 +9,14 @@ import (
 
 const TIMEOUT_FIND = 10
 
-type findOneFieldConfig struct {
-	collection string
-	returnType *graphql.Object
+type createFieldParams struct {
+	collection  string
+	permissions []AuthGuard
+	returnType  *graphql.Object
 }
 
-func (mongoke *Mongoke) findOneField(conf findOneFieldConfig) *graphql.Field {
+func (mongoke *Mongoke) findOneField(conf createFieldParams) *graphql.Field {
+	operation := Operations.READ
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
 		opts := FindOneParams{
@@ -26,6 +28,17 @@ func (mongoke *Mongoke) findOneField(conf findOneFieldConfig) *graphql.Field {
 			return nil, err
 		}
 		document, err := mongoke.databaseFunctions.FindOne(opts)
+		if err != nil {
+			return nil, err
+		}
+		jwt := Map{} // TODO take jwt from rootObject
+		// don't compute permissions if document is nil
+		document, err = applyGuardsOnDocument(applyGuardsOnDocumentParams{
+			document:  document,
+			guards:    conf.permissions,
+			jwt:       jwt,
+			operation: operation,
+		})
 		if err != nil {
 			return nil, err
 		}
@@ -46,12 +59,7 @@ func (mongoke *Mongoke) findOneField(conf findOneFieldConfig) *graphql.Field {
 	}
 }
 
-type findManyFieldConfig struct {
-	collection string
-	returnType *graphql.Object
-}
-
-func (mongoke *Mongoke) findManyField(conf findManyFieldConfig) *graphql.Field {
+func (mongoke *Mongoke) findManyField(conf createFieldParams) *graphql.Field {
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
 		pagination := paginationFromArgs(args)
