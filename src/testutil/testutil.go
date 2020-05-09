@@ -17,6 +17,15 @@ func QuerySchema(t *testing.T, schema graphql.Schema, query string) interface{} 
 	return res.Data
 }
 
+func QuerySchemaShouldFail(t *testing.T, schema graphql.Schema, query string) error {
+	res := graphql.Do(graphql.Params{Schema: schema, RequestString: query})
+	if res.Errors != nil && len(res.Errors) > 0 {
+		return res.Errors[0]
+	}
+	t.Fatal("query " + query + " should have failed")
+	return nil
+}
+
 var UserSchema = `
 type User {
 	name: String

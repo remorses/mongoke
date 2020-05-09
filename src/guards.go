@@ -7,13 +7,6 @@ import (
 	"github.com/PaesslerAG/gval"
 )
 
-type applyGuardsOnDocumentParams struct {
-	document  interface{}
-	guards    []AuthGuard
-	jwt       Map
-	operation string
-}
-
 func (guard AuthGuard) Evaluate(params Map) (interface{}, error) {
 	if guard.eval == nil {
 		eval, err := gval.Full().NewEvaluable(guard.Expression)
@@ -29,6 +22,13 @@ func (guard AuthGuard) Evaluate(params Map) (interface{}, error) {
 	return res, nil
 }
 
+type applyGuardsOnDocumentParams struct {
+	document  interface{}
+	guards    []AuthGuard
+	jwt       Map
+	operation string
+}
+
 func applyGuardsOnDocument(p applyGuardsOnDocumentParams) (interface{}, error) {
 	if p.document == nil {
 		return nil, nil
@@ -39,7 +39,7 @@ func applyGuardsOnDocument(p applyGuardsOnDocumentParams) (interface{}, error) {
 		return nil, err
 	}
 	if !contains(guard.AllowedOperations, p.operation) {
-		return nil, errors.New("cannot execute " + p.operation + " operation with user permissions, " + guard.Expression)
+		return nil, errors.New("cannot execute " + p.operation + " operation with current user permissions")
 	}
 	if len(guard.HideFields) != 0 {
 		p.document = hideFieldsFromDocument(p.document, guard.HideFields)

@@ -1,6 +1,7 @@
 package mongoke
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/mitchellh/mapstructure"
@@ -143,6 +144,43 @@ func TestQueryReturnValues(t *testing.T) {
 		require.Equal(t, exampleUser["name"], x.User.Name)
 	})
 
+	t.Run("findOne query with permissions false", func(t *testing.T) {
+		config := Config{
+			Schema: `
+			type User {
+				name: String
+				age: Int
+			}
+			`,
+			DatabaseUri: testutil.MONGODB_URI,
+			Types: map[string]*TypeConfig{
+				"User": {
+					Collection: "users",
+					Permissions: []AuthGuard{
+						{
+							Expression: "false",
+						},
+					},
+				},
+			},
+		}
+		schema, err := MakeMongokeSchema(config, databaseMock)
+		if err != nil {
+			t.Error(err)
+		}
+		query := `
+		{
+			User {
+				name
+				age
+			}
+		}
+		`
+		err = testutil.QuerySchemaShouldFail(t, schema, query)
+		fmt.Println(err)
+		// require.Equal(t, err, "")
+	})
+
 	t.Run("findMany query without args", func(t *testing.T) {
 		query := `
 		{
@@ -164,6 +202,52 @@ func TestQueryReturnValues(t *testing.T) {
 		mapstructure.Decode(res, &x)
 		require.Equal(t, exampleUsers[0]["name"], x.UserNodes.Nodes[0].Name)
 		require.Equal(t, exampleUsers[0]["age"], x.UserNodes.Nodes[0].Age)
+	})
+
+	t.Run("findMany query with permissions false", func(t *testing.T) {
+		config := Config{
+			Schema: `
+			type User {
+				name: String
+				age: Int
+			}
+			`,
+			DatabaseUri: testutil.MONGODB_URI,
+			Types: map[string]*TypeConfig{
+				"User": {
+					Collection: "users",
+					Permissions: []AuthGuard{
+						{
+							Expression: "false",
+						},
+					},
+				},
+			},
+		}
+		schema, err := MakeMongokeSchema(config, databaseMock)
+		if err != nil {
+			t.Error(err)
+		}
+		query := `
+		{
+			UserNodes {
+				nodes {
+					name
+					age
+				}
+			}
+		}
+		`
+		type Res struct {
+			UserNodes struct {
+				Nodes []userStruct
+			}
+		}
+		res := testutil.QuerySchema(t, schema, query)
+		t.Log(pretty(res))
+		var x Res
+		mapstructure.Decode(res, &x)
+		require.Equal(t, 0, len(x.UserNodes.Nodes))
 	})
 
 }

@@ -41,50 +41,8 @@ schema: |
   }
 
 types:
-  Default:
-    collection: tasks
-    permissions: # default permissions when permissions empty
-      - if: "true" # default expression is true
-        actions:
-          - read
-  WithJwtCheck:
-    collection: tasks
-    permissions:
-      - if: "jwt['user_id'] == document['byUserId'].Hex()"
-        actions: # default actions is every action
-          - update
-          - create
-          - read
-          - delete
-      - hide_fields:
-          - password
-          - userId
-        actions:
-          - read
-  UsingJwtRoles:
-    collection: tasks
-    permissions:
-      - if: "jwt['role'] == 'privileged_user'" # you can use expression to define complex rules
-        actions:
-          - read
-      - if: "jwt['role'] == 'user' && jwt['user_id'] == document['byUserId'].Hex()"
-        actions:
-          - update
-          - read
-          - delete
-      - actions: [] # default last permission is nothing when permissions list not empty
   User:
-    collection: tasks
-    permissions:
-      - if: "jwt['user_id'] == string(document['user_id'])"
-        actions:
-          - update
-          - read
-          - delete
-      - hide_fields:
-          - password
-        actions:
-          - read
+    collection: users
 
 relations:
   - from: Task

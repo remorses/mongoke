@@ -76,20 +76,34 @@ func (mongoke *Mongoke) findManyField(conf createFieldParams) *graphql.Field {
 		nodes, err := mongoke.databaseFunctions.FindMany(
 			opts,
 		)
-		connection := makeConnection(nodes, opts.Pagination, opts.CursorField)
-		jwt := Map{} // TODO take jwt from rootObject
-		for i, document := range connection.Nodes {
-			connection.Nodes[i], err = applyGuardsOnDocument(applyGuardsOnDocumentParams{
+		if err != nil {
+			return nil, err
+		}
+
+		// TODO skip auth if no auth guards present
+		// if len(conf.permissions) == 0 {
+		// 	return connection, nil
+		// }
+
+		jwt := Map{}              // TODO take jwt from rootObject
+		var accessibleNodes []Map // TODO maybe make more space for the nodes array
+		for _, document := range nodes {
+			node, err := applyGuardsOnDocument(applyGuardsOnDocumentParams{
 				document:  document,
 				guards:    conf.permissions,
 				jwt:       jwt,
 				operation: Operations.READ,
 			})
+			if err != nil {
+				// println("got an error while calling applyGuardsOnDocument on findManyField for " + conf.returnType.PrivateName)
+				// fmt.Println(err)
+				continue
+			}
+			if node != nil {
+				accessibleNodes = append(accessibleNodes, node.(Map))
+			}
 		}
-
-		if err != nil {
-			return nil, err
-		}
+		connection := makeConnection(accessibleNodes, opts.Pagination, opts.CursorField)
 		// document, err := mongoke.database.findOne()
 		// prettyPrint(args)
 		return connection, nil
