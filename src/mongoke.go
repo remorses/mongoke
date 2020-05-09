@@ -123,7 +123,7 @@ func extractClaims(tokenStr string, secret string) (jwt.MapClaims, error) {
 	hmacSecret := []byte(secret)
 	claims := jwt.MapClaims{}
 	_, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
-		// TODO check token signing method etc
+		// TODO check token ALG method is same etc
 		return hmacSecret, nil
 	})
 
