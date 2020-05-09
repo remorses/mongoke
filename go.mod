@@ -7,6 +7,7 @@ require (
 	github.com/arvitaly/go-graphql-tools v0.0.0-20160619171204-76ac32860523 // indirect
 	github.com/bhoriuchi/graphql-go-tools v0.0.0-20190911192059-fe56277415a1 // indirect
 	github.com/carted/graphql v0.7.6 // indirect
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/dvic/graphql v0.7.4
 	github.com/graphql-go/graphql v0.7.9
 	github.com/graphql-go/handler v0.2.3

@@ -23,6 +23,11 @@ type Config struct {
 	SchemaPath  string                 `yaml:"schema_path"`
 	Types       map[string]*TypeConfig `yaml:"types"`
 	Relations   []RelationConfig       `yaml:"relations"`
+	JwtConfig   JwtConfig              `yaml:"jwt"`
+}
+
+type JwtConfig struct {
+	HeaderName string `yaml:"header_name"`
 }
 
 type TypeConfig struct {

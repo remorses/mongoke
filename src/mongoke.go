@@ -1,9 +1,12 @@
 package mongoke
 
 import (
-	"context"
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strings"
+
+	jwt "github.com/dgrijalva/jwt-go"
 
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/handler"
@@ -68,20 +71,66 @@ func makeSchemaConfig(typeDefs string) (graphql.SchemaConfig, error) {
 }
 
 // MakeMongokeHandler creates an http handler
-func MakeMongokeHandler(config Config, databaseFunctions DatabaseInterface) (http.Handler, error) {
+func MakeMongokeHandler(config Config, databaseFunctions DatabaseInterface) (http.HandlerFunc, error) {
 	schema, err := MakeMongokeSchema(config, databaseFunctions)
 	if err != nil {
 		return nil, err
 	}
 
-	h := handler.New(&handler.Config{
-		Schema:   &schema,
-		Pretty:   true,
-		GraphiQL: true,
-		RootObjectFn: func(ctx context.Context, r *http.Request) map[string]interface{} {
-			// TODO add user jwt data here, resolver can return an error if user not authenticated
-			return make(map[string]interface{})
-		},
-	})
+	h := func(w http.ResponseWriter, r *http.Request) {
+
+		// parse http.Request into handler.RequestOptions
+		opts := handler.NewRequestOptions(r)
+
+		tknStr := r.Header.Get("Authorization")
+		parts := strings.Split(tknStr, "Bearer")
+		tknStr = reverseStrings(parts)[0]
+		tknStr = strings.TrimSpace(tknStr)
+		claims, err := extractClaims(tknStr, "secret") // TODO take secret from config or url
+
+		rootValue := Map{
+			"response": w,
+			"request":  r,
+			"jwt":      claims,
+		}
+
+		// execute graphql query
+		// here, we passed in Query, Variables and OperationName extracted from http.Request
+		params := graphql.Params{
+			Schema:         schema,
+			RequestString:  opts.Query,
+			VariableValues: opts.Variables,
+			OperationName:  opts.OperationName,
+			RootObject:     rootValue,
+		}
+		result := graphql.Do(params)
+
+		// one way to render JSON without use of external libraries
+		// alternatively, you can use libraries like `unrolled/render`
+		js, err := json.Marshal(result)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(js)
+	}
+
 	return h, nil
+}
+
+func extractClaims(tokenStr string, secret string) (jwt.MapClaims, error) {
+	hmacSecret := []byte(secret)
+	claims := jwt.MapClaims{}
+	_, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
+		// TODO check token signing method etc
+		return hmacSecret, nil
+	})
+
+	if err != nil {
+		return jwt.MapClaims{}, err
+	}
+
+	return claims, nil
+
 }

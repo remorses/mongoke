@@ -85,8 +85,8 @@ func (mongoke *Mongoke) findManyField(conf createFieldParams) *graphql.Field {
 		// 	return connection, nil
 		// }
 
-		jwt := Map{}              // TODO take jwt from rootObject
-		var accessibleNodes []Map // TODO maybe make more space for the nodes array
+		jwt := Map{} // TODO take jwt from rootObject
+		var accessibleNodes []Map
 		for _, document := range nodes {
 			node, err := applyGuardsOnDocument(applyGuardsOnDocumentParams{
 				document:  document,
@@ -207,4 +207,12 @@ func reverse(input []Map) []Map {
 	}
 	// TODO remove recursion
 	return append(reverse(input[1:]), input[0])
+}
+
+func reverseStrings(input []string) []string {
+	if len(input) == 0 {
+		return input
+	}
+	// TODO remove recursion
+	return append(reverseStrings(input[1:]), input[0])
 }
