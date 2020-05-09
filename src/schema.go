@@ -6,6 +6,12 @@ import (
 	"github.com/graphql-go/graphql"
 )
 
+type AuthGuard struct {
+	Expression string   `yaml:"if"`
+	Actions    []string `yaml:"actions"`
+	HideFields []string `yaml:"hide_fields"`
+}
+
 func (mongoke *Mongoke) generateSchema() (graphql.Schema, error) {
 	queryFields := graphql.Fields{}
 	mutationFields := graphql.Fields{}

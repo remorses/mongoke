@@ -3,6 +3,7 @@ module github.com/remorses/mongoke
 go 1.13
 
 require (
+	github.com/PaesslerAG/gval v1.0.1
 	github.com/arvitaly/go-graphql-tools v0.0.0-20160619171204-76ac32860523 // indirect
 	github.com/bhoriuchi/graphql-go-tools v0.0.0-20190911192059-fe56277415a1 // indirect
 	github.com/carted/graphql v0.7.6 // indirect

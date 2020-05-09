@@ -1,4 +1,8 @@
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
+github.com/PaesslerAG/gval v1.0.1 h1:QnCvok0w0Y3uZNxmNmC6GZ0cuBl+jH0tu/rBMT8pso4=
+github.com/PaesslerAG/gval v1.0.1/go.mod h1:y/nm5yEyTeX6av0OfKJNp9rBNj2XrGhAf5+v24IBN1I=
+github.com/PaesslerAG/jsonpath v0.1.0 h1:gADYeifvlqK3R3i2cR5B4DGgxLXIPb3TRTH1mGi0jPI=
+github.com/PaesslerAG/jsonpath v0.1.0/go.mod h1:4BzmtoM/PI8fPO4aQGIusjGxGir2BzcV0grWtFzq1Y8=
 github.com/arvitaly/go-graphql-tools v0.0.0-20160619171204-76ac32860523 h1:pPkuAZjH+AxzBEiqJm2ET6xMBFwemL1Z+6BHxwZy6Og=
 github.com/arvitaly/go-graphql-tools v0.0.0-20160619171204-76ac32860523/go.mod h1:u+zI/HPdajh7q9nJzSYOVVajmdGib+Ofa+2lmmAoftU=
 github.com/bhoriuchi/graphql-go-tools v0.0.0-20190911192059-fe56277415a1 h1:9HAhaOMcG5fHaiuLjFHOauktFYxIcdLPST8lHzGiAA0=
