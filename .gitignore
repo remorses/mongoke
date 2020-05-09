@@ -8,7 +8,7 @@ __pycache__/
 play*
 node_modules
 .DS_Store
-
+bin
 # Distribution / packaging
 .Python
 build/
