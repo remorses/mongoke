@@ -39,12 +39,15 @@ func main() {
 			}
 			handler, err := mongoke.MakeMongokeHandler(config)
 			if err != nil {
-				panic(err)
+				return cli.Exit(err, 1)
 			}
 			port := c.String("port")
 			println("listening on http://localhost:" + port)
 			http.Handle("/", handler)
-			http.ListenAndServe("localhost:"+port, nil)
+			if err = http.ListenAndServe("localhost:"+port, nil); err != nil {
+				return cli.Exit(err, 1)
+			}
+
 			return nil
 		},
 	}
