@@ -201,11 +201,11 @@ func TestQueryReturnValues(t *testing.T) {
 				DatabaseUri: testutil.MONGODB_URI,
 				Types: map[string]*TypeConfig{
 					"Admin": {
-						Exposed:  &falseValue,
+						Exposed:  &False,
 						IsTypeOf: "false",
 					},
 					"Guest": {
-						Exposed:  &falseValue,
+						Exposed:  &False,
 						IsTypeOf: "x.name == \"01\"",
 					},
 					"User": {

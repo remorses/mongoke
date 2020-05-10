@@ -7,6 +7,11 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+var (
+	True  = true
+	False = true
+)
+
 var directionEnum = graphql.NewEnum(graphql.EnumConfig{
 	Name:        "Direction",
 	Description: "asc or desc",
