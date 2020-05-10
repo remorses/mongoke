@@ -2,6 +2,7 @@ package mongoke
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/dgrijalva/jwt-go"
@@ -137,13 +138,12 @@ func TestQueryReturnValues(t *testing.T) {
 			}
 		}
 		`
-		type Res struct {
-			User userStruct
-		}
 		res := testutil.QuerySchema(t, schema, query)
-		var x Res
-		mapstructure.Decode(res, &x)
-		require.Equal(t, exampleUser["name"], x.User.Name)
+		res = testutil.ConvertToPlainMap(res)
+		expected := testutil.ConvertToPlainMap(Map{"User": exampleUser})
+		t.Log(res)
+		t.Log(expected)
+		require.Equal(t, true, reflect.DeepEqual(res, expected))
 	})
 
 	t.Run("findOne query with permissions false", func(t *testing.T) {

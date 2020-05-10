@@ -1,6 +1,7 @@
 package testutil
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/graphql-go/graphql"
@@ -15,6 +16,13 @@ func QuerySchema(t *testing.T, schema graphql.Schema, query string) interface{} 
 		return nil
 	}
 	return res.Data
+}
+
+func ConvertToPlainMap(in interface{}) map[string]interface{} {
+	var inInterface map[string]interface{}
+	inrec, _ := json.Marshal(in)
+	json.Unmarshal(inrec, &inInterface)
+	return inInterface
 }
 
 func QuerySchemaShouldFail(t *testing.T, schema graphql.Schema, query string) error {
