@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/PaesslerAG/gval"
-	jwt "github.com/dgrijalva/jwt-go"
 
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/handler"
@@ -126,7 +125,7 @@ func MakeMongokeHandler(config Config) (http.Handler, error) {
 				return rootValue
 			}
 
-			claims, err := extractClaims(tknStr, "secret") // TODO take secret from config or url
+			claims, err := extractClaims(config.JwtConfig, tknStr)
 
 			if err != nil {
 				fmt.Println("error in handler", err)
@@ -140,20 +139,4 @@ func MakeMongokeHandler(config Config) (http.Handler, error) {
 	})
 
 	return h, nil
-}
-
-func extractClaims(tokenStr string, secret string) (jwt.MapClaims, error) {
-	hmacSecret := []byte(secret)
-	claims := jwt.MapClaims{}
-	_, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
-		// TODO check token ALG method is same etc
-		return hmacSecret, nil
-	})
-
-	if err != nil {
-		return jwt.MapClaims{}, err
-	}
-
-	return claims, nil
-
 }
