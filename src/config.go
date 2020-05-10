@@ -29,11 +29,14 @@ type Config struct {
 
 type JwtConfig struct {
 	HeaderName string `yaml:"header_name"`
-	JwkUrl     string `yaml:"jwk_url"`
-	Key        string `yaml:"key"`  // 32 string for HS256 or PEM encoded string or as a X509 certificate for RSA
-	Type       string `yaml:"type"` // HS256, HS384, HS512, RS256, RS384, RS512
-	Audience   string `yaml:"audience"`
-	Issuer     string `yaml:"issuer"`
+	// for example https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com
+	JwkUrl string `yaml:"jwk_url"`
+	// 32 string for HS256 or PEM encoded string or as a X509 certificate for RSA
+	Key string `yaml:"key"`
+	// HS256, HS384, HS512, RS256, RS384, RS512
+	Type     string `yaml:"type"`
+	Audience string `yaml:"audience"`
+	Issuer   string `yaml:"issuer"`
 }
 
 type TypeConfig struct {

@@ -1,9 +1,11 @@
 package mongoke
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
+	"github.com/go-test/deep"
 	"github.com/remorses/mongoke/src/testutil"
 	"github.com/stretchr/testify/require"
 )
@@ -328,6 +330,191 @@ func TestQueryReturnValues(t *testing.T) {
 			t.Log("expected:", expected)
 			t.Log("result:", res)
 			require.Equal(t, true, reflect.DeepEqual(res, expected))
+		})
+	}
+}
+
+func TestQueryReturnValuesWithMongoDB(t *testing.T) {
+	collection := "users"
+	var exampleUsers = []Map{
+		{"name": "01", "age": 1},
+		{"name": "02", "age": 2},
+		{"name": "03", "age": 3},
+	}
+	exampleUser := exampleUsers[0]
+	var config = Config{
+		Schema: `
+		scalar ObjectId
+		interface Named {
+			name: String
+		}
+
+		type User implements Named {
+			_id: ObjectId
+			name: String
+			age: Int
+		}
+		`,
+		DatabaseUri: testutil.MONGODB_URI,
+		Types: map[string]*TypeConfig{
+			"User": {Collection: "users"},
+		},
+	}
+
+	cases := []struct {
+		Name          string
+		Query         string
+		Expected      Map
+		ExpectedError string
+		Config        Config
+	}{
+		{
+			Name:     "findOne query without args",
+			Config:   config,
+			Expected: Map{"User": exampleUser},
+			Query: `
+			{
+				User {
+					name
+					age
+				}
+			}
+			`,
+		},
+		{
+			Name:     "findOne query with eq",
+			Config:   config,
+			Expected: Map{"User": Map{"name": "03"}},
+			Query: `
+			{
+				User(where: {name: {eq: "03"}}) {
+					name
+				}
+			}
+			`,
+		},
+		{
+			Name:     "findMany query without args",
+			Config:   config,
+			Expected: Map{"UserNodes": Map{"nodes": exampleUsers}},
+			Query: `
+			{
+				UserNodes {
+					nodes {
+						name
+						age
+					}
+				}
+			}
+			`,
+		},
+		{
+			Name:     "findMany query with first",
+			Config:   config,
+			Expected: Map{"UserNodes": Map{"nodes": exampleUsers[:2]}},
+			Query: `
+			{
+				UserNodes(first: 2) {
+					nodes {
+						name
+						age
+					}
+				}
+			}
+			`,
+		},
+		{
+			Name:     "findMany query with last",
+			Config:   config,
+			Expected: Map{"UserNodes": Map{"nodes": exampleUsers[len(exampleUsers)-2:]}},
+			Query: `
+			{
+				UserNodes(last: 2) {
+					nodes {
+						name
+						age
+					}
+				}
+			}
+			`,
+		},
+		{
+			Name:     "findMany query with string cursorField",
+			Config:   config,
+			Expected: Map{"UserNodes": Map{"nodes": exampleUsers[:2], "pageInfo": Map{"endCursor": "02"}}},
+			Query: `
+			{
+				UserNodes(first: 2, cursorField: name) {
+					nodes {
+						name
+						age
+					}
+					pageInfo {
+						endCursor
+					}
+				}
+			}
+			`,
+		},
+		{
+			Name:     "findMany query with int cursorField",
+			Config:   config,
+			Expected: Map{"UserNodes": Map{"nodes": exampleUsers[:2], "pageInfo": Map{"endCursor": 2}}},
+			Query: `
+			{
+				UserNodes(first: 2, cursorField: age) {
+					nodes {
+						name
+						age
+					}
+					pageInfo {
+						endCursor
+					}
+				}
+			}
+			`,
+		},
+	}
+
+	for _, testCase := range cases {
+		t.Run(testCase.Name, func(t *testing.T) {
+			t.Log()
+			// t.Log(testCase.Name)
+			schema, err := MakeMongokeSchema(testCase.Config)
+			m := MongodbDatabaseFunctions{}
+			db, err := m.initMongo(testutil.MONGODB_URI)
+			if err != nil {
+				t.Error(err)
+			}
+			// clear
+			_, err = db.Collection(collection).DeleteMany(context.TODO(), Map{})
+			if err != nil {
+				t.Error(err)
+			}
+			if err != nil {
+				t.Error(err)
+			}
+			for _, user := range exampleUsers {
+				_, err := db.Collection(collection).InsertOne(context.TODO(), user)
+				if err != nil {
+					t.Error(err)
+				}
+			}
+			if testCase.ExpectedError != "" {
+				err = testutil.QuerySchemaShouldFail(t, schema, testCase.Query)
+				return
+			}
+			res := testutil.QuerySchema(t, schema, testCase.Query)
+			res = testutil.ConvertToPlainMap(res)
+			expected := testutil.ConvertToPlainMap(testCase.Expected)
+			t.Log("expected:", expected)
+			t.Log("expected:", pretty(expected))
+			t.Log("result:", res)
+			t.Log("result:", pretty(res))
+			// require.Equal(t, pretty(res), pretty(expected))
+			if diff := deep.Equal(res, expected); diff != nil {
+				t.Error(diff)
+			}
 		})
 	}
 }
