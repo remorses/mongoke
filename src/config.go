@@ -34,6 +34,7 @@ type JwtConfig struct {
 type TypeConfig struct {
 	Exposed     *bool       `yaml:"exposed"`
 	Collection  string      `yaml:"collection"`
+	IsTypeOf    string      `yaml:"is_type_of"`
 	Permissions []AuthGuard `yaml:"permissions"`
 }
 

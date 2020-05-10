@@ -13,7 +13,7 @@ const TIMEOUT_FIND = 10
 type createFieldParams struct {
 	collection  string
 	permissions []AuthGuard
-	returnType  *graphql.Object
+	returnType  graphql.Type
 }
 
 func (mongoke *Mongoke) findOneField(conf createFieldParams) *graphql.Field {

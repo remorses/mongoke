@@ -2,11 +2,13 @@ package mongoke
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
 
+	"github.com/PaesslerAG/gval"
 	jwt "github.com/dgrijalva/jwt-go"
 
 	"github.com/graphql-go/graphql"
@@ -36,7 +38,7 @@ func MakeMongokeSchema(config Config) (graphql.Schema, error) {
 		}
 		config.Schema = string(data)
 	}
-	schemaConfig, err := makeSchemaConfig(config.Schema)
+	schemaConfig, err := makeSchemaConfig(config)
 	if err != nil {
 		return graphql.Schema{}, err
 	}
@@ -55,17 +57,44 @@ func MakeMongokeSchema(config Config) (graphql.Schema, error) {
 	return schema, nil
 }
 
-func makeSchemaConfig(typeDefs string) (graphql.SchemaConfig, error) {
+func makeSchemaConfig(config Config) (graphql.SchemaConfig, error) {
+	resolvers := map[string]tools.Resolver{
+		objectID.Name(): &tools.ScalarResolver{
+			Serialize:    objectID.Serialize,
+			ParseLiteral: objectID.ParseLiteral,
+			ParseValue:   objectID.ParseValue,
+		},
+	}
+	for name, typeConf := range config.Types {
+		if typeConf.IsTypeOf == "" {
+			continue
+		}
+		eval, err := gval.Full().NewEvaluable(typeConf.IsTypeOf)
+		if err != nil {
+			return graphql.SchemaConfig{}, errors.New("got an error parsing isTypeOf expression " + typeConf.IsTypeOf)
+		}
+		resolvers[name] = &tools.ObjectResolver{
+			IsTypeOf: func(p graphql.IsTypeOfParams) bool {
+				res, err := eval(context.Background(), Map{
+					"x":        p.Value,
+					"document": p.Value,
+				})
+				if err != nil {
+					fmt.Println("got an error evaluating expression " + typeConf.IsTypeOf)
+					return false
+				}
+				if res == true {
+					return true
+				}
+				return false
+			},
+		}
+	}
+
 	baseSchemaConfig, err := tools.MakeSchemaConfig(
 		tools.ExecutableSchema{
-			TypeDefs: []string{typeDefs},
-			Resolvers: map[string]tools.Resolver{
-				objectID.Name(): &tools.ScalarResolver{
-					Serialize:    objectID.Serialize,
-					ParseLiteral: objectID.ParseLiteral,
-					ParseValue:   objectID.ParseValue,
-				},
-			},
+			TypeDefs:  []string{config.Schema},
+			Resolvers: resolvers,
 		},
 	)
 	return baseSchemaConfig, err

@@ -1,25 +1,12 @@
 package mongoke
 
 import (
-	"context"
 	"testing"
 
 	"github.com/PaesslerAG/gval"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-
-// example code
-func eval() {
-	eval, err := gval.Full().NewEvaluable("")
-	if err != nil {
-
-	}
-	_, err = eval(context.Background(), Map{})
-	if err != nil {
-
-	}
-}
 
 func TestBasicEvaluation(t *testing.T) {
 	// notice gval does not support single quotes

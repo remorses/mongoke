@@ -6,11 +6,11 @@ import (
 	"github.com/graphql-go/graphql"
 )
 
-func makeWhereArgumentName(object *graphql.Object) string {
+func makeWhereArgumentName(object graphql.Type) string {
 	return object.Name() + "Where"
 }
 
-func (mongoke *Mongoke) getWhereArg(object *graphql.Object) (*graphql.InputObject, error) {
+func (mongoke *Mongoke) getWhereArg(object graphql.Type) (*graphql.InputObject, error) {
 	name := makeWhereArgumentName(object)
 	if item, ok := mongoke.typeMap[name]; ok {
 		if t, ok := item.(*graphql.InputObject); ok {
@@ -21,7 +21,7 @@ func (mongoke *Mongoke) getWhereArg(object *graphql.Object) (*graphql.InputObjec
 	scalars := mongoke.takeIndexableFields(object)
 	inputFields := graphql.InputObjectConfigFieldMap{}
 	for _, field := range scalars {
-		fieldWhere, err := mongoke.getFieldWhereArg(field, object.PrivateName)
+		fieldWhere, err := mongoke.getFieldWhereArg(field, object.Name())
 		if err != nil {
 			return nil, err
 		}

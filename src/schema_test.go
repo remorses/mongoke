@@ -98,6 +98,9 @@ func TestQueryArgs(t *testing.T) {
 	})
 }
 
+var trueValue = true
+var falseValue = false
+
 func TestQueryReturnValues(t *testing.T) {
 	var exampleUsers = []Map{
 		{"name": "01", "age": 1},
@@ -179,6 +182,48 @@ func TestQueryReturnValues(t *testing.T) {
 				User {
 					name
 					age
+				}
+			}
+			`,
+		},
+		{
+			Name: "schema with Union type",
+			Config: Config{
+				Schema: `
+				type Guest {
+					name: String
+				}
+				type Admin {
+					password: String
+				}
+				union User = Admin | Guest
+				`,
+				DatabaseUri: testutil.MONGODB_URI,
+				Types: map[string]*TypeConfig{
+					"Admin": {
+						Exposed:  &falseValue,
+						IsTypeOf: "false",
+					},
+					"Guest": {
+						Exposed:  &falseValue,
+						IsTypeOf: "x.name == \"01\"",
+					},
+					"User": {
+						Collection: "users",
+					},
+				},
+				databaseFunctions: databaseMock,
+			},
+			Expected: Map{"User": Map{"name": "01"}},
+			Query: `
+			{
+				User {
+					...on Guest {
+						name
+					}
+					...on Admin {
+						password
+					}
 				}
 			}
 			`,

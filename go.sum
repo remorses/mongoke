@@ -95,6 +95,8 @@ github.com/remorses/graphql-go-tools v0.0.0-20200506161536-a31d9b4aa896 h1:UDjGj
 github.com/remorses/graphql-go-tools v0.0.0-20200506161536-a31d9b4aa896/go.mod h1:oO7RviMuSoVdW1uBrannRMSLoRO6Hpzfds/908drdj4=
 github.com/remorses/graphql-go-tools v0.0.0-20200510114719-971e286a85ec h1:RWY6lvSG18UvMAUjadCKBmLBa3VwRGyveqpTdi3RNp4=
 github.com/remorses/graphql-go-tools v0.0.0-20200510114719-971e286a85ec/go.mod h1:oO7RviMuSoVdW1uBrannRMSLoRO6Hpzfds/908drdj4=
+github.com/remorses/graphql-go-tools v0.0.0-20200510134602-04879f523e37 h1:mI4SVan7VUKWZxiiEMg4hwMpXz9sQWpyhtZlIGEIO7Y=
+github.com/remorses/graphql-go-tools v0.0.0-20200510134602-04879f523e37/go.mod h1:oO7RviMuSoVdW1uBrannRMSLoRO6Hpzfds/908drdj4=
 github.com/remorses/mongoke v0.0.0-20200411094841-ab0cbf0ea488 h1:FDC0SD40UHC8yUqEQ+Grp4TmLQKnoTk0RQjVCZP6wnw=
 github.com/rogpeppe/go-internal v1.1.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/rogpeppe/go-internal v1.2.2/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=

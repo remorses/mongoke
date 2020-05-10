@@ -5,10 +5,10 @@ import (
 )
 
 // indexableFields
-func (m Mongoke) takeIndexableFields(object *graphql.Object) []*graphql.FieldDefinition {
+func (m Mongoke) takeIndexableFields(object graphql.Type) []*graphql.FieldDefinition {
 	indexableNames := takeIndexableTypeNames(m.schemaConfig)
 	indexableFields := make([]*graphql.FieldDefinition, 0)
-	for _, v := range object.Fields() {
+	for _, v := range getTypeFields(object) {
 		typeName := v.Type.Name()
 		switch typeName {
 		case "String", "Boolean", "Int", "Float", "ID", "DateTime":
@@ -19,6 +19,23 @@ func (m Mongoke) takeIndexableFields(object *graphql.Object) []*graphql.FieldDef
 		}
 	}
 	return indexableFields
+}
+
+func getTypeFields(object graphql.Type) graphql.FieldDefinitionMap {
+	fieldMap := graphql.FieldDefinitionMap{}
+	switch v := object.(type) {
+	case *graphql.Object:
+		return v.Fields()
+	case *graphql.Union:
+		for _, t := range v.Types() {
+			for k, field := range t.Fields() {
+				fieldMap[k] = field
+			}
+		}
+		return fieldMap
+	default:
+		return graphql.FieldDefinitionMap{}
+	}
 }
 
 // to be used in takeScalarFields

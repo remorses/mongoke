@@ -6,11 +6,11 @@ import (
 	"github.com/graphql-go/graphql"
 )
 
-func makeIndexableFieldsName(object *graphql.Object) string {
+func makeIndexableFieldsName(object graphql.Type) string {
 	return object.Name() + "IndexableFields"
 }
 
-func (mongoke *Mongoke) getIndexableFieldsEnum(object *graphql.Object) (*graphql.Enum, error) {
+func (mongoke *Mongoke) getIndexableFieldsEnum(object graphql.Type) (*graphql.Enum, error) {
 	name := makeIndexableFieldsName(object)
 	if item, ok := mongoke.typeMap[name]; ok {
 		if t, ok := item.(*graphql.Enum); ok {

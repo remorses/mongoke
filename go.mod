@@ -15,7 +15,7 @@ require (
 	github.com/kofalt/go-memoize v0.0.0-20190519021333-cf756f0462a4 // indirect
 	github.com/matryer/moq v0.0.0-20200310130814-7721994d1b54 // indirect
 	github.com/mitchellh/mapstructure v1.3.0
-	github.com/remorses/graphql-go-tools v0.0.0-20200510114719-971e286a85ec
+	github.com/remorses/graphql-go-tools v0.0.0-20200510134602-04879f523e37
 	github.com/stretchr/testify v1.5.1
 	github.com/urfave/cli/v2 v2.2.0
 	go.mongodb.org/mongo-driver v1.3.3

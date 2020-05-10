@@ -6,11 +6,11 @@ import (
 	"github.com/graphql-go/graphql"
 )
 
-func makeConnectionTypeName(object *graphql.Object) string {
+func makeConnectionTypeName(object graphql.Type) string {
 	return object.Name() + "Connection"
 }
 
-func (mongoke *Mongoke) getConnectionType(object *graphql.Object) (*graphql.Object, error) {
+func (mongoke *Mongoke) getConnectionType(object graphql.Type) (*graphql.Object, error) {
 	name := makeConnectionTypeName(object)
 	// get cached value to not dupe
 	if item, ok := mongoke.typeMap[name]; ok {
