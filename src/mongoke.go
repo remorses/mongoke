@@ -1,7 +1,8 @@
 package mongoke
 
 import (
-	"encoding/json"
+	"context"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -71,50 +72,43 @@ func makeSchemaConfig(typeDefs string) (graphql.SchemaConfig, error) {
 }
 
 // MakeMongokeHandler creates an http handler
-func MakeMongokeHandler(config Config) (http.HandlerFunc, error) {
+func MakeMongokeHandler(config Config) (http.Handler, error) {
 	schema, err := MakeMongokeSchema(config)
 	if err != nil {
 		return nil, err
 	}
 
-	h := func(w http.ResponseWriter, r *http.Request) {
+	h := handler.New(&handler.Config{
+		Schema:     &schema,
+		Pretty:     true,
+		GraphiQL:   true,
+		Playground: true,
+		RootObjectFn: func(ctx context.Context, r *http.Request) map[string]interface{} {
+			rootValue := Map{
+				"request": r,
+			}
 
-		// parse http.Request into handler.RequestOptions
-		opts := handler.NewRequestOptions(r)
+			tknStr := r.Header.Get("Authorization")
+			parts := strings.Split(tknStr, "Bearer")
+			tknStr = reverseStrings(parts)[0]
+			tknStr = strings.TrimSpace(tknStr)
 
-		tknStr := r.Header.Get("Authorization")
-		parts := strings.Split(tknStr, "Bearer")
-		tknStr = reverseStrings(parts)[0]
-		tknStr = strings.TrimSpace(tknStr)
-		claims, err := extractClaims(tknStr, "secret") // TODO take secret from config or url
+			if tknStr == "" {
+				return rootValue
+			}
 
-		rootValue := Map{
-			"response": w,
-			"request":  r,
-			"jwt":      claims,
-		}
+			claims, err := extractClaims(tknStr, "secret") // TODO take secret from config or url
 
-		// execute graphql query
-		// here, we passed in Query, Variables and OperationName extracted from http.Request
-		params := graphql.Params{
-			Schema:         schema,
-			RequestString:  opts.Query,
-			VariableValues: opts.Variables,
-			OperationName:  opts.OperationName,
-			RootObject:     rootValue,
-		}
-		result := graphql.Do(params)
+			if err != nil {
+				fmt.Println("error in handler", err)
+				return rootValue
+			}
 
-		// one way to render JSON without use of external libraries
-		// alternatively, you can use libraries like `unrolled/render`
-		js, err := json.Marshal(result)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(js)
-	}
+			rootValue["jwt"] = claims
+
+			return rootValue
+		},
+	})
 
 	return h, nil
 }
