@@ -30,7 +30,7 @@ func QuerySchemaShouldFail(t *testing.T, schema graphql.Schema, query string) er
 	if res.Errors != nil && len(res.Errors) > 0 {
 		return res.Errors[0]
 	}
-	t.Fatal("query " + query + " should have failed")
+	t.Fatal("query should have failed")
 	return nil
 }
 

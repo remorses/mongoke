@@ -1,13 +1,11 @@
 package mongoke
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/graphql-go/graphql"
-	"github.com/mitchellh/mapstructure"
 	"github.com/remorses/mongoke/src/testutil"
 	"github.com/stretchr/testify/require"
 )
@@ -100,16 +98,6 @@ func TestQueryArgs(t *testing.T) {
 }
 
 func TestQueryReturnValues(t *testing.T) {
-	type user struct {
-		Name string `json:name`
-		Age  int    `json:age`
-	}
-
-	type userStruct struct {
-		Name string
-		Age  int
-	}
-
 	var exampleUsers = []Map{
 		{"name": "01", "age": 1},
 		{"name": "02", "age": 2},
@@ -124,177 +112,161 @@ func TestQueryReturnValues(t *testing.T) {
 			return exampleUser, nil
 		},
 	}
-	schema, err := MakeMongokeSchema(config, databaseMock)
-	if err != nil {
-		t.Error(err)
+
+	cases := []struct {
+		Name          string
+		Query         string
+		Expected      Map
+		ExpectedError string
+		Config        Config
+	}{
+		{
+			Name:     "findOne query without args",
+			Config:   config,
+			Expected: Map{"User": exampleUser},
+			Query: `
+			{
+				User {
+					name
+					age
+				}
+			}
+			`,
+		},
+		{
+			Name: "findOne query with permissions false",
+			Config: Config{
+				Schema: `
+				type User {
+					name: String
+					age: Int
+				}
+				`,
+				DatabaseUri: testutil.MONGODB_URI,
+				Types: map[string]*TypeConfig{
+					"User": {
+						Collection: "users",
+						Permissions: []AuthGuard{
+							{
+								Expression: "false",
+							},
+						},
+					},
+				},
+			},
+			ExpectedError: "no enough permissions", // TODO error not right
+			Query: `
+			{
+				User {
+					name
+					age
+				}
+			}
+			`,
+		},
+		{
+			Name: "findOne query with permissions HideFields",
+			Config: Config{
+				Schema: `
+				type User {
+					name: String
+					age: Int
+				}
+				`,
+				DatabaseUri: testutil.MONGODB_URI,
+				Types: map[string]*TypeConfig{
+					"User": {
+						Collection: "users",
+
+						Permissions: []AuthGuard{
+							{
+								Expression: "true",
+								HideFields: []string{"name"},
+							},
+						},
+					},
+				},
+			},
+			Expected: Map{"User": Map{"name": nil, "age": 1}},
+			Query: `
+			{
+				User {
+					name
+					age
+				}
+			}
+			`,
+		},
+		{
+			Name:     "findMany query without args",
+			Config:   config,
+			Expected: Map{"UserNodes": Map{"nodes": exampleUsers}},
+			Query: `
+			{
+				UserNodes {
+					nodes {
+						name
+						age
+					}
+				}
+			}
+			`,
+		},
+		{
+			Name: "findMany query with permissions false",
+			Config: Config{
+				Schema: `
+				type User {
+					name: String
+					age: Int
+				}
+				`,
+				DatabaseUri: testutil.MONGODB_URI,
+				Types: map[string]*TypeConfig{
+					"User": {
+						Collection: "users",
+						Permissions: []AuthGuard{
+							{
+								Expression: "false",
+							},
+						},
+					},
+				},
+			},
+			Expected: Map{"UserNodes": Map{"nodes": []Map{}}},
+			Query: `
+			{
+				UserNodes {
+					nodes {
+						name
+						age
+					}
+				}
+			}
+			`,
+		},
 	}
 
-	t.Run("findOne query without args", func(t *testing.T) {
-		query := `
-		{
-			User {
-				name
-				age
+	for _, testCase := range cases {
+		t.Run(testCase.Name, func(t *testing.T) {
+			t.Log()
+			// t.Log(testCase.Name)
+			schema, err := MakeMongokeSchema(testCase.Config, databaseMock)
+			if err != nil {
+				t.Error(err)
 			}
-		}
-		`
-		res := testutil.QuerySchema(t, schema, query)
-		res = testutil.ConvertToPlainMap(res)
-		expected := testutil.ConvertToPlainMap(Map{"User": exampleUser})
-		t.Log(res)
-		t.Log(expected)
-		require.Equal(t, true, reflect.DeepEqual(res, expected))
-	})
-
-	t.Run("findOne query with permissions false", func(t *testing.T) {
-		config := Config{
-			Schema: `
-			type User {
-				name: String
-				age: Int
+			if testCase.ExpectedError != "" {
+				err = testutil.QuerySchemaShouldFail(t, schema, testCase.Query)
+				return
 			}
-			`,
-			DatabaseUri: testutil.MONGODB_URI,
-			Types: map[string]*TypeConfig{
-				"User": {
-					Collection: "users",
-					Permissions: []AuthGuard{
-						{
-							Expression: "false",
-						},
-					},
-				},
-			},
-		}
-		schema, err := MakeMongokeSchema(config, databaseMock)
-		if err != nil {
-			t.Error(err)
-		}
-		query := `
-		{
-			User {
-				name
-				age
-			}
-		}
-		`
-		err = testutil.QuerySchemaShouldFail(t, schema, query)
-		fmt.Println(err)
-		// require.Equal(t, err, "")
-	})
-
-	t.Run("findOne query with permissions HideFields", func(t *testing.T) {
-		config := Config{
-			Schema: `
-			type User {
-				name: String
-				age: Int
-			}
-			`,
-			DatabaseUri: testutil.MONGODB_URI,
-			Types: map[string]*TypeConfig{
-				"User": {
-					Collection: "users",
-					Permissions: []AuthGuard{
-						{
-							Expression: "true",
-							HideFields: []string{"name"},
-						},
-					},
-				},
-			},
-		}
-		schema, err := MakeMongokeSchema(config, databaseMock)
-		if err != nil {
-			t.Error(err)
-		}
-		query := `
-		{
-			User {
-				name
-				age
-			}
-		}
-		`
-		type Res struct {
-			User userStruct
-		}
-		res := testutil.QuerySchema(t, schema, query)
-		t.Log(pretty(res))
-		var x Res
-		mapstructure.Decode(res, &x)
-		require.Equal(t, "", x.User.Name)
-		require.Equal(t, exampleUser["age"], x.User.Age)
-	})
-
-	t.Run("findMany query without args", func(t *testing.T) {
-		query := `
-		{
-			UserNodes {
-				nodes {
-					name
-					age
-				}
-			}
-		}
-		`
-		type Res struct {
-			UserNodes struct {
-				Nodes []userStruct
-			}
-		}
-		res := testutil.QuerySchema(t, schema, query)
-		var x Res
-		mapstructure.Decode(res, &x)
-		require.Equal(t, exampleUsers[0]["name"], x.UserNodes.Nodes[0].Name)
-		require.Equal(t, exampleUsers[0]["age"], x.UserNodes.Nodes[0].Age)
-	})
-
-	t.Run("findMany query with permissions false", func(t *testing.T) {
-		config := Config{
-			Schema: `
-			type User {
-				name: String
-				age: Int
-			}
-			`,
-			DatabaseUri: testutil.MONGODB_URI,
-			Types: map[string]*TypeConfig{
-				"User": {
-					Collection: "users",
-					Permissions: []AuthGuard{
-						{
-							Expression: "false",
-						},
-					},
-				},
-			},
-		}
-		schema, err := MakeMongokeSchema(config, databaseMock)
-		if err != nil {
-			t.Error(err)
-		}
-		query := `
-		{
-			UserNodes {
-				nodes {
-					name
-					age
-				}
-			}
-		}
-		`
-		type Res struct {
-			UserNodes struct {
-				Nodes []userStruct
-			}
-		}
-		res := testutil.QuerySchema(t, schema, query)
-		t.Log(pretty(res))
-		var x Res
-		mapstructure.Decode(res, &x)
-		require.Equal(t, 0, len(x.UserNodes.Nodes))
-	})
+			res := testutil.QuerySchema(t, schema, testCase.Query)
+			res = testutil.ConvertToPlainMap(res)
+			expected := testutil.ConvertToPlainMap(testCase.Expected)
+			t.Log("expected:", expected)
+			t.Log("result:", res)
+			require.Equal(t, true, reflect.DeepEqual(res, expected))
+		})
+	}
 }
 
 func TestExtractClaims(t *testing.T) {
