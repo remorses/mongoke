@@ -9,7 +9,7 @@ import (
 
 var (
 	True  = true
-	False = true
+	False = false
 )
 
 var directionEnum = graphql.NewEnum(graphql.EnumConfig{
