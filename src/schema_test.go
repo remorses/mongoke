@@ -115,7 +115,11 @@ func TestQueryReturnValues(t *testing.T) {
 	}
 	var config = Config{
 		Schema: `
-		type User {
+		interface Named {
+			name: String
+		}
+
+		type User implements Named {
 			name: String
 			age: Int
 		}
