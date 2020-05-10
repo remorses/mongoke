@@ -37,7 +37,7 @@ func main() {
 			if e != nil {
 				return cli.Exit(e, 1)
 			}
-			handler, err := mongoke.MakeMongokeHandler(config, nil)
+			handler, err := mongoke.MakeMongokeHandler(config)
 			if err != nil {
 				panic(err)
 			}

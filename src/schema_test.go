@@ -10,19 +10,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var config = Config{
-	Schema: `
-	type User {
-		name: String
-		age: Int
-	}
-	`,
-	DatabaseUri: testutil.MONGODB_URI,
-	Types: map[string]*TypeConfig{
-		"User": {Collection: "users"},
-	},
-}
-
 func TestQueryArgs(t *testing.T) {
 	databaseMock := &DatabaseInterfaceMock{
 		FindManyFunc: func(p FindManyParams) ([]Map, error) {
@@ -32,7 +19,21 @@ func TestQueryArgs(t *testing.T) {
 			return nil, nil
 		},
 	}
-	schema, err := MakeMongokeSchema(config, databaseMock)
+	var config = Config{
+		Schema: `
+		type User {
+			name: String
+			age: Int
+		}
+		`,
+		DatabaseUri: testutil.MONGODB_URI,
+		Types: map[string]*TypeConfig{
+			"User": {Collection: "users"},
+		},
+		databaseFunctions: databaseMock,
+	}
+
+	schema, err := MakeMongokeSchema(config)
 	if err != nil {
 		t.Error(err)
 	}
@@ -112,6 +113,19 @@ func TestQueryReturnValues(t *testing.T) {
 			return exampleUser, nil
 		},
 	}
+	var config = Config{
+		Schema: `
+		type User {
+			name: String
+			age: Int
+		}
+		`,
+		DatabaseUri: testutil.MONGODB_URI,
+		Types: map[string]*TypeConfig{
+			"User": {Collection: "users"},
+		},
+		databaseFunctions: databaseMock,
+	}
 
 	cases := []struct {
 		Name          string
@@ -153,6 +167,7 @@ func TestQueryReturnValues(t *testing.T) {
 						},
 					},
 				},
+				databaseFunctions: databaseMock,
 			},
 			ExpectedError: "no enough permissions", // TODO error not right
 			Query: `
@@ -186,6 +201,7 @@ func TestQueryReturnValues(t *testing.T) {
 						},
 					},
 				},
+				databaseFunctions: databaseMock,
 			},
 			Expected: Map{"User": Map{"name": nil, "age": 1}},
 			Query: `
@@ -251,7 +267,7 @@ func TestQueryReturnValues(t *testing.T) {
 		t.Run(testCase.Name, func(t *testing.T) {
 			t.Log()
 			// t.Log(testCase.Name)
-			schema, err := MakeMongokeSchema(testCase.Config, databaseMock)
+			schema, err := MakeMongokeSchema(testCase.Config)
 			if err != nil {
 				t.Error(err)
 			}

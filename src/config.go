@@ -18,12 +18,13 @@ var Operations = struct {
 }
 
 type Config struct {
-	DatabaseUri string                 `yaml:"database_uri"`
-	Schema      string                 `yaml:"schema"`
-	SchemaPath  string                 `yaml:"schema_path"`
-	Types       map[string]*TypeConfig `yaml:"types"`
-	Relations   []RelationConfig       `yaml:"relations"`
-	JwtConfig   JwtConfig              `yaml:"jwt"`
+	DatabaseUri       string                 `yaml:"database_uri"`
+	Schema            string                 `yaml:"schema"`
+	SchemaPath        string                 `yaml:"schema_path"`
+	Types             map[string]*TypeConfig `yaml:"types"`
+	Relations         []RelationConfig       `yaml:"relations"`
+	JwtConfig         JwtConfig              `yaml:"jwt"`
+	databaseFunctions DatabaseInterface
 }
 
 type JwtConfig struct {

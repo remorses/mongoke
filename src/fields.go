@@ -33,6 +33,9 @@ func (mongoke *Mongoke) findOneField(conf createFieldParams) *graphql.Field {
 		}
 		jwt := getJwt(params)
 		// don't compute permissions if document is nil
+		if document == nil {
+			return nil, nil
+		}
 		document, err = applyGuardsOnDocument(applyGuardsOnDocumentParams{
 			document:  document,
 			guards:    conf.permissions,
@@ -42,8 +45,6 @@ func (mongoke *Mongoke) findOneField(conf createFieldParams) *graphql.Field {
 		if err != nil {
 			return nil, err
 		}
-		// document, err := mongoke.database.findOne()
-		// prettyPrint(args)
 		return document, nil
 	}
 	whereArg, err := mongoke.getWhereArg(conf.returnType)

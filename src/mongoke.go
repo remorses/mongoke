@@ -24,9 +24,9 @@ type Mongoke struct {
 }
 
 // MakeMongokeSchema generates the schema
-func MakeMongokeSchema(config Config, databaseFunctions DatabaseInterface) (graphql.Schema, error) {
-	if databaseFunctions == nil {
-		databaseFunctions = MongodbDatabaseFunctions{}
+func MakeMongokeSchema(config Config) (graphql.Schema, error) {
+	if config.databaseFunctions == nil {
+		config.databaseFunctions = MongodbDatabaseFunctions{}
 	}
 	if config.Schema == "" && config.SchemaPath != "" {
 		data, e := ioutil.ReadFile(config.SchemaPath)
@@ -42,7 +42,7 @@ func MakeMongokeSchema(config Config, databaseFunctions DatabaseInterface) (grap
 	mongoke := Mongoke{
 		Config:            config,
 		typeDefs:          config.Schema,
-		databaseFunctions: databaseFunctions,
+		databaseFunctions: config.databaseFunctions,
 		typeMap:           make(map[string]graphql.Type),
 		databaseUri:       config.DatabaseUri,
 		schemaConfig:      schemaConfig,
@@ -71,8 +71,8 @@ func makeSchemaConfig(typeDefs string) (graphql.SchemaConfig, error) {
 }
 
 // MakeMongokeHandler creates an http handler
-func MakeMongokeHandler(config Config, databaseFunctions DatabaseInterface) (http.HandlerFunc, error) {
-	schema, err := MakeMongokeSchema(config, databaseFunctions)
+func MakeMongokeHandler(config Config) (http.HandlerFunc, error) {
+	schema, err := MakeMongokeSchema(config)
 	if err != nil {
 		return nil, err
 	}
