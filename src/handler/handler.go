@@ -17,6 +17,8 @@ import (
 	"context"
 )
 
+var WEB_UI_PATH = "./web-ui/out/"
+
 // MakeMongokeHandler creates an http handler
 func MakeMongokeHandler(config mongoke.Config) (http.Handler, error) {
 	schema, err := mongoke.MakeMongokeSchema(config)
@@ -86,7 +88,7 @@ func MakeMongokeHandler(config mongoke.Config) (http.Handler, error) {
 func makeGraphiqlHandler() (http.Handler, error) {
 	cwd, _ := os.Getwd()
 	root, _ := filepath.Abs(cwd)
-	assets := path.Join(root, "./web-ui/out/")
+	assets := path.Join(root, WEB_UI_PATH)
 	fmt.Println(assets)
 	h := http.FileServer(http.Dir(assets))
 	return h, nil
