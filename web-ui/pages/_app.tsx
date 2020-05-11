@@ -4,7 +4,7 @@ import { ThemeProvider, CSSReset, Box } from '@chakra-ui/core'
 
 function MyApp({ Component, pageProps }) {
     return (
-        <Box height='100%'>
+        <Box h='100vh'>
             <ThemeProvider>
                 <CSSReset />
                 <Component {...pageProps} />
