@@ -21,6 +21,7 @@ require (
 	github.com/remorses/graphql-go-tools v0.0.0-20200511111635-5c318a54190b
 	github.com/stretchr/testify v1.5.1
 	github.com/urfave/cli/v2 v2.2.0
+	github.com/xeipuuv/gojsonschema v1.2.0
 	go.mongodb.org/mongo-driver v1.3.3
 	golang.org/x/net v0.0.0-20200505041828-1ed23360d12c // indirect
 	gopkg.in/yaml.v2 v2.2.2

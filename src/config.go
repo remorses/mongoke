@@ -42,13 +42,13 @@ type JwtConfig struct {
 type TypeConfig struct {
 	Exposed     *bool       `yaml:"exposed"`
 	Collection  string      `yaml:"collection"`
-	IsTypeOf    string      `yaml:"is_type_of"`
+	IsTypeOf    string      `yaml:"type_check"`
 	Permissions []AuthGuard `yaml:"permissions"`
 }
 
 type AuthGuard struct {
 	Expression        string   `yaml:"if"`
-	AllowedOperations []string `yaml:"actions"`
+	AllowedOperations []string `yaml:"allowed_operations"`
 	HideFields        []string `yaml:"hide_fields"`
 	eval              gval.Evaluable
 }
@@ -57,7 +57,7 @@ type RelationConfig struct {
 	From         string            `yaml:"from"`
 	Field        string            `yaml:"field"`
 	To           string            `yaml:"to"`
-	RelationType string            `yaml:"relation_type"`
+	RelationType string            `yaml:"type"`
 	Where        map[string]Filter `yaml:"where"`
 }
 
