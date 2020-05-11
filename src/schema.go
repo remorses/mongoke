@@ -9,23 +9,16 @@ import (
 func (mongoke *Mongoke) generateSchema() (graphql.Schema, error) {
 	queryFields := graphql.Fields{}
 	mutationFields := graphql.Fields{}
-
 	baseSchemaConfig := mongoke.schemaConfig
-	for _, gqlType := range baseSchemaConfig.Types {
-		// TODO handle unions types, adding a Field function to Object and creating a shared interface
 
+	// add fields
+	for _, gqlType := range baseSchemaConfig.Types {
 		var object graphql.Type
 		switch v := gqlType.(type) {
 		case *graphql.Object, *graphql.Union:
-			// TODO add an v.isTypeOf based on config, to resolve interfaces and unions
 			object = v
 		default:
 			continue
-			// case *graphql.Scalar: // scalars like Id are laready baked in
-			// 	return graphql.Schema{}, errors.New("scalar types are still not supported, for scalar type" + gqlType.Name())
-			// case *graphql.Interface:
-			// 	println("interface")
-			// 	return graphql.Schema{}, errors.New("interface types are still not supported, for interface type" + gqlType.Name())
 		}
 
 		typeConf := mongoke.Config.getTypeConfig(gqlType.Name())
@@ -63,6 +56,7 @@ func (mongoke *Mongoke) generateSchema() (graphql.Schema, error) {
 		}
 	}
 
+	// add relations
 	for _, relation := range mongoke.Config.Relations {
 		if relation.Field == "" {
 			return graphql.Schema{}, errors.New("relation field is empty " + relation.From)
