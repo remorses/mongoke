@@ -9,6 +9,9 @@
                 "schema": {
                     "type": "string"
                 },
+                "database_uri": {
+                    "type": "string"
+                },
                 "schema_url": {
                     "$ref": "#/definitions/Url"
                 },
@@ -46,13 +49,7 @@
                     "type": "array",
                     "items": {
                         "type": "object",
-                        "required": [
-                            "from",
-                            "to",
-                            "type",
-                            "field",
-                            "where"
-                        ],
+                        "required": ["from", "to", "type", "field", "where"],
                         "properties": {
                             "from": {
                                 "type": "string"

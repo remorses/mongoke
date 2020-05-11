@@ -1,18 +1,12 @@
-$schema: https://raw.githubusercontent.com/angular/angular-cli/master/packages/angular/cli/lib/config/schema.json
+# $schema: https://raw.githubusercontent.com/angular/angular-cli/master/packages/angular/cli/lib/config/schema.json
 
 
 
 database_uri: mongodb://localhost/testdb
 
-jwt:
-  algorithms: [H256]
-  required: false
 
 # admin can do everything, used in server side adding a custom header
 # in the web UI it is set as a password
-admin:
-  header: "x-mongoke-admin-secret"
-  secret: "kjhfgdhfgk"
 
 schema: |
   scalar ObjectId
@@ -52,8 +46,7 @@ types:
 relations:
   - from: User
     to: User
-    x: sdf
-    relation_type: to_many
+    type: 'to_many'
     field: friends
     where: {}
  

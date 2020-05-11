@@ -18,47 +18,47 @@ var Operations = struct {
 }
 
 type Config struct {
-	DatabaseUri       string                 `yaml:"database_uri"`
-	Schema            string                 `yaml:"schema"`
-	SchemaPath        string                 `yaml:"schema_path"`
-	Types             map[string]*TypeConfig `yaml:"types"`
-	Relations         []RelationConfig       `yaml:"relations"`
-	JwtConfig         JwtConfig              `yaml:"jwt"`
+	DatabaseUri       string                 `json:"database_uri"`
+	Schema            string                 `json:"schema"`
+	SchemaPath        string                 `json:"schema_path"`
+	Types             map[string]*TypeConfig `json:"types"`
+	Relations         []RelationConfig       `json:"relations"`
+	JwtConfig         JwtConfig              `json:"jwt"`
 	databaseFunctions DatabaseInterface
 }
 
 type JwtConfig struct {
-	HeaderName string `yaml:"header_name"`
+	HeaderName string `json:"header_name"`
 	// for example https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com
-	JwkUrl string `yaml:"jwk_url"`
+	JwkUrl string `json:"jwk_url"`
 	// 32 string for HS256 or PEM encoded string or as a X509 certificate for RSA
-	Key string `yaml:"key"`
+	Key string `json:"key"`
 	// HS256, HS384, HS512, RS256, RS384, RS512
-	Type     string `yaml:"type"`
-	Audience string `yaml:"audience"`
-	Issuer   string `yaml:"issuer"`
+	Type     string `json:"type"`
+	Audience string `json:"audience"`
+	Issuer   string `json:"issuer"`
 }
 
 type TypeConfig struct {
-	Exposed     *bool       `yaml:"exposed"`
-	Collection  string      `yaml:"collection"`
-	IsTypeOf    string      `yaml:"type_check"`
-	Permissions []AuthGuard `yaml:"permissions"`
+	Exposed     *bool       `json:"exposed"`
+	Collection  string      `json:"collection"`
+	IsTypeOf    string      `json:"type_check"`
+	Permissions []AuthGuard `json:"permissions"`
 }
 
 type AuthGuard struct {
-	Expression        string   `yaml:"if"`
-	AllowedOperations []string `yaml:"allowed_operations"`
-	HideFields        []string `yaml:"hide_fields"`
+	Expression        string   `json:"if"`
+	AllowedOperations []string `json:"allowed_operations"`
+	HideFields        []string `json:"hide_fields"`
 	eval              gval.Evaluable
 }
 
 type RelationConfig struct {
-	From         string            `yaml:"from"`
-	Field        string            `yaml:"field"`
-	To           string            `yaml:"to"`
-	RelationType string            `yaml:"type"`
-	Where        map[string]Filter `yaml:"where"`
+	From         string            `json:"from"`
+	Field        string            `json:"field"`
+	To           string            `json:"to"`
+	RelationType string            `json:"type"`
+	Where        map[string]Filter `json:"where"`
 }
 
 // MakeConfigFromYaml parses the config from yaml

@@ -9,6 +9,7 @@ require (
 	github.com/carted/graphql v0.7.6 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/dvic/graphql v0.7.4 // indirect
+	github.com/ghodss/yaml v1.0.0
 	github.com/go-test/deep v1.0.6
 	github.com/graphql-go/graphql v0.7.9
 	github.com/graphql-go/handler v0.2.3

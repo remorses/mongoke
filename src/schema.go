@@ -97,7 +97,7 @@ func (mongoke *Mongoke) generateSchema() (graphql.Schema, error) {
 			}
 			object.AddFieldConfig(relation.Field, field)
 		} else {
-			return graphql.Schema{}, errors.New("relation_type must be to_many or to_one")
+			return graphql.Schema{}, errors.New("relation_type must be `to_many` or `to_one`, got " + relation.RelationType)
 		}
 	}
 
