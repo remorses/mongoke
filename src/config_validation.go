@@ -1,110 +1,72 @@
 package mongoke
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/xeipuuv/gojsonschema"
 )
 
-func validate(config Config) {
+func validateConfig(config Config) error {
 
 	schemaLoader := gojsonschema.NewStringLoader(jsonSchemaString)
-	result, err := gojsonschema.Validate(schemaLoader, nil)
+	result, err := gojsonschema.Validate(schemaLoader, gojsonschema.NewGoLoader(config))
 	if err != nil {
-		panic(err.Error())
+		return err
 	}
 
-	if result.Valid() {
-		fmt.Printf("The document is valid\n")
-	} else {
-		fmt.Printf("The document is not valid. see errors :\n")
+	if !result.Valid() {
+		msg := ("The document is not valid. see errors :\n")
 		for _, desc := range result.Errors() {
-			fmt.Printf("- %s\n", desc)
+			msg += fmt.Sprintf("- %s\n", desc)
 		}
+		return errors.New(msg)
 	}
+	return nil
 }
 
+// TODO upload jsonschema somewhere
 var jsonSchemaString = `
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/Configuration",
     "definitions": {
         "Configuration": {
-        "type": "object",
-            "required": [
-                "types"
-            ],
+            "type": "object",
+            "required": ["types"],
             "properties": {
                 "schema": {
-                    "type": "string",
+                    "type": "string"
+                },
+                "database_uri": {
+                    "type": "string"
                 },
                 "schema_url": {
-                    "$ref": "#/definitions/Url",
+                    "$ref": "#/definitions/Url"
                 },
                 "schema_path": {
-                    "type": "string",
+                    "type": "string"
                 },
                 "types": {
-                "description": "",
                     "type": "object",
-                    "required": [],
                     "properties": {},
                     "additionalProperties": {
-                        "description": "",
                         "type": "object",
-                        "required": [
-                            "collection"
-                        ],
+                        "required": ["collection"],
                         "properties": {
                             "collection": {
-                                "type": "string",
+                                "type": "string"
                             },
                             "exposed": {
-                                "type": "boolean",
+                                "type": "boolean"
                             },
-                            "pipeline": {
+                            "type_check": {
+                                "type": "string"
+                            },
+                            "permissions": {
                                 "type": "array",
-                            "items": {
-                                },
-                                "minItems": 0
-                            },
-                            "disambiguations": {
-                            "description": "",
-                                "type": "object",
-                                "required": [],
-                                "properties": {},
-                                "additionalProperties": {
-                                    "type": "string",
-                                }
-                            },
-                            "guards": {
-                                "type": "array",
-                            "items": {
-                                "description": "",
-                                    "type": "object",
-                                    "required": [
-                                        "expression"
-                                    ],
-                                    "properties": {
-                                        "expression": {
-                                            "type": "string",
-                                        },
-                                        "excluded": {
-                                            "type": "array",
-                                        "items": {
-                                                "type": "string",
-                                            },
-                                            "minItems": 0
-                                        },
-                                        "when": {
-                                            "enum": [
-                                                "after",
-                                                "before"
-                                            ],
-                                            "type": "string",
-                                        }
-                                    },
-                                    "additionalProperties": false
+                                "items": {
+                                    "$ref": "#/definitions/AuthGuard"
                                 },
                                 "minItems": 0
                             }
@@ -114,34 +76,31 @@ var jsonSchemaString = `
                 },
                 "relations": {
                     "type": "array",
-                "items": {
-                    "description": "",
+                    "items": {
                         "type": "object",
                         "required": [
                             "from",
                             "to",
-                            "relation_type",
+                            "type",
                             "field",
                             "where"
                         ],
                         "properties": {
                             "from": {
-                                "type": "string",
+                                "type": "string"
                             },
                             "to": {
-                                "type": "string",
+                                "type": "string"
                             },
-                            "relation_type": {
-                                "enum": [
-                                    "to_many",
-                                    "to_one"
-                                ],
-                                "type": "string",
+                            "type": {
+                                "enum": ["to_many", "to_one"],
+                                "type": "string"
                             },
                             "field": {
-                                "type": "string",
+                                "type": "string"
                             },
                             "where": {
+                                "$ref": "#/definitions/WhereFilter"
                             }
                         },
                         "additionalProperties": false
@@ -149,43 +108,41 @@ var jsonSchemaString = `
                     "minItems": 0
                 },
                 "jwt": {
-                "description": "",
                     "type": "object",
-                    "required": [],
+
                     "properties": {
-                        "secret": {
-                            "type": "string",
+                        "key": {
+                            "type": "string"
+                        },
+                        "jwk_url": {
+                            "type": "string"
                         },
                         "header_name": {
-                            "type": "string",
+                            "type": "string"
                         },
-                        "header_scheme": {
-                            "type": "string",
+                        "audience": {
+                            "type": "boolean"
                         },
-                        "required": {
-                            "type": "boolean",
+                        "issuer": {
+                            "type": "boolean"
                         },
-                        "algorithms": {
-                            "type": "array",
-                        "items": {
-                                "enum": [
-                                    "H256",
-                                    "HS512",
-                                    "HS384",
-                                    "RS256",
-                                    "RS384",
-                                    "RS512",
-                                    "ES256",
-                                    "ES384",
-                                    "ES521",
-                                    "ES512",
-                                    "PS256",
-                                    "PS384",
-                                    "PS512"
-                                ],
-                                "type": "string",
-                            },
-                            "minItems": 0
+                        "type": {
+                            "enum": [
+                                "H256",
+                                "HS512",
+                                "HS384",
+                                "RS256",
+                                "RS384",
+                                "RS512",
+                                "ES256",
+                                "ES384",
+                                "ES521",
+                                "ES512",
+                                "PS256",
+                                "PS384",
+                                "PS512"
+                            ],
+                            "type": "string"
                         }
                     },
                     "additionalProperties": false
@@ -194,8 +151,49 @@ var jsonSchemaString = `
             "additionalProperties": false
         },
         "Url": {
-            "type": "string",
+            "type": "string"
+        },
+        "WhereFilter": {
+            "type": "object",
+            "additionalProperties": {
+                "eq": {},
+                "neq": {},
+                "in": {
+                    "type": "array",
+                    "items": {}
+                },
+                "nin": {
+                    "type": "array",
+                    "items": {}
+                }
+            }
+        },
+        "AuthGuard": {
+            "type": "object",
+            "required": ["if"],
+            "properties": {
+                "if": {
+                    "type": "string"
+                },
+                "hide_fields": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "minItems": 0
+                },
+                "allowed_operations": {
+                    "type": "array",
+                    "items": {
+                        "enum": ["read", "update", "delete", "create"],
+                        "type": "string"
+                    },
+                    "minItems": 0
+                }
+            },
+            "additionalProperties": false
         }
     }
 }
+
 `

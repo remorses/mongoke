@@ -1,3 +1,7 @@
+$schema: https://raw.githubusercontent.com/angular/angular-cli/master/packages/angular/cli/lib/config/schema.json
+
+
+
 database_uri: mongodb://localhost/testdb
 
 jwt:
@@ -48,6 +52,7 @@ types:
 relations:
   - from: User
     to: User
+    x: sdf
     relation_type: to_many
     field: friends
     where: {}
