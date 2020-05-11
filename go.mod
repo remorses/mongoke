@@ -13,11 +13,12 @@ require (
 	github.com/graphql-go/graphql v0.7.9
 	github.com/graphql-go/handler v0.2.3
 	github.com/graphql-go/relay v0.0.0-20171208134043-54350098cfe5 // indirect
+	github.com/imdario/mergo v0.3.9
 	github.com/kofalt/go-memoize v0.0.0-20190519021333-cf756f0462a4
 	github.com/lestrrat-go/jwx v1.0.2
 	github.com/matryer/moq v0.0.0-20200310130814-7721994d1b54 // indirect
 	github.com/mitchellh/mapstructure v1.3.0
-	github.com/remorses/graphql-go-tools v0.0.0-20200510134602-04879f523e37
+	github.com/remorses/graphql-go-tools v0.0.0-20200511111635-5c318a54190b
 	github.com/stretchr/testify v1.5.1
 	github.com/urfave/cli/v2 v2.2.0
 	go.mongodb.org/mongo-driver v1.3.3

@@ -31,7 +31,7 @@ func (c MongodbDatabaseFunctions) FindOne(p FindOneParams) (interface{}, error) 
 		return nil, err
 	}
 	collection := db.Collection(p.Collection)
-	prettyPrint(p.Where)
+	// prettyPrint(p.Where)
 
 	opts := options.FindOne().SetMaxTime(MAX_QUERY_TIME * time.Second)
 	res := collection.FindOne(ctx, p.Where, opts)
@@ -47,7 +47,7 @@ func (c MongodbDatabaseFunctions) FindOne(p FindOneParams) (interface{}, error) 
 	if err != nil {
 		return nil, err
 	}
-	prettyPrint(document)
+	// prettyPrint(document)
 	return document, nil
 }
 

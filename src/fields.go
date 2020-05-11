@@ -5,18 +5,21 @@ import (
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/graphql-go/graphql"
+	"github.com/imdario/mergo"
 	"github.com/mitchellh/mapstructure"
 )
 
 const TIMEOUT_FIND = 10
 
 type createFieldParams struct {
-	collection  string
-	permissions []AuthGuard
-	returnType  graphql.Type
+	collection   string
+	initialWhere map[string]Filter
+	permissions  []AuthGuard
+	returnType   graphql.Type
+	omitWhere    bool
 }
 
-func (mongoke *Mongoke) findOneField(conf createFieldParams) *graphql.Field {
+func (mongoke *Mongoke) findOneField(conf createFieldParams) (*graphql.Field, error) {
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
 		opts := FindOneParams{
@@ -26,6 +29,9 @@ func (mongoke *Mongoke) findOneField(conf createFieldParams) *graphql.Field {
 		err := mapstructure.Decode(args, &opts)
 		if err != nil {
 			return nil, err
+		}
+		if conf.initialWhere != nil {
+			mergo.Merge(&opts.Where, conf.initialWhere)
 		}
 		document, err := mongoke.databaseFunctions.FindOne(opts)
 		if err != nil {
@@ -49,18 +55,21 @@ func (mongoke *Mongoke) findOneField(conf createFieldParams) *graphql.Field {
 	}
 	whereArg, err := mongoke.getWhereArg(conf.returnType)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return &graphql.Field{
-		Type: conf.returnType,
-		Args: graphql.FieldConfigArgument{
-			"where": &graphql.ArgumentConfig{Type: whereArg},
-		},
+	args := graphql.FieldConfigArgument{}
+	if !conf.omitWhere {
+		args["where"] = &graphql.ArgumentConfig{Type: whereArg}
+	}
+	field := graphql.Field{
+		Type:    conf.returnType,
+		Args:    args,
 		Resolve: resolver,
 	}
+	return &field, nil
 }
 
-func (mongoke *Mongoke) findManyField(conf createFieldParams) *graphql.Field {
+func (mongoke *Mongoke) findManyField(conf createFieldParams) (*graphql.Field, error) {
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
 		pagination := paginationFromArgs(args)
@@ -74,6 +83,9 @@ func (mongoke *Mongoke) findManyField(conf createFieldParams) *graphql.Field {
 		err := mapstructure.Decode(args, &opts)
 		if err != nil {
 			return nil, err
+		}
+		if conf.initialWhere != nil {
+			mergo.Merge(&opts.Where, conf.initialWhere)
 		}
 		nodes, err := mongoke.databaseFunctions.FindMany(
 			opts,
@@ -111,29 +123,33 @@ func (mongoke *Mongoke) findManyField(conf createFieldParams) *graphql.Field {
 	}
 	whereArg, err := mongoke.getWhereArg(conf.returnType)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	connectionType, err := mongoke.getConnectionType(conf.returnType)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	indexableFieldsEnum, err := mongoke.getIndexableFieldsEnum(conf.returnType)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return &graphql.Field{
-		Type: connectionType,
-		Args: graphql.FieldConfigArgument{
-			"where":       &graphql.ArgumentConfig{Type: whereArg},
-			"first":       &graphql.ArgumentConfig{Type: graphql.Int},
-			"last":        &graphql.ArgumentConfig{Type: graphql.Int},
-			"after":       &graphql.ArgumentConfig{Type: AnyScalar},
-			"before":      &graphql.ArgumentConfig{Type: AnyScalar},
-			"direction":   &graphql.ArgumentConfig{Type: directionEnum},
-			"cursorField": &graphql.ArgumentConfig{Type: indexableFieldsEnum},
-		},
+	args := graphql.FieldConfigArgument{
+		"first":       &graphql.ArgumentConfig{Type: graphql.Int},
+		"last":        &graphql.ArgumentConfig{Type: graphql.Int},
+		"after":       &graphql.ArgumentConfig{Type: AnyScalar},
+		"before":      &graphql.ArgumentConfig{Type: AnyScalar},
+		"direction":   &graphql.ArgumentConfig{Type: directionEnum},
+		"cursorField": &graphql.ArgumentConfig{Type: indexableFieldsEnum},
+	}
+	if !conf.omitWhere {
+		args["where"] = &graphql.ArgumentConfig{Type: whereArg}
+	}
+	field := graphql.Field{
+		Type:    connectionType,
+		Args:    args,
 		Resolve: resolver,
 	}
+	return &field, nil
 }
 
 func paginationFromArgs(args interface{}) Pagination {

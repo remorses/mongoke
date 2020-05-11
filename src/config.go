@@ -54,10 +54,11 @@ type AuthGuard struct {
 }
 
 type RelationConfig struct {
-	From         string                 `yaml:"from"`
-	To           string                 `yaml:"to"`
-	RelationType string                 `yaml:"relation_type"`
-	where        map[string]interface{} `yaml:"where"`
+	From         string            `yaml:"from"`
+	Field        string            `yaml:"field"`
+	To           string            `yaml:"to"`
+	RelationType string            `yaml:"relation_type"`
+	Where        map[string]Filter `yaml:"where"`
 }
 
 // MakeConfigFromYaml parses the config from yaml

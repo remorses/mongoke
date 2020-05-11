@@ -107,9 +107,9 @@ func MakeMongokeHandler(config Config) (http.Handler, error) {
 	}
 
 	h := handler.New(&handler.Config{
-		Schema:     &schema,
-		Pretty:     true,
-		GraphiQL:   true,
+		Schema: &schema,
+		Pretty: true,
+		// GraphiQL:   true,
 		Playground: true,
 		RootObjectFn: func(ctx context.Context, r *http.Request) map[string]interface{} {
 			rootValue := Map{

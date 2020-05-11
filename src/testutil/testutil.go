@@ -153,15 +153,16 @@ relations:
         field: likes_over_time
         where:
             bot_id:
-                $in: ${{ parent['_id'] }}
-            type: like
+                in: ["${{ parent['_id'] }}"]
+            type:
+                eq: like
     -   from: User
         to: Human
         field: father
         relation_type: to_one
         where:
             _id:
-                $in: ${{ parent['father_id'] }}
+                in: ["${{ parent['father_id'] }}"]
 
 
 `

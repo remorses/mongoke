@@ -2,7 +2,6 @@ package mongoke
 
 import (
 	"context"
-	"reflect"
 	"testing"
 
 	"github.com/go-test/deep"
@@ -286,7 +285,8 @@ func TestQueryReturnValues(t *testing.T) {
 					age: Int
 				}
 				`,
-				DatabaseUri: testutil.MONGODB_URI,
+				DatabaseUri:       testutil.MONGODB_URI,
+				databaseFunctions: databaseMock,
 				Types: map[string]*TypeConfig{
 					"User": {
 						Collection: "users",
@@ -310,6 +310,60 @@ func TestQueryReturnValues(t *testing.T) {
 			}
 			`,
 		},
+		{
+			Name:     "findOne query without args",
+			Config:   config,
+			Expected: Map{"User": exampleUser},
+			Query: `
+			{
+				User {
+					name
+					age
+				}
+			}
+			`,
+		},
+		{
+			Name: "findOne with to_many relation",
+			Config: Config{
+				Schema: `
+				type User {
+					name: String
+					age: Int
+				}
+				`,
+				DatabaseUri:       testutil.MONGODB_URI,
+				databaseFunctions: databaseMock,
+				Types: map[string]*TypeConfig{
+					"User": {
+						Collection: "users",
+					},
+				},
+				Relations: []RelationConfig{
+					{
+						Field:        "friends",
+						From:         "User",
+						To:           "User",
+						RelationType: "to_many",
+						Where:        make(map[string]Filter),
+					},
+				},
+			},
+			Expected: Map{"User": Map{"name": "01", "friends": Map{"nodes": exampleUsers}}},
+			Query: `
+			{
+				User {
+					name
+					friends {
+						nodes {
+							name
+							age
+						}
+					}
+				}
+			}
+			`,
+		},
 	}
 
 	for _, testCase := range cases {
@@ -318,7 +372,7 @@ func TestQueryReturnValues(t *testing.T) {
 			// t.Log(testCase.Name)
 			schema, err := MakeMongokeSchema(testCase.Config)
 			if err != nil {
-				t.Error(err)
+				t.Fatal(err)
 			}
 			if testCase.ExpectedError != "" {
 				err = testutil.QuerySchemaShouldFail(t, schema, testCase.Query)
@@ -329,7 +383,7 @@ func TestQueryReturnValues(t *testing.T) {
 			expected := testutil.ConvertToPlainMap(testCase.Expected)
 			t.Log("expected:", expected)
 			t.Log("result:", res)
-			require.Equal(t, true, reflect.DeepEqual(res, expected))
+			require.Equal(t, pretty(expected), pretty(res))
 		})
 	}
 }

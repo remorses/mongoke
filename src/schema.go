@@ -43,8 +43,16 @@ func (mongoke *Mongoke) generateSchema() (graphql.Schema, error) {
 			permissions: typeConf.Permissions,
 			collection:  typeConf.Collection,
 		}
-		queryFields[object.Name()] = mongoke.findOneField(p)
-		queryFields[object.Name()+"Nodes"] = mongoke.findManyField(p)
+		findOne, err := mongoke.findOneField(p)
+		if err != nil {
+			return graphql.Schema{}, err
+		}
+		queryFields[object.Name()] = findOne
+		findMany, err := mongoke.findManyField(p)
+		if err != nil {
+			return graphql.Schema{}, err
+		}
+		queryFields[object.Name()+"Nodes"] = findMany
 
 		// TODO add mutaiton fields
 		mutationFields["putSome"+object.Name()] = &graphql.Field{
@@ -52,6 +60,50 @@ func (mongoke *Mongoke) generateSchema() (graphql.Schema, error) {
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 				return "world", nil
 			},
+		}
+	}
+
+	for _, relation := range mongoke.Config.Relations {
+		if relation.Field == "" {
+			return graphql.Schema{}, errors.New("relation field is empty " + relation.From)
+		}
+		fromType := findType(baseSchemaConfig.Types, relation.From)
+		if fromType == nil {
+			return graphql.Schema{}, errors.New("cannot find relation `from` type " + relation.From)
+		}
+		returnType := findType(baseSchemaConfig.Types, relation.To)
+		if returnType == nil {
+			return graphql.Schema{}, errors.New("cannot find relation `to` type " + relation.To)
+		}
+		returnTypeConf := mongoke.Config.getTypeConfig(relation.To)
+		if returnTypeConf == nil {
+			return graphql.Schema{}, errors.New("cannot find type config for relation " + relation.Field)
+		}
+		object, ok := fromType.(*graphql.Object)
+		if !ok {
+			return graphql.Schema{}, errors.New("relation return type " + fromType.Name() + " is not an object")
+		}
+		p := createFieldParams{
+			returnType:   returnType,
+			permissions:  returnTypeConf.Permissions,
+			collection:   returnTypeConf.Collection,
+			initialWhere: relation.Where,
+			omitWhere:    true,
+		}
+		if relation.RelationType == "to_many" {
+			field, err := mongoke.findManyField(p)
+			if err != nil {
+				return graphql.Schema{}, err
+			}
+			object.AddFieldConfig(relation.Field, field)
+		} else if relation.RelationType == "to_one" {
+			field, err := mongoke.findOneField(p)
+			if err != nil {
+				return graphql.Schema{}, err
+			}
+			object.AddFieldConfig(relation.Field, field)
+		} else {
+			return graphql.Schema{}, errors.New("relation_type must be to_many or to_one")
 		}
 	}
 
@@ -67,6 +119,15 @@ func (mongoke *Mongoke) generateSchema() (graphql.Schema, error) {
 		return graphql.Schema{}, err
 	}
 	return schema, nil
+}
+
+func findType(a []graphql.Type, name string) graphql.Type {
+	for _, t := range a {
+		if t.Name() == name {
+			return t
+		}
+	}
+	return nil
 }
 
 /*

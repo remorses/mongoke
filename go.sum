@@ -60,6 +60,8 @@ github.com/graphql-go/handler v0.2.3/go.mod h1:leLF6RpV5uZMN1CdImAxuiayrYYhOk33b
 github.com/graphql-go/relay v0.0.0-20171208134043-54350098cfe5 h1:7fNeIw+3vvQjnJWi+ayQfpz8Y1l788ZGsvrP7cGBG2M=
 github.com/graphql-go/relay v0.0.0-20171208134043-54350098cfe5/go.mod h1:JaXUeU9JGLA7FGTZJ254WFzDz8NMfE9Pym6ipTmFnP4=
 github.com/graphql/graphql v0.0.0-20200430170520-a1c1348c252e h1:q9nSBkV5qQT+UHB5ROnB4kNICoOfNLHxZv7yYn+zPkY=
+github.com/imdario/mergo v0.3.9 h1:UauaLniWCFHWd+Jp9oCEkTBj8VO/9DKg3PV3VCNMDIg=
+github.com/imdario/mergo v0.3.9/go.mod h1:2EnlNZ0deacrJVfApfmtdGgDfMuh/nq6Ok1EcJh5FfA=
 github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
 github.com/joho/godotenv v1.3.0/go.mod h1:7hK45KPybAkOC6peb+G5yklZfMxEjkZhHbwpqxOKXbg=
 github.com/karrick/godirwalk v1.8.0/go.mod h1:H5KPZjojv4lE+QYImBI8xVtrBRgYrIVsaRPx4tDPEn4=
@@ -106,6 +108,8 @@ github.com/remorses/graphql-go-tools v0.0.0-20200510114719-971e286a85ec h1:RWY6l
 github.com/remorses/graphql-go-tools v0.0.0-20200510114719-971e286a85ec/go.mod h1:oO7RviMuSoVdW1uBrannRMSLoRO6Hpzfds/908drdj4=
 github.com/remorses/graphql-go-tools v0.0.0-20200510134602-04879f523e37 h1:mI4SVan7VUKWZxiiEMg4hwMpXz9sQWpyhtZlIGEIO7Y=
 github.com/remorses/graphql-go-tools v0.0.0-20200510134602-04879f523e37/go.mod h1:oO7RviMuSoVdW1uBrannRMSLoRO6Hpzfds/908drdj4=
+github.com/remorses/graphql-go-tools v0.0.0-20200511111635-5c318a54190b h1:wv7eekZnRmdLgs7AbFSko4ocIVl7dD4xKaUVuQxAio8=
+github.com/remorses/graphql-go-tools v0.0.0-20200511111635-5c318a54190b/go.mod h1:oO7RviMuSoVdW1uBrannRMSLoRO6Hpzfds/908drdj4=
 github.com/remorses/mongoke v0.0.0-20200411094841-ab0cbf0ea488 h1:FDC0SD40UHC8yUqEQ+Grp4TmLQKnoTk0RQjVCZP6wnw=
 github.com/rogpeppe/go-internal v1.1.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/rogpeppe/go-internal v1.2.2/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
