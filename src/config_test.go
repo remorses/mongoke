@@ -11,5 +11,5 @@ func TestMakeConfigFromYaml(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	t.Log(pretty(conf))
+	t.Log(testutil.Pretty(conf))
 }

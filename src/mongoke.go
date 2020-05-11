@@ -5,13 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"net/http"
-	"strings"
 
 	"github.com/PaesslerAG/gval"
 
 	"github.com/graphql-go/graphql"
-	"github.com/graphql-go/handler"
 	tools "github.com/remorses/graphql-go-tools"
 )
 
@@ -99,57 +96,4 @@ func makeSchemaConfig(config Config) (graphql.SchemaConfig, error) {
 		},
 	)
 	return baseSchemaConfig, err
-}
-
-// MakeMongokeHandler creates an http handler
-func MakeMongokeHandler(config Config) (http.Handler, error) {
-	schema, err := MakeMongokeSchema(config)
-	if err != nil {
-		return nil, err
-	}
-
-	h := handler.New(&handler.Config{
-		Schema: &schema,
-		Pretty: true,
-		// GraphiQL:   true,
-		Playground: true,
-		RootObjectFn: func(ctx context.Context, r *http.Request) map[string]interface{} {
-			rootValue := Map{
-				"request": r,
-			}
-
-			tknStr := r.Header.Get("Authorization")
-			parts := strings.Split(tknStr, "Bearer")
-			tknStr = reverseStrings(parts)[0]
-			tknStr = strings.TrimSpace(tknStr)
-
-			if tknStr == "" {
-				return rootValue
-			}
-
-			claims, err := extractClaims(config.JwtConfig, tknStr)
-
-			if err != nil {
-				fmt.Println("error in handler", err)
-				return rootValue
-			}
-
-			rootValue["jwt"] = claims
-
-			return rootValue
-		},
-	})
-
-	return corsMiddleware(h), nil
-}
-
-func corsMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-
-		next.ServeHTTP(w, r)
-	})
 }

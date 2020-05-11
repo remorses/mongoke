@@ -18,6 +18,29 @@ func QuerySchema(t *testing.T, schema graphql.Schema, query string) interface{} 
 	return res.Data
 }
 
+func PrettyPrint(x ...interface{}) {
+	for _, x := range x {
+		json, err := json.MarshalIndent(x, "", "   ")
+		if err != nil {
+			panic(err)
+		}
+		println(string(json))
+	}
+	println()
+}
+func Pretty(x ...interface{}) string {
+	res := ""
+	for _, x := range x {
+		json, err := json.MarshalIndent(x, "", "   ")
+		if err != nil {
+			panic(err)
+		}
+		res += string(json)
+		res += "\n"
+	}
+	return res
+}
+
 func ConvertToPlainMap(in interface{}) map[string]interface{} {
 	var inInterface map[string]interface{}
 	inrec, _ := json.Marshal(in)

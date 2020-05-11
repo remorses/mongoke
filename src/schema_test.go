@@ -72,7 +72,7 @@ func TestQueryArgs(t *testing.T) {
 		calls := len(databaseMock.FindOneCalls())
 		require.Equal(t, 1, calls)
 		where := databaseMock.FindOneCalls()[0].P.Where
-		t.Log(pretty(where))
+		t.Log(testutil.Pretty(where))
 		require.Equal(t, "xxx", where["name"].Eq)
 	})
 	t.Run("findMany query with first, after, where", func(t *testing.T) {
@@ -90,7 +90,7 @@ func TestQueryArgs(t *testing.T) {
 		calls := len(databaseMock.calls.FindMany)
 		require.Equal(t, 1, calls)
 		p := databaseMock.calls.FindMany[0].P
-		t.Log("params", pretty(p))
+		t.Log("params", testutil.Pretty(p))
 		// + 1 because we need to know hasNextPage
 		require.Equal(t, 10+1, p.Pagination.First)
 		require.Equal(t, "xxx", p.Pagination.After)
@@ -383,7 +383,7 @@ func TestQueryReturnValues(t *testing.T) {
 			expected := testutil.ConvertToPlainMap(testCase.Expected)
 			t.Log("expected:", expected)
 			t.Log("result:", res)
-			require.Equal(t, pretty(expected), pretty(res))
+			require.Equal(t, testutil.Pretty(expected), testutil.Pretty(res))
 		})
 	}
 }
@@ -563,9 +563,9 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			expected := testutil.ConvertToPlainMap(testCase.Expected)
 			t.Log("expected:", expected)
 			t.Log("result:", res)
-			t.Log("expected:", pretty(expected))
-			t.Log("result:", pretty(res))
-			// require.Equal(t, pretty(res), pretty(expected))
+			t.Log("expected:", testutil.Pretty(expected))
+			t.Log("result:", testutil.Pretty(res))
+			// require.Equal(t, testutil.Pretty(res), testutil.Pretty(expected))
 			if diff := deep.Equal(res, expected); diff != nil {
 				t.Error(diff)
 			}

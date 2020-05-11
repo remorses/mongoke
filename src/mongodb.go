@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/remorses/mongoke/src/testutil"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/x/mongo/driver/connstring"
@@ -31,7 +32,7 @@ func (c MongodbDatabaseFunctions) FindOne(p FindOneParams) (interface{}, error) 
 		return nil, err
 	}
 	collection := db.Collection(p.Collection)
-	// prettyPrint(p.Where)
+	// testutil.PrettyPrint(p.Where)
 
 	opts := options.FindOne().SetMaxTime(MAX_QUERY_TIME * time.Second)
 	res := collection.FindOne(ctx, p.Where, opts)
@@ -47,7 +48,7 @@ func (c MongodbDatabaseFunctions) FindOne(p FindOneParams) (interface{}, error) 
 	if err != nil {
 		return nil, err
 	}
-	// prettyPrint(document)
+	// testutil.PrettyPrint(document)
 	return document, nil
 }
 
@@ -139,7 +140,7 @@ func (c MongodbDatabaseFunctions) FindMany(p FindManyParams) ([]Map, error) {
 
 	opts.SetMaxTime(MAX_QUERY_TIME * time.Second)
 
-	prettyPrint(p)
+	testutil.PrettyPrint(p)
 
 	res, err := db.Collection(p.Collection).Find(ctx, p.Where, opts)
 	if err != nil {

@@ -18,6 +18,7 @@ var Operations = struct {
 }
 
 type Config struct {
+	EnableGraphiql    *bool                  `json:"enable_graphiql"`
 	DatabaseUri       string                 `json:"database_uri"`
 	Schema            string                 `json:"schema"`
 	SchemaPath        string                 `json:"schema_path"`

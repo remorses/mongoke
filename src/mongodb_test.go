@@ -60,7 +60,7 @@ func TestMongodbFunctions(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		t.Log(pretty(user))
+		t.Log(testutil.Pretty(user))
 		var x userStruct
 		if err := mapstructure.Decode(user, &x); err != nil {
 			t.Error(err)
@@ -83,7 +83,7 @@ func TestMongodbFunctions(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		t.Log(pretty(users))
+		t.Log(testutil.Pretty(users))
 		var x []userStruct
 		if err := mapstructure.Decode(users, &x); err != nil {
 			t.Error(err)
@@ -109,7 +109,7 @@ func TestMongodbFunctions(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		t.Log(pretty(users))
+		t.Log(testutil.Pretty(users))
 		var x []userStruct
 		if err := mapstructure.Decode(users, &x); err != nil {
 			t.Error(err)
@@ -133,7 +133,7 @@ func TestMongodbFunctions(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		t.Log(pretty(users))
+		t.Log(testutil.Pretty(users))
 		var x []userStruct
 		if err := mapstructure.Decode(users, &x); err != nil {
 			t.Error(err)

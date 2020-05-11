@@ -37,7 +37,7 @@ func (mongoke *Mongoke) findOneField(conf createFieldParams) (*graphql.Field, er
 		if err != nil {
 			return nil, err
 		}
-		jwt := getJwt(params)
+		jwt := GetJwt(params)
 		// don't compute permissions if document is nil
 		if document == nil {
 			return nil, nil
@@ -98,7 +98,7 @@ func (mongoke *Mongoke) findManyField(conf createFieldParams) (*graphql.Field, e
 			return makeConnection(nodes, opts.Pagination, opts.CursorField), nil
 		}
 
-		jwt := getJwt(params)
+		jwt := GetJwt(params)
 		var accessibleNodes []Map
 		for _, document := range nodes {
 			node, err := applyGuardsOnDocument(applyGuardsOnDocumentParams{
@@ -118,7 +118,7 @@ func (mongoke *Mongoke) findManyField(conf createFieldParams) (*graphql.Field, e
 		}
 		connection := makeConnection(accessibleNodes, opts.Pagination, opts.CursorField)
 		// document, err := mongoke.database.findOne()
-		// prettyPrint(args)
+		// testutil.PrettyPrint(args)
 		return connection, nil
 	}
 	whereArg, err := mongoke.getWhereArg(conf.returnType)
@@ -166,7 +166,7 @@ func paginationFromArgs(args interface{}) Pagination {
 	if pag.Last != 0 {
 		pag.Last++
 	}
-	// prettyPrint(pag)
+	// testutil.PrettyPrint(pag)
 	return pag
 }
 
@@ -226,15 +226,7 @@ func reverse(input []Map) []Map {
 	return append(reverse(input[1:]), input[0])
 }
 
-func reverseStrings(input []string) []string {
-	if len(input) == 0 {
-		return input
-	}
-	// TODO remove recursion
-	return append(reverseStrings(input[1:]), input[0])
-}
-
-func getJwt(params graphql.ResolveParams) jwt.MapClaims {
+func GetJwt(params graphql.ResolveParams) jwt.MapClaims {
 	root := params.Info.RootValue
 	rootMap, ok := root.(Map)
 	if !ok {

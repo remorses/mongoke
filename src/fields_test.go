@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/imdario/mergo"
+	"github.com/remorses/mongoke/src/testutil"
 )
 
 func TestMerge(t *testing.T) {
@@ -21,5 +22,5 @@ func TestMerge(t *testing.T) {
 		},
 	}
 	mergo.Merge(&a, b)
-	t.Log(pretty(a))
+	t.Log(testutil.Pretty(a))
 }

@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	mongoke "github.com/remorses/mongoke/src"
+	handler "github.com/remorses/mongoke/src/handler"
 	"github.com/urfave/cli/v2"
 )
 
@@ -37,13 +38,13 @@ func main() {
 			if e != nil {
 				return cli.Exit(e, 1)
 			}
-			handler, err := mongoke.MakeMongokeHandler(config)
+			h, err := handler.MakeMongokeHandler(config)
 			if err != nil {
 				return cli.Exit(err, 1)
 			}
+			http.Handle("/", h)
 			port := c.String("port")
 			println("listening on http://localhost:" + port)
-			http.Handle("/", handler)
 			if err = http.ListenAndServe("localhost:"+port, nil); err != nil {
 				return cli.Exit(err, 1)
 			}
