@@ -7,7 +7,7 @@ const Page = (props) => {
             <GraphiQL
                 fetcher={async (graphQLParams) => {
                     const data = await fetch(
-                        'https://swapi-graphql.netlify.app/.netlify/functions/index',
+                        '/',
                         {
                             method: 'POST',
                             headers: {
