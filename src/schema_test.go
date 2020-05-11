@@ -508,8 +508,8 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			res = testutil.ConvertToPlainMap(res)
 			expected := testutil.ConvertToPlainMap(testCase.Expected)
 			t.Log("expected:", expected)
-			t.Log("expected:", pretty(expected))
 			t.Log("result:", res)
+			t.Log("expected:", pretty(expected))
 			t.Log("result:", pretty(res))
 			// require.Equal(t, pretty(res), pretty(expected))
 			if diff := deep.Equal(res, expected); diff != nil {
