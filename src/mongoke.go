@@ -30,10 +30,7 @@ func MakeMongokeSchema(config Config) (graphql.Schema, error) {
 	if config.databaseFunctions == nil {
 		config.databaseFunctions = MongodbDatabaseFunctions{}
 	}
-	err := validateConfig(config)
-	if err != nil {
-		return graphql.Schema{}, nil
-	}
+	// TODO validate config here
 
 	if config.Schema == "" && config.SchemaPath != "" {
 		data, e := ioutil.ReadFile(config.SchemaPath)

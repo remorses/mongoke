@@ -4,13 +4,19 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/ghodss/yaml"
 	"github.com/xeipuuv/gojsonschema"
 )
 
-func validateConfig(config Config) error {
+func validateYamlConfig(data string) error {
+
+	var document map[string]interface{}
+	if err := yaml.Unmarshal([]byte(data), &document); err != nil {
+		return err
+	}
 
 	schemaLoader := gojsonschema.NewStringLoader(jsonSchemaString)
-	result, err := gojsonschema.Validate(schemaLoader, gojsonschema.NewGoLoader(config))
+	result, err := gojsonschema.Validate(schemaLoader, gojsonschema.NewGoLoader(document))
 	if err != nil {
 		return err
 	}

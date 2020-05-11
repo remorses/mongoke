@@ -2,7 +2,7 @@ package mongoke
 
 import (
 	"github.com/PaesslerAG/gval"
-	yaml "gopkg.in/yaml.v2"
+	yaml "github.com/ghodss/yaml"
 )
 
 var Operations = struct {
@@ -63,6 +63,11 @@ type RelationConfig struct {
 
 // MakeConfigFromYaml parses the config from yaml
 func MakeConfigFromYaml(data string) (Config, error) {
+
+	if err := validateYamlConfig(data); err != nil {
+		return Config{}, err
+	}
+
 	t := Config{}
 
 	// TODO add databaseUri overwite from environment

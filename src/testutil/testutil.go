@@ -66,9 +66,9 @@ var UserQuery2 = `
 }`
 
 var YamlConfig = `
+
 jwt:
-    algorithms: [H256]
-    required: false
+    type: H256
 
 schema: |
     scalar Address
@@ -110,60 +110,13 @@ types:
     User:
         collection: users
         
-    Human:
-        collection: humans
-        guards:
-            -   expression: jwt['role'] == 'admin'
-                when: after
-            -   expression: jwt['role'] == 'semi'
-                excluded: [passwords, campaign_data]
-        disambiguations:
-            User: x['type'] == 'user'
-            Guest: x['type'] == 'guest'
-    WindowedEvent:
-        exposed: False
-        collection: events
-        pipeline:
-            -   $group:
-                    _id:
-                        $substartct:
-                            - $timestamp
-                            - $mod: [$timestamp, 60000] # minute 60 * 1000
-                    value:
-                        $sum: $likes
-            -   $project:
-                    _id: 0
-                    value: 1
-                    timestamp: $_id
 
 relations:
     -   from: Task
         to: WindowedEvent
-        relation_type: to_many
+        type: to_many
         field: events
         where: {}
-    -   from: User
-        to: User
-        relation_type: to_many
-        field: friends
-        where: {}
-    -   from: User
-        to: WindowedEvent
-        relation_type: to_many
-        field: likes_over_time
-        where:
-            bot_id:
-                in: ["${{ parent['_id'] }}"]
-            type:
-                eq: like
-    -   from: User
-        to: Human
-        field: father
-        relation_type: to_one
-        where:
-            _id:
-                in: ["${{ parent['father_id'] }}"]
-
 
 `
 
