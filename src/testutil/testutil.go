@@ -28,6 +28,7 @@ func PrettyPrint(x ...interface{}) {
 	}
 	println()
 }
+
 func Pretty(x ...interface{}) string {
 	res := ""
 	for _, x := range x {

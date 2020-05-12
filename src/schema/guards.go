@@ -54,7 +54,6 @@ func hideFieldsFromDocument(document interface{}, toHide []string) interface{} {
 		}
 	}
 	return copy
-
 }
 
 func evaluateAuthPermission(guards []mongoke.AuthGuard, jwt jwt.MapClaims, document interface{}) (mongoke.AuthGuard, error) {

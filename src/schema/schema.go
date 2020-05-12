@@ -57,7 +57,8 @@ func makeSchemaConfig(config mongoke.Config) (graphql.SchemaConfig, error) {
 		}
 		eval, err := gval.Full().NewEvaluable(typeConf.IsTypeOf)
 		if err != nil {
-			return graphql.SchemaConfig{}, errors.New("got an error parsing isTypeOf expression " + typeConf.IsTypeOf)
+			return graphql.SchemaConfig{}, errors.New(
+				"got an error parsing isTypeOf expression " + typeConf.IsTypeOf)
 		}
 		resolvers[name] = &tools.ObjectResolver{
 			IsTypeOf: func(p graphql.IsTypeOfParams) bool {

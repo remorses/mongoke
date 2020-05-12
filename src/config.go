@@ -104,7 +104,6 @@ type RelationConfig struct {
 
 // MakeConfigFromYaml parses the config from yaml
 func MakeConfigFromYaml(data string) (Config, error) {
-
 	if err := validateYamlConfig(data); err != nil {
 		return Config{}, err
 	}

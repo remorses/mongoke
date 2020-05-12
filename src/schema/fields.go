@@ -253,7 +253,6 @@ func getJwt(params graphql.ResolveParams) jwt.MapClaims {
 	rootMap, ok := root.(mongoke.Map)
 	if !ok {
 		return jwt.MapClaims{}
-
 	}
 	v, ok := rootMap["jwt"]
 	if !ok {

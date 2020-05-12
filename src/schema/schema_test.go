@@ -12,11 +12,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var False = false
-var True = true
+var (
+	False = false
+	True  = true
+)
 
 func TestQueryReturnValues(t *testing.T) {
-	var exampleUsers = []mongoke.Map{
+	exampleUsers := []mongoke.Map{
 		{"name": "01", "age": 1},
 		{"name": "02", "age": 2},
 		{"name": "03", "age": 3},
@@ -30,7 +32,7 @@ func TestQueryReturnValues(t *testing.T) {
 			return exampleUser, nil
 		},
 	}
-	var config = mongoke.Config{
+	config := mongoke.Config{
 		Schema: `
 		interface Named {
 			name: String
@@ -264,7 +266,8 @@ func TestQueryReturnValues(t *testing.T) {
 					},
 				},
 			},
-			Expected: mongoke.Map{"User": mongoke.Map{"name": "01", "friends": mongoke.Map{"nodes": exampleUsers}}},
+			Expected: mongoke.Map{"User": mongoke.Map{"name": "01",
+				"friends": mongoke.Map{"nodes": exampleUsers}}},
 			Query: `
 			{
 				User {
@@ -305,13 +308,13 @@ func TestQueryReturnValues(t *testing.T) {
 
 func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 	collection := "users"
-	var exampleUsers = []mongoke.Map{
+	exampleUsers := []mongoke.Map{
 		{"name": "01", "age": 1},
 		{"name": "02", "age": 2},
 		{"name": "03", "age": 3},
 	}
 	exampleUser := exampleUsers[0]
-	var config = mongoke.Config{
+	config := mongoke.Config{
 		Schema: `
 		scalar ObjectId
 		interface Named {
@@ -408,9 +411,10 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			`,
 		},
 		{
-			Name:     "findMany query with string cursorField",
-			Config:   config,
-			Expected: mongoke.Map{"UserNodes": mongoke.Map{"nodes": exampleUsers[:2], "pageInfo": mongoke.Map{"endCursor": "02"}}},
+			Name:   "findMany query with string cursorField",
+			Config: config,
+			Expected: mongoke.Map{"UserNodes": mongoke.Map{"nodes": exampleUsers[:2],
+				"pageInfo": mongoke.Map{"endCursor": "02"}}},
 			Query: `
 			{
 				UserNodes(first: 2, cursorField: name) {
@@ -426,9 +430,10 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			`,
 		},
 		{
-			Name:     "findMany query with int cursorField",
-			Config:   config,
-			Expected: mongoke.Map{"UserNodes": mongoke.Map{"nodes": exampleUsers[:2], "pageInfo": mongoke.Map{"endCursor": 2}}},
+			Name:   "findMany query with int cursorField",
+			Config: config,
+			Expected: mongoke.Map{"UserNodes": mongoke.Map{"nodes": exampleUsers[:2],
+				"pageInfo": mongoke.Map{"endCursor": 2}}},
 			Query: `
 			{
 				UserNodes(first: 2, cursorField: age) {

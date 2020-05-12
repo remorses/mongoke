@@ -4,8 +4,9 @@
 package mock
 
 import (
-	"github.com/remorses/mongoke/src"
 	"sync"
+
+	"github.com/remorses/mongoke/src"
 )
 
 var (

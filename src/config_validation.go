@@ -9,7 +9,6 @@ import (
 )
 
 func validateYamlConfig(data string) error {
-
 	var document map[string]interface{}
 	if err := yaml.Unmarshal([]byte(data), &document); err != nil {
 		return err

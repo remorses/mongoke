@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"os"
-
 	"net/http"
+	"os"
 
 	mongoke "github.com/remorses/mongoke/src"
 	handler "github.com/remorses/mongoke/src/handler"

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -13,8 +14,6 @@ import (
 	"github.com/graphql-go/handler"
 	mongoke "github.com/remorses/mongoke/src"
 	mongoke_schema "github.com/remorses/mongoke/src/schema"
-
-	"context"
 )
 
 var GRAPHIQL_PATH = "/graphiql"
@@ -71,7 +70,6 @@ func MakeMongokeHandler(config mongoke.Config, webUiFolder string) (http.Handler
 		buff, _ = json.MarshalIndent(result, "", "\t")
 
 		w.Write(buff)
-
 	}
 
 	r := mux.NewRouter()
@@ -100,7 +98,6 @@ func makeGraphiqlHandler(webUiFolder string) (http.Handler, error) {
 	// fmt.Println(assets)
 	h := http.FileServer(http.Dir(assets))
 	return h, nil
-
 }
 
 func getRootObject(config mongoke.JwtConfig, r *http.Request) map[string]interface{} {
@@ -118,7 +115,6 @@ func getRootObject(config mongoke.JwtConfig, r *http.Request) map[string]interfa
 	}
 
 	claims, err := extractClaims(config, tknStr)
-
 	if err != nil {
 		fmt.Println("error in handler", err)
 		return rootValue
@@ -139,10 +135,10 @@ func reverseStrings(input []string) []string {
 
 func corsMiddleware(next http.HandlerFunc) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+		w.Header().Set("Access-Control-Allow-Headers",
+			"Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 
 		next.ServeHTTP(w, r)
 	})

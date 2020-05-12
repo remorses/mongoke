@@ -14,7 +14,6 @@ func TestBasicEvaluation(t *testing.T) {
 	vars := mongoke.Map{"document": mongoke.Map{"name": "World"}}
 
 	t.Run("using dots", func(t *testing.T) {
-
 		value, err := gval.Evaluate(`"Hello " + document.name + "!"`, vars)
 		if err != nil {
 			t.Error(err)
@@ -22,7 +21,6 @@ func TestBasicEvaluation(t *testing.T) {
 		t.Log(value)
 	})
 	t.Run("using subscription", func(t *testing.T) {
-
 		value, err := gval.Evaluate(`"Hello " + document.name + "!"`, vars)
 		if err != nil {
 			t.Error(err)
