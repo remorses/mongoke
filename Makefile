@@ -1,7 +1,7 @@
 
 
 play:
-	go run ./cmd/main.go --path example_mongoke.yml
+	go run ./cmd/main.go --www ./web-ui/out --localhost --path example_mongoke.yml
 
 .PHONY: build
 build:

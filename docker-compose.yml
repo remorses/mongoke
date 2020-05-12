@@ -1,9 +1,19 @@
 version: "3"
 
 services:
+  mongoke:
+    build: .
+    command: 
+      - --path 
+      - /mongoke.yml
+    ports:
+      - 8080:8080
+    volumes: 
+      - ./example_mongoke.yml:/mongoke.yml
+    
   mongo:
     ports:
       - 27017:27017
     image: mongo
-    # logging:
-    #   driver: "none"
+    logging:
+      driver: "none"

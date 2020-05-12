@@ -2,10 +2,9 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
-	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -18,10 +17,10 @@ import (
 	"context"
 )
 
-var WEB_UI_PATH = "./web-ui/out/"
+var GRAPHIQL_PATH = "/graphiql"
 
 // MakeMongokeHandler creates an http handler
-func MakeMongokeHandler(config mongoke.Config) (http.Handler, error) {
+func MakeMongokeHandler(config mongoke.Config, webUiFolder string) (http.Handler, error) {
 	schema, err := mongoke_schema.MakeMongokeSchema(config)
 	if err != nil {
 		return nil, err
@@ -59,7 +58,7 @@ func MakeMongokeHandler(config mongoke.Config) (http.Handler, error) {
 			acceptHeader := r.Header.Get("Accept")
 			_, raw := r.URL.Query()["raw"]
 			if !raw && !strings.Contains(acceptHeader, "application/json") && strings.Contains(acceptHeader, "text/html") {
-				http.Redirect(w, r, "/graphiql", 302)
+				http.Redirect(w, r, GRAPHIQL_PATH, 302)
 				return
 			}
 		}
@@ -77,19 +76,27 @@ func MakeMongokeHandler(config mongoke.Config) (http.Handler, error) {
 
 	r := mux.NewRouter()
 
-	graphiql, _ := makeGraphiqlHandler()
+	graphiql, err := makeGraphiqlHandler(webUiFolder)
+	if err != nil {
+		return nil, err
+	}
 
-	r.PathPrefix("/graphiql").Handler(http.StripPrefix("/graphiql", graphiql))
+	r.PathPrefix(GRAPHIQL_PATH).Handler(http.StripPrefix(GRAPHIQL_PATH, graphiql))
 	r.Handle("/", http.HandlerFunc(api))
 
 	return r, nil
-
 }
 
-func makeGraphiqlHandler() (http.Handler, error) {
-	cwd, _ := os.Getwd()
-	root, _ := filepath.Abs(cwd)
-	assets := path.Join(root, WEB_UI_PATH)
+func makeGraphiqlHandler(webUiFolder string) (http.Handler, error) {
+	// cwd, err := os.Getwd()
+	// if err != nil {
+	// 	return nil, err
+	// }
+	assets, err := filepath.Abs(webUiFolder)
+	if err != nil {
+		return nil, errors.New("cannot find web ui assets in " + webUiFolder + ", " + err.Error())
+	}
+	// assets := path.Join(root, webUiFolder)
 	fmt.Println(assets)
 	h := http.FileServer(http.Dir(assets))
 	return h, nil

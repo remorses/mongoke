@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -24,6 +25,16 @@ func main() {
 				Value: "8080",
 				Usage: "port to listen to",
 			},
+			&cli.StringFlag{
+				Name:  "www",
+				Value: "",
+				Usage: "web ui assets folder",
+			},
+			&cli.BoolFlag{
+				Name:  "localhost",
+				Value: false,
+				Usage: "use localhost instead of 0.0.0.0",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			path := c.String("path")
@@ -38,17 +49,23 @@ func main() {
 			if e != nil {
 				return cli.Exit(e, 1)
 			}
-			h, err := handler.MakeMongokeHandler(config)
+			h, err := handler.MakeMongokeHandler(config, c.String("www"))
 			if err != nil {
 				return cli.Exit(err, 1)
 			}
 			http.Handle("/", h)
 			port := c.String("port")
 			println("listening on http://localhost:" + port)
-			if err = http.ListenAndServe("localhost:"+port, nil); err != nil {
+			var host string
+			if c.Bool("localhost") {
+				host = "localhost:"
+			} else {
+				host = "0.0.0.0:"
+			}
+			if err = http.ListenAndServe(host+port, nil); err != nil {
+				fmt.Println(err)
 				return cli.Exit(err, 1)
 			}
-
 			return nil
 		},
 	}
