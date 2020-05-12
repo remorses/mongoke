@@ -266,8 +266,10 @@ func TestQueryReturnValues(t *testing.T) {
 					},
 				},
 			},
-			Expected: mongoke.Map{"User": mongoke.Map{"name": "01",
-				"friends": mongoke.Map{"nodes": exampleUsers}}},
+			Expected: mongoke.Map{"User": mongoke.Map{
+				"name":    "01",
+				"friends": mongoke.Map{"nodes": exampleUsers},
+			}},
 			Query: `
 			{
 				User {
@@ -413,8 +415,10 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 		{
 			Name:   "findMany query with string cursorField",
 			Config: config,
-			Expected: mongoke.Map{"UserNodes": mongoke.Map{"nodes": exampleUsers[:2],
-				"pageInfo": mongoke.Map{"endCursor": "02"}}},
+			Expected: mongoke.Map{"UserNodes": mongoke.Map{
+				"nodes":    exampleUsers[:2],
+				"pageInfo": mongoke.Map{"endCursor": "02"},
+			}},
 			Query: `
 			{
 				UserNodes(first: 2, cursorField: name) {
@@ -432,8 +436,10 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 		{
 			Name:   "findMany query with int cursorField",
 			Config: config,
-			Expected: mongoke.Map{"UserNodes": mongoke.Map{"nodes": exampleUsers[:2],
-				"pageInfo": mongoke.Map{"endCursor": 2}}},
+			Expected: mongoke.Map{"UserNodes": mongoke.Map{
+				"nodes":    exampleUsers[:2],
+				"pageInfo": mongoke.Map{"endCursor": 2},
+			}},
 			Query: `
 			{
 				UserNodes(first: 2, cursorField: age) {
