@@ -5,8 +5,8 @@ import (
 )
 
 // indexableFields
-func (m Mongoke) takeIndexableFields(object graphql.Type) []*graphql.FieldDefinition {
-	indexableNames := takeIndexableTypeNames(m.schemaConfig)
+func takeIndexableFields(indexableNames []string, object graphql.Type) []*graphql.FieldDefinition {
+	// indexableNames := takeIndexableTypeNames(schemaConfig)
 	indexableFields := make([]*graphql.FieldDefinition, 0)
 	for _, v := range getTypeFields(object) {
 		typeName := v.Type.Name()

@@ -1,8 +1,6 @@
 package mongoke
 
 import (
-	"errors"
-
 	"github.com/graphql-go/graphql"
 )
 
@@ -10,18 +8,15 @@ func makeWhereArgumentName(object graphql.Type) string {
 	return object.Name() + "Where"
 }
 
-func (mongoke *Mongoke) getWhereArg(object graphql.Type) (*graphql.InputObject, error) {
+func getWhereArg(cache Map, indexableNames []string, object graphql.Type) (*graphql.InputObject, error) {
 	name := makeWhereArgumentName(object)
-	if item, ok := mongoke.typeMap[name]; ok {
-		if t, ok := item.(*graphql.InputObject); ok {
-			return t, nil
-		}
-		return nil, errors.New("cannot cast where type for " + name)
+	if item, ok := cache[name].(*graphql.InputObject); ok {
+		return item, nil
 	}
-	scalars := mongoke.takeIndexableFields(object)
+	scalars := takeIndexableFields(indexableNames, object)
 	inputFields := graphql.InputObjectConfigFieldMap{}
 	for _, field := range scalars {
-		fieldWhere, err := mongoke.getFieldWhereArg(field, object.Name())
+		fieldWhere, err := getFieldWhereArg(cache, field, object.Name())
 		if err != nil {
 			return nil, err
 		}
@@ -36,18 +31,15 @@ func (mongoke *Mongoke) getWhereArg(object graphql.Type) (*graphql.InputObject, 
 	})
 	inputFields["or"] = &graphql.InputObjectFieldConfig{Type: where}
 	inputFields["and"] = &graphql.InputObjectFieldConfig{Type: where}
-	mongoke.typeMap[name] = where
+	cache[name] = where
 	return where, nil
 }
 
 // this is be based on a type, like scalars, enums, ..., cache it in mongoke and replace name
-func (mongoke *Mongoke) getFieldWhereArg(field *graphql.FieldDefinition, parentName string) (*graphql.InputObject, error) {
+func getFieldWhereArg(cache Map, field *graphql.FieldDefinition, parentName string) (*graphql.InputObject, error) {
 	name := field.Type.Name() + "Where"
-	if item, ok := mongoke.typeMap[name]; ok {
-		if t, ok := item.(*graphql.InputObject); ok {
-			return t, nil
-		}
-		return nil, errors.New("cannot cast field where type for " + name)
+	if item, ok := cache[name].(*graphql.InputObject); ok {
+		return item, nil
 	}
 	currentType := &graphql.InputObjectFieldConfig{Type: field.Type}
 	fieldWhere := graphql.NewInputObject(
@@ -65,6 +57,6 @@ func (mongoke *Mongoke) getFieldWhereArg(field *graphql.FieldDefinition, parentN
 			},
 		},
 	)
-	mongoke.typeMap[name] = fieldWhere
+	cache[name] = fieldWhere
 	return fieldWhere, nil
 }

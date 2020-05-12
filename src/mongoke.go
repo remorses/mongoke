@@ -12,21 +12,25 @@ import (
 	tools "github.com/remorses/graphql-go-tools"
 )
 
-type Mongoke struct {
-	databaseFunctions  DatabaseInterface
-	typeDefs           string
-	databaseUri        string
-	indexableTypeNames []string
-	typeMap            map[string]graphql.Type
-	Config             Config
-	schemaConfig       graphql.SchemaConfig
-}
+// type Mongoke struct {
+// 	databaseFunctions  DatabaseInterface
+// 	typeDefs           string
+// 	databaseUri        string
+// 	indexableTypeNames []string
+// 	typeMap            map[string]graphql.Type
+// 	Config             Config
+// 	schemaConfig       graphql.SchemaConfig
+// }
 
 // MakeMongokeSchema generates the schema
 func MakeMongokeSchema(config Config) (graphql.Schema, error) {
 	if config.databaseFunctions == nil {
 		config.databaseFunctions = MongodbDatabaseFunctions{}
 	}
+	if config.cache == nil {
+		config.cache = make(Map)
+	}
+
 	// TODO validate config here
 
 	if config.Schema == "" && config.SchemaPath != "" {
@@ -40,15 +44,7 @@ func MakeMongokeSchema(config Config) (graphql.Schema, error) {
 	if err != nil {
 		return graphql.Schema{}, err
 	}
-	mongoke := Mongoke{
-		Config:            config,
-		typeDefs:          config.Schema,
-		databaseFunctions: config.databaseFunctions,
-		typeMap:           make(map[string]graphql.Type),
-		databaseUri:       config.DatabaseUri,
-		schemaConfig:      schemaConfig,
-	}
-	schema, err := mongoke.generateSchema()
+	schema, err := generateSchema(config, schemaConfig)
 	if err != nil {
 		return schema, err
 	}

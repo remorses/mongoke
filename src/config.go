@@ -26,6 +26,7 @@ type Config struct {
 	Relations         []RelationConfig       `json:"relations"`
 	JwtConfig         JwtConfig              `json:"jwt"`
 	databaseFunctions DatabaseInterface
+	cache             Map
 }
 
 type JwtConfig struct {

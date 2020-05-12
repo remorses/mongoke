@@ -1,8 +1,6 @@
 package mongoke
 
 import (
-	"errors"
-
 	"github.com/graphql-go/graphql"
 )
 
@@ -10,14 +8,11 @@ func makeConnectionTypeName(object graphql.Type) string {
 	return object.Name() + "Connection"
 }
 
-func (mongoke *Mongoke) getConnectionType(object graphql.Type) (*graphql.Object, error) {
+func getConnectionType(cache Map, object graphql.Type) (*graphql.Object, error) {
 	name := makeConnectionTypeName(object)
 	// get cached value to not dupe
-	if item, ok := mongoke.typeMap[name]; ok {
-		if t, ok := item.(*graphql.Object); ok {
-			return t, nil
-		}
-		return nil, errors.New("cannot cast connection type for " + name)
+	if item, ok := cache[name].(*graphql.Object); ok {
+		return item, nil
 	}
 	edgeNode := graphql.NewObject(
 		graphql.ObjectConfig{
@@ -48,6 +43,6 @@ func (mongoke *Mongoke) getConnectionType(object graphql.Type) (*graphql.Object,
 		Name:   name,
 		Fields: fields,
 	})
-	mongoke.typeMap[name] = connection
+	cache[name] = connection
 	return connection, nil
 }

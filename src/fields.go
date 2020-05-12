@@ -12,28 +12,30 @@ import (
 const TIMEOUT_FIND = 10
 
 type createFieldParams struct {
+	Config       Config
 	collection   string
 	initialWhere map[string]Filter
 	permissions  []AuthGuard
 	returnType   graphql.Type
+	schemaConfig graphql.SchemaConfig
 	omitWhere    bool
 }
 
-func (mongoke *Mongoke) findOneField(conf createFieldParams) (*graphql.Field, error) {
+func findOneField(p createFieldParams) (*graphql.Field, error) {
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
 		opts := FindOneParams{
-			Collection:  conf.collection,
-			DatabaseUri: mongoke.databaseUri,
+			Collection:  p.collection,
+			DatabaseUri: p.Config.DatabaseUri,
 		}
 		err := mapstructure.Decode(args, &opts)
 		if err != nil {
 			return nil, err
 		}
-		if conf.initialWhere != nil {
-			mergo.Merge(&opts.Where, conf.initialWhere)
+		if p.initialWhere != nil {
+			mergo.Merge(&opts.Where, p.initialWhere)
 		}
-		document, err := mongoke.databaseFunctions.FindOne(opts)
+		document, err := p.Config.databaseFunctions.FindOne(opts)
 		if err != nil {
 			return nil, err
 		}
@@ -44,7 +46,7 @@ func (mongoke *Mongoke) findOneField(conf createFieldParams) (*graphql.Field, er
 		}
 		document, err = applyGuardsOnDocument(applyGuardsOnDocumentParams{
 			document:  document,
-			guards:    conf.permissions,
+			guards:    p.permissions,
 			jwt:       jwt,
 			operation: Operations.READ,
 		})
@@ -53,29 +55,30 @@ func (mongoke *Mongoke) findOneField(conf createFieldParams) (*graphql.Field, er
 		}
 		return document, nil
 	}
-	whereArg, err := mongoke.getWhereArg(conf.returnType)
+	indexableNames := takeIndexableTypeNames(p.schemaConfig)
+	whereArg, err := getWhereArg(p.Config.cache, indexableNames, p.returnType)
 	if err != nil {
 		return nil, err
 	}
 	args := graphql.FieldConfigArgument{}
-	if !conf.omitWhere {
+	if !p.omitWhere {
 		args["where"] = &graphql.ArgumentConfig{Type: whereArg}
 	}
 	field := graphql.Field{
-		Type:    conf.returnType,
+		Type:    p.returnType,
 		Args:    args,
 		Resolve: resolver,
 	}
 	return &field, nil
 }
 
-func (mongoke *Mongoke) findManyField(conf createFieldParams) (*graphql.Field, error) {
+func findManyField(p createFieldParams) (*graphql.Field, error) {
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
 		pagination := paginationFromArgs(args)
 		opts := FindManyParams{
-			DatabaseUri: mongoke.databaseUri, // here i set the defaults
-			Collection:  conf.collection,
+			DatabaseUri: p.Config.DatabaseUri, // here i set the defaults
+			Collection:  p.collection,
 			Direction:   ASC,
 			CursorField: "_id",
 			Pagination:  pagination,
@@ -84,17 +87,17 @@ func (mongoke *Mongoke) findManyField(conf createFieldParams) (*graphql.Field, e
 		if err != nil {
 			return nil, err
 		}
-		if conf.initialWhere != nil {
-			mergo.Merge(&opts.Where, conf.initialWhere)
+		if p.initialWhere != nil {
+			mergo.Merge(&opts.Where, p.initialWhere)
 		}
-		nodes, err := mongoke.databaseFunctions.FindMany(
+		nodes, err := p.Config.databaseFunctions.FindMany(
 			opts,
 		)
 		if err != nil {
 			return nil, err
 		}
 
-		if len(conf.permissions) == 0 {
+		if len(p.permissions) == 0 {
 			return makeConnection(nodes, opts.Pagination, opts.CursorField), nil
 		}
 
@@ -103,7 +106,7 @@ func (mongoke *Mongoke) findManyField(conf createFieldParams) (*graphql.Field, e
 		for _, document := range nodes {
 			node, err := applyGuardsOnDocument(applyGuardsOnDocumentParams{
 				document:  document,
-				guards:    conf.permissions,
+				guards:    p.permissions,
 				jwt:       jwt,
 				operation: Operations.READ,
 			})
@@ -121,15 +124,16 @@ func (mongoke *Mongoke) findManyField(conf createFieldParams) (*graphql.Field, e
 		// testutil.PrettyPrint(args)
 		return connection, nil
 	}
-	whereArg, err := mongoke.getWhereArg(conf.returnType)
+	indexableNames := takeIndexableTypeNames(p.schemaConfig)
+	whereArg, err := getWhereArg(p.Config.cache, indexableNames, p.returnType)
 	if err != nil {
 		return nil, err
 	}
-	connectionType, err := mongoke.getConnectionType(conf.returnType)
+	connectionType, err := getConnectionType(p.Config.cache, p.returnType)
 	if err != nil {
 		return nil, err
 	}
-	indexableFieldsEnum, err := mongoke.getIndexableFieldsEnum(conf.returnType)
+	indexableFieldsEnum, err := getIndexableFieldsEnum(p.Config.cache, indexableNames, p.returnType)
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +145,7 @@ func (mongoke *Mongoke) findManyField(conf createFieldParams) (*graphql.Field, e
 		"direction":   &graphql.ArgumentConfig{Type: directionEnum},
 		"cursorField": &graphql.ArgumentConfig{Type: indexableFieldsEnum},
 	}
-	if !conf.omitWhere {
+	if !p.omitWhere {
 		args["where"] = &graphql.ArgumentConfig{Type: whereArg}
 	}
 	field := graphql.Field{

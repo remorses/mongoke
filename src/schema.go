@@ -6,10 +6,9 @@ import (
 	"github.com/graphql-go/graphql"
 )
 
-func (mongoke *Mongoke) generateSchema() (graphql.Schema, error) {
+func generateSchema(Config Config, baseSchemaConfig graphql.SchemaConfig) (graphql.Schema, error) {
 	queryFields := graphql.Fields{}
 	mutationFields := graphql.Fields{}
-	baseSchemaConfig := mongoke.schemaConfig
 
 	// add fields
 	for _, gqlType := range baseSchemaConfig.Types {
@@ -21,7 +20,7 @@ func (mongoke *Mongoke) generateSchema() (graphql.Schema, error) {
 			continue
 		}
 
-		typeConf := mongoke.Config.getTypeConfig(gqlType.Name())
+		typeConf := Config.getTypeConfig(gqlType.Name())
 
 		if typeConf == nil || (typeConf.Exposed != nil && !*typeConf.Exposed) {
 			println("ignoring not exposed type " + gqlType.Name())
@@ -32,16 +31,18 @@ func (mongoke *Mongoke) generateSchema() (graphql.Schema, error) {
 			return graphql.Schema{}, errors.New("no collection given for type " + gqlType.Name())
 		}
 		p := createFieldParams{
-			returnType:  object,
-			permissions: typeConf.Permissions,
-			collection:  typeConf.Collection,
+			Config:       Config,
+			returnType:   object,
+			permissions:  typeConf.Permissions,
+			collection:   typeConf.Collection,
+			schemaConfig: baseSchemaConfig,
 		}
-		findOne, err := mongoke.findOneField(p)
+		findOne, err := findOneField(p)
 		if err != nil {
 			return graphql.Schema{}, err
 		}
 		queryFields[object.Name()] = findOne
-		findMany, err := mongoke.findManyField(p)
+		findMany, err := findManyField(p)
 		if err != nil {
 			return graphql.Schema{}, err
 		}
@@ -57,7 +58,7 @@ func (mongoke *Mongoke) generateSchema() (graphql.Schema, error) {
 	}
 
 	// add relations
-	for _, relation := range mongoke.Config.Relations {
+	for _, relation := range Config.Relations {
 		if relation.Field == "" {
 			return graphql.Schema{}, errors.New("relation field is empty " + relation.From)
 		}
@@ -69,7 +70,7 @@ func (mongoke *Mongoke) generateSchema() (graphql.Schema, error) {
 		if returnType == nil {
 			return graphql.Schema{}, errors.New("cannot find relation `to` type " + relation.To)
 		}
-		returnTypeConf := mongoke.Config.getTypeConfig(relation.To)
+		returnTypeConf := Config.getTypeConfig(relation.To)
 		if returnTypeConf == nil {
 			return graphql.Schema{}, errors.New("cannot find type config for relation " + relation.Field)
 		}
@@ -78,20 +79,22 @@ func (mongoke *Mongoke) generateSchema() (graphql.Schema, error) {
 			return graphql.Schema{}, errors.New("relation return type " + fromType.Name() + " is not an object")
 		}
 		p := createFieldParams{
+			Config:       Config,
 			returnType:   returnType,
 			permissions:  returnTypeConf.Permissions,
 			collection:   returnTypeConf.Collection,
 			initialWhere: relation.Where,
+			schemaConfig: baseSchemaConfig,
 			omitWhere:    true,
 		}
 		if relation.RelationType == "to_many" {
-			field, err := mongoke.findManyField(p)
+			field, err := findManyField(p)
 			if err != nil {
 				return graphql.Schema{}, err
 			}
 			object.AddFieldConfig(relation.Field, field)
 		} else if relation.RelationType == "to_one" {
-			field, err := mongoke.findOneField(p)
+			field, err := findOneField(p)
 			if err != nil {
 				return graphql.Schema{}, err
 			}
