@@ -1,9 +1,10 @@
-package mongoke
+package types
 
 import (
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/graphql/language/ast"
 	"github.com/graphql-go/graphql/language/kinds"
+	mongoke "github.com/remorses/mongoke/src"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -12,22 +13,22 @@ var (
 	False = false
 )
 
-var directionEnum = graphql.NewEnum(graphql.EnumConfig{
+var DirectionEnum = graphql.NewEnum(graphql.EnumConfig{
 	Name:        "Direction",
 	Description: "asc or desc",
 	Values: graphql.EnumValueConfigMap{
 		"ASC": &graphql.EnumValueConfig{
-			Value:       ASC,
+			Value:       mongoke.ASC,
 			Description: "ascending",
 		},
 		"DESC": &graphql.EnumValueConfig{
-			Value:       DESC,
+			Value:       mongoke.DESC,
 			Description: "Descending",
 		},
 	},
 })
 
-var pageInfo = graphql.NewObject(
+var PageInfo = graphql.NewObject(
 	graphql.ObjectConfig{
 		Name:        "PageInfo",
 		Description: "Pagination information",
@@ -48,7 +49,7 @@ var pageInfo = graphql.NewObject(
 	},
 )
 
-var objectID = graphql.NewScalar(graphql.ScalarConfig{
+var ObjectID = graphql.NewScalar(graphql.ScalarConfig{
 	Name:        "ObjectId",
 	Description: "The `bson` scalar type represents a BSON ObjectId.",
 	// Serialize serializes `bson.ObjectId` to string.
@@ -87,6 +88,22 @@ var objectID = graphql.NewScalar(graphql.ScalarConfig{
 	},
 })
 
+// AnyScalar json type
+var AnyScalar = graphql.NewScalar(
+	graphql.ScalarConfig{
+		Name:        "AnyScalar",
+		Description: "The `AnyScalar` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf)",
+		Serialize: func(value interface{}) interface{} {
+			//  it seems it can already handle ObjectId and generic scalars, but how?
+			return value
+		},
+		ParseValue: func(value interface{}) interface{} {
+			return value
+		},
+		ParseLiteral: parseAnyScalarLiteral,
+	},
+)
+
 func parseAnyScalarLiteral(astValue ast.Value) interface{} {
 	kind := astValue.GetKind()
 
@@ -115,19 +132,3 @@ func parseAnyScalarLiteral(astValue ast.Value) interface{} {
 		return nil
 	}
 }
-
-// AnyScalar json type
-var AnyScalar = graphql.NewScalar(
-	graphql.ScalarConfig{
-		Name:        "AnyScalar",
-		Description: "The `AnyScalar` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf)",
-		Serialize: func(value interface{}) interface{} {
-			//  it seems it can already handle ObjectId and generic scalars, but how?
-			return value
-		},
-		ParseValue: func(value interface{}) interface{} {
-			return value
-		},
-		ParseLiteral: parseAnyScalarLiteral,
-	},
-)

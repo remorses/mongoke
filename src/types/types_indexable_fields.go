@@ -1,12 +1,37 @@
-package mongoke
+package types
 
 import (
 	"github.com/graphql-go/graphql"
+	mongoke "github.com/remorses/mongoke/src"
 )
+
+func MakeIndexableFieldsName(object graphql.Type) string {
+	return object.Name() + "IndexableFields"
+}
+
+func GetIndexableFieldsEnum(cache mongoke.Map, indexableNames []string, object graphql.Type) (*graphql.Enum, error) {
+	name := MakeIndexableFieldsName(object)
+	if item, ok := cache[name].(*graphql.Enum); ok {
+		return item, nil
+	}
+	scalars := takeIndexableFields(indexableNames, object)
+	enumValues := graphql.EnumValueConfigMap{}
+	for _, field := range scalars {
+		enumValues[field.Name] = &graphql.EnumValueConfig{
+			Value:       field.Name,
+			Description: "The field enum for " + field.Name,
+		}
+	}
+	enum := graphql.NewEnum(graphql.EnumConfig{
+		Name:   name,
+		Values: enumValues,
+	})
+	cache[name] = enum
+	return enum, nil
+}
 
 // indexableFields
 func takeIndexableFields(indexableNames []string, object graphql.Type) []*graphql.FieldDefinition {
-	// indexableNames := takeIndexableTypeNames(schemaConfig)
 	indexableFields := make([]*graphql.FieldDefinition, 0)
 	for _, v := range getTypeFields(object) {
 		typeName := v.Type.Name()
@@ -36,29 +61,6 @@ func getTypeFields(object graphql.Type) graphql.FieldDefinitionMap {
 	default:
 		return graphql.FieldDefinitionMap{}
 	}
-}
-
-// to be used in takeScalarFields
-func takeIndexableTypeNames(baseSchemaConfig graphql.SchemaConfig) []string {
-	names := make([]string, 0)
-	for _, gqlType := range baseSchemaConfig.Types {
-		if graphql.IsLeafType(gqlType) {
-			names = append(names, gqlType.Name())
-		}
-	}
-	return names
-}
-
-func takeEnumTypes(baseSchemaConfig graphql.SchemaConfig) []*graphql.Enum {
-	enums := make([]*graphql.Enum, 0)
-	for _, gqlType := range baseSchemaConfig.Types {
-		enum, ok := gqlType.(*graphql.Enum)
-		if !ok {
-			continue
-		}
-		enums = append(enums, enum)
-	}
-	return enums
 }
 
 func contains(arr []string, str string) bool {

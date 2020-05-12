@@ -1,15 +1,16 @@
-package mongoke
+package types
 
 import (
 	"github.com/graphql-go/graphql"
+	mongoke "github.com/remorses/mongoke/src"
 )
 
-func makeWhereArgumentName(object graphql.Type) string {
+func MakeWhereArgumentName(object graphql.Type) string {
 	return object.Name() + "Where"
 }
 
-func getWhereArg(cache Map, indexableNames []string, object graphql.Type) (*graphql.InputObject, error) {
-	name := makeWhereArgumentName(object)
+func GetWhereArg(cache mongoke.Map, indexableNames []string, object graphql.Type) (*graphql.InputObject, error) {
+	name := MakeWhereArgumentName(object)
 	if item, ok := cache[name].(*graphql.InputObject); ok {
 		return item, nil
 	}
@@ -36,7 +37,7 @@ func getWhereArg(cache Map, indexableNames []string, object graphql.Type) (*grap
 }
 
 // this is be based on a type, like scalars, enums, ..., cache it in mongoke and replace name
-func getFieldWhereArg(cache Map, field *graphql.FieldDefinition, parentName string) (*graphql.InputObject, error) {
+func getFieldWhereArg(cache mongoke.Map, field *graphql.FieldDefinition, parentName string) (*graphql.InputObject, error) {
 	name := field.Type.Name() + "Where"
 	if item, ok := cache[name].(*graphql.InputObject); ok {
 		return item, nil

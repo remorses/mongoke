@@ -5,6 +5,7 @@ go 1.13
 require (
 	github.com/PaesslerAG/gval v1.0.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/dvic/graphql v0.7.4 // indirect
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-test/deep v1.0.6
 	github.com/google/go-cmp v0.4.0 // indirect
@@ -14,7 +15,7 @@ require (
 	github.com/imdario/mergo v0.3.9
 	github.com/kofalt/go-memoize v0.0.0-20190519021333-cf756f0462a4
 	github.com/lestrrat-go/jwx v1.0.2
-	github.com/markbates/pkger v0.15.1
+	github.com/markbates/pkger v0.15.1 // indirect
 	github.com/mitchellh/mapstructure v1.3.0
 	github.com/remorses/graphql-go-tools v0.0.0-20200511111635-5c318a54190b
 	github.com/stretchr/testify v1.5.1

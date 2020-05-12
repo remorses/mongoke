@@ -1,15 +1,16 @@
-package mongoke
+package types
 
 import (
 	"github.com/graphql-go/graphql"
+	mongoke "github.com/remorses/mongoke/src"
 )
 
-func makeConnectionTypeName(object graphql.Type) string {
+func MakeConnectionTypeName(object graphql.Type) string {
 	return object.Name() + "Connection"
 }
 
-func getConnectionType(cache Map, object graphql.Type) (*graphql.Object, error) {
-	name := makeConnectionTypeName(object)
+func GetConnectionType(cache mongoke.Map, object graphql.Type) (*graphql.Object, error) {
+	name := MakeConnectionTypeName(object)
 	// get cached value to not dupe
 	if item, ok := cache[name].(*graphql.Object); ok {
 		return item, nil
@@ -36,7 +37,7 @@ func getConnectionType(cache Map, object graphql.Type) (*graphql.Object, error) 
 			Type: graphql.NewList(edgeNode),
 		},
 		"pageInfo": &graphql.Field{
-			Type: pageInfo,
+			Type: PageInfo,
 		},
 	}
 	connection := graphql.NewObject(graphql.ObjectConfig{

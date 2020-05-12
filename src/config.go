@@ -1,9 +1,13 @@
 package mongoke
 
 import (
+	"context"
+
 	"github.com/PaesslerAG/gval"
 	yaml "github.com/ghodss/yaml"
 )
+
+type Map map[string]interface{}
 
 var Operations = struct {
 	READ   string
@@ -17,6 +21,16 @@ var Operations = struct {
 	CREATE: "create",
 }
 
+const (
+	ASC  = 1
+	DESC = -1
+)
+
+var (
+	True  = true
+	False = false
+)
+
 type Config struct {
 	EnableGraphiql    *bool                  `json:"enable_graphiql"`
 	DatabaseUri       string                 `json:"database_uri"`
@@ -25,8 +39,17 @@ type Config struct {
 	Types             map[string]*TypeConfig `json:"types"`
 	Relations         []RelationConfig       `json:"relations"`
 	JwtConfig         JwtConfig              `json:"jwt"`
-	databaseFunctions DatabaseInterface
-	cache             Map
+	DatabaseFunctions DatabaseInterface
+	Cache             Map
+}
+
+func (config Config) GetTypeConfig(typeName string) *TypeConfig {
+	for name, conf := range config.Types {
+		if name == typeName {
+			return conf
+		}
+	}
+	return nil
 }
 
 type JwtConfig struct {
@@ -55,6 +78,21 @@ type AuthGuard struct {
 	eval              gval.Evaluable
 }
 
+func (guard AuthGuard) Evaluate(params Map) (interface{}, error) {
+	if guard.eval == nil {
+		eval, err := gval.Full().NewEvaluable(guard.Expression)
+		if err != nil {
+			return nil, err
+		}
+		guard.eval = eval
+	}
+	res, err := guard.eval(context.Background(), params)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
 type RelationConfig struct {
 	From         string            `json:"from"`
 	Field        string            `json:"field"`
@@ -80,13 +118,4 @@ func MakeConfigFromYaml(data string) (Config, error) {
 	}
 
 	return t, nil
-}
-
-func (config Config) getTypeConfig(typeName string) *TypeConfig {
-	for name, conf := range config.Types {
-		if name == typeName {
-			return conf
-		}
-	}
-	return nil
 }

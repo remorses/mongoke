@@ -1,31 +1,15 @@
-package mongoke
+package schema
 
 import (
-	"context"
 	"errors"
 
-	"github.com/PaesslerAG/gval"
 	jwt "github.com/dgrijalva/jwt-go"
+	mongoke "github.com/remorses/mongoke/src"
 )
-
-func (guard AuthGuard) Evaluate(params Map) (interface{}, error) {
-	if guard.eval == nil {
-		eval, err := gval.Full().NewEvaluable(guard.Expression)
-		if err != nil {
-			return nil, err
-		}
-		guard.eval = eval
-	}
-	res, err := guard.eval(context.Background(), params)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
 
 type applyGuardsOnDocumentParams struct {
 	document  interface{}
-	guards    []AuthGuard
+	guards    []mongoke.AuthGuard
 	jwt       jwt.MapClaims
 	operation string
 }
@@ -48,17 +32,17 @@ func applyGuardsOnDocument(p applyGuardsOnDocumentParams) (interface{}, error) {
 	return p.document, nil
 }
 
-// TODO copying document when hiding fields could be not performant
 func hideFieldsFromDocument(document interface{}, toHide []string) interface{} {
 	if document == nil {
 		return nil
 	}
-	documentMap, ok := document.(Map)
+	documentMap, ok := document.(mongoke.Map)
 	if !ok {
 		return document
 	}
+	// TODO copying document when hiding fields could be not performant
 	// clone the map
-	copy := Map{}
+	copy := mongoke.Map{}
 	for k, v := range documentMap {
 		copy[k] = v
 	}
@@ -73,17 +57,17 @@ func hideFieldsFromDocument(document interface{}, toHide []string) interface{} {
 
 }
 
-func evaluateAuthPermission(guards []AuthGuard, jwt jwt.MapClaims, document interface{}) (AuthGuard, error) {
+func evaluateAuthPermission(guards []mongoke.AuthGuard, jwt jwt.MapClaims, document interface{}) (mongoke.AuthGuard, error) {
 	// TODO if user is admin return the max AuthGuard here
 	// if guards are empty default to read permission
 	if len(guards) == 0 {
-		return AuthGuard{
-			AllowedOperations: []string{Operations.READ},
+		return mongoke.AuthGuard{
+			AllowedOperations: []string{mongoke.Operations.READ},
 		}, nil
 	}
 	for _, guard := range guards {
 		res, err := guard.Evaluate(
-			Map{
+			mongoke.Map{
 				"jwt":      jwt,
 				"document": document,
 				// TODO more evaluation params like x, utility functions, ...
@@ -97,18 +81,27 @@ func evaluateAuthPermission(guards []AuthGuard, jwt jwt.MapClaims, document inte
 			// default allowed operations is every operation
 			if len(guard.AllowedOperations) == 0 {
 				guard.AllowedOperations = []string{
-					Operations.CREATE,
-					Operations.DELETE,
-					Operations.READ,
-					Operations.UPDATE,
+					mongoke.Operations.CREATE,
+					mongoke.Operations.DELETE,
+					mongoke.Operations.READ,
+					mongoke.Operations.UPDATE,
 				}
 			}
 			return guard, nil
 		}
 	}
 	// default last permission is nothing when permissions list not empty and error
-	permission := AuthGuard{
+	permission := mongoke.AuthGuard{
 		AllowedOperations: nil,
 	}
 	return permission, errors.New("no required permission for this resource")
+}
+
+func contains(arr []string, str string) bool {
+	for _, a := range arr {
+		if a == str {
+			return true
+		}
+	}
+	return false
 }

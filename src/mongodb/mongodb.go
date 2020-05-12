@@ -1,10 +1,11 @@
-package mongoke
+package mongodb
 
 import (
 	"context"
 	"errors"
 	"time"
 
+	mongoke "github.com/remorses/mongoke/src"
 	"github.com/remorses/mongoke/src/testutil"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -14,6 +15,7 @@ import (
 const (
 	TIMEOUT_CONNECT = 5
 	MAX_QUERY_TIME  = 10
+	TIMEOUT_FIND    = 10
 )
 
 // type findOneParams struct {
@@ -25,9 +27,9 @@ type MongodbDatabaseFunctions struct {
 	db *mongo.Database
 }
 
-func (c MongodbDatabaseFunctions) FindOne(p FindOneParams) (interface{}, error) {
+func (self MongodbDatabaseFunctions) FindOne(p mongoke.FindOneParams) (interface{}, error) {
 	ctx, _ := context.WithTimeout(context.Background(), TIMEOUT_FIND*time.Second)
-	db, err := c.initMongo(p.DatabaseUri)
+	db, err := self.InitMongo(p.DatabaseUri)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +45,7 @@ func (c MongodbDatabaseFunctions) FindOne(p FindOneParams) (interface{}, error) 
 	if res.Err() != nil {
 		return nil, res.Err()
 	}
-	var document Map = make(Map)
+	var document mongoke.Map = make(mongoke.Map)
 	err = res.Decode(document)
 	if err != nil {
 		return nil, err
@@ -57,20 +59,15 @@ const (
 	MAX_NODES_COUNT     = 40
 )
 
-const (
-	ASC  = 1
-	DESC = -1
-)
-
-func (c MongodbDatabaseFunctions) FindMany(p FindManyParams) ([]Map, error) {
+func (self MongodbDatabaseFunctions) FindMany(p mongoke.FindManyParams) ([]mongoke.Map, error) {
 	if p.Direction == 0 {
-		p.Direction = ASC
+		p.Direction = mongoke.ASC
 	}
 	if p.CursorField == "" {
 		p.CursorField = "_id"
 	}
 	ctx, _ := context.WithTimeout(context.Background(), TIMEOUT_FIND*time.Second)
-	db, err := c.initMongo(p.DatabaseUri)
+	db, err := self.InitMongo(p.DatabaseUri)
 	if err != nil {
 		return nil, err
 	}
@@ -106,14 +103,14 @@ func (c MongodbDatabaseFunctions) FindMany(p FindManyParams) ([]Map, error) {
 	// gt and lt
 	cursorFieldMatch := p.Where[p.CursorField]
 	if after != "" {
-		if p.Direction == DESC {
+		if p.Direction == mongoke.DESC {
 			cursorFieldMatch.Lt = after
 		} else {
 			cursorFieldMatch.Gt = after
 		}
 	}
 	if before != "" {
-		if p.Direction == DESC {
+		if p.Direction == mongoke.DESC {
 			cursorFieldMatch.Gt = before
 		} else {
 			cursorFieldMatch.Lt = before
@@ -125,7 +122,7 @@ func (c MongodbDatabaseFunctions) FindMany(p FindManyParams) ([]Map, error) {
 	if last != 0 {
 		sorting = -p.Direction
 	}
-	opts.SetSort(Map{p.CursorField: sorting})
+	opts.SetSort(mongoke.Map{p.CursorField: sorting})
 
 	// limit
 	if last != 0 {
@@ -148,7 +145,7 @@ func (c MongodbDatabaseFunctions) FindMany(p FindManyParams) ([]Map, error) {
 		return nil, err
 	}
 	defer res.Close(ctx)
-	nodes := make([]Map, 0)
+	nodes := make([]mongoke.Map, 0)
 	err = res.All(ctx, &nodes)
 	if err != nil {
 		return nil, err
@@ -156,9 +153,9 @@ func (c MongodbDatabaseFunctions) FindMany(p FindManyParams) ([]Map, error) {
 	return nodes, nil
 }
 
-func (c *MongodbDatabaseFunctions) initMongo(uri string) (*mongo.Database, error) {
-	if c.db != nil {
-		return c.db, nil
+func (self *MongodbDatabaseFunctions) InitMongo(uri string) (*mongo.Database, error) {
+	if self.db != nil {
+		return self.db, nil
 	}
 	uriOptions, err := connstring.Parse(uri)
 	if err != nil {
@@ -174,7 +171,7 @@ func (c *MongodbDatabaseFunctions) initMongo(uri string) (*mongo.Database, error
 		return nil, err
 	}
 	db := client.Database(dbName)
-	c.db = db
+	self.db = db
 	return db, nil
 }
 

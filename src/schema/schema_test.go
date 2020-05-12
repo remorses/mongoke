@@ -1,121 +1,36 @@
-package mongoke
+package schema
 
 import (
 	"context"
 	"testing"
 
 	"github.com/go-test/deep"
+	mongoke "github.com/remorses/mongoke/src"
+	"github.com/remorses/mongoke/src/mock"
+	"github.com/remorses/mongoke/src/mongodb"
 	"github.com/remorses/mongoke/src/testutil"
 	"github.com/stretchr/testify/require"
 )
 
-func TestQueryArgs(t *testing.T) {
-	databaseMock := &DatabaseInterfaceMock{
-		FindManyFunc: func(p FindManyParams) ([]Map, error) {
-			return nil, nil
-		},
-		FindOneFunc: func(p FindOneParams) (interface{}, error) {
-			return nil, nil
-		},
-	}
-	var config = Config{
-		Schema: `
-		type User {
-			name: String
-			age: Int
-		}
-		`,
-		DatabaseUri: testutil.MONGODB_URI,
-		Types: map[string]*TypeConfig{
-			"User": {Collection: "users"},
-		},
-		databaseFunctions: databaseMock,
-	}
-
-	schema, err := MakeMongokeSchema(config)
-	if err != nil {
-		t.Error(err)
-	}
-	t.Run("introspect schema", func(t *testing.T) {
-		if err != nil {
-			t.Error(err)
-		}
-		testutil.QuerySchema(t, schema, testutil.IntrospectionQuery)
-	})
-	t.Run("findOne query without args", func(t *testing.T) {
-		query := `
-		{
-			User {
-				name
-				age
-			}
-		}
-		`
-		testutil.QuerySchema(t, schema, query)
-		calls := len(databaseMock.FindOneCalls())
-		require.Equal(t, 1, calls)
-		where := databaseMock.FindOneCalls()[calls-1].P.Where
-		// require.Equal(t, nil, where)
-		t.Log(where)
-	})
-	t.Run("findOne query with eq", func(t *testing.T) {
-		databaseMock.calls.FindOne = nil
-		query := `
-		{
-			User(where: {name: {eq: "xxx"}}) {
-				name
-				age
-			}
-		}
-		`
-		testutil.QuerySchema(t, schema, query)
-		calls := len(databaseMock.FindOneCalls())
-		require.Equal(t, 1, calls)
-		where := databaseMock.FindOneCalls()[0].P.Where
-		t.Log(testutil.Pretty(where))
-		require.Equal(t, "xxx", where["name"].Eq)
-	})
-	t.Run("findMany query with first, after, where", func(t *testing.T) {
-		databaseMock.calls.FindMany = nil
-		query := `
-		{
-			UserNodes(first: 10, after: "xxx", where: {name: {eq: "xxx"}}) {
-				nodes {
-					name
-				}
-			}
-		}
-		`
-		testutil.QuerySchema(t, schema, query)
-		calls := len(databaseMock.calls.FindMany)
-		require.Equal(t, 1, calls)
-		p := databaseMock.calls.FindMany[0].P
-		t.Log("params", testutil.Pretty(p))
-		// + 1 because we need to know hasNextPage
-		require.Equal(t, 10+1, p.Pagination.First)
-		require.Equal(t, "xxx", p.Pagination.After)
-	})
-}
-
-var trueValue = true
-var falseValue = false
+var False = false
+var True = true
 
 func TestQueryReturnValues(t *testing.T) {
-	var exampleUsers = []Map{
+	var exampleUsers = []mongoke.Map{
 		{"name": "01", "age": 1},
 		{"name": "02", "age": 2},
 		{"name": "03", "age": 3},
 	}
 	exampleUser := exampleUsers[0]
-	databaseMock := &DatabaseInterfaceMock{
-		FindManyFunc: func(p FindManyParams) ([]Map, error) {
+	databaseMock := &mock.DatabaseInterfaceMock{
+		FindManyFunc: func(p mongoke.FindManyParams) ([]mongoke.Map, error) {
 			return exampleUsers, nil
 		},
-		FindOneFunc: func(p FindOneParams) (interface{}, error) {
+		FindOneFunc: func(p mongoke.FindOneParams) (interface{}, error) {
 			return exampleUser, nil
 		},
 	}
-	var config = Config{
+	var config = mongoke.Config{
 		Schema: `
 		interface Named {
 			name: String
@@ -127,23 +42,23 @@ func TestQueryReturnValues(t *testing.T) {
 		}
 		`,
 		DatabaseUri: testutil.MONGODB_URI,
-		Types: map[string]*TypeConfig{
+		Types: map[string]*mongoke.TypeConfig{
 			"User": {Collection: "users"},
 		},
-		databaseFunctions: databaseMock,
+		DatabaseFunctions: databaseMock,
 	}
 
 	cases := []struct {
 		Name          string
 		Query         string
-		Expected      Map
+		Expected      mongoke.Map
 		ExpectedError string
-		Config        Config
+		Config        mongoke.Config
 	}{
 		{
 			Name:     "findOne query without args",
 			Config:   config,
-			Expected: Map{"User": exampleUser},
+			Expected: mongoke.Map{"User": exampleUser},
 			Query: `
 			{
 				User {
@@ -155,7 +70,7 @@ func TestQueryReturnValues(t *testing.T) {
 		},
 		{
 			Name: "findOne query with permissions false",
-			Config: Config{
+			Config: mongoke.Config{
 				Schema: `
 				type User {
 					name: String
@@ -163,17 +78,17 @@ func TestQueryReturnValues(t *testing.T) {
 				}
 				`,
 				DatabaseUri: testutil.MONGODB_URI,
-				Types: map[string]*TypeConfig{
+				Types: map[string]*mongoke.TypeConfig{
 					"User": {
 						Collection: "users",
-						Permissions: []AuthGuard{
+						Permissions: []mongoke.AuthGuard{
 							{
 								Expression: "false",
 							},
 						},
 					},
 				},
-				databaseFunctions: databaseMock,
+				DatabaseFunctions: databaseMock,
 			},
 			ExpectedError: "no enough permissions", // TODO error not right
 			Query: `
@@ -187,7 +102,7 @@ func TestQueryReturnValues(t *testing.T) {
 		},
 		{
 			Name: "schema with Union type",
-			Config: Config{
+			Config: mongoke.Config{
 				Schema: `
 				type Guest {
 					name: String
@@ -198,7 +113,7 @@ func TestQueryReturnValues(t *testing.T) {
 				union User = Admin | Guest
 				`,
 				DatabaseUri: testutil.MONGODB_URI,
-				Types: map[string]*TypeConfig{
+				Types: map[string]*mongoke.TypeConfig{
 					"Admin": {
 						Exposed:  &False,
 						IsTypeOf: "false",
@@ -211,9 +126,9 @@ func TestQueryReturnValues(t *testing.T) {
 						Collection: "users",
 					},
 				},
-				databaseFunctions: databaseMock,
+				DatabaseFunctions: databaseMock,
 			},
-			Expected: Map{"User": Map{"name": "01"}},
+			Expected: mongoke.Map{"User": mongoke.Map{"name": "01"}},
 			Query: `
 			{
 				User {
@@ -229,7 +144,7 @@ func TestQueryReturnValues(t *testing.T) {
 		},
 		{
 			Name: "findOne query with permissions HideFields",
-			Config: Config{
+			Config: mongoke.Config{
 				Schema: `
 				type User {
 					name: String
@@ -237,11 +152,11 @@ func TestQueryReturnValues(t *testing.T) {
 				}
 				`,
 				DatabaseUri: testutil.MONGODB_URI,
-				Types: map[string]*TypeConfig{
+				Types: map[string]*mongoke.TypeConfig{
 					"User": {
 						Collection: "users",
 
-						Permissions: []AuthGuard{
+						Permissions: []mongoke.AuthGuard{
 							{
 								Expression: "true",
 								HideFields: []string{"name"},
@@ -249,9 +164,9 @@ func TestQueryReturnValues(t *testing.T) {
 						},
 					},
 				},
-				databaseFunctions: databaseMock,
+				DatabaseFunctions: databaseMock,
 			},
-			Expected: Map{"User": Map{"name": nil, "age": 1}},
+			Expected: mongoke.Map{"User": mongoke.Map{"name": nil, "age": 1}},
 			Query: `
 			{
 				User {
@@ -264,7 +179,7 @@ func TestQueryReturnValues(t *testing.T) {
 		{
 			Name:     "findMany query without args",
 			Config:   config,
-			Expected: Map{"UserNodes": Map{"nodes": exampleUsers}},
+			Expected: mongoke.Map{"UserNodes": mongoke.Map{"nodes": exampleUsers}},
 			Query: `
 			{
 				UserNodes {
@@ -278,7 +193,7 @@ func TestQueryReturnValues(t *testing.T) {
 		},
 		{
 			Name: "findMany query with permissions false",
-			Config: Config{
+			Config: mongoke.Config{
 				Schema: `
 				type User {
 					name: String
@@ -286,11 +201,11 @@ func TestQueryReturnValues(t *testing.T) {
 				}
 				`,
 				DatabaseUri:       testutil.MONGODB_URI,
-				databaseFunctions: databaseMock,
-				Types: map[string]*TypeConfig{
+				DatabaseFunctions: databaseMock,
+				Types: map[string]*mongoke.TypeConfig{
 					"User": {
 						Collection: "users",
-						Permissions: []AuthGuard{
+						Permissions: []mongoke.AuthGuard{
 							{
 								Expression: "false",
 							},
@@ -298,7 +213,7 @@ func TestQueryReturnValues(t *testing.T) {
 					},
 				},
 			},
-			Expected: Map{"UserNodes": Map{"nodes": []Map{}}},
+			Expected: mongoke.Map{"UserNodes": mongoke.Map{"nodes": []mongoke.Map{}}},
 			Query: `
 			{
 				UserNodes {
@@ -313,7 +228,7 @@ func TestQueryReturnValues(t *testing.T) {
 		{
 			Name:     "findOne query without args",
 			Config:   config,
-			Expected: Map{"User": exampleUser},
+			Expected: mongoke.Map{"User": exampleUser},
 			Query: `
 			{
 				User {
@@ -325,7 +240,7 @@ func TestQueryReturnValues(t *testing.T) {
 		},
 		{
 			Name: "findOne with to_many relation",
-			Config: Config{
+			Config: mongoke.Config{
 				Schema: `
 				type User {
 					name: String
@@ -333,23 +248,23 @@ func TestQueryReturnValues(t *testing.T) {
 				}
 				`,
 				DatabaseUri:       testutil.MONGODB_URI,
-				databaseFunctions: databaseMock,
-				Types: map[string]*TypeConfig{
+				DatabaseFunctions: databaseMock,
+				Types: map[string]*mongoke.TypeConfig{
 					"User": {
 						Collection: "users",
 					},
 				},
-				Relations: []RelationConfig{
+				Relations: []mongoke.RelationConfig{
 					{
 						Field:        "friends",
 						From:         "User",
 						To:           "User",
 						RelationType: "to_many",
-						Where:        make(map[string]Filter),
+						Where:        make(map[string]mongoke.Filter),
 					},
 				},
 			},
-			Expected: Map{"User": Map{"name": "01", "friends": Map{"nodes": exampleUsers}}},
+			Expected: mongoke.Map{"User": mongoke.Map{"name": "01", "friends": mongoke.Map{"nodes": exampleUsers}}},
 			Query: `
 			{
 				User {
@@ -390,13 +305,13 @@ func TestQueryReturnValues(t *testing.T) {
 
 func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 	collection := "users"
-	var exampleUsers = []Map{
+	var exampleUsers = []mongoke.Map{
 		{"name": "01", "age": 1},
 		{"name": "02", "age": 2},
 		{"name": "03", "age": 3},
 	}
 	exampleUser := exampleUsers[0]
-	var config = Config{
+	var config = mongoke.Config{
 		Schema: `
 		scalar ObjectId
 		interface Named {
@@ -410,7 +325,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 		}
 		`,
 		DatabaseUri: testutil.MONGODB_URI,
-		Types: map[string]*TypeConfig{
+		Types: map[string]*mongoke.TypeConfig{
 			"User": {Collection: "users"},
 		},
 	}
@@ -418,14 +333,14 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 	cases := []struct {
 		Name          string
 		Query         string
-		Expected      Map
+		Expected      mongoke.Map
 		ExpectedError string
-		Config        Config
+		Config        mongoke.Config
 	}{
 		{
 			Name:     "findOne query without args",
 			Config:   config,
-			Expected: Map{"User": exampleUser},
+			Expected: mongoke.Map{"User": exampleUser},
 			Query: `
 			{
 				User {
@@ -438,7 +353,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 		{
 			Name:     "findOne query with eq",
 			Config:   config,
-			Expected: Map{"User": Map{"name": "03"}},
+			Expected: mongoke.Map{"User": mongoke.Map{"name": "03"}},
 			Query: `
 			{
 				User(where: {name: {eq: "03"}}) {
@@ -450,7 +365,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 		{
 			Name:     "findMany query without args",
 			Config:   config,
-			Expected: Map{"UserNodes": Map{"nodes": exampleUsers}},
+			Expected: mongoke.Map{"UserNodes": mongoke.Map{"nodes": exampleUsers}},
 			Query: `
 			{
 				UserNodes {
@@ -465,7 +380,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 		{
 			Name:     "findMany query with first",
 			Config:   config,
-			Expected: Map{"UserNodes": Map{"nodes": exampleUsers[:2]}},
+			Expected: mongoke.Map{"UserNodes": mongoke.Map{"nodes": exampleUsers[:2]}},
 			Query: `
 			{
 				UserNodes(first: 2) {
@@ -480,7 +395,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 		{
 			Name:     "findMany query with last",
 			Config:   config,
-			Expected: Map{"UserNodes": Map{"nodes": exampleUsers[len(exampleUsers)-2:]}},
+			Expected: mongoke.Map{"UserNodes": mongoke.Map{"nodes": exampleUsers[len(exampleUsers)-2:]}},
 			Query: `
 			{
 				UserNodes(last: 2) {
@@ -495,7 +410,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 		{
 			Name:     "findMany query with string cursorField",
 			Config:   config,
-			Expected: Map{"UserNodes": Map{"nodes": exampleUsers[:2], "pageInfo": Map{"endCursor": "02"}}},
+			Expected: mongoke.Map{"UserNodes": mongoke.Map{"nodes": exampleUsers[:2], "pageInfo": mongoke.Map{"endCursor": "02"}}},
 			Query: `
 			{
 				UserNodes(first: 2, cursorField: name) {
@@ -513,7 +428,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 		{
 			Name:     "findMany query with int cursorField",
 			Config:   config,
-			Expected: Map{"UserNodes": Map{"nodes": exampleUsers[:2], "pageInfo": Map{"endCursor": 2}}},
+			Expected: mongoke.Map{"UserNodes": mongoke.Map{"nodes": exampleUsers[:2], "pageInfo": mongoke.Map{"endCursor": 2}}},
 			Query: `
 			{
 				UserNodes(first: 2, cursorField: age) {
@@ -535,13 +450,13 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			t.Log()
 			// t.Log(testCase.Name)
 			schema, err := MakeMongokeSchema(testCase.Config)
-			m := MongodbDatabaseFunctions{}
-			db, err := m.initMongo(testutil.MONGODB_URI)
+			m := mongodb.MongodbDatabaseFunctions{}
+			db, err := m.InitMongo(testutil.MONGODB_URI)
 			if err != nil {
 				t.Error(err)
 			}
 			// clear
-			_, err = db.Collection(collection).DeleteMany(context.TODO(), Map{})
+			_, err = db.Collection(collection).DeleteMany(context.TODO(), mongoke.Map{})
 			if err != nil {
 				t.Error(err)
 			}

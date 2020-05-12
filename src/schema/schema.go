@@ -1,12 +1,92 @@
-package mongoke
+package schema
 
 import (
+	"context"
 	"errors"
+	"fmt"
+	"io/ioutil"
 
+	"github.com/PaesslerAG/gval"
 	"github.com/graphql-go/graphql"
+	tools "github.com/remorses/graphql-go-tools"
+	mongoke "github.com/remorses/mongoke/src"
+	"github.com/remorses/mongoke/src/mongodb"
+	"github.com/remorses/mongoke/src/types"
 )
 
-func generateSchema(Config Config, baseSchemaConfig graphql.SchemaConfig) (graphql.Schema, error) {
+// MakeMongokeSchema generates the schema
+func MakeMongokeSchema(config mongoke.Config) (graphql.Schema, error) {
+	if config.DatabaseFunctions == nil {
+		config.DatabaseFunctions = mongodb.MongodbDatabaseFunctions{}
+	}
+	if config.Cache == nil {
+		config.Cache = make(mongoke.Map)
+	}
+
+	// TODO validate config here
+
+	if config.Schema == "" && config.SchemaPath != "" {
+		data, e := ioutil.ReadFile(config.SchemaPath)
+		if e != nil {
+			return graphql.Schema{}, e
+		}
+		config.Schema = string(data)
+	}
+	schemaConfig, err := makeSchemaConfig(config)
+	if err != nil {
+		return graphql.Schema{}, err
+	}
+	schema, err := GenerateSchema(config, schemaConfig)
+	if err != nil {
+		return schema, err
+	}
+	return schema, nil
+}
+
+func makeSchemaConfig(config mongoke.Config) (graphql.SchemaConfig, error) {
+	resolvers := map[string]tools.Resolver{
+		types.ObjectID.Name(): &tools.ScalarResolver{
+			Serialize:    types.ObjectID.Serialize,
+			ParseLiteral: types.ObjectID.ParseLiteral,
+			ParseValue:   types.ObjectID.ParseValue,
+		},
+	}
+	for name, typeConf := range config.Types {
+		if typeConf.IsTypeOf == "" {
+			continue
+		}
+		eval, err := gval.Full().NewEvaluable(typeConf.IsTypeOf)
+		if err != nil {
+			return graphql.SchemaConfig{}, errors.New("got an error parsing isTypeOf expression " + typeConf.IsTypeOf)
+		}
+		resolvers[name] = &tools.ObjectResolver{
+			IsTypeOf: func(p graphql.IsTypeOfParams) bool {
+				res, err := eval(context.Background(), mongoke.Map{
+					"x":        p.Value,
+					"document": p.Value,
+				})
+				if err != nil {
+					fmt.Println("got an error evaluating expression " + typeConf.IsTypeOf)
+					return false
+				}
+				if res == true {
+					return true
+				}
+				return false
+			},
+		}
+	}
+
+	baseSchemaConfig, err := tools.MakeSchemaConfig(
+		tools.ExecutableSchema{
+			TypeDefs:  []string{config.Schema},
+			Resolvers: resolvers,
+		},
+	)
+	return baseSchemaConfig, err
+}
+
+func GenerateSchema(Config mongoke.Config, baseSchemaConfig graphql.SchemaConfig) (graphql.Schema, error) {
 	queryFields := graphql.Fields{}
 	mutationFields := graphql.Fields{}
 
@@ -20,7 +100,7 @@ func generateSchema(Config Config, baseSchemaConfig graphql.SchemaConfig) (graph
 			continue
 		}
 
-		typeConf := Config.getTypeConfig(gqlType.Name())
+		typeConf := Config.GetTypeConfig(gqlType.Name())
 
 		if typeConf == nil || (typeConf.Exposed != nil && !*typeConf.Exposed) {
 			println("ignoring not exposed type " + gqlType.Name())
@@ -70,7 +150,7 @@ func generateSchema(Config Config, baseSchemaConfig graphql.SchemaConfig) (graph
 		if returnType == nil {
 			return graphql.Schema{}, errors.New("cannot find relation `to` type " + relation.To)
 		}
-		returnTypeConf := Config.getTypeConfig(relation.To)
+		returnTypeConf := Config.GetTypeConfig(relation.To)
 		if returnTypeConf == nil {
 			return graphql.Schema{}, errors.New("cannot find type config for relation " + relation.Field)
 		}

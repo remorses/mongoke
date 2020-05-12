@@ -13,6 +13,7 @@ import (
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/handler"
 	mongoke "github.com/remorses/mongoke/src"
+	mongoke_schema "github.com/remorses/mongoke/src/schema"
 
 	"context"
 )
@@ -21,7 +22,7 @@ var WEB_UI_PATH = "./web-ui/out/"
 
 // MakeMongokeHandler creates an http handler
 func MakeMongokeHandler(config mongoke.Config) (http.Handler, error) {
-	schema, err := mongoke.MakeMongokeSchema(config)
+	schema, err := mongoke_schema.MakeMongokeSchema(config)
 	if err != nil {
 		return nil, err
 	}

@@ -1,10 +1,11 @@
-package mongoke
+package mongodb
 
 import (
 	"context"
 	"testing"
 
 	"github.com/mitchellh/mapstructure"
+	mongoke "github.com/remorses/mongoke/src"
 	"github.com/remorses/mongoke/src/testutil"
 	"github.com/stretchr/testify/require"
 )
@@ -23,19 +24,19 @@ func TestMongodbFunctions(t *testing.T) {
 		Age  int
 	}
 
-	exampleUsers := []Map{
+	exampleUsers := []mongoke.Map{
 		{"name": "01", "age": 1},
 		{"name": "02", "age": 2},
 		{"name": "03", "age": 3},
 	}
 	// clear and insert some docs
 	m := MongodbDatabaseFunctions{}
-	db, err := m.initMongo(uri)
+	db, err := m.InitMongo(uri)
 	if err != nil {
 		t.Error(err)
 	}
 	// clear
-	_, err = db.Collection(collection).DeleteMany(ctx, Map{})
+	_, err = db.Collection(collection).DeleteMany(ctx, mongoke.Map{})
 	if err != nil {
 		t.Error(err)
 	}
@@ -49,10 +50,10 @@ func TestMongodbFunctions(t *testing.T) {
 	t.Run("FindOne with eq", func(t *testing.T) {
 		m := MongodbDatabaseFunctions{}
 		user, err := m.FindOne(
-			FindOneParams{
+			mongoke.FindOneParams{
 				Collection:  collection,
 				DatabaseUri: uri,
-				Where: map[string]Filter{
+				Where: map[string]mongoke.Filter{
 					"name": {Eq: "01"},
 				},
 			},
@@ -71,11 +72,11 @@ func TestMongodbFunctions(t *testing.T) {
 	t.Run("FindMany with first", func(t *testing.T) {
 		m := MongodbDatabaseFunctions{}
 		users, err := m.FindMany(
-			FindManyParams{
+			mongoke.FindManyParams{
 				Collection:  collection,
 				DatabaseUri: uri,
-				Direction:   ASC,
-				Pagination: Pagination{
+				Direction:   mongoke.ASC,
+				Pagination: mongoke.Pagination{
 					First: 2,
 				},
 			},
@@ -95,13 +96,13 @@ func TestMongodbFunctions(t *testing.T) {
 	t.Run("FindMany with neq", func(t *testing.T) {
 		m := MongodbDatabaseFunctions{}
 		users, err := m.FindMany(
-			FindManyParams{
+			mongoke.FindManyParams{
 				Collection:  collection,
 				DatabaseUri: uri,
-				Where: map[string]Filter{
+				Where: map[string]mongoke.Filter{
 					"name": {Neq: "01"},
 				},
-				Pagination: Pagination{
+				Pagination: mongoke.Pagination{
 					First: 2,
 				},
 			},
@@ -121,11 +122,11 @@ func TestMongodbFunctions(t *testing.T) {
 	t.Run("FindMany direction DESC", func(t *testing.T) {
 		m := MongodbDatabaseFunctions{}
 		users, err := m.FindMany(
-			FindManyParams{
+			mongoke.FindManyParams{
 				Collection:  collection,
 				DatabaseUri: uri,
-				Direction:   DESC,
-				Pagination: Pagination{
+				Direction:   mongoke.DESC,
+				Pagination: mongoke.Pagination{
 					First: 2,
 				},
 			},

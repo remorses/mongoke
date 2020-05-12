@@ -1,9 +1,6 @@
 package mongoke
 
-//go:generate moq -out database_interface_mock.go . DatabaseInterface
-
-type Map map[string]interface{}
-
+//go:generate moq -pkg mock -out mock/database_interface_mock.go . DatabaseInterface
 type DatabaseInterface interface {
 	FindOne(p FindOneParams) (interface{}, error)
 	// FindMany should return p.First + 1 nodes, or p.Last + 1 nodes, so mongoke can compute `hasNextPage` and `hasPreviousPage`
@@ -40,22 +37,4 @@ type Filter struct {
 	Nin []interface{} `bson:"$nin,omitempty"`
 	Gt  interface{}   `bson:"$gt,omitempty"`
 	Lt  interface{}   `bson:"$lt,omitempty"`
-}
-
-type PageInfo struct {
-	StartCursor     interface{} `json:startCursor`
-	EndCursor       interface{} `json:endCursor`
-	HasNextPage     bool        `json:hasNextPage`
-	HasPreviousPage bool        `json:hasPreviousPage`
-}
-
-type Connection struct {
-	Nodes    []Map    `json:nodes`
-	Edges    []Edge   `json:edges`
-	PageInfo PageInfo `json:pageInfo`
-}
-
-type Edge struct {
-	Node   Map         `json:node`
-	Cursor interface{} `json:cursor`
 }

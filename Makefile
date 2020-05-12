@@ -6,3 +6,9 @@ play:
 .PHONY: build
 build:
 	cd web-ui && yarn build 
+
+test:
+	go test ./... -cover
+
+test2:
+	gotestsum -f dots-v2

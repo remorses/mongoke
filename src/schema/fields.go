@@ -1,4 +1,4 @@
-package mongoke
+package schema
 
 import (
 	"fmt"
@@ -7,24 +7,42 @@ import (
 	"github.com/graphql-go/graphql"
 	"github.com/imdario/mergo"
 	"github.com/mitchellh/mapstructure"
+	mongoke "github.com/remorses/mongoke/src"
+	"github.com/remorses/mongoke/src/types"
 )
 
-const TIMEOUT_FIND = 10
-
 type createFieldParams struct {
-	Config       Config
+	Config       mongoke.Config
 	collection   string
-	initialWhere map[string]Filter
-	permissions  []AuthGuard
+	initialWhere map[string]mongoke.Filter
+	permissions  []mongoke.AuthGuard
 	returnType   graphql.Type
 	schemaConfig graphql.SchemaConfig
 	omitWhere    bool
 }
 
+type PageInfo struct {
+	StartCursor     interface{} `json:startCursor`
+	EndCursor       interface{} `json:endCursor`
+	HasNextPage     bool        `json:hasNextPage`
+	HasPreviousPage bool        `json:hasPreviousPage`
+}
+
+type Connection struct {
+	Nodes    []mongoke.Map `json:nodes`
+	Edges    []Edge        `json:edges`
+	PageInfo PageInfo      `json:pageInfo`
+}
+
+type Edge struct {
+	Node   mongoke.Map `json:node`
+	Cursor interface{} `json:cursor`
+}
+
 func findOneField(p createFieldParams) (*graphql.Field, error) {
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
-		opts := FindOneParams{
+		opts := mongoke.FindOneParams{
 			Collection:  p.collection,
 			DatabaseUri: p.Config.DatabaseUri,
 		}
@@ -35,11 +53,11 @@ func findOneField(p createFieldParams) (*graphql.Field, error) {
 		if p.initialWhere != nil {
 			mergo.Merge(&opts.Where, p.initialWhere)
 		}
-		document, err := p.Config.databaseFunctions.FindOne(opts)
+		document, err := p.Config.DatabaseFunctions.FindOne(opts)
 		if err != nil {
 			return nil, err
 		}
-		jwt := GetJwt(params)
+		jwt := getJwt(params)
 		// don't compute permissions if document is nil
 		if document == nil {
 			return nil, nil
@@ -48,7 +66,7 @@ func findOneField(p createFieldParams) (*graphql.Field, error) {
 			document:  document,
 			guards:    p.permissions,
 			jwt:       jwt,
-			operation: Operations.READ,
+			operation: mongoke.Operations.READ,
 		})
 		if err != nil {
 			return nil, err
@@ -56,7 +74,7 @@ func findOneField(p createFieldParams) (*graphql.Field, error) {
 		return document, nil
 	}
 	indexableNames := takeIndexableTypeNames(p.schemaConfig)
-	whereArg, err := getWhereArg(p.Config.cache, indexableNames, p.returnType)
+	whereArg, err := types.GetWhereArg(p.Config.Cache, indexableNames, p.returnType)
 	if err != nil {
 		return nil, err
 	}
@@ -76,10 +94,10 @@ func findManyField(p createFieldParams) (*graphql.Field, error) {
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
 		pagination := paginationFromArgs(args)
-		opts := FindManyParams{
+		opts := mongoke.FindManyParams{
 			DatabaseUri: p.Config.DatabaseUri, // here i set the defaults
 			Collection:  p.collection,
-			Direction:   ASC,
+			Direction:   mongoke.ASC,
 			CursorField: "_id",
 			Pagination:  pagination,
 		}
@@ -90,7 +108,7 @@ func findManyField(p createFieldParams) (*graphql.Field, error) {
 		if p.initialWhere != nil {
 			mergo.Merge(&opts.Where, p.initialWhere)
 		}
-		nodes, err := p.Config.databaseFunctions.FindMany(
+		nodes, err := p.Config.DatabaseFunctions.FindMany(
 			opts,
 		)
 		if err != nil {
@@ -101,14 +119,14 @@ func findManyField(p createFieldParams) (*graphql.Field, error) {
 			return makeConnection(nodes, opts.Pagination, opts.CursorField), nil
 		}
 
-		jwt := GetJwt(params)
-		var accessibleNodes []Map
+		jwt := getJwt(params)
+		var accessibleNodes []mongoke.Map
 		for _, document := range nodes {
 			node, err := applyGuardsOnDocument(applyGuardsOnDocumentParams{
 				document:  document,
 				guards:    p.permissions,
 				jwt:       jwt,
-				operation: Operations.READ,
+				operation: mongoke.Operations.READ,
 			})
 			if err != nil {
 				// println("got an error while calling applyGuardsOnDocument on findManyField for " + conf.returnType.PrivateName)
@@ -116,7 +134,7 @@ func findManyField(p createFieldParams) (*graphql.Field, error) {
 				continue
 			}
 			if node != nil {
-				accessibleNodes = append(accessibleNodes, node.(Map))
+				accessibleNodes = append(accessibleNodes, node.(mongoke.Map))
 			}
 		}
 		connection := makeConnection(accessibleNodes, opts.Pagination, opts.CursorField)
@@ -125,24 +143,24 @@ func findManyField(p createFieldParams) (*graphql.Field, error) {
 		return connection, nil
 	}
 	indexableNames := takeIndexableTypeNames(p.schemaConfig)
-	whereArg, err := getWhereArg(p.Config.cache, indexableNames, p.returnType)
+	whereArg, err := types.GetWhereArg(p.Config.Cache, indexableNames, p.returnType)
 	if err != nil {
 		return nil, err
 	}
-	connectionType, err := getConnectionType(p.Config.cache, p.returnType)
+	connectionType, err := types.GetConnectionType(p.Config.Cache, p.returnType)
 	if err != nil {
 		return nil, err
 	}
-	indexableFieldsEnum, err := getIndexableFieldsEnum(p.Config.cache, indexableNames, p.returnType)
+	indexableFieldsEnum, err := types.GetIndexableFieldsEnum(p.Config.Cache, indexableNames, p.returnType)
 	if err != nil {
 		return nil, err
 	}
 	args := graphql.FieldConfigArgument{
 		"first":       &graphql.ArgumentConfig{Type: graphql.Int},
 		"last":        &graphql.ArgumentConfig{Type: graphql.Int},
-		"after":       &graphql.ArgumentConfig{Type: AnyScalar},
-		"before":      &graphql.ArgumentConfig{Type: AnyScalar},
-		"direction":   &graphql.ArgumentConfig{Type: directionEnum},
+		"after":       &graphql.ArgumentConfig{Type: types.AnyScalar},
+		"before":      &graphql.ArgumentConfig{Type: types.AnyScalar},
+		"direction":   &graphql.ArgumentConfig{Type: types.DirectionEnum},
 		"cursorField": &graphql.ArgumentConfig{Type: indexableFieldsEnum},
 	}
 	if !p.omitWhere {
@@ -156,12 +174,12 @@ func findManyField(p createFieldParams) (*graphql.Field, error) {
 	return &field, nil
 }
 
-func paginationFromArgs(args interface{}) Pagination {
-	var pag Pagination
+func paginationFromArgs(args interface{}) mongoke.Pagination {
+	var pag mongoke.Pagination
 	err := mapstructure.Decode(args, &pag)
 	if err != nil {
 		fmt.Println(err)
-		return Pagination{}
+		return mongoke.Pagination{}
 	}
 	// increment nodes count so createConnection knows how to set `hasNextPage`
 	if pag.First != 0 {
@@ -174,7 +192,7 @@ func paginationFromArgs(args interface{}) Pagination {
 	return pag
 }
 
-func makeConnection(nodes []Map, pagination Pagination, cursorField string) Connection {
+func makeConnection(nodes []mongoke.Map, pagination mongoke.Pagination, cursorField string) Connection {
 	if len(nodes) == 0 {
 		return Connection{}
 	}
@@ -211,7 +229,7 @@ func makeConnection(nodes []Map, pagination Pagination, cursorField string) Conn
 	}
 }
 
-func makeEdges(nodes []Map, cursorField string) []Edge {
+func makeEdges(nodes []mongoke.Map, cursorField string) []Edge {
 	var edges []Edge
 	for _, node := range nodes {
 		edges = append(edges, Edge{
@@ -222,7 +240,7 @@ func makeEdges(nodes []Map, cursorField string) []Edge {
 	return edges
 }
 
-func reverse(input []Map) []Map {
+func reverse(input []mongoke.Map) []mongoke.Map {
 	if len(input) == 0 {
 		return input
 	}
@@ -230,9 +248,9 @@ func reverse(input []Map) []Map {
 	return append(reverse(input[1:]), input[0])
 }
 
-func GetJwt(params graphql.ResolveParams) jwt.MapClaims {
+func getJwt(params graphql.ResolveParams) jwt.MapClaims {
 	root := params.Info.RootValue
-	rootMap, ok := root.(Map)
+	rootMap, ok := root.(mongoke.Map)
 	if !ok {
 		return jwt.MapClaims{}
 
