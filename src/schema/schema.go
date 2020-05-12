@@ -23,8 +23,6 @@ func MakeMongokeSchema(config mongoke.Config) (graphql.Schema, error) {
 		config.Cache = make(mongoke.Map)
 	}
 
-	// TODO validate config logically here
-
 	if config.Schema == "" && config.SchemaPath != "" {
 		data, e := ioutil.ReadFile(config.SchemaPath)
 		if e != nil {
@@ -32,6 +30,23 @@ func MakeMongokeSchema(config mongoke.Config) (graphql.Schema, error) {
 		}
 		config.Schema = string(data)
 	}
+
+	if config.Schema == "" && config.SchemaUrl != "" {
+		data, e := mongoke.DownloadFile(config.SchemaUrl)
+		if e != nil {
+			return graphql.Schema{}, e
+		}
+		config.Schema = string(data)
+	}
+
+	if config.Schema == "" {
+		return graphql.Schema{}, errors.New("missing required schema")
+	}
+
+	if config.DatabaseUri == "" {
+		return graphql.Schema{}, errors.New("missing required database url")
+	}
+
 	schemaConfig, err := makeSchemaConfig(config)
 	if err != nil {
 		return graphql.Schema{}, err

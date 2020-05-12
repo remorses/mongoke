@@ -1,7 +1,9 @@
 package mongoke
 
 import (
+	"bytes"
 	"context"
+	"net/http"
 
 	"github.com/PaesslerAG/gval"
 	"github.com/caarlos0/env"
@@ -37,6 +39,7 @@ type Config struct {
 	DisableGraphiql   bool                   `json:"disable_graphiql" env:"DISABLE_GRAPHIQL"`
 	Schema            string                 `json:"schema"`
 	SchemaPath        string                 `json:"schema_path"`
+	SchemaUrl         string                 `json:"schema_url"`
 	Types             map[string]*TypeConfig `json:"types"`
 	Relations         []RelationConfig       `json:"relations"`
 	JwtConfig         JwtConfig              `json:"jwt"`
@@ -119,4 +122,21 @@ func MakeConfigFromYaml(data string) (Config, error) {
 	}
 
 	return config, nil
+}
+
+// DownloadFile will download a url to a local file. It's efficient because it will
+// write as it downloads and not load the whole file into memory.
+func DownloadFile(url string) (string, error) {
+	// TODO i should test downloadFile
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(resp.Body)
+	s := buf.String() // Does a complete copy of the bytes in the buffer.
+
+	return s, err
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -56,7 +55,7 @@ func main() {
 			}
 			if url != "" {
 				var err error
-				data, err = downloadFile(url)
+				data, err = mongoke.DownloadFile(url)
 				if err != nil {
 					return cli.Exit(err, 1)
 				}
@@ -91,21 +90,4 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-// DownloadFile will download a url to a local file. It's efficient because it will
-// write as it downloads and not load the whole file into memory.
-func downloadFile(url string) (string, error) {
-	// TODO i should test downloadFile
-	resp, err := http.Get(url)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(resp.Body)
-	s := buf.String() // Does a complete copy of the bytes in the buffer.
-
-	return s, err
 }

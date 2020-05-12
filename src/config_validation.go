@@ -21,7 +21,7 @@ func validateYamlConfig(data string) error {
 	}
 
 	if !result.Valid() {
-		msg := ("The document is not valid. see errors :\n")
+		msg := "The yaml config is not valid. see errors:\n"
 		for _, desc := range result.Errors() {
 			msg += fmt.Sprintf("- %s\n", desc)
 		}
@@ -38,7 +38,12 @@ var jsonSchemaString = `
     "definitions": {
         "Configuration": {
             "type": "object",
-            "required": ["types"],
+			"required": ["types"],
+			"anyOf": [
+				{"required": ["schema"]},
+				{"required": ["schema_path"]},
+				{"required": ["schema_url"]}
+			],
             "properties": {
                 "schema": {
                     "type": "string"
@@ -53,7 +58,8 @@ var jsonSchemaString = `
                     "type": "string"
                 },
                 "types": {
-                    "type": "object",
+					"type": "object",
+					"minProperties": 1,
                     "properties": {},
                     "additionalProperties": {
                         "type": "object",
@@ -114,7 +120,6 @@ var jsonSchemaString = `
                 },
                 "jwt": {
                     "type": "object",
-
                     "properties": {
                         "key": {
                             "type": "string"
