@@ -8,6 +8,8 @@ services:
       - /mongoke.yml
     ports:
       - 8080:8080
+    environment: 
+      - DB_URL=mongodb://mongo/testdb
     volumes: 
       - ./example_mongoke.yml:/mongoke.yml
     
@@ -15,5 +17,5 @@ services:
     ports:
       - 27017:27017
     image: mongo
-    # logging:
-    #   driver: "none"
+    logging:
+      driver: "none"

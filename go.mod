@@ -4,6 +4,8 @@ go 1.13
 
 require (
 	github.com/PaesslerAG/gval v1.0.1
+	github.com/caarlos0/env v3.5.0+incompatible
+	github.com/caarlos0/env/v6 v6.2.2 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-test/deep v1.0.6

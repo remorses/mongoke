@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/PaesslerAG/gval"
+	"github.com/caarlos0/env"
 	yaml "github.com/ghodss/yaml"
 )
 
@@ -32,8 +33,8 @@ var (
 )
 
 type Config struct {
-	EnableGraphiql    *bool                  `json:"enable_graphiql"`
-	DatabaseUri       string                 `json:"database_uri"`
+	DatabaseUri       string                 `json:"database_uri" env:"DB_URL"`
+	DisableGraphiql   bool                   `json:"disable_graphiql" env:"DISABLE_GRAPHIQL"`
 	Schema            string                 `json:"schema"`
 	SchemaPath        string                 `json:"schema_path"`
 	Types             map[string]*TypeConfig `json:"types"`
@@ -108,14 +109,15 @@ func MakeConfigFromYaml(data string) (Config, error) {
 		return Config{}, err
 	}
 
-	t := Config{}
+	config := Config{}
 
-	// TODO add databaseUri overwite from environment
-
-	err := yaml.Unmarshal([]byte(data), &t)
-	if err != nil {
+	if err := yaml.Unmarshal([]byte(data), &config); err != nil {
 		return Config{}, err
 	}
 
-	return t, nil
+	if err := env.Parse(&config); err != nil {
+		return Config{}, err
+	}
+
+	return config, nil
 }

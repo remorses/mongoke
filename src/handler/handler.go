@@ -54,7 +54,7 @@ func MakeMongokeHandler(config mongoke.Config, webUiFolder string) (http.Handler
 		// }
 
 		// render web ui if content type is html
-		if config.EnableGraphiql == nil || config.EnableGraphiql == &mongoke.True {
+		if !config.DisableGraphiql {
 			acceptHeader := r.Header.Get("Accept")
 			_, raw := r.URL.Query()["raw"]
 			if !raw && !strings.Contains(acceptHeader, "application/json") && strings.Contains(acceptHeader, "text/html") {
@@ -97,7 +97,7 @@ func makeGraphiqlHandler(webUiFolder string) (http.Handler, error) {
 		return nil, errors.New("cannot find web ui assets in " + webUiFolder + ", " + err.Error())
 	}
 	// assets := path.Join(root, webUiFolder)
-	fmt.Println(assets)
+	// fmt.Println(assets)
 	h := http.FileServer(http.Dir(assets))
 	return h, nil
 

@@ -49,6 +49,7 @@ func main() {
 			if e != nil {
 				return cli.Exit(e, 1)
 			}
+			fmt.Println("using database_uri " + config.DatabaseUri)
 			h, err := handler.MakeMongokeHandler(config, c.String("www"))
 			if err != nil {
 				return cli.Exit(err, 1)
