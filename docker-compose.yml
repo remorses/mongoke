@@ -15,5 +15,5 @@ services:
     ports:
       - 27017:27017
     image: mongo
-    logging:
-      driver: "none"
+    # logging:
+    #   driver: "none"
