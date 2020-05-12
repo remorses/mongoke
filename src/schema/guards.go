@@ -40,7 +40,7 @@ func hideFieldsFromDocument(document interface{}, toHide []string) interface{} {
 	if !ok {
 		return document
 	}
-	// TODO copying document when hiding fields could be not performant
+	// TODO don't copy documents to remove fields
 	// clone the map
 	copy := mongoke.Map{}
 	for k, v := range documentMap {
@@ -58,7 +58,7 @@ func hideFieldsFromDocument(document interface{}, toHide []string) interface{} {
 }
 
 func evaluateAuthPermission(guards []mongoke.AuthGuard, jwt jwt.MapClaims, document interface{}) (mongoke.AuthGuard, error) {
-	// TODO if user is admin return the max AuthGuard here
+	// TODO if user is admin return the all permissions AuthGuard here
 	// if guards are empty default to read permission
 	if len(guards) == 0 {
 		return mongoke.AuthGuard{

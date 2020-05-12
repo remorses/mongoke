@@ -90,7 +90,7 @@ func TestQueryReturnValues(t *testing.T) {
 				},
 				DatabaseFunctions: databaseMock,
 			},
-			ExpectedError: "no enough permissions", // TODO error not right
+			ExpectedError: "no enough permissions", // TODO tests should check errors name
 			Query: `
 			{
 				User {

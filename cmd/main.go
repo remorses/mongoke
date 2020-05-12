@@ -38,6 +38,7 @@ func main() {
 		},
 		Action: func(c *cli.Context) error {
 			path := c.String("path")
+			// TODO download config if MONGOKE_CONFIG_URL
 			if path == "" {
 				return cli.Exit("config path is required", 1)
 			}

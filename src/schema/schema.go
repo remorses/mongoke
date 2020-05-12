@@ -23,7 +23,7 @@ func MakeMongokeSchema(config mongoke.Config) (graphql.Schema, error) {
 		config.Cache = make(mongoke.Map)
 	}
 
-	// TODO validate config here
+	// TODO validate config logically here
 
 	if config.Schema == "" && config.SchemaPath != "" {
 		data, e := ioutil.ReadFile(config.SchemaPath)

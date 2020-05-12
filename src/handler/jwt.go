@@ -67,7 +67,7 @@ func validateTokenClaims(config mongoke.JwtConfig, claims jwt.MapClaims) error {
 
 func validateTokenHeaders(config mongoke.JwtConfig, token *jwt.Token) error {
 	if token.Method.Alg() == "none" {
-		return errors.New("jwt algorithm non is not supported")
+		return errors.New("jwt algorithm none is not supported")
 	}
 	if config.Type != "" && token.Method.Alg() != config.Type {
 		return errors.New("jwt algorithm is different")
@@ -81,7 +81,6 @@ var JwkCache = memoize.NewMemoizer(10*time.Minute, 10*time.Minute)
 func jwtKeyGetter(config mongoke.JwtConfig) func(token *jwt.Token) (interface{}, error) {
 	if config.Key != "" {
 		return func(token *jwt.Token) (interface{}, error) {
-			// TODO add firebase and jwt presets to check for verification
 			if err := validateTokenHeaders(config, token); err != nil {
 				return nil, err
 			}
@@ -89,9 +88,6 @@ func jwtKeyGetter(config mongoke.JwtConfig) func(token *jwt.Token) (interface{},
 		}
 	} else if config.JwkUrl != "" {
 		return func(token *jwt.Token) (interface{}, error) {
-			// TODO: cache response so we don't have to make a request every time
-			// we want to verify a JWT
-			// TODO see max-age or s-maxage in Cache-Control header or Expires header
 			if err := validateTokenHeaders(config, token); err != nil {
 				return nil, err
 			}
