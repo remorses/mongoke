@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -21,6 +22,10 @@ func main() {
 				Usage: "config path",
 			},
 			&cli.StringFlag{
+				Name:  "config-url",
+				Usage: "config url",
+			},
+			&cli.StringFlag{
 				Name:  "port",
 				Value: "8080",
 				Usage: "port to listen to",
@@ -38,15 +43,26 @@ func main() {
 		},
 		Action: func(c *cli.Context) error {
 			path := c.String("path")
-			// TODO download config if MONGOKE_CONFIG_URL
-			if path == "" {
-				return cli.Exit("config path is required", 1)
+			url := c.String("config-url")
+			if path == "" && url == "" {
+				return cli.Exit("config path or url is required", 1)
 			}
-			data, e := ioutil.ReadFile(path)
-			if e != nil {
-				return cli.Exit(e, 1)
+			var data string
+			if path != "" {
+				buff, e := ioutil.ReadFile(path)
+				if e != nil {
+					return cli.Exit(e, 1)
+				}
+				data = string(buff)
 			}
-			config, e := mongoke.MakeConfigFromYaml(string(data))
+			if url != "" {
+				var err error
+				data, err = downloadFile(url)
+				if err != nil {
+					return cli.Exit(err, 1)
+				}
+			}
+			config, e := mongoke.MakeConfigFromYaml(data)
 			if e != nil {
 				return cli.Exit(e, 1)
 			}
@@ -76,4 +92,21 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+// DownloadFile will download a url to a local file. It's efficient because it will
+// write as it downloads and not load the whole file into memory.
+func downloadFile(url string) (string, error) {
+	// TODO i should test downloadFile
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(resp.Body)
+	s := buf.String() // Does a complete copy of the bytes in the buffer.
+
+	return s, err
 }
