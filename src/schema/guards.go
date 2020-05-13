@@ -40,9 +40,8 @@ func hideFieldsFromDocument(document interface{}, toHide []string) interface{} {
 	if !ok {
 		return document
 	}
-	// TODO don't copy documents to remove fields
 	// clone the map
-	copy := mongoke.Map{}
+	copy := make(mongoke.Map, len(documentMap))
 	for k, v := range documentMap {
 		copy[k] = v
 	}

@@ -230,7 +230,7 @@ func makeConnection(nodes []mongoke.Map, pagination mongoke.Pagination, cursorFi
 }
 
 func makeEdges(nodes []mongoke.Map, cursorField string) []Edge {
-	var edges []Edge
+	edges := make([]Edge, len(nodes))
 	for _, node := range nodes {
 		edges = append(edges, Edge{
 			Node:   node,
