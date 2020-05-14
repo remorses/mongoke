@@ -6,307 +6,14 @@ import (
 
 	"github.com/go-test/deep"
 	mongoke "github.com/remorses/mongoke/src"
-	"github.com/remorses/mongoke/src/mock"
 	"github.com/remorses/mongoke/src/mongodb"
 	"github.com/remorses/mongoke/src/testutil"
-	"github.com/stretchr/testify/require"
 )
 
 var (
 	False = false
 	True  = true
 )
-
-func TestQueryReturnValues(t *testing.T) {
-	exampleUsers := []mongoke.Map{
-		{"name": "01", "age": 1},
-		{"name": "02", "age": 2},
-		{"name": "03", "age": 3},
-	}
-	exampleUser := exampleUsers[0]
-	databaseMock := &mock.DatabaseInterfaceMock{
-		FindManyFunc: func(p mongoke.FindManyParams) ([]mongoke.Map, error) {
-			return exampleUsers, nil
-		},
-		FindOneFunc: func(p mongoke.FindOneParams) (interface{}, error) {
-			return exampleUser, nil
-		},
-	}
-	config := mongoke.Config{
-		Schema: `
-		interface Named {
-			name: String
-		}
-
-		type User implements Named {
-			name: String
-			age: Int
-		}
-		`,
-		DatabaseUri: testutil.MONGODB_URI,
-		Types: map[string]*mongoke.TypeConfig{
-			"User": {Collection: "users"},
-		},
-		DatabaseFunctions: databaseMock,
-	}
-
-	cases := []struct {
-		Name          string
-		Query         string
-		Expected      mongoke.Map
-		ExpectedError string
-		Config        mongoke.Config
-	}{
-		{
-			Name:     "findOne query without args",
-			Config:   config,
-			Expected: mongoke.Map{"User": exampleUser},
-			Query: `
-			{
-				User {
-					name
-					age
-				}
-			}
-			`,
-		},
-		{
-			Name: "findOne query with permissions false",
-			Config: mongoke.Config{
-				Schema: `
-				type User {
-					name: String
-					age: Int
-				}
-				`,
-				DatabaseUri: testutil.MONGODB_URI,
-				Types: map[string]*mongoke.TypeConfig{
-					"User": {
-						Collection: "users",
-						Permissions: []mongoke.AuthGuard{
-							{
-								Expression: "false",
-							},
-						},
-					},
-				},
-				DatabaseFunctions: databaseMock,
-			},
-			ExpectedError: "no enough permissions", // TODO tests should check errors name
-			Query: `
-			{
-				User {
-					name
-					age
-				}
-			}
-			`,
-		},
-		{
-			Name: "schema with Union type",
-			Config: mongoke.Config{
-				Schema: `
-				type Guest {
-					name: String
-				}
-				type Admin {
-					password: String
-				}
-				union User = Admin | Guest
-				`,
-				DatabaseUri: testutil.MONGODB_URI,
-				Types: map[string]*mongoke.TypeConfig{
-					"Admin": {
-						Exposed:  &False,
-						IsTypeOf: "false",
-					},
-					"Guest": {
-						Exposed:  &False,
-						IsTypeOf: "x.name == \"01\"",
-					},
-					"User": {
-						Collection: "users",
-					},
-				},
-				DatabaseFunctions: databaseMock,
-			},
-			Expected: mongoke.Map{"User": mongoke.Map{"name": "01"}},
-			Query: `
-			{
-				User {
-					...on Guest {
-						name
-					}
-					...on Admin {
-						password
-					}
-				}
-			}
-			`,
-		},
-		{
-			Name: "findOne query with permissions HideFields",
-			Config: mongoke.Config{
-				Schema: `
-				type User {
-					name: String
-					age: Int
-				}
-				`,
-				DatabaseUri: testutil.MONGODB_URI,
-				Types: map[string]*mongoke.TypeConfig{
-					"User": {
-						Collection: "users",
-
-						Permissions: []mongoke.AuthGuard{
-							{
-								Expression: "true",
-								HideFields: []string{"name"},
-							},
-						},
-					},
-				},
-				DatabaseFunctions: databaseMock,
-			},
-			Expected: mongoke.Map{"User": mongoke.Map{"name": nil, "age": 1}},
-			Query: `
-			{
-				User {
-					name
-					age
-				}
-			}
-			`,
-		},
-		{
-			Name:     "findMany query without args",
-			Config:   config,
-			Expected: mongoke.Map{"UserNodes": mongoke.Map{"nodes": exampleUsers}},
-			Query: `
-			{
-				UserNodes {
-					nodes {
-						name
-						age
-					}
-				}
-			}
-			`,
-		},
-		{
-			Name: "findMany query with permissions false",
-			Config: mongoke.Config{
-				Schema: `
-				type User {
-					name: String
-					age: Int
-				}
-				`,
-				DatabaseUri:       testutil.MONGODB_URI,
-				DatabaseFunctions: databaseMock,
-				Types: map[string]*mongoke.TypeConfig{
-					"User": {
-						Collection: "users",
-						Permissions: []mongoke.AuthGuard{
-							{
-								Expression: "false",
-							},
-						},
-					},
-				},
-			},
-			Expected: mongoke.Map{"UserNodes": mongoke.Map{"nodes": []mongoke.Map{}}},
-			Query: `
-			{
-				UserNodes {
-					nodes {
-						name
-						age
-					}
-				}
-			}
-			`,
-		},
-		{
-			Name:     "findOne query without args",
-			Config:   config,
-			Expected: mongoke.Map{"User": exampleUser},
-			Query: `
-			{
-				User {
-					name
-					age
-				}
-			}
-			`,
-		},
-		{
-			Name: "findOne with to_many relation",
-			Config: mongoke.Config{
-				Schema: `
-				type User {
-					name: String
-					age: Int
-				}
-				`,
-				DatabaseUri:       testutil.MONGODB_URI,
-				DatabaseFunctions: databaseMock,
-				Types: map[string]*mongoke.TypeConfig{
-					"User": {
-						Collection: "users",
-					},
-				},
-				Relations: []mongoke.RelationConfig{
-					{
-						Field:        "friends",
-						From:         "User",
-						To:           "User",
-						RelationType: "to_many",
-						Where:        make(map[string]mongoke.Filter),
-					},
-				},
-			},
-			Expected: mongoke.Map{"User": mongoke.Map{
-				"name":    "01",
-				"friends": mongoke.Map{"nodes": exampleUsers},
-			}},
-			Query: `
-			{
-				User {
-					name
-					friends {
-						nodes {
-							name
-							age
-						}
-					}
-				}
-			}
-			`,
-		},
-	}
-
-	for _, testCase := range cases {
-		t.Run(testCase.Name, func(t *testing.T) {
-			t.Log()
-			// t.Log(testCase.Name)
-			schema, err := MakeMongokeSchema(testCase.Config)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if testCase.ExpectedError != "" {
-				err = testutil.QuerySchemaShouldFail(t, schema, testCase.Query)
-				return
-			}
-			res := testutil.QuerySchema(t, schema, testCase.Query)
-			res = testutil.ConvertToPlainMap(res)
-			expected := testutil.ConvertToPlainMap(testCase.Expected)
-			t.Log("expected:", expected)
-			t.Log("result:", res)
-			require.Equal(t, testutil.Pretty(expected), testutil.Pretty(res))
-		})
-	}
-}
 
 func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 	collection := "users"
@@ -315,7 +22,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 		{"name": "02", "age": 2},
 		{"name": "03", "age": 3},
 	}
-	exampleUser := exampleUsers[0]
+	exampleUser := exampleUsers[2]
 	config := mongoke.Config{
 		Schema: `
 		scalar ObjectId
@@ -373,7 +80,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			Expected: mongoke.Map{"UserNodes": mongoke.Map{"nodes": exampleUsers}},
 			Query: `
 			{
-				UserNodes {
+				UserNodes(direction: ASC) {
 					nodes {
 						name
 						age
@@ -388,7 +95,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			Expected: mongoke.Map{"UserNodes": mongoke.Map{"nodes": exampleUsers[:2]}},
 			Query: `
 			{
-				UserNodes(first: 2) {
+				UserNodes(first: 2, direction: ASC) {
 					nodes {
 						name
 						age
@@ -403,7 +110,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			Expected: mongoke.Map{"UserNodes": mongoke.Map{"nodes": exampleUsers[len(exampleUsers)-2:]}},
 			Query: `
 			{
-				UserNodes(last: 2) {
+				UserNodes(last: 2, direction: ASC) {
 					nodes {
 						name
 						age
@@ -421,7 +128,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			}},
 			Query: `
 			{
-				UserNodes(first: 2, cursorField: name) {
+				UserNodes(first: 2, cursorField: name, direction: ASC) {
 					nodes {
 						name
 						age
@@ -442,7 +149,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			}},
 			Query: `
 			{
-				UserNodes(first: 2, cursorField: age) {
+				UserNodes(first: 2, cursorField: age, direction: ASC) {
 					nodes {
 						name
 						age

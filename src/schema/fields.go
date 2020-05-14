@@ -42,9 +42,13 @@ type Edge struct {
 func findOneField(p createFieldParams) (*graphql.Field, error) {
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
-		opts := mongoke.FindOneParams{
+		opts := mongoke.FindManyParams{
 			Collection:  p.collection,
 			DatabaseUri: p.Config.DatabaseUri,
+			Direction:   mongoke.DESC,
+			Pagination: mongoke.Pagination{
+				First: 1,
+			},
 		}
 		err := mapstructure.Decode(args, &opts)
 		if err != nil {
@@ -53,16 +57,17 @@ func findOneField(p createFieldParams) (*graphql.Field, error) {
 		if p.initialWhere != nil {
 			mergo.Merge(&opts.Where, p.initialWhere)
 		}
-		document, err := p.Config.DatabaseFunctions.FindOne(opts)
+		documents, err := p.Config.DatabaseFunctions.FindMany(opts)
 		if err != nil {
 			return nil, err
 		}
 		jwt := getJwt(params)
 		// don't compute permissions if document is nil
-		if document == nil {
+		if len(documents) == 0 {
 			return nil, nil
 		}
-		document, err = applyGuardsOnDocument(applyGuardsOnDocumentParams{
+		document := documents[0]
+		result, err := applyGuardsOnDocument(applyGuardsOnDocumentParams{
 			document:  document,
 			guards:    p.permissions,
 			jwt:       jwt,
@@ -71,7 +76,7 @@ func findOneField(p createFieldParams) (*graphql.Field, error) {
 		if err != nil {
 			return nil, err
 		}
-		return document, nil
+		return result, nil
 	}
 	indexableNames := takeIndexableTypeNames(p.schemaConfig)
 	whereArg, err := types.GetWhereArg(p.Config.Cache, indexableNames, p.returnType)
@@ -97,7 +102,7 @@ func findManyField(p createFieldParams) (*graphql.Field, error) {
 		opts := mongoke.FindManyParams{
 			DatabaseUri: p.Config.DatabaseUri, // here i set the defaults
 			Collection:  p.collection,
-			Direction:   mongoke.ASC,
+			Direction:   mongoke.DESC,
 			CursorField: "_id",
 			Pagination:  pagination,
 		}

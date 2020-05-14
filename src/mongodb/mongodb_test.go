@@ -49,15 +49,19 @@ func TestMongodbFunctions(t *testing.T) {
 
 	t.Run("FindOne with eq", func(t *testing.T) {
 		m := MongodbDatabaseFunctions{}
-		user, err := m.FindOne(
-			mongoke.FindOneParams{
+		users, err := m.FindMany(
+			mongoke.FindManyParams{
 				Collection:  collection,
 				DatabaseUri: uri,
+				Pagination: mongoke.Pagination{
+					First: 0,
+				},
 				Where: map[string]mongoke.Filter{
 					"name": {Eq: "01"},
 				},
 			},
 		)
+		user := users[0]
 		if err != nil {
 			t.Error(err)
 		}

@@ -4,14 +4,12 @@
 package mock
 
 import (
-	"sync"
-
 	"github.com/remorses/mongoke/src"
+	"sync"
 )
 
 var (
 	lockDatabaseInterfaceMockFindMany sync.RWMutex
-	lockDatabaseInterfaceMockFindOne  sync.RWMutex
 )
 
 // Ensure, that DatabaseInterfaceMock does implement mongoke.DatabaseInterface.
@@ -27,9 +25,6 @@ var _ mongoke.DatabaseInterface = &DatabaseInterfaceMock{}
 //             FindManyFunc: func(p mongoke.FindManyParams) ([]mongoke.Map, error) {
 // 	               panic("mock out the FindMany method")
 //             },
-//             FindOneFunc: func(p mongoke.FindOneParams) (interface{}, error) {
-// 	               panic("mock out the FindOne method")
-//             },
 //         }
 //
 //         // use mockedDatabaseInterface in code that requires mongoke.DatabaseInterface
@@ -40,20 +35,12 @@ type DatabaseInterfaceMock struct {
 	// FindManyFunc mocks the FindMany method.
 	FindManyFunc func(p mongoke.FindManyParams) ([]mongoke.Map, error)
 
-	// FindOneFunc mocks the FindOne method.
-	FindOneFunc func(p mongoke.FindOneParams) (interface{}, error)
-
 	// calls tracks calls to the methods.
 	calls struct {
 		// FindMany holds details about calls to the FindMany method.
 		FindMany []struct {
 			// P is the p argument value.
 			P mongoke.FindManyParams
-		}
-		// FindOne holds details about calls to the FindOne method.
-		FindOne []struct {
-			// P is the p argument value.
-			P mongoke.FindOneParams
 		}
 	}
 }
@@ -86,36 +73,5 @@ func (mock *DatabaseInterfaceMock) FindManyCalls() []struct {
 	lockDatabaseInterfaceMockFindMany.RLock()
 	calls = mock.calls.FindMany
 	lockDatabaseInterfaceMockFindMany.RUnlock()
-	return calls
-}
-
-// FindOne calls FindOneFunc.
-func (mock *DatabaseInterfaceMock) FindOne(p mongoke.FindOneParams) (interface{}, error) {
-	if mock.FindOneFunc == nil {
-		panic("DatabaseInterfaceMock.FindOneFunc: method is nil but DatabaseInterface.FindOne was just called")
-	}
-	callInfo := struct {
-		P mongoke.FindOneParams
-	}{
-		P: p,
-	}
-	lockDatabaseInterfaceMockFindOne.Lock()
-	mock.calls.FindOne = append(mock.calls.FindOne, callInfo)
-	lockDatabaseInterfaceMockFindOne.Unlock()
-	return mock.FindOneFunc(p)
-}
-
-// FindOneCalls gets all the calls that were made to FindOne.
-// Check the length with:
-//     len(mockedDatabaseInterface.FindOneCalls())
-func (mock *DatabaseInterfaceMock) FindOneCalls() []struct {
-	P mongoke.FindOneParams
-} {
-	var calls []struct {
-		P mongoke.FindOneParams
-	}
-	lockDatabaseInterfaceMockFindOne.RLock()
-	calls = mock.calls.FindOne
-	lockDatabaseInterfaceMockFindOne.RUnlock()
 	return calls
 }

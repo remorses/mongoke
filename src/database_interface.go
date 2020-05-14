@@ -2,17 +2,17 @@ package mongoke
 
 //go:generate moq -pkg mock -out mock/database_interface_mock.go . DatabaseInterface
 type DatabaseInterface interface {
-	FindOne(p FindOneParams) (interface{}, error)
+	// FindOne(p FindOneParams) (interface{}, error)
 	// FindMany should return p.First + 1 nodes, or p.Last + 1 nodes, so mongoke can compute `hasNextPage` and `hasPreviousPage`
 	FindMany(p FindManyParams) ([]Map, error)
 	// TODO add mutations in databaseFunctions
 }
 
-type FindOneParams struct {
-	Collection  string
-	DatabaseUri string
-	Where       map[string]Filter `mapstructure:"where"`
-}
+// type FindOneParams struct {
+// 	Collection  string
+// 	DatabaseUri string
+// 	Where       map[string]Filter `mapstructure:"where"`
+// }
 
 type FindManyParams struct {
 	Collection  string
