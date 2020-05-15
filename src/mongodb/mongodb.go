@@ -90,15 +90,16 @@ func (self MongodbDatabaseFunctions) FindMany(p mongoke.FindManyParams) ([]mongo
 		}
 	}
 
+	// TODO move findMany argument handling logic in custom function
 	// assertion for arguments
-	if after != "" && (first == 0 || before == "") {
+	if after != "" && first == 0 && before == "" {
 		return nil, errors.New("need `first` or `before` if using `after`")
 	}
-	if before != "" && (last == 0 || after == "") {
+	if before != "" && (last == 0 && after == "") {
 		return nil, errors.New("need `last` or `after` if using `before`")
 	}
 	if first != 0 && last != 0 {
-		return nil, errors.New("need `last` or `after` if using `before`")
+		return nil, errors.New("cannot use `first` and `last` together")
 	}
 
 	// gt and lt
