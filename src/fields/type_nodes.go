@@ -12,27 +12,27 @@ import (
 	"github.com/remorses/mongoke/src/types"
 )
 
-type FindManyArgs struct {
+type typeNodesArgs struct {
 	Where       map[string]mongoke.Filter `mapstructure:"where"`
 	Pagination  mongoke.Pagination
 	CursorField string `mapstructure:"cursorField"`
 	Direction   int    `mapstructure:"direction"`
 }
 
-type PageInfo struct {
+type pageInfo struct {
 	StartCursor     interface{} `json:startCursor`
 	EndCursor       interface{} `json:endCursor`
 	HasNextPage     bool        `json:hasNextPage`
 	HasPreviousPage bool        `json:hasPreviousPage`
 }
 
-type Connection struct {
+type connection struct {
 	Nodes    []mongoke.Map `json:nodes`
-	Edges    []Edge        `json:edges`
-	PageInfo PageInfo      `json:pageInfo`
+	Edges    []edge        `json:edges`
+	PageInfo pageInfo      `json:pageInfo`
 }
 
-type Edge struct {
+type edge struct {
 	Node   mongoke.Map `json:node`
 	Cursor interface{} `json:cursor`
 }
@@ -41,7 +41,7 @@ func QueryTypeNodesField(p CreateFieldParams) (*graphql.Field, error) {
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
 		pagination := paginationFromArgs(args)
-		decodedArgs := FindManyArgs{
+		decodedArgs := typeNodesArgs{
 			Direction:   mongoke.DESC,
 			CursorField: "_id", // TODO change _id default based on schema
 			Pagination:  pagination,
@@ -50,7 +50,7 @@ func QueryTypeNodesField(p CreateFieldParams) (*graphql.Field, error) {
 		if err != nil {
 			return nil, err
 		}
-		decodedArgs, err = addFindManyArgsDefaults(decodedArgs)
+		decodedArgs, err = addTypeNodesArgsDefaults(decodedArgs)
 		if err != nil {
 			return nil, err
 		}
@@ -154,9 +154,9 @@ func paginationFromArgs(args interface{}) mongoke.Pagination {
 	return pag
 }
 
-func makeConnection(nodes []mongoke.Map, pagination mongoke.Pagination, cursorField string) Connection {
+func makeConnection(nodes []mongoke.Map, pagination mongoke.Pagination, cursorField string) connection {
 	if len(nodes) == 0 {
-		return Connection{}
+		return connection{}
 	}
 	var hasNext bool
 	var hasPrev bool
@@ -179,10 +179,10 @@ func makeConnection(nodes []mongoke.Map, pagination mongoke.Pagination, cursorFi
 		endCursor = nodes[len(nodes)-1][cursorField]
 		startCursor = nodes[0][cursorField]
 	}
-	return Connection{
+	return connection{
 		Nodes: nodes,
 		Edges: makeEdges(nodes, cursorField),
-		PageInfo: PageInfo{
+		PageInfo: pageInfo{
 			StartCursor:     startCursor,
 			EndCursor:       endCursor,
 			HasNextPage:     hasNext,
@@ -191,10 +191,10 @@ func makeConnection(nodes []mongoke.Map, pagination mongoke.Pagination, cursorFi
 	}
 }
 
-func makeEdges(nodes []mongoke.Map, cursorField string) []Edge {
-	edges := make([]Edge, len(nodes))
+func makeEdges(nodes []mongoke.Map, cursorField string) []edge {
+	edges := make([]edge, len(nodes))
 	for _, node := range nodes {
-		edges = append(edges, Edge{
+		edges = append(edges, edge{
 			Node:   node,
 			Cursor: node[cursorField],
 		})
@@ -232,7 +232,7 @@ const (
 	MAX_NODES_COUNT     = 40
 )
 
-func addFindManyArgsDefaults(p FindManyArgs) (FindManyArgs, error) {
+func addTypeNodesArgsDefaults(p typeNodesArgs) (typeNodesArgs, error) {
 	if p.Direction == 0 {
 		p.Direction = mongoke.ASC
 	}
@@ -285,7 +285,7 @@ func addFindManyArgsDefaults(p FindManyArgs) (FindManyArgs, error) {
 	return p, nil
 }
 
-func createFindManyParamsFromArgs(p FindManyArgs, collection string, databaseUri string) (mongoke.FindManyParams, error) {
+func createFindManyParamsFromArgs(p typeNodesArgs, collection string, databaseUri string) (mongoke.FindManyParams, error) {
 	last := p.Pagination.Last
 	first := p.Pagination.First
 
