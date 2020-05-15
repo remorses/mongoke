@@ -125,14 +125,6 @@ func getRootObject(config mongoke.JwtConfig, r *http.Request) map[string]interfa
 	return rootValue
 }
 
-func reverseStrings(input []string) []string {
-	if len(input) == 0 {
-		return input
-	}
-	// TODO remove recursion
-	return append(reverseStrings(input[1:]), input[0])
-}
-
 func corsMiddleware(next http.HandlerFunc) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -142,4 +134,11 @@ func corsMiddleware(next http.HandlerFunc) http.Handler {
 
 		next.ServeHTTP(w, r)
 	})
+}
+
+func reverseStrings(input []string) []string {
+	if len(input) == 0 {
+		return input
+	}
+	return append(reverseStrings(input[1:]), input[0])
 }

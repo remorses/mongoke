@@ -140,3 +140,16 @@ func DownloadFile(url string) (string, error) {
 
 	return s, err
 }
+
+func ReverseMaps(ss []Map) []Map {
+	if len(ss) == 0 {
+		return ss
+	}
+	copy := make([]Map, len(ss))
+	j := 0
+	for i := len(ss) - 1; i >= 0; i-- {
+		copy[j] = ss[i]
+		j++
+	}
+	return copy
+}

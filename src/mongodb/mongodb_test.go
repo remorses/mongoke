@@ -50,7 +50,7 @@ func TestFindMany(t *testing.T) {
 				Collection: collection,
 				OrderBy:    map[string]int{"name": mongoke.DESC},
 			},
-			expected: reverse(exampleUsers),
+			expected: mongoke.ReverseMaps(exampleUsers),
 		},
 		"Eq": {
 			params: mongoke.FindManyParams{
@@ -122,12 +122,4 @@ func TestFindMany(t *testing.T) {
 	}
 	_, err = db.Collection(collection).DeleteMany(ctx, mongoke.Map{})
 
-}
-
-func reverse(input []mongoke.Map) []mongoke.Map {
-	if len(input) == 0 {
-		return input
-	}
-	// TODO remove recursion
-	return append(reverse(input[1:]), input[0])
 }

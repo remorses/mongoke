@@ -170,7 +170,7 @@ func makeConnection(nodes []mongoke.Map, pagination mongoke.Pagination, cursorFi
 		}
 	}
 	if pagination.Last != 0 {
-		nodes = reverse(nodes)
+		nodes = mongoke.ReverseMaps(nodes)
 		hasPrev = len(nodes) == int(pagination.Last)
 		if hasPrev {
 			nodes = nodes[1:]
@@ -201,14 +201,6 @@ func makeEdges(nodes []mongoke.Map, cursorField string) []edge {
 		})
 	}
 	return edges
-}
-
-func reverse(input []mongoke.Map) []mongoke.Map {
-	if len(input) == 0 {
-		return input
-	}
-	// TODO remove recursion
-	return append(reverse(input[1:]), input[0])
 }
 
 func getJwt(params graphql.ResolveParams) jwt.MapClaims {
