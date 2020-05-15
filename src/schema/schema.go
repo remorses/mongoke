@@ -144,6 +144,11 @@ func generateSchema(Config mongoke.Config, baseSchemaConfig graphql.SchemaConfig
 			return graphql.Schema{}, err
 		}
 		queryFields[object.Name()+"Nodes"] = typeNodes
+		typeList, err := fields.QueryTypeListField(p)
+		if err != nil {
+			return graphql.Schema{}, err
+		}
+		queryFields[object.Name()+"List"] = typeList
 
 		// TODO add mutaiton fields
 		mutationFields["putSome"+object.Name()] = &graphql.Field{

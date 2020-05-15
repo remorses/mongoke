@@ -20,21 +20,21 @@ type typeNodesArgs struct {
 }
 
 type pageInfo struct {
-	StartCursor     interface{} `json:startCursor`
-	EndCursor       interface{} `json:endCursor`
-	HasNextPage     bool        `json:hasNextPage`
-	HasPreviousPage bool        `json:hasPreviousPage`
+	StartCursor     interface{} `json:"startCursor"`
+	EndCursor       interface{} `json:"endCursor"`
+	HasNextPage     bool        `json:"hasNextPage"`
+	HasPreviousPage bool        `json:"hasPreviousPage"`
 }
 
 type connection struct {
-	Nodes    []mongoke.Map `json:nodes`
-	Edges    []edge        `json:edges`
-	PageInfo pageInfo      `json:pageInfo`
+	Nodes    []mongoke.Map `json:"nodes"`
+	Edges    []edge        `json:"edges"`
+	PageInfo pageInfo      `json:"pageInfo"`
 }
 
 type edge struct {
-	Node   mongoke.Map `json:node`
-	Cursor interface{} `json:cursor`
+	Node   mongoke.Map `json:"node"`
+	Cursor interface{} `json:"cursor"`
 }
 
 func QueryTypeNodesField(p CreateFieldParams) (*graphql.Field, error) {

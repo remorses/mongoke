@@ -18,6 +18,10 @@ type CreateFieldParams struct {
 func takeIndexableTypeNames(baseSchemaConfig graphql.SchemaConfig) []string {
 	names := make([]string, 0)
 	for _, gqlType := range baseSchemaConfig.Types {
+		if _, ok := gqlType.(*graphql.List); ok {
+			// because isLeafType also returns lists
+			continue
+		}
 		if graphql.IsLeafType(gqlType) {
 			names = append(names, gqlType.Name())
 		}
