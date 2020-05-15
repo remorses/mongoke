@@ -49,6 +49,10 @@ func getFieldWhereArg(cache mongoke.Map, field *graphql.FieldDefinition, parentN
 			Fields: graphql.InputObjectConfigFieldMap{
 				"eq":  currentType,
 				"neq": currentType,
+				"gt":  currentType,
+				"lt":  currentType,
+				"gte": currentType,
+				"lte": currentType,
 				"in": &graphql.InputObjectFieldConfig{
 					Type: graphql.NewList(field.Type),
 				},
