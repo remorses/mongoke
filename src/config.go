@@ -35,7 +35,9 @@ var (
 )
 
 type Config struct {
-	DatabaseUri       string                 `json:"database_uri" env:"DB_URL"`
+	DatabaseUri       string
+	Mongodb           MongodbConfig          `json:"mongodb"`
+	Firestore         FirestoreConfig        `json:"firestore"`
 	DisableGraphiql   bool                   `json:"disable_graphiql" env:"DISABLE_GRAPHIQL"`
 	Schema            string                 `json:"schema"`
 	SchemaPath        string                 `json:"schema_path"`
@@ -45,6 +47,14 @@ type Config struct {
 	JwtConfig         JwtConfig              `json:"jwt"`
 	DatabaseFunctions DatabaseInterface
 	Cache             Map
+}
+
+type MongodbConfig struct {
+	Uri string `json:"uri" env:"MONGODB_URL"`
+}
+
+type FirestoreConfig struct {
+	Uri string `json:"uri" env:"FIRESTORE_URL"`
 }
 
 func (config Config) GetTypeConfig(typeName string) *TypeConfig {

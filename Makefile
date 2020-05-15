@@ -8,7 +8,7 @@ build:
 	cd web-ui && yarn build 
 
 test:
-	go test ./... -cover
+	FIRESTORE_EMULATOR_HOST=localhost:8080 go test ./... -cover -fail-fast
 
 test2:
-	gotestsum -f dots-v2
+	FIRESTORE_EMULATOR_HOST=localhost:8080 gotestsum -f dots-v2

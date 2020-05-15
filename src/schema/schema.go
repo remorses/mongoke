@@ -11,15 +11,14 @@ import (
 	tools "github.com/remorses/graphql-go-tools"
 	mongoke "github.com/remorses/mongoke/src"
 	"github.com/remorses/mongoke/src/fields"
+	"github.com/remorses/mongoke/src/firestore"
 	"github.com/remorses/mongoke/src/mongodb"
 	"github.com/remorses/mongoke/src/types"
 )
 
 // MakeMongokeSchema generates the schema
 func MakeMongokeSchema(config mongoke.Config) (graphql.Schema, error) {
-	if config.DatabaseFunctions == nil {
-		config.DatabaseFunctions = mongodb.MongodbDatabaseFunctions{}
-	}
+
 	if config.Cache == nil {
 		config.Cache = make(mongoke.Map)
 	}
@@ -44,8 +43,16 @@ func MakeMongokeSchema(config mongoke.Config) (graphql.Schema, error) {
 		return graphql.Schema{}, errors.New("missing required schema")
 	}
 
-	if config.DatabaseUri == "" {
-		return graphql.Schema{}, errors.New("missing required database url")
+	if config.Mongodb.Uri != "" {
+		config.DatabaseUri = config.Mongodb.Uri
+		config.DatabaseFunctions = mongodb.MongodbDatabaseFunctions{}
+	} else if config.Firestore.Uri != "" {
+		config.DatabaseUri = config.Firestore.Uri
+		config.DatabaseFunctions = firestore.FirestoreDatabaseFunctions{}
+	}
+
+	if config.DatabaseFunctions == nil {
+		return graphql.Schema{}, errors.New("missing database implementation")
 	}
 
 	schemaConfig, err := makeSchemaConfig(config)

@@ -2,7 +2,9 @@
 
 
 
-database_uri: mongodb://localhost/testdb
+
+mongodb:
+  uri: mongodb://localhost/testdb
 
 
 # admin can do everything, used in server side adding a custom header

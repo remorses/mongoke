@@ -48,9 +48,22 @@ var jsonSchemaString = `
                 "schema": {
                     "type": "string"
                 },
-                "database_uri": {
-                    "type": "string"
-                },
+				"mongodb": {
+					"type": "object",
+					"properties": {
+						"uri": {
+							"type": "string"
+						}
+					}
+				},
+				"firestore": {
+					"type": "object",
+					"properties": {
+						"uri": {
+							"type": "string"
+						}
+					}
+				},
                 "schema_url": {
                     "$ref": "#/definitions/Url"
                 },

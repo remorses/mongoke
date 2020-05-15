@@ -3,7 +3,7 @@ import { Box } from '@chakra-ui/core'
 
 
 
-const API_URL = process.env.NODE_ENV == "production" ? "/" : "http://localhost:8080"
+const API_URL = process.env.NODE_ENV == "production" ? "/" : "http://localhost:8060"
 
 
 
