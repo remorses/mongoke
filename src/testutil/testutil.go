@@ -2,6 +2,7 @@ package testutil
 
 import (
 	"encoding/json"
+	"log"
 	"testing"
 
 	"github.com/graphql-go/graphql"
@@ -32,7 +33,7 @@ func PrettyPrint(x ...interface{}) {
 func Pretty(x ...interface{}) string {
 	res := ""
 	for _, x := range x {
-		json, err := json.MarshalIndent(ConvertToPlainMap(x), "", "   ")
+		json, err := json.MarshalIndent(x, "", "   ")
 		if err != nil {
 			panic(err)
 		}
@@ -44,7 +45,10 @@ func Pretty(x ...interface{}) string {
 
 func ConvertToPlainMap(in interface{}) map[string]interface{} {
 	var inInterface map[string]interface{}
-	inrec, _ := json.Marshal(in)
+	inrec, err := json.Marshal(in)
+	if err != nil {
+		log.Fatal(err)
+	}
 	json.Unmarshal(inrec, &inInterface)
 	return inInterface
 }
