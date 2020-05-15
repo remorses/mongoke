@@ -1,4 +1,4 @@
-package schema
+package fields
 
 import (
 	"testing"

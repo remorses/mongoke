@@ -1,10 +1,20 @@
-package schema
+package fields
 
 import (
 	"github.com/graphql-go/graphql"
+	mongoke "github.com/remorses/mongoke/src"
 )
 
-// to be used in takeScalarFields
+type CreateFieldParams struct {
+	Config       mongoke.Config
+	Collection   string
+	InitialWhere map[string]mongoke.Filter
+	Permissions  []mongoke.AuthGuard
+	ReturnType   graphql.Type
+	SchemaConfig graphql.SchemaConfig
+	OmitWhere    bool
+}
+
 func takeIndexableTypeNames(baseSchemaConfig graphql.SchemaConfig) []string {
 	names := make([]string, 0)
 	for _, gqlType := range baseSchemaConfig.Types {

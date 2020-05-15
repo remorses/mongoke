@@ -10,6 +10,7 @@ import (
 	"github.com/graphql-go/graphql"
 	tools "github.com/remorses/graphql-go-tools"
 	mongoke "github.com/remorses/mongoke/src"
+	"github.com/remorses/mongoke/src/fields"
 	"github.com/remorses/mongoke/src/mongodb"
 	"github.com/remorses/mongoke/src/types"
 )
@@ -51,7 +52,7 @@ func MakeMongokeSchema(config mongoke.Config) (graphql.Schema, error) {
 	if err != nil {
 		return graphql.Schema{}, err
 	}
-	schema, err := GenerateSchema(config, schemaConfig)
+	schema, err := generateSchema(config, schemaConfig)
 	if err != nil {
 		return schema, err
 	}
@@ -102,7 +103,7 @@ func makeSchemaConfig(config mongoke.Config) (graphql.SchemaConfig, error) {
 	return baseSchemaConfig, err
 }
 
-func GenerateSchema(Config mongoke.Config, baseSchemaConfig graphql.SchemaConfig) (graphql.Schema, error) {
+func generateSchema(Config mongoke.Config, baseSchemaConfig graphql.SchemaConfig) (graphql.Schema, error) {
 	queryFields := graphql.Fields{}
 	mutationFields := graphql.Fields{}
 
@@ -126,23 +127,23 @@ func GenerateSchema(Config mongoke.Config, baseSchemaConfig graphql.SchemaConfig
 		if typeConf.Collection == "" {
 			return graphql.Schema{}, errors.New("no collection given for type " + gqlType.Name())
 		}
-		p := createFieldParams{
+		p := fields.CreateFieldParams{
 			Config:       Config,
-			returnType:   object,
-			permissions:  typeConf.Permissions,
-			collection:   typeConf.Collection,
-			schemaConfig: baseSchemaConfig,
+			ReturnType:   object,
+			Permissions:  typeConf.Permissions,
+			Collection:   typeConf.Collection,
+			SchemaConfig: baseSchemaConfig,
 		}
-		findOne, err := findOneField(p)
+		findOne, err := fields.QueryTypeField(p)
 		if err != nil {
 			return graphql.Schema{}, err
 		}
 		queryFields[object.Name()] = findOne
-		findMany, err := findManyField(p)
+		typeNodes, err := fields.QueryTypeNodesField(p)
 		if err != nil {
 			return graphql.Schema{}, err
 		}
-		queryFields[object.Name()+"Nodes"] = findMany
+		queryFields[object.Name()+"Nodes"] = typeNodes
 
 		// TODO add mutaiton fields
 		mutationFields["putSome"+object.Name()] = &graphql.Field{
@@ -174,23 +175,23 @@ func GenerateSchema(Config mongoke.Config, baseSchemaConfig graphql.SchemaConfig
 		if !ok {
 			return graphql.Schema{}, errors.New("relation return type " + fromType.Name() + " is not an object")
 		}
-		p := createFieldParams{
+		p := fields.CreateFieldParams{
 			Config:       Config,
-			returnType:   returnType,
-			permissions:  returnTypeConf.Permissions,
-			collection:   returnTypeConf.Collection,
-			initialWhere: relation.Where,
-			schemaConfig: baseSchemaConfig,
-			omitWhere:    true,
+			ReturnType:   returnType,
+			Permissions:  returnTypeConf.Permissions,
+			Collection:   returnTypeConf.Collection,
+			InitialWhere: relation.Where,
+			SchemaConfig: baseSchemaConfig,
+			OmitWhere:    true,
 		}
 		if relation.RelationType == "to_many" {
-			field, err := findManyField(p)
+			field, err := fields.QueryTypeNodesField(p)
 			if err != nil {
 				return graphql.Schema{}, err
 			}
 			object.AddFieldConfig(relation.Field, field)
 		} else if relation.RelationType == "to_one" {
-			field, err := findOneField(p)
+			field, err := fields.QueryTypeField(p)
 			if err != nil {
 				return graphql.Schema{}, err
 			}
@@ -236,107 +237,3 @@ functions to
 - create a many resolver, based on collection, guard
 - create a one resolver, based on collection
 */
-
-const (
-	general_graphql = `
-type Query {
-    mongoke_version: String
-}
-enum Direction {
-    ASC
-    DESC
-}
-${{
-''.join([f"""
-input Where{scalar} {'{'}
-    in: [{scalar}]
-    nin: [{scalar}]
-    eq: {scalar}
-    neq: {scalar}
-{'}'}
-""" for scalar in map(str, sorted(searchables))])
-}}
-type PageInfo {
-    startCursor: AnyScalar
-    endCursor: AnyScalar
-    hasNextPage: Boolean
-    hasPreviousPage: Boolean
-}
-scalar Json
-scalar ObjectId
-scalar AnyScalar
-`
-
-	graphql_query = `
-extend type Query {
-    ${{query_name}}(
-        where: ${{type_name}}Where,
-    ): ${{type_name}}
-    ${{query_name}}Nodes(
-        where: ${{type_name}}Where, 
-        cursorField: ${{type_name}}Fields, 
-        first: Int, 
-        last: Int, 
-        after: AnyScalar, 
-        before: AnyScalar,
-        direction: Direction
-    ): ${{type_name}}Connection!
-}
-type ${{type_name}}Connection {
-    nodes: [${{type_name}}]!
-    edges: [${{type_name}}Edge]!
-    pageInfo: PageInfo!
-}
-type ${{type_name}}Edge {
-    node: ${{type_name}}
-    cursor: AnyScalar
-}
-input ${{type_name}}Where { 
-    and: [${{type_name}}Where]
-    or: [${{type_name}}Where]
-    # $not: [${{type_name}}Where]
-    ${{'\\n    '.join([f'{field}: Where{scalar_name}' for field, scalar_name in fields])}}
-}
-enum ${{type_name}}Fields {
-    ${{'\\n    '.join([f'{field}' for field, _ in fields])}}
-}
-`
-
-	to_one_relation = `
-extend type ${{fromType}} {
-    ${{relationName}}: ${{toType}}
-}
-`
-
-	to_many_relation = `
-extend type ${{fromType}} {
-   ${{relationName}}(
-       where: ${{toType}}Where, 
-       cursorField: ${{toType}}Fields, 
-       first: Int, 
-       last: Int, 
-       after: AnyScalar, 
-       before: AnyScalar,
-       direction: Direction
-    ): ${{toType}}Connection!
-}
-`
-
-	to_many_relation_boilerplate = `
-type ${{toType}}Connection {
-    nodes: [${{toType}}]!
-    edges: [${{toType}}Edge]!
-    pageInfo: PageInfo!
-}
-type ${{toType}}Edge {
-    node: ${{toType}}
-    cursor: AnyScalar
-}
-input ${{toType}}Where { 
-    ${{'\\n    '.join([f'{field}: Where{scalar_name}' for field, scalar_name in fields])}}
-}
-enum ${{toType}}Fields {
-    ${{'\\n    '.join([f'{field}' for field, _ in fields])}}
-}
-`
-)

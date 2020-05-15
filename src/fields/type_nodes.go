@@ -1,4 +1,4 @@
-package schema
+package fields
 
 import (
 	"errors"
@@ -11,16 +11,6 @@ import (
 	mongoke "github.com/remorses/mongoke/src"
 	"github.com/remorses/mongoke/src/types"
 )
-
-type createFieldParams struct {
-	Config       mongoke.Config
-	collection   string
-	initialWhere map[string]mongoke.Filter
-	permissions  []mongoke.AuthGuard
-	returnType   graphql.Type
-	schemaConfig graphql.SchemaConfig
-	omitWhere    bool
-}
 
 type FindManyArgs struct {
 	Where       map[string]mongoke.Filter `mapstructure:"where"`
@@ -47,61 +37,7 @@ type Edge struct {
 	Cursor interface{} `json:cursor`
 }
 
-func findOneField(p createFieldParams) (*graphql.Field, error) {
-	resolver := func(params graphql.ResolveParams) (interface{}, error) {
-		args := params.Args
-		opts := mongoke.FindManyParams{
-			Collection:  p.collection,
-			DatabaseUri: p.Config.DatabaseUri,
-			OrderBy:     map[string]int{"_id": mongoke.DESC}, // TODO change _id default based on doc field
-			Limit:       1,
-		}
-		err := mapstructure.Decode(args, &opts)
-		if err != nil {
-			return nil, err
-		}
-		if p.initialWhere != nil {
-			mergo.Merge(&opts.Where, p.initialWhere)
-		}
-		documents, err := p.Config.DatabaseFunctions.FindMany(opts)
-		if err != nil {
-			return nil, err
-		}
-		jwt := getJwt(params)
-		// don't compute permissions if document is nil
-		if len(documents) == 0 {
-			return nil, nil
-		}
-		document := documents[0]
-		result, err := applyGuardsOnDocument(applyGuardsOnDocumentParams{
-			document:  document,
-			guards:    p.permissions,
-			jwt:       jwt,
-			operation: mongoke.Operations.READ,
-		})
-		if err != nil {
-			return nil, err
-		}
-		return result, nil
-	}
-	indexableNames := takeIndexableTypeNames(p.schemaConfig)
-	whereArg, err := types.GetWhereArg(p.Config.Cache, indexableNames, p.returnType)
-	if err != nil {
-		return nil, err
-	}
-	args := graphql.FieldConfigArgument{}
-	if !p.omitWhere {
-		args["where"] = &graphql.ArgumentConfig{Type: whereArg}
-	}
-	field := graphql.Field{
-		Type:    p.returnType,
-		Args:    args,
-		Resolve: resolver,
-	}
-	return &field, nil
-}
-
-func findManyField(p createFieldParams) (*graphql.Field, error) {
+func QueryTypeNodesField(p CreateFieldParams) (*graphql.Field, error) {
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
 		pagination := paginationFromArgs(args)
@@ -118,10 +54,10 @@ func findManyField(p createFieldParams) (*graphql.Field, error) {
 		if err != nil {
 			return nil, err
 		}
-		if p.initialWhere != nil {
-			mergo.Merge(&decodedArgs.Where, p.initialWhere)
+		if p.InitialWhere != nil {
+			mergo.Merge(&decodedArgs.Where, p.InitialWhere)
 		}
-		opts, err := createFindManyParamsFromArgs(decodedArgs, p.collection, p.Config.DatabaseUri)
+		opts, err := createFindManyParamsFromArgs(decodedArgs, p.Collection, p.Config.DatabaseUri)
 		if err != nil {
 			return nil, err
 		}
@@ -132,7 +68,7 @@ func findManyField(p createFieldParams) (*graphql.Field, error) {
 			return nil, err
 		}
 
-		if len(p.permissions) == 0 {
+		if len(p.Permissions) == 0 {
 			connection := makeConnection(
 				nodes,
 				decodedArgs.Pagination,
@@ -146,7 +82,7 @@ func findManyField(p createFieldParams) (*graphql.Field, error) {
 		for _, document := range nodes {
 			node, err := applyGuardsOnDocument(applyGuardsOnDocumentParams{
 				document:  document,
-				guards:    p.permissions,
+				guards:    p.Permissions,
 				jwt:       jwt,
 				operation: mongoke.Operations.READ,
 			})
@@ -168,16 +104,16 @@ func findManyField(p createFieldParams) (*graphql.Field, error) {
 		// testutil.PrettyPrint(args)
 		return connection, nil
 	}
-	indexableNames := takeIndexableTypeNames(p.schemaConfig)
-	whereArg, err := types.GetWhereArg(p.Config.Cache, indexableNames, p.returnType)
+	indexableNames := takeIndexableTypeNames(p.SchemaConfig)
+	whereArg, err := types.GetWhereArg(p.Config.Cache, indexableNames, p.ReturnType)
 	if err != nil {
 		return nil, err
 	}
-	connectionType, err := types.GetConnectionType(p.Config.Cache, p.returnType)
+	connectionType, err := types.GetConnectionType(p.Config.Cache, p.ReturnType)
 	if err != nil {
 		return nil, err
 	}
-	indexableFieldsEnum, err := types.GetIndexableFieldsEnum(p.Config.Cache, indexableNames, p.returnType)
+	indexableFieldsEnum, err := types.GetIndexableFieldsEnum(p.Config.Cache, indexableNames, p.ReturnType)
 	if err != nil {
 		return nil, err
 	}
@@ -189,7 +125,7 @@ func findManyField(p createFieldParams) (*graphql.Field, error) {
 		"direction":   &graphql.ArgumentConfig{Type: types.DirectionEnum},
 		"cursorField": &graphql.ArgumentConfig{Type: indexableFieldsEnum},
 	}
-	if !p.omitWhere {
+	if !p.OmitWhere {
 		args["where"] = &graphql.ArgumentConfig{Type: whereArg}
 	}
 	field := graphql.Field{
