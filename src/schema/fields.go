@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"errors"
 	"fmt"
 
 	jwt "github.com/dgrijalva/jwt-go"
@@ -19,6 +20,13 @@ type createFieldParams struct {
 	returnType   graphql.Type
 	schemaConfig graphql.SchemaConfig
 	omitWhere    bool
+}
+
+type FindManyArgs struct {
+	Where       map[string]mongoke.Filter `mapstructure:"where"`
+	Pagination  mongoke.Pagination
+	CursorField string `mapstructure:"cursorField"`
+	Direction   int    `mapstructure:"direction"`
 }
 
 type PageInfo struct {
@@ -45,10 +53,8 @@ func findOneField(p createFieldParams) (*graphql.Field, error) {
 		opts := mongoke.FindManyParams{
 			Collection:  p.collection,
 			DatabaseUri: p.Config.DatabaseUri,
-			Direction:   mongoke.DESC,
-			Pagination: mongoke.Pagination{
-				First: 1,
-			},
+			OrderBy:     map[string]int{"_id": mongoke.DESC}, // TODO change _id default based on doc field
+			Limit:       1,
 		}
 		err := mapstructure.Decode(args, &opts)
 		if err != nil {
@@ -99,19 +105,25 @@ func findManyField(p createFieldParams) (*graphql.Field, error) {
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
 		pagination := paginationFromArgs(args)
-		opts := mongoke.FindManyParams{
-			DatabaseUri: p.Config.DatabaseUri, // here i set the defaults
-			Collection:  p.collection,
+		decodedArgs := FindManyArgs{
 			Direction:   mongoke.DESC,
-			CursorField: "_id",
+			CursorField: "_id", // TODO change _id default based on schema
 			Pagination:  pagination,
 		}
-		err := mapstructure.Decode(args, &opts)
+		err := mapstructure.Decode(args, &decodedArgs)
+		if err != nil {
+			return nil, err
+		}
+		decodedArgs, err = addFindManyArgsDefaults(decodedArgs)
 		if err != nil {
 			return nil, err
 		}
 		if p.initialWhere != nil {
-			mergo.Merge(&opts.Where, p.initialWhere)
+			mergo.Merge(&decodedArgs.Where, p.initialWhere)
+		}
+		opts, err := createFindManyParamsFromArgs(decodedArgs, p.collection, p.Config.DatabaseUri)
+		if err != nil {
+			return nil, err
 		}
 		nodes, err := p.Config.DatabaseFunctions.FindMany(
 			opts,
@@ -121,7 +133,12 @@ func findManyField(p createFieldParams) (*graphql.Field, error) {
 		}
 
 		if len(p.permissions) == 0 {
-			return makeConnection(nodes, opts.Pagination, opts.CursorField), nil
+			connection := makeConnection(
+				nodes,
+				decodedArgs.Pagination,
+				decodedArgs.CursorField,
+			)
+			return connection, nil
 		}
 
 		jwt := getJwt(params)
@@ -142,7 +159,11 @@ func findManyField(p createFieldParams) (*graphql.Field, error) {
 				accessibleNodes = append(accessibleNodes, node.(mongoke.Map))
 			}
 		}
-		connection := makeConnection(accessibleNodes, opts.Pagination, opts.CursorField)
+		connection := makeConnection(
+			accessibleNodes,
+			decodedArgs.Pagination,
+			decodedArgs.CursorField,
+		)
 		// document, err := mongoke.database.findOne()
 		// testutil.PrettyPrint(args)
 		return connection, nil
@@ -268,4 +289,103 @@ func getJwt(params graphql.ResolveParams) jwt.MapClaims {
 		return jwt.MapClaims{}
 	}
 	return jwtMap
+}
+
+const (
+	DEFAULT_NODES_COUNT = 20
+	MAX_NODES_COUNT     = 40
+)
+
+func addFindManyArgsDefaults(p FindManyArgs) (FindManyArgs, error) {
+	if p.Direction == 0 {
+		p.Direction = mongoke.ASC
+	}
+	if p.CursorField == "" {
+		p.CursorField = "_id"
+	}
+	after := p.Pagination.After
+	before := p.Pagination.Before
+	last := p.Pagination.Last
+	first := p.Pagination.First
+
+	// set defaults
+	if first == 0 && last == 0 {
+		if after != "" {
+			first = DEFAULT_NODES_COUNT
+		} else if before != "" {
+			last = DEFAULT_NODES_COUNT
+		} else {
+			first = DEFAULT_NODES_COUNT
+		}
+	}
+
+	// assertion for arguments
+	if after != "" && first == 0 && before == "" {
+		return p, errors.New("need `first` or `before` if using `after`")
+	}
+	if before != "" && (last == 0 && after == "") {
+		return p, errors.New("need `last` or `after` if using `before`")
+	}
+	if first != 0 && last != 0 {
+		return p, errors.New("cannot use `first` and `last` together")
+	}
+
+	// gt and lt
+	cursorFieldMatch := p.Where[p.CursorField]
+	if after != "" {
+		if p.Direction == mongoke.DESC {
+			cursorFieldMatch.Lt = after
+		} else {
+			cursorFieldMatch.Gt = after
+		}
+	}
+	if before != "" {
+		if p.Direction == mongoke.DESC {
+			cursorFieldMatch.Gt = before
+		} else {
+			cursorFieldMatch.Lt = before
+		}
+	}
+	return p, nil
+}
+
+func createFindManyParamsFromArgs(p FindManyArgs, collection string, databaseUri string) (mongoke.FindManyParams, error) {
+	last := p.Pagination.Last
+	first := p.Pagination.First
+
+	opts := mongoke.FindManyParams{
+		Collection:  collection,
+		DatabaseUri: databaseUri,
+		Where:       p.Where,
+		Limit:       p.Pagination.First,
+		OrderBy: map[string]int{
+			p.CursorField: p.Direction,
+		},
+	}
+
+	// sort order
+	sorting := p.Direction
+	if last != 0 {
+		sorting = -p.Direction
+	}
+	opts.OrderBy = map[string]int{p.CursorField: sorting}
+
+	// limit
+	if last != 0 {
+		opts.Limit = int(min(MAX_NODES_COUNT, last))
+	}
+	if first != 0 {
+		opts.Limit = int(min(MAX_NODES_COUNT, first))
+	}
+	if first == 0 && last == 0 { // when using `after` and `before`
+		opts.Limit = int(MAX_NODES_COUNT)
+	}
+	return opts, nil
+}
+
+func min(x, y int) int {
+	if x > y {
+		return y
+	}
+	return x
 }

@@ -53,9 +53,7 @@ func TestMongodbFunctions(t *testing.T) {
 			mongoke.FindManyParams{
 				Collection:  collection,
 				DatabaseUri: uri,
-				Pagination: mongoke.Pagination{
-					First: 0,
-				},
+				Limit:       1,
 				Where: map[string]mongoke.Filter{
 					"name": {Eq: "01"},
 				},
@@ -79,10 +77,8 @@ func TestMongodbFunctions(t *testing.T) {
 			mongoke.FindManyParams{
 				Collection:  collection,
 				DatabaseUri: uri,
-				Direction:   mongoke.ASC,
-				Pagination: mongoke.Pagination{
-					First: 2,
-				},
+				OrderBy:     map[string]int{"_id": mongoke.ASC},
+				Limit:       2,
 			},
 		)
 		if err != nil {
@@ -106,9 +102,8 @@ func TestMongodbFunctions(t *testing.T) {
 				Where: map[string]mongoke.Filter{
 					"name": {Neq: "01"},
 				},
-				Pagination: mongoke.Pagination{
-					First: 2,
-				},
+				OrderBy: map[string]int{"_id": mongoke.ASC},
+				Limit:   2,
 			},
 		)
 		if err != nil {
@@ -129,10 +124,8 @@ func TestMongodbFunctions(t *testing.T) {
 			mongoke.FindManyParams{
 				Collection:  collection,
 				DatabaseUri: uri,
-				Direction:   mongoke.DESC,
-				Pagination: mongoke.Pagination{
-					First: 2,
-				},
+				OrderBy:     map[string]int{"_id": mongoke.DESC},
+				Limit:       2,
 			},
 		)
 		if err != nil {

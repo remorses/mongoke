@@ -55,90 +55,18 @@ type MongodbDatabaseFunctions struct {
 // 	return document, nil
 // }
 
-const (
-	DEFAULT_NODES_COUNT = 20
-	MAX_NODES_COUNT     = 40
-)
-
 func (self MongodbDatabaseFunctions) FindMany(p mongoke.FindManyParams) ([]mongoke.Map, error) {
-	if p.Direction == 0 {
-		p.Direction = mongoke.ASC
-	}
-	if p.CursorField == "" {
-		p.CursorField = "_id"
-	}
 	ctx, _ := context.WithTimeout(context.Background(), TIMEOUT_FIND*time.Second)
 	db, err := self.InitMongo(p.DatabaseUri)
 	if err != nil {
 		return nil, err
 	}
-	after := p.Pagination.After
-	before := p.Pagination.Before
-	last := p.Pagination.Last
-	first := p.Pagination.First
 
 	opts := options.Find()
-
-	// set defaults
-	if first == 0 && last == 0 {
-		if after != "" {
-			first = DEFAULT_NODES_COUNT
-		} else if before != "" {
-			last = DEFAULT_NODES_COUNT
-		} else {
-			first = DEFAULT_NODES_COUNT
-		}
-	}
-
-	// TODO move findMany argument handling logic in custom function
-	// assertion for arguments
-	if after != "" && first == 0 && before == "" {
-		return nil, errors.New("need `first` or `before` if using `after`")
-	}
-	if before != "" && (last == 0 && after == "") {
-		return nil, errors.New("need `last` or `after` if using `before`")
-	}
-	if first != 0 && last != 0 {
-		return nil, errors.New("cannot use `first` and `last` together")
-	}
-
-	// gt and lt
-	cursorFieldMatch := p.Where[p.CursorField]
-	if after != "" {
-		if p.Direction == mongoke.DESC {
-			cursorFieldMatch.Lt = after
-		} else {
-			cursorFieldMatch.Gt = after
-		}
-	}
-	if before != "" {
-		if p.Direction == mongoke.DESC {
-			cursorFieldMatch.Gt = before
-		} else {
-			cursorFieldMatch.Lt = before
-		}
-	}
-
-	// sort order
-	sorting := p.Direction
-	if last != 0 {
-		sorting = -p.Direction
-	}
-	opts.SetSort(mongoke.Map{p.CursorField: sorting})
-
-	// limit
-	if last != 0 {
-		opts.SetLimit(int64(min(MAX_NODES_COUNT, last)))
-	}
-	if first != 0 {
-		opts.SetLimit(int64(min(MAX_NODES_COUNT, first)))
-	}
-	if first == 0 && last == 0 { // when using `after` and `before`
-		opts.SetLimit(int64(MAX_NODES_COUNT))
-	}
-
 	opts.SetMaxTime(MAX_QUERY_TIME * time.Second)
-
+	opts.SetLimit(int64(p.Limit))
+	opts.SetSkip(int64(p.Offset))
+	opts.SetSort(p.OrderBy)
 	testutil.PrettyPrint(p)
 
 	res, err := db.Collection(p.Collection).Find(ctx, p.Where, opts)
@@ -178,10 +106,3 @@ func (self *MongodbDatabaseFunctions) InitMongo(uri string) (*mongo.Database, er
 }
 
 // removes last or first node, adds pageInfo data
-
-func min(x, y int) int {
-	if x > y {
-		return y
-	}
-	return x
-}

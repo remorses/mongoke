@@ -18,9 +18,9 @@ type FindManyParams struct {
 	Collection  string
 	DatabaseUri string
 	Where       map[string]Filter `mapstructure:"where"`
-	Pagination  Pagination
-	CursorField string `mapstructure:"cursorField"`
-	Direction   int    `mapstructure:"direction"`
+	Limit       int               `mapstructure:"limit"`
+	Offset      int               `mapstructure:"offset"`
+	OrderBy     map[string]int    `mapstructure:"orderBy"`
 }
 
 type Pagination struct {
@@ -37,4 +37,6 @@ type Filter struct {
 	Nin []interface{} `bson:"$nin,omitempty"`
 	Gt  interface{}   `bson:"$gt,omitempty"`
 	Lt  interface{}   `bson:"$lt,omitempty"`
+	Gte interface{}   `bson:"$gte,omitempty"`
+	Lte interface{}   `bson:"$lte,omitempty"`
 }
