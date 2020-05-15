@@ -28,3 +28,17 @@ func takeIndexableTypeNames(baseSchemaConfig graphql.SchemaConfig) []string {
 	}
 	return names
 }
+
+func getDefaultCursorField(scalarNames []string) string {
+	// TODO customize default cursor field via config
+	for _, name := range scalarNames {
+		if name == "_id" || name == "id" {
+			return name
+		}
+	}
+	if len(scalarNames) != 0 {
+
+		return scalarNames[0]
+	}
+	return ""
+}

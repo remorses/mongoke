@@ -38,12 +38,13 @@ type edge struct {
 }
 
 func QueryTypeNodesField(p CreateFieldParams) (*graphql.Field, error) {
+	indexableNames := takeIndexableTypeNames(p.SchemaConfig)
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
 		pagination := paginationFromArgs(args)
 		decodedArgs := typeNodesArgs{
 			Direction:   mongoke.DESC,
-			CursorField: "_id", // TODO change _id default based on schema
+			CursorField: getDefaultCursorField(indexableNames),
 			Pagination:  pagination,
 		}
 		err := mapstructure.Decode(args, &decodedArgs)
@@ -104,7 +105,7 @@ func QueryTypeNodesField(p CreateFieldParams) (*graphql.Field, error) {
 		// testutil.PrettyPrint(args)
 		return connection, nil
 	}
-	indexableNames := takeIndexableTypeNames(p.SchemaConfig)
+
 	whereArg, err := types.GetWhereArg(p.Config.Cache, indexableNames, p.ReturnType)
 	if err != nil {
 		return nil, err

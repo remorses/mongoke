@@ -9,13 +9,16 @@ import (
 )
 
 func QueryTypeField(p CreateFieldParams) (*graphql.Field, error) {
+	indexableNames := takeIndexableTypeNames(p.SchemaConfig)
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
 		opts := mongoke.FindManyParams{
 			Collection:  p.Collection,
 			DatabaseUri: p.Config.DatabaseUri,
-			OrderBy:     map[string]int{"_id": mongoke.DESC}, // TODO change _id default based on doc field
-			Limit:       1,
+			OrderBy: map[string]int{
+				getDefaultCursorField(indexableNames): mongoke.DESC,
+			},
+			Limit: 1,
 		}
 		err := mapstructure.Decode(args, &opts)
 		if err != nil {
@@ -45,7 +48,7 @@ func QueryTypeField(p CreateFieldParams) (*graphql.Field, error) {
 		}
 		return result, nil
 	}
-	indexableNames := takeIndexableTypeNames(p.SchemaConfig)
+
 	whereArg, err := types.GetWhereArg(p.Config.Cache, indexableNames, p.ReturnType)
 	if err != nil {
 		return nil, err
