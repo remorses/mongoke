@@ -18,42 +18,10 @@ const (
 	TIMEOUT_FIND    = 10
 )
 
-// type findOneParams struct {
-// 	collection
-// 	database
-// }
-
 type MongodbDatabaseFunctions struct {
 	mongoke.DatabaseInterface
 	db *mongo.Database
 }
-
-// func (self MongodbDatabaseFunctions) FindOne(p mongoke.FindOneParams) (interface{}, error) {
-// 	ctx, _ := context.WithTimeout(context.Background(), TIMEOUT_FIND*time.Second)
-// 	db, err := self.InitMongo(p.DatabaseUri)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	collection := db.Collection(p.Collection)
-// 	// testutil.PrettyPrint(p.Where)
-
-// 	opts := options.FindOne().SetMaxTime(MAX_QUERY_TIME * time.Second)
-// 	res := collection.FindOne(ctx, p.Where, opts)
-
-// 	if res.Err() == mongo.ErrNoDocuments {
-// 		return nil, nil
-// 	}
-// 	if res.Err() != nil {
-// 		return nil, res.Err()
-// 	}
-// 	var document mongoke.Map = make(mongoke.Map)
-// 	err = res.Decode(document)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	// testutil.PrettyPrint(document)
-// 	return document, nil
-// }
 
 func (self MongodbDatabaseFunctions) FindMany(p mongoke.FindManyParams) ([]mongoke.Map, error) {
 	ctx, _ := context.WithTimeout(context.Background(), TIMEOUT_FIND*time.Second)
@@ -104,5 +72,3 @@ func (self *MongodbDatabaseFunctions) InitMongo(uri string) (*mongo.Database, er
 	self.db = db
 	return db, nil
 }
-
-// removes last or first node, adds pageInfo data
