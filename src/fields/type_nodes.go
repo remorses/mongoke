@@ -44,7 +44,7 @@ func QueryTypeNodesField(p CreateFieldParams) (*graphql.Field, error) {
 		pagination := paginationFromArgs(args)
 		decodedArgs := typeNodesArgs{
 			Direction:   mongoke.DESC,
-			CursorField: getDefaultCursorField(indexableNames),
+			CursorField: getDefaultCursorField(p.ReturnType, indexableNames),
 			Pagination:  pagination,
 		}
 		err := mapstructure.Decode(args, &decodedArgs)

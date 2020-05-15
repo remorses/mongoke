@@ -33,7 +33,7 @@ func GetIndexableFieldsEnum(cache mongoke.Map, indexableNames []string, object g
 // indexableFields
 func takeIndexableFields(indexableNames []string, object graphql.Type) []*graphql.FieldDefinition {
 	indexableFields := make([]*graphql.FieldDefinition, 0)
-	for _, v := range getTypeFields(object) {
+	for _, v := range GetTypeFields(object) {
 		typeName := v.Type.Name()
 		switch typeName {
 		case "String", "Boolean", "Int", "Float", "ID", "DateTime":
@@ -46,7 +46,7 @@ func takeIndexableFields(indexableNames []string, object graphql.Type) []*graphq
 	return indexableFields
 }
 
-func getTypeFields(object graphql.Type) graphql.FieldDefinitionMap {
+func GetTypeFields(object graphql.Type) graphql.FieldDefinitionMap {
 	fieldMap := graphql.FieldDefinitionMap{}
 	switch v := object.(type) {
 	case *graphql.Object:

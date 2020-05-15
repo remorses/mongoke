@@ -32,7 +32,7 @@ func PrettyPrint(x ...interface{}) {
 func Pretty(x ...interface{}) string {
 	res := ""
 	for _, x := range x {
-		json, err := json.MarshalIndent(x, "", "   ")
+		json, err := json.MarshalIndent(ConvertToPlainMap(x), "", "   ")
 		if err != nil {
 			panic(err)
 		}

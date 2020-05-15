@@ -16,7 +16,7 @@ func QueryTypeField(p CreateFieldParams) (*graphql.Field, error) {
 			Collection:  p.Collection,
 			DatabaseUri: p.Config.DatabaseUri,
 			OrderBy: map[string]int{
-				getDefaultCursorField(indexableNames): mongoke.DESC,
+				getDefaultCursorField(p.ReturnType, indexableNames): mongoke.DESC,
 			},
 			Limit: 1,
 		}

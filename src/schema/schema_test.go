@@ -202,6 +202,8 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			if diff := deep.Equal(res, expected); diff != nil {
 				t.Error(diff)
 			}
+			_, err = db.Collection(collection).DeleteMany(context.Background(), mongoke.Map{})
 		})
 	}
+
 }
