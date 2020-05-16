@@ -13,7 +13,6 @@ import (
 func TestFindMany(t *testing.T) {
 	collection := "users"
 	ctx := context.Background()
-	uri := testutil.FIRESTORE_URI
 	type Case struct {
 		params   mongoke.FindManyParams
 		expected []mongoke.Map
@@ -106,7 +105,7 @@ func TestFindMany(t *testing.T) {
 
 	// clear and insert some docs
 	m := FirestoreDatabaseFunctions{}
-	db, err := m.Init(uri)
+	db, err := m.Init(testutil.FIRESTORE_PROJECT_ID)
 	if err != nil {
 		t.Error(err)
 	}
@@ -132,7 +131,7 @@ func TestFindMany(t *testing.T) {
 			require.Equal(t, testutil.Pretty(c.expected), testutil.Pretty(result))
 		})
 	}
-	deleteCollection(t, db, collection)
+	// deleteCollection(t, db, collection)
 
 }
 

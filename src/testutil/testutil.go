@@ -9,7 +9,7 @@ import (
 )
 
 const MONGODB_URI = "mongodb://localhost/testdb"
-const FIRESTORE_URI = "http://localhost:8080"
+const FIRESTORE_PROJECT_ID = "example"
 
 func QuerySchema(t *testing.T, schema graphql.Schema, query string) interface{} {
 	res := graphql.Do(graphql.Params{Schema: schema, RequestString: query})

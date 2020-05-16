@@ -54,7 +54,7 @@ type MongodbConfig struct {
 }
 
 type FirestoreConfig struct {
-	Uri string `json:"uri" env:"FIRESTORE_URL"`
+	ProjectID string `json:"project_id" env:"FIRESTORE_PROJECT_ID"`
 }
 
 func (config Config) GetTypeConfig(typeName string) *TypeConfig {

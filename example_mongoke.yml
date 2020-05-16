@@ -3,8 +3,11 @@
 
 
 
-mongodb:
-  uri: mongodb://localhost/testdb
+# mongodb:
+#   uri: mongodb://localhost/testdb
+
+firestore:
+  project_id: example
 
 
 # admin can do everything, used in server side adding a custom header

@@ -14,7 +14,6 @@ import (
 
 const (
 	TIMEOUT_CONNECT = 5
-	MAX_QUERY_TIME  = 10
 	TIMEOUT_FIND    = 10
 )
 
@@ -115,13 +114,13 @@ func isZero(v interface{}) bool {
 	return v == reflect.Zero(t).Interface()
 }
 
-func (self *FirestoreDatabaseFunctions) Init(uri string) (*firestore.Client, error) {
+func (self *FirestoreDatabaseFunctions) Init(projectID string) (*firestore.Client, error) {
 	if self.db != nil {
 		return self.db, nil
 	}
-	ctx := context.Background()
+	ctx, _ := context.WithTimeout(context.Background(), TIMEOUT_CONNECT*time.Second)
 	// option.WithCredentialsJSON()
-	db, err := firestore.NewClient(ctx, "project-test")
+	db, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
 		return nil, err
 	}

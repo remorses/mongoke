@@ -46,8 +46,8 @@ func MakeMongokeSchema(config mongoke.Config) (graphql.Schema, error) {
 	if config.Mongodb.Uri != "" {
 		config.DatabaseUri = config.Mongodb.Uri
 		config.DatabaseFunctions = mongodb.MongodbDatabaseFunctions{}
-	} else if config.Firestore.Uri != "" {
-		config.DatabaseUri = config.Firestore.Uri
+	} else if config.Firestore.ProjectID != "" {
+		config.DatabaseUri = config.Firestore.ProjectID // TODO firestore project id is not really a database uri
 		config.DatabaseFunctions = firestore.FirestoreDatabaseFunctions{}
 	}
 

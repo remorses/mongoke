@@ -25,7 +25,7 @@ func main() {
 			},
 			&cli.StringFlag{
 				Name:  "port",
-				Value: "8080",
+				Value: "8090",
 				Usage: "port to listen to",
 			},
 			&cli.StringFlag{
@@ -74,7 +74,7 @@ func main() {
 			println("listening on http://localhost:" + port)
 			var host string
 			if c.Bool("localhost") {
-				host = "localhost:"
+				host = "127.0.0.1:" // TODO ListenAndServe does not raises if port already used by 0.0.0.0
 			} else {
 				host = "0.0.0.0:"
 			}

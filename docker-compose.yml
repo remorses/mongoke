@@ -1,4 +1,4 @@
-version: "3"
+version: "3.7"
 
 services:
   mongoke:
@@ -20,8 +20,9 @@ services:
     logging:
       driver: "none"
 
-  firestore-emulator:
-    image: pathmotion/firestore-emulator-docker
+  firestore:
+    image: ridedott/firestore-emulator
+    init: true
     ports:
       - 8080:8080
     environment:
