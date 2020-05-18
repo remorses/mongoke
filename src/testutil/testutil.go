@@ -1,6 +1,7 @@
 package testutil
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"testing"
@@ -12,7 +13,7 @@ const MONGODB_URI = "mongodb://localhost/testdb"
 const FIRESTORE_PROJECT_ID = "example"
 
 func QuerySchema(t *testing.T, schema graphql.Schema, query string) interface{} {
-	res := graphql.Do(graphql.Params{Schema: schema, RequestString: query})
+	res := graphql.Do(graphql.Params{Schema: schema, RequestString: query, Context: context.Background()})
 	if res.Errors != nil && len(res.Errors) > 0 {
 		t.Error(res.Errors[0])
 		return nil

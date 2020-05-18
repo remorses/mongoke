@@ -27,7 +27,7 @@ func QueryTypeField(p CreateFieldParams) (*graphql.Field, error) {
 		if p.InitialWhere != nil {
 			mergo.Merge(&opts.Where, p.InitialWhere)
 		}
-		documents, err := p.Config.DatabaseFunctions.FindMany(opts)
+		documents, err := p.Config.DatabaseFunctions.FindMany(params.Context, opts)
 		if err != nil {
 			return nil, err
 		}

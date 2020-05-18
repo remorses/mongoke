@@ -26,7 +26,7 @@ func QueryTypeListField(p CreateFieldParams) (*graphql.Field, error) {
 			return nil, err
 		}
 		nodes, err := p.Config.DatabaseFunctions.FindMany(
-			opts,
+			params.Context, opts,
 		)
 		if err != nil {
 			return nil, err

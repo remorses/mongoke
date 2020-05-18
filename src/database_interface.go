@@ -1,10 +1,12 @@
 package mongoke
 
+import "context"
+
 //go:generate moq -pkg mock -out mock/database_interface_mock.go . DatabaseInterface
 type DatabaseInterface interface {
 	// FindOne(p FindOneParams) (interface{}, error)
 	// FindMany should return p.First + 1 nodes, or p.Last + 1 nodes, so mongoke can compute `hasNextPage` and `hasPreviousPage`
-	FindMany(p FindManyParams) ([]Map, error)
+	FindMany(ctx context.Context, p FindManyParams) ([]Map, error)
 	// TODO add mutations in databaseFunctions
 }
 

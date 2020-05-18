@@ -23,13 +23,12 @@ type MongodbDatabaseFunctions struct {
 	db *mongo.Database
 }
 
-func (self MongodbDatabaseFunctions) FindMany(p mongoke.FindManyParams) ([]mongoke.Map, error) {
-	ctx, _ := context.WithTimeout(context.Background(), TIMEOUT_FIND*time.Second)
-	db, err := self.InitMongo(p.DatabaseUri)
+func (self MongodbDatabaseFunctions) FindMany(ctx context.Context, p mongoke.FindManyParams) ([]mongoke.Map, error) {
+	db, err := self.Init(ctx, p.DatabaseUri)
 	if err != nil {
 		return nil, err
 	}
-
+	ctx, _ = context.WithTimeout(ctx, TIMEOUT_FIND*time.Second)
 	opts := options.Find()
 	opts.SetMaxTime(MAX_QUERY_TIME * time.Second)
 	opts.SetLimit(int64(p.Limit))
@@ -51,7 +50,7 @@ func (self MongodbDatabaseFunctions) FindMany(p mongoke.FindManyParams) ([]mongo
 	return nodes, nil
 }
 
-func (self *MongodbDatabaseFunctions) InitMongo(uri string) (*mongo.Database, error) {
+func (self *MongodbDatabaseFunctions) Init(ctx context.Context, uri string) (*mongo.Database, error) {
 	if self.db != nil {
 		return self.db, nil
 	}
@@ -63,7 +62,7 @@ func (self *MongodbDatabaseFunctions) InitMongo(uri string) (*mongo.Database, er
 	if dbName == "" {
 		return nil, errors.New("the db uri must contain the database name")
 	}
-	ctx, _ := context.WithTimeout(context.Background(), TIMEOUT_CONNECT*time.Second)
+	ctx, _ = context.WithTimeout(ctx, TIMEOUT_CONNECT*time.Second)
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
 	if err != nil {
 		return nil, err

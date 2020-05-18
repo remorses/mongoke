@@ -22,12 +22,12 @@ type FirestoreDatabaseFunctions struct {
 	db *firestore.Client
 }
 
-func (self FirestoreDatabaseFunctions) FindMany(p mongoke.FindManyParams) ([]mongoke.Map, error) {
-	ctx, _ := context.WithTimeout(context.Background(), TIMEOUT_FIND*time.Second)
-	db, err := self.Init(p.DatabaseUri)
+func (self FirestoreDatabaseFunctions) FindMany(ctx context.Context, p mongoke.FindManyParams) ([]mongoke.Map, error) {
+	db, err := self.Init(ctx, p.DatabaseUri)
 	if err != nil {
 		return nil, err
 	}
+	ctx, _ = context.WithTimeout(ctx, TIMEOUT_FIND*time.Second)
 	var query firestore.Query = db.Collection(p.Collection).Query
 	if p.Limit != 0 {
 		query = query.Limit(p.Limit)
@@ -114,11 +114,11 @@ func isZero(v interface{}) bool {
 	return v == reflect.Zero(t).Interface()
 }
 
-func (self *FirestoreDatabaseFunctions) Init(projectID string) (*firestore.Client, error) {
+func (self *FirestoreDatabaseFunctions) Init(ctx context.Context, projectID string) (*firestore.Client, error) {
 	if self.db != nil {
 		return self.db, nil
 	}
-	ctx, _ := context.WithTimeout(context.Background(), TIMEOUT_CONNECT*time.Second)
+	ctx, _ = context.WithTimeout(ctx, TIMEOUT_CONNECT*time.Second)
 	// option.WithCredentialsJSON()
 	db, err := firestore.NewClient(ctx, projectID)
 	if err != nil {

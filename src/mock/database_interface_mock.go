@@ -4,6 +4,7 @@
 package mock
 
 import (
+	"context"
 	"github.com/remorses/mongoke/src"
 	"sync"
 )
@@ -22,7 +23,7 @@ var _ mongoke.DatabaseInterface = &DatabaseInterfaceMock{}
 //
 //         // make and configure a mocked mongoke.DatabaseInterface
 //         mockedDatabaseInterface := &DatabaseInterfaceMock{
-//             FindManyFunc: func(p mongoke.FindManyParams) ([]mongoke.Map, error) {
+//             FindManyFunc: func(ctx context.Context, p mongoke.FindManyParams) ([]mongoke.Map, error) {
 // 	               panic("mock out the FindMany method")
 //             },
 //         }
@@ -33,12 +34,14 @@ var _ mongoke.DatabaseInterface = &DatabaseInterfaceMock{}
 //     }
 type DatabaseInterfaceMock struct {
 	// FindManyFunc mocks the FindMany method.
-	FindManyFunc func(p mongoke.FindManyParams) ([]mongoke.Map, error)
+	FindManyFunc func(ctx context.Context, p mongoke.FindManyParams) ([]mongoke.Map, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
 		// FindMany holds details about calls to the FindMany method.
 		FindMany []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
 			// P is the p argument value.
 			P mongoke.FindManyParams
 		}
@@ -46,29 +49,33 @@ type DatabaseInterfaceMock struct {
 }
 
 // FindMany calls FindManyFunc.
-func (mock *DatabaseInterfaceMock) FindMany(p mongoke.FindManyParams) ([]mongoke.Map, error) {
+func (mock *DatabaseInterfaceMock) FindMany(ctx context.Context, p mongoke.FindManyParams) ([]mongoke.Map, error) {
 	if mock.FindManyFunc == nil {
 		panic("DatabaseInterfaceMock.FindManyFunc: method is nil but DatabaseInterface.FindMany was just called")
 	}
 	callInfo := struct {
-		P mongoke.FindManyParams
+		Ctx context.Context
+		P   mongoke.FindManyParams
 	}{
-		P: p,
+		Ctx: ctx,
+		P:   p,
 	}
 	lockDatabaseInterfaceMockFindMany.Lock()
 	mock.calls.FindMany = append(mock.calls.FindMany, callInfo)
 	lockDatabaseInterfaceMockFindMany.Unlock()
-	return mock.FindManyFunc(p)
+	return mock.FindManyFunc(ctx, p)
 }
 
 // FindManyCalls gets all the calls that were made to FindMany.
 // Check the length with:
 //     len(mockedDatabaseInterface.FindManyCalls())
 func (mock *DatabaseInterfaceMock) FindManyCalls() []struct {
-	P mongoke.FindManyParams
+	Ctx context.Context
+	P   mongoke.FindManyParams
 } {
 	var calls []struct {
-		P mongoke.FindManyParams
+		Ctx context.Context
+		P   mongoke.FindManyParams
 	}
 	lockDatabaseInterfaceMockFindMany.RLock()
 	calls = mock.calls.FindMany

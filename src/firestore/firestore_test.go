@@ -105,7 +105,7 @@ func TestFindMany(t *testing.T) {
 
 	// clear and insert some docs
 	m := FirestoreDatabaseFunctions{}
-	db, err := m.Init(testutil.FIRESTORE_PROJECT_ID)
+	db, err := m.Init(ctx, testutil.FIRESTORE_PROJECT_ID)
 	if err != nil {
 		t.Error(err)
 	}
@@ -118,7 +118,7 @@ func TestFindMany(t *testing.T) {
 					t.Error(err)
 				}
 			}
-			result, err := m.FindMany(c.params)
+			result, err := m.FindMany(ctx, c.params)
 			if err != nil {
 				t.Error(err)
 			}

@@ -167,18 +167,19 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 	for _, testCase := range cases {
 		t.Run(testCase.Name, func(t *testing.T) {
 			t.Log()
+			ctx := context.Background()
 			// t.Log(testCase.Name)
 			schema, err := MakeMongokeSchema(testCase.Config)
 			if err != nil {
 				t.Error(err)
 			}
 			m := mongodb.MongodbDatabaseFunctions{}
-			db, err := m.InitMongo(testutil.MONGODB_URI)
+			db, err := m.Init(ctx, testutil.MONGODB_URI)
 			if err != nil {
 				t.Error(err)
 			}
 			// clear
-			_, err = db.Collection(collection).DeleteMany(context.TODO(), mongoke.Map{})
+			_, err = db.Collection(collection).DeleteMany(ctx, mongoke.Map{})
 			if err != nil {
 				t.Error(err)
 			}
@@ -186,7 +187,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 				t.Error(err)
 			}
 			for _, user := range exampleUsers {
-				_, err := db.Collection(collection).InsertOne(context.TODO(), user)
+				_, err := db.Collection(collection).InsertOne(ctx, user)
 				if err != nil {
 					t.Error(err)
 				}
@@ -206,7 +207,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			if diff := deep.Equal(res, expected); diff != nil {
 				t.Error(diff)
 			}
-			_, err = db.Collection(collection).DeleteMany(context.Background(), mongoke.Map{})
+			_, err = db.Collection(collection).DeleteMany(ctx, mongoke.Map{})
 		})
 	}
 
