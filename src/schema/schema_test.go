@@ -86,6 +86,20 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			`,
 		},
 		{
+			Name:     "findOne query with eq objectId",
+			Config:   config,
+			Expected: mongoke.Map{"User": exampleUsers[0]},
+			Query: `
+			{
+				User(where: {_id: {eq: "000000000000000000000000"}}) {
+					_id
+					age
+					name
+				}
+			}
+			`,
+		},
+		{
 			Name:     "findMany query without args",
 			Config:   config,
 			Expected: mongoke.Map{"UserNodes": mongoke.Map{"nodes": exampleUsers}},
