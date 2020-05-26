@@ -205,6 +205,28 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			}
 			`,
 		},
+		{
+			Name:   "findMany query with ObjectId cursorField",
+			Config: config,
+			Expected: mongoke.Map{"UserNodes": mongoke.Map{
+				"nodes":    exampleUsers[:2],
+				"pageInfo": mongoke.Map{"endCursor": exampleUsers[1]["_id"].(primitive.ObjectID).Hex()},
+			}},
+			Query: `
+			{
+				UserNodes(first: 2, direction: ASC) {
+					nodes {
+						_id
+						name
+						age
+					}
+					pageInfo {
+						endCursor
+					}
+				}
+			}
+			`,
+		},
 	}
 
 	for _, testCase := range cases {
