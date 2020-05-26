@@ -2,12 +2,14 @@ package schema
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/go-test/deep"
 	mongoke "github.com/remorses/mongoke/src"
 	"github.com/remorses/mongoke/src/mongodb"
 	"github.com/remorses/mongoke/src/testutil"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var (
@@ -21,6 +23,13 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 		{"name": "01", "age": 1},
 		{"name": "02", "age": 2},
 		{"name": "03", "age": 3},
+	}
+	for i, u := range exampleUsers {
+		id, err := primitive.ObjectIDFromHex("00000000000000000000000" + fmt.Sprintf("%d", i))
+		if err != nil {
+			t.Error(err)
+		}
+		u["_id"] = id
 	}
 	exampleUser := exampleUsers[2]
 	config := mongoke.Config{
@@ -59,6 +68,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 				User {
 					name
 					age
+					_id
 				}
 			}
 			`,
@@ -83,6 +93,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			{
 				UserNodes(direction: ASC) {
 					nodes {
+						_id
 						name
 						age
 					}
@@ -98,6 +109,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			{
 				UserNodes(first: 2, direction: ASC) {
 					nodes {
+						_id
 						name
 						age
 					}
@@ -113,6 +125,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			{
 				UserNodes(last: 2, direction: ASC) {
 					nodes {
+						_id
 						name
 						age
 					}
@@ -131,6 +144,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			{
 				UserNodes(first: 2, cursorField: name, direction: ASC) {
 					nodes {
+						_id
 						name
 						age
 					}
@@ -152,6 +166,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			{
 				UserNodes(first: 2, cursorField: age, direction: ASC) {
 					nodes {
+						_id
 						name
 						age
 					}
