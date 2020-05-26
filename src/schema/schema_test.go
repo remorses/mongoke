@@ -116,6 +116,20 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			`,
 		},
 		{
+			Name:     "findMany with list",
+			Config:   config,
+			Expected: mongoke.Map{"UserList": exampleUsers},
+			Query: `
+			{
+				UserList {
+					_id
+					name
+					age
+				}
+			}
+			`,
+		},
+		{
 			Name:     "findMany query with first",
 			Config:   config,
 			Expected: mongoke.Map{"UserNodes": mongoke.Map{"nodes": exampleUsers[:2]}},
