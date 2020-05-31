@@ -155,7 +155,7 @@ func makeQuery(Config mongoke.Config, baseSchemaConfig graphql.SchemaConfig) (*g
 
 		typeConf := Config.GetTypeConfig(gqlType.Name())
 
-		if typeConf == nil || (typeConf.Exposed != nil && !*typeConf.Exposed) {
+		if unexposedType(typeConf) {
 			println("ignoring not exposed type " + gqlType.Name())
 			continue
 		}
@@ -191,6 +191,10 @@ func makeQuery(Config mongoke.Config, baseSchemaConfig graphql.SchemaConfig) (*g
 	return query, nil
 }
 
+func unexposedType(typeConf *mongoke.TypeConfig) bool {
+	return typeConf == nil || (typeConf.Exposed != nil && !*typeConf.Exposed)
+}
+
 func makeMutation(Config mongoke.Config, baseSchemaConfig graphql.SchemaConfig) (*graphql.Object, error) {
 	mutationFields := graphql.Fields{}
 	for _, gqlType := range baseSchemaConfig.Types {
@@ -201,12 +205,24 @@ func makeMutation(Config mongoke.Config, baseSchemaConfig graphql.SchemaConfig) 
 		default:
 			continue
 		}
-		mutationFields["putSome"+object.Name()] = &graphql.Field{
-			Type: object,
-			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return "world", nil
-			},
+		typeConf := Config.GetTypeConfig(gqlType.Name())
+
+		if unexposedType(typeConf) {
+			println("ignoring not exposed type " + gqlType.Name())
+			continue
 		}
+		p := fields.CreateFieldParams{
+			Config:       Config,
+			ReturnType:   object,
+			Permissions:  typeConf.Permissions,
+			Collection:   typeConf.Collection,
+			SchemaConfig: baseSchemaConfig,
+		}
+		insertOne, err := fields.MutationInsertOne(p)
+		if err != nil {
+			return nil, err
+		}
+		mutationFields["insertOne"+object.Name()] = insertOne
 	}
 	mutation := graphql.NewObject(graphql.ObjectConfig{Name: "Mutation", Fields: mutationFields})
 	return mutation, nil
