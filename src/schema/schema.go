@@ -223,13 +223,19 @@ func makeMutation(Config mongoke.Config, baseSchemaConfig graphql.SchemaConfig) 
 		if err != nil {
 			return nil, err
 		}
-		mutationFields["insertOne"+object.Name()] = insertOne
+		mutationFields["insert"+object.Name()] = insertOne
 		// insertMany
 		insertNodes, err := fields.MutationInsertNodes(p)
 		if err != nil {
 			return nil, err
 		}
 		mutationFields["insert"+object.Name()+"Nodes"] = insertNodes
+		// updateOne
+		updateOne, err := fields.MutationUpdateOne(p)
+		if err != nil {
+			return nil, err
+		}
+		mutationFields["update"+object.Name()] = updateOne
 	}
 	mutation := graphql.NewObject(graphql.ObjectConfig{Name: "Mutation", Fields: mutationFields})
 	return mutation, nil
