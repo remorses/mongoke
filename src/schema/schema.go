@@ -50,14 +50,12 @@ func MakeMongokeSchema(config mongoke.Config) (graphql.Schema, error) {
 	} else if config.Firestore.ProjectID != "" {
 		config.DatabaseUri = config.Firestore.ProjectID // TODO firestore project id is not really a database uri
 		config.DatabaseFunctions = firestore.FirestoreDatabaseFunctions{}
-	} else {
+	}
+
+	if config.DatabaseFunctions == nil { // by default use local fake data
 		println("using local fake data source")
 		config.DatabaseUri = ""
 		config.DatabaseFunctions = fakedata.FakeDatabaseFunctions{Config: config}
-	}
-
-	if config.DatabaseFunctions == nil {
-		return graphql.Schema{}, errors.New("missing database implementation")
 	}
 
 	schemaConfig, err := makeSchemaConfig(config)
