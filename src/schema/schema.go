@@ -58,11 +58,7 @@ func MakeMongokeSchema(config mongoke.Config) (graphql.Schema, error) {
 		config.DatabaseFunctions = &fakedata.FakeDatabaseFunctions{Config: config}
 	}
 
-	schemaConfig, err := makeSchemaConfig(config)
-	if err != nil {
-		return graphql.Schema{}, err
-	}
-	schema, err := generateSchema(config, schemaConfig)
+	schema, err := generateSchema(config)
 	if err != nil {
 		return schema, err
 	}
@@ -89,7 +85,7 @@ func makeSchemaConfig(config mongoke.Config) (graphql.SchemaConfig, error) {
 		resolvers[name] = &tools.ObjectResolver{
 			IsTypeOf: func(p graphql.IsTypeOfParams) bool {
 				res, err := eval(context.Background(), mongoke.Map{
-					"x":        p.Value,
+					"x":        p.Value, // TODO add more variables to isTypeOf expressions
 					"document": p.Value,
 				})
 				if err != nil {
@@ -113,15 +109,45 @@ func makeSchemaConfig(config mongoke.Config) (graphql.SchemaConfig, error) {
 	return baseSchemaConfig, err
 }
 
-func generateSchema(Config mongoke.Config, baseSchemaConfig graphql.SchemaConfig) (graphql.Schema, error) {
-	queryFields := graphql.Fields{}
-	mutationFields := graphql.Fields{}
-
+func generateSchema(config mongoke.Config) (graphql.Schema, error) {
+	baseSchemaConfig, err := makeSchemaConfig(config)
+	if err != nil {
+		return graphql.Schema{}, err
+	}
 	// add fields
+	query, err := makeQuery(config, baseSchemaConfig)
+	if err != nil {
+		return graphql.Schema{}, err
+	}
+	mutation, err := makeMutation(config, baseSchemaConfig)
+	if err != nil {
+		return graphql.Schema{}, err
+	}
+	err = addRelationsFields(config, baseSchemaConfig)
+	if err != nil {
+		return graphql.Schema{}, err
+	}
+
+	schema, err := graphql.NewSchema(
+		graphql.SchemaConfig{
+			Types:      baseSchemaConfig.Types,
+			Extensions: baseSchemaConfig.Extensions,
+			Query:      query,
+			Mutation:   mutation,
+		},
+	)
+	if err != nil {
+		return graphql.Schema{}, err
+	}
+	return schema, nil
+}
+
+func makeQuery(Config mongoke.Config, baseSchemaConfig graphql.SchemaConfig) (*graphql.Object, error) {
+	queryFields := graphql.Fields{}
 	for _, gqlType := range baseSchemaConfig.Types {
 		var object graphql.Type
 		switch v := gqlType.(type) {
-		case *graphql.Object, *graphql.Union:
+		case *graphql.Object, *graphql.Union, *graphql.Interface:
 			object = v
 		default:
 			continue
@@ -135,7 +161,7 @@ func generateSchema(Config mongoke.Config, baseSchemaConfig graphql.SchemaConfig
 		}
 
 		if typeConf.Collection == "" {
-			return graphql.Schema{}, errors.New("no collection given for type " + gqlType.Name())
+			return nil, errors.New("no collection given for type " + gqlType.Name())
 		}
 		p := fields.CreateFieldParams{
 			Config:       Config,
@@ -146,21 +172,35 @@ func generateSchema(Config mongoke.Config, baseSchemaConfig graphql.SchemaConfig
 		}
 		findOne, err := fields.QueryTypeField(p)
 		if err != nil {
-			return graphql.Schema{}, err
+			return nil, err
 		}
 		queryFields[object.Name()] = findOne
 		typeNodes, err := fields.QueryTypeNodesField(p)
 		if err != nil {
-			return graphql.Schema{}, err
+			return nil, err
 		}
 		queryFields[object.Name()+"Nodes"] = typeNodes
 		typeList, err := fields.QueryTypeListField(p)
 		if err != nil {
-			return graphql.Schema{}, err
+			return nil, err
 		}
 		queryFields[object.Name()+"List"] = typeList
 
-		// TODO add mutaiton fields
+	}
+	query := graphql.NewObject(graphql.ObjectConfig{Name: "Query", Fields: queryFields})
+	return query, nil
+}
+
+func makeMutation(Config mongoke.Config, baseSchemaConfig graphql.SchemaConfig) (*graphql.Object, error) {
+	mutationFields := graphql.Fields{}
+	for _, gqlType := range baseSchemaConfig.Types {
+		var object graphql.Type
+		switch v := gqlType.(type) {
+		case *graphql.Object, *graphql.Union, *graphql.Interface:
+			object = v
+		default:
+			continue
+		}
 		mutationFields["putSome"+object.Name()] = &graphql.Field{
 			Type: object,
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
@@ -168,27 +208,31 @@ func generateSchema(Config mongoke.Config, baseSchemaConfig graphql.SchemaConfig
 			},
 		}
 	}
+	mutation := graphql.NewObject(graphql.ObjectConfig{Name: "Mutation", Fields: mutationFields})
+	return mutation, nil
+}
 
+func addRelationsFields(Config mongoke.Config, baseSchemaConfig graphql.SchemaConfig) error {
 	// add relations
 	for _, relation := range Config.Relations {
 		if relation.Field == "" {
-			return graphql.Schema{}, errors.New("relation field is empty " + relation.From)
+			return errors.New("relation field is empty " + relation.From)
 		}
 		fromType := findType(baseSchemaConfig.Types, relation.From)
 		if fromType == nil {
-			return graphql.Schema{}, errors.New("cannot find relation `from` type " + relation.From)
+			return errors.New("cannot find relation `from` type " + relation.From)
 		}
 		returnType := findType(baseSchemaConfig.Types, relation.To)
 		if returnType == nil {
-			return graphql.Schema{}, errors.New("cannot find relation `to` type " + relation.To)
+			return errors.New("cannot find relation `to` type " + relation.To)
 		}
 		returnTypeConf := Config.GetTypeConfig(relation.To)
 		if returnTypeConf == nil {
-			return graphql.Schema{}, errors.New("cannot find type config for relation " + relation.Field)
+			return errors.New("cannot find type config for relation " + relation.Field)
 		}
 		object, ok := fromType.(*graphql.Object)
 		if !ok {
-			return graphql.Schema{}, errors.New("relation return type " + fromType.Name() + " is not an object")
+			return errors.New("relation return type " + fromType.Name() + " is not an object")
 		}
 		p := fields.CreateFieldParams{
 			Config:       Config,
@@ -202,32 +246,20 @@ func generateSchema(Config mongoke.Config, baseSchemaConfig graphql.SchemaConfig
 		if relation.RelationType == "to_many" {
 			field, err := fields.QueryTypeNodesField(p)
 			if err != nil {
-				return graphql.Schema{}, err
+				return err
 			}
 			object.AddFieldConfig(relation.Field, field)
 		} else if relation.RelationType == "to_one" {
 			field, err := fields.QueryTypeField(p)
 			if err != nil {
-				return graphql.Schema{}, err
+				return err
 			}
 			object.AddFieldConfig(relation.Field, field)
 		} else {
-			return graphql.Schema{}, errors.New("relation_type must be `to_many` or `to_one`, got " + relation.RelationType)
+			return errors.New("relation_type must be `to_many` or `to_one`, got " + relation.RelationType)
 		}
 	}
-
-	schema, err := graphql.NewSchema(
-		graphql.SchemaConfig{
-			Types:      baseSchemaConfig.Types,
-			Extensions: baseSchemaConfig.Extensions,
-			Query:      graphql.NewObject(graphql.ObjectConfig{Name: "Query", Fields: queryFields}),
-			Mutation:   graphql.NewObject(graphql.ObjectConfig{Name: "Mutation", Fields: mutationFields}),
-		},
-	)
-	if err != nil {
-		return graphql.Schema{}, err
-	}
-	return schema, nil
+	return nil
 }
 
 func findType(a []graphql.Type, name string) graphql.Type {
