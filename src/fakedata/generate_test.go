@@ -118,6 +118,16 @@ func TestGenerate(t *testing.T) {
 				"age",
 			},
 		},
+		"missing type": {
+			typeName: "XXX",
+			typeDefs: `
+				interface User {
+					name: String
+					age: Int
+				}
+			`,
+			expectedError: "cannot find ast node for XXX",
+		},
 	}
 	for name, test := range tests {
 
@@ -130,6 +140,14 @@ func TestGenerate(t *testing.T) {
 			}
 			x, err := fakeData.Generate(test.typeName)
 			if err != nil {
+				if test.expectedError != "" {
+					// t.Log(err)
+					if test.expectedError != err.Error() {
+						t.Error("expected error `" + test.expectedError + "`, got `" + err.Error() + "`")
+					} else {
+						return
+					}
+				}
 				t.Error(err)
 			}
 			json := testutil.Pretty(x)
