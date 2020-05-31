@@ -58,6 +58,7 @@ func GetTypeFields(object graphql.Type) graphql.FieldDefinitionMap {
 			}
 		}
 		return fieldMap
+	// TODO return interface fields
 	default:
 		return graphql.FieldDefinitionMap{}
 	}

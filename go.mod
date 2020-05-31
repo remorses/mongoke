@@ -5,17 +5,19 @@ go 1.13
 require (
 	cloud.google.com/go/firestore v1.2.0
 	cloud.google.com/go/storage v1.8.0 // indirect
-	firebase.google.com/go v3.12.1+incompatible
+	firebase.google.com/go v3.12.1+incompatible // indirect
 	github.com/256dpi/lungo v0.2.5
 	github.com/PaesslerAG/gval v1.0.1
 	github.com/caarlos0/env v3.5.0+incompatible
 	github.com/caarlos0/env/v6 v6.2.2 // indirect
+	github.com/corpix/uarand v0.1.1 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-test/deep v1.0.6
 	github.com/gorilla/mux v1.7.4
 	github.com/graphql-go/graphql v0.7.9
 	github.com/graphql-go/handler v0.2.3
+	github.com/icrowley/fake v0.0.0-20180203215853-4178557ae428
 	github.com/imdario/mergo v0.3.9
 	github.com/kofalt/go-memoize v0.0.0-20190519021333-cf756f0462a4
 	github.com/lestrrat-go/jwx v1.0.2
