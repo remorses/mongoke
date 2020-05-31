@@ -51,6 +51,8 @@ func GetTypeFields(object graphql.Type) graphql.FieldDefinitionMap {
 	switch v := object.(type) {
 	case *graphql.Object:
 		return v.Fields()
+	case *graphql.Interface:
+		return v.Fields()
 	case *graphql.Union:
 		for _, t := range v.Types() {
 			for k, field := range t.Fields() {
@@ -58,7 +60,6 @@ func GetTypeFields(object graphql.Type) graphql.FieldDefinitionMap {
 			}
 		}
 		return fieldMap
-	// TODO return interface fields
 	default:
 		return graphql.FieldDefinitionMap{}
 	}
