@@ -2,34 +2,33 @@ name: Publish Docker
 on:
   push:
     branches:
-      - master
+      - golang
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/setup-go@v2
     - uses: actions/checkout@master
+    - run: go mod download
+    - run: docker-compose up -d
+    - run: make test
     - name: Bump version
       uses: remorses/bump-version@js
       with:
         version_file: VERSION
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Publish to Dockerhub
-      uses: elgohr/Publish-Docker-Github-Action@master
-      with:
-        name: mongoke/mongoke
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-    - name: Publish to Dockerhub
-      uses: elgohr/Publish-Docker-Github-Action@master
-      with:
-        name: containerful/mongoke
-        registry: gcr.io
-        username: _json_key
-        password: ${{ secrets.GCP_KEY_JSON }}
-    - name: Publish to Pypi
-      uses: remorses/pypi@master
-      with:
-        username: ${{ secrets.pypi_username }}
-        password: ${{ secrets.pypi_password }}
+    # - name: Publish to Dockerhub
+    #   uses: elgohr/Publish-Docker-Github-Action@master
+    #   with:
+    #     name: mongoke/mongoke
+    #     username: ${{ secrets.DOCKER_USERNAME }}
+    #     password: ${{ secrets.DOCKER_PASSWORD }}
+    # - name: Publish to Dockerhub
+    #   uses: elgohr/Publish-Docker-Github-Action@master
+    #   with:
+    #     name: containerful/mongoke
+    #     registry: gcr.io
+    #     username: _json_key
+    #     password: ${{ secrets.GCP_KEY_JSON }}
