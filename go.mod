@@ -6,6 +6,7 @@ require (
 	cloud.google.com/go/firestore v1.2.0
 	cloud.google.com/go/storage v1.8.0 // indirect
 	firebase.google.com/go v3.12.1+incompatible
+	github.com/256dpi/lungo v0.2.5
 	github.com/PaesslerAG/gval v1.0.1
 	github.com/caarlos0/env v3.5.0+incompatible
 	github.com/caarlos0/env/v6 v6.2.2 // indirect
