@@ -1,6 +1,7 @@
 package fields
 
 import (
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/graphql-go/graphql"
 	mongoke "github.com/remorses/mongoke/src"
 	"github.com/remorses/mongoke/src/types"
@@ -47,4 +48,21 @@ func getDefaultCursorField(object graphql.Type, scalarTypes []string) string {
 		return scalarNames[0]
 	}
 	return ""
+}
+
+func getJwt(params graphql.ResolveParams) jwt.MapClaims {
+	root := params.Info.RootValue
+	rootMap, ok := root.(mongoke.Map)
+	if !ok {
+		return jwt.MapClaims{}
+	}
+	v, ok := rootMap["jwt"]
+	if !ok {
+		return jwt.MapClaims{}
+	}
+	jwtMap, ok := v.(jwt.MapClaims)
+	if !ok {
+		return jwt.MapClaims{}
+	}
+	return jwtMap
 }

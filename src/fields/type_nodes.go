@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 
-	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/graphql-go/graphql"
 	"github.com/imdario/mergo"
 	"github.com/mitchellh/mapstructure"
@@ -201,23 +200,6 @@ func makeEdges(nodes []mongoke.Map, cursorField string) []edge {
 		})
 	}
 	return edges
-}
-
-func getJwt(params graphql.ResolveParams) jwt.MapClaims {
-	root := params.Info.RootValue
-	rootMap, ok := root.(mongoke.Map)
-	if !ok {
-		return jwt.MapClaims{}
-	}
-	v, ok := rootMap["jwt"]
-	if !ok {
-		return jwt.MapClaims{}
-	}
-	jwtMap, ok := v.(jwt.MapClaims)
-	if !ok {
-		return jwt.MapClaims{}
-	}
-	return jwtMap
 }
 
 const (
