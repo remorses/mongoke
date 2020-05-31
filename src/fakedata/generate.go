@@ -132,7 +132,7 @@ func (self *FakeData) Generate(name string) (interface{}, error) {
 		dest := make(map[string]interface{})
 		fields := self.getNodeFields(definition)
 		for _, field := range fields {
-			generated, err := self.generateField(field.Type)
+			generated, err := self.generateField(field.Type) // TODO customize the fields type of generated data via filed names
 			if err != nil {
 				return nil, err
 			}
