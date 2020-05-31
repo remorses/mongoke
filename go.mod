@@ -23,6 +23,7 @@ require (
 	github.com/kofalt/go-memoize v0.0.0-20190519021333-cf756f0462a4
 	github.com/lestrrat-go/jwx v1.0.2
 	github.com/mitchellh/mapstructure v1.3.0
+	github.com/pkg/errors v0.9.1
 	github.com/remorses/graphql-go-tools v0.0.0-20200511111635-5c318a54190b
 	github.com/stretchr/testify v1.5.1
 	github.com/urfave/cli/v2 v2.2.0

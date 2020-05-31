@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/256dpi/lungo"
+	"github.com/pkg/errors"
 	mongoke "github.com/remorses/mongoke/src"
 	"github.com/remorses/mongoke/src/testutil"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -18,7 +19,9 @@ const (
 
 type FakeDatabaseFunctions struct {
 	mongoke.DatabaseInterface
-	db lungo.IDatabase
+	Config             mongoke.Config
+	skipDataGeneration bool
+	db                 lungo.IDatabase
 }
 
 func (self FakeDatabaseFunctions) FindMany(ctx context.Context, p mongoke.FindManyParams) ([]mongoke.Map, error) {
@@ -66,5 +69,38 @@ func (self *FakeDatabaseFunctions) Init(ctx context.Context, uri string) (lungo.
 	// get db
 	db := client.Database("default")
 	self.db = db
+
+	if self.skipDataGeneration {
+		return db, nil
+	}
+
+	err = self.generateFakeData(self.Config)
+	if err != nil {
+		return nil, errors.Wrap(err, "Error generating fake data")
+	}
 	return db, nil
+}
+
+func (self FakeDatabaseFunctions) generateFakeData(config mongoke.Config) error {
+	println("generating fake data")
+	faker, err := NewFakeData(NewFakeDataParams{typeDefs: config.Schema})
+	if err != nil {
+		return err
+	}
+	documentsPerCollection := config.FakeDatabase.DocumentsPerCollection
+	if documentsPerCollection == 0 {
+		documentsPerCollection = 50
+	}
+	for name, t := range config.Types {
+		var docs []interface{}
+		for i := 0; i < documentsPerCollection; i++ {
+			data, err := faker.Generate(name)
+			if err != nil {
+				return err
+			}
+			docs = append(docs, data)
+		}
+		self.db.Collection(t.Collection).InsertMany(context.Background(), docs)
+	}
+	return nil
 }

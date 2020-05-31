@@ -37,6 +37,7 @@ var (
 type Config struct {
 	DatabaseUri       string
 	Mongodb           MongodbConfig          `json:"mongodb"`
+	FakeDatabase      FakeDatabaseConfig     `json:"fake_database"`
 	Firestore         FirestoreConfig        `json:"firestore"`
 	DisableGraphiql   bool                   `json:"disable_graphiql" env:"DISABLE_GRAPHIQL"`
 	Schema            string                 `json:"schema"`
@@ -51,6 +52,10 @@ type Config struct {
 
 type MongodbConfig struct {
 	Uri string `json:"uri" env:"MONGODB_URL"`
+}
+
+type FakeDatabaseConfig struct {
+	DocumentsPerCollection int `json: "documents_per_collection"`
 }
 
 type FirestoreConfig struct {

@@ -90,7 +90,7 @@ func TestFindMany(t *testing.T) {
 	}
 
 	// clear and insert some docs
-	m := FakeDatabaseFunctions{}
+	m := FakeDatabaseFunctions{skipDataGeneration: true}
 	db, err := m.Init(ctx, uri)
 	if err != nil {
 		t.Error(err)

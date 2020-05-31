@@ -78,6 +78,10 @@ func NewFakeData(p NewFakeDataParams) (*FakeData, error) {
 	}
 
 	for _, definition := range document.Definitions {
+		// dont overwrite existing scalars
+		if instance.nodes[getNodeName(definition)] != nil {
+			continue
+		}
 		instance.nodes[getNodeName(definition)] = definition
 	}
 
@@ -93,7 +97,7 @@ func (self *FakeData) Generate(name string) (interface{}, error) {
 
 	// custom scalars kinds
 	case dateTimeKind:
-		return randate(), nil
+		return randomDate(), nil
 	case idKind:
 		return fake.DigitsN(10), nil
 	case objectIdKind:
@@ -108,9 +112,13 @@ func (self *FakeData) Generate(name string) (interface{}, error) {
 	case kinds.BooleanValue:
 		return rand.Intn(2) == 0, nil
 	case kinds.ScalarDefinition:
-		node := definition.(*ast.ScalarDefinition) // TODO take scalar to type mapping from options
-		print("scalar kind", node.Kind)
 		return nil, nil
+		node := definition.(*ast.ScalarDefinition) // TODO take scalar to type mapping from options
+		res, err := self.Generate(node.Name.Value)
+		if err != nil {
+			println("error for " + node.Name.Value + " " + err.Error())
+		}
+		return res, nil
 	case kinds.EnumDefinition:
 		node := definition.(*ast.EnumDefinition)
 		randomIndex := rand.Intn(len(node.Values))
@@ -217,7 +225,7 @@ func (self FakeData) getNodeFields(object ast.Node) []*ast.FieldDefinition {
 	}
 }
 
-func randate() time.Time {
+func randomDate() time.Time {
 	min := time.Date(2018, 1, 0, 0, 0, 0, 0, time.UTC).Unix()
 	max := time.Date(2025, 1, 0, 0, 0, 0, 0, time.UTC).Unix()
 	delta := max - min

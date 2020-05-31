@@ -56,6 +56,14 @@ var jsonSchemaString = `
 						}
 					}
 				},
+				"fake_database": {
+					"type": "object",
+					"properties": {
+						"documents_per_collection": {
+							"type": "number"
+						}
+					}
+				},
 				"firestore": {
 					"type": "object",
 					"properties": {

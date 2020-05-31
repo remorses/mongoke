@@ -10,6 +10,7 @@ import (
 	"github.com/graphql-go/graphql"
 	tools "github.com/remorses/graphql-go-tools"
 	mongoke "github.com/remorses/mongoke/src"
+	"github.com/remorses/mongoke/src/fakedata"
 	"github.com/remorses/mongoke/src/fields"
 	"github.com/remorses/mongoke/src/firestore"
 	"github.com/remorses/mongoke/src/mongodb"
@@ -49,6 +50,10 @@ func MakeMongokeSchema(config mongoke.Config) (graphql.Schema, error) {
 	} else if config.Firestore.ProjectID != "" {
 		config.DatabaseUri = config.Firestore.ProjectID // TODO firestore project id is not really a database uri
 		config.DatabaseFunctions = firestore.FirestoreDatabaseFunctions{}
+	} else {
+		println("using local fake data source")
+		config.DatabaseUri = ""
+		config.DatabaseFunctions = fakedata.FakeDatabaseFunctions{Config: config}
 	}
 
 	if config.DatabaseFunctions == nil {
