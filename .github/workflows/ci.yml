@@ -6,19 +6,35 @@ on:
 
 jobs:
   build:
+    services:
+      mongo:
+        ports:
+          - 27017:27017
+        image: mvertes/alpine-mongo
+        logging:
+          driver: "none"
+
+      firestore:
+        image: ridedott/firestore-emulator
+        init: true
+        ports:
+          - 8080:8080
+        environment:
+          - FIRESTORE_PROJECT_ID=project-test
+
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/setup-go@v2
-    - uses: actions/checkout@master
-    - run: go mod download
-    - run: docker-compose up -d
-    - run: make test
-    - name: Bump version
-      uses: remorses/bump-version@js
-      with:
-        version_file: VERSION
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-go@v2
+      - uses: actions/checkout@master
+      - run: go mod download
+      - run: docker-compose up -d
+      - run: make test
+      - name: Bump version
+        uses: remorses/bump-version@js
+        with:
+          version_file: VERSION
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     # - name: Publish to Dockerhub
     #   uses: elgohr/Publish-Docker-Github-Action@master
     #   with:
