@@ -22,7 +22,6 @@ jobs:
       - uses: actions/setup-go@v2
       - uses: actions/checkout@master
       - run: go mod download
-      - run: docker-compose up -d
       - run: make test
       - name: Bump version
         uses: remorses/bump-version@js
