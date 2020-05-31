@@ -14,7 +14,7 @@ insertOneUser(data: {name: "xxx"}) {
 
 */
 
-func MutationInsertOne(p CreateFieldParams) (*graphql.Field, error) {
+func MutationInsertNodes(p CreateFieldParams) (*graphql.Field, error) {
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		// TODO implement resolver
 		return nil, nil
@@ -25,10 +25,12 @@ func MutationInsertOne(p CreateFieldParams) (*graphql.Field, error) {
 	// }
 	args := graphql.FieldConfigArgument{}
 	args["data"] = &graphql.ArgumentConfig{
-		Type: types.TransformToInput(p.Config.Cache, p.ReturnType),
+		Type: graphql.NewNonNull(
+			graphql.NewList(types.TransformToInput(p.Config.Cache, p.ReturnType)),
+		),
 	}
 	field := graphql.Field{
-		Type:    p.ReturnType,
+		Type:    graphql.NewList(p.ReturnType),
 		Args:    args,
 		Resolve: resolver,
 	}

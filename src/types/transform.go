@@ -1,21 +1,32 @@
 package types
 
-import "github.com/graphql-go/graphql"
+import (
+	"github.com/graphql-go/graphql"
+	mongoke "github.com/remorses/mongoke/src"
+)
 
-func TransformToInput(t graphql.Type) graphql.Type {
+func TransformToInput(cache mongoke.Map, t graphql.Type) graphql.Type {
 	switch t.(type) {
 	case *graphql.Object:
-		return objectToInputObject(t.(*graphql.Object))
+		return objectToInputObject(cache, t.(*graphql.Object))
 	} // TODO transform unions to input objects
 	return t
 }
 
-func objectToInputObject(object *graphql.Object) *graphql.InputObject {
+func makeObjectInputName(t graphql.Type) string {
+	return t.Name() + "Input"
+}
+
+func objectToInputObject(cache mongoke.Map, object *graphql.Object) *graphql.InputObject {
+	name := makeObjectInputName(object)
+	if item, ok := cache[name].(*graphql.InputObject); ok {
+		return item
+	}
 	fields := graphql.InputObjectConfigFieldMap{}
 	for _, field := range object.Fields() {
 		t := field.Type
 		if v, ok := t.(*graphql.Object); ok {
-			t = objectToInputObject(v)
+			t = objectToInputObject(cache, v)
 		}
 		fields[field.Name] = &graphql.InputObjectFieldConfig{
 			Type:        t,
@@ -23,8 +34,10 @@ func objectToInputObject(object *graphql.Object) *graphql.InputObject {
 		}
 	}
 	config := graphql.InputObjectConfig{
-		Name:   object.Name() + "Input",
+		Name:   name,
 		Fields: fields,
 	}
-	return graphql.NewInputObject(config)
+	input := graphql.NewInputObject(config)
+	cache[name] = input
+	return input
 }
