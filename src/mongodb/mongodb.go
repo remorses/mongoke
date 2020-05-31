@@ -23,7 +23,7 @@ type MongodbDatabaseFunctions struct {
 	db *mongo.Database
 }
 
-func (self MongodbDatabaseFunctions) FindMany(ctx context.Context, p mongoke.FindManyParams) ([]mongoke.Map, error) {
+func (self *MongodbDatabaseFunctions) FindMany(ctx context.Context, p mongoke.FindManyParams) ([]mongoke.Map, error) {
 	db, err := self.Init(ctx, p.DatabaseUri)
 	if err != nil {
 		return nil, err

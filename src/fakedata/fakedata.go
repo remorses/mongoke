@@ -24,7 +24,7 @@ type FakeDatabaseFunctions struct {
 	db                 lungo.IDatabase
 }
 
-func (self FakeDatabaseFunctions) FindMany(ctx context.Context, p mongoke.FindManyParams) ([]mongoke.Map, error) {
+func (self *FakeDatabaseFunctions) FindMany(ctx context.Context, p mongoke.FindManyParams) ([]mongoke.Map, error) {
 	db, err := self.Init(ctx, p.DatabaseUri)
 	if err != nil {
 		return nil, err
@@ -55,6 +55,7 @@ func (self *FakeDatabaseFunctions) Init(ctx context.Context, uri string) (lungo.
 	if self.db != nil {
 		return self.db, nil
 	}
+	println("initializing fake data client")
 	opts := lungo.Options{
 		Store: lungo.NewMemoryStore(),
 	}

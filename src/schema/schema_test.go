@@ -45,7 +45,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			age: Int
 		}
 		`,
-		DatabaseFunctions: mongodb.MongodbDatabaseFunctions{},
+		DatabaseFunctions: &mongodb.MongodbDatabaseFunctions{},
 		DatabaseUri:       testutil.MONGODB_URI,
 		Types: map[string]*mongoke.TypeConfig{
 			"User": {Collection: "users"},
