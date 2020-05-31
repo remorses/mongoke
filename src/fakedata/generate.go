@@ -4,24 +4,37 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"time"
 
 	"github.com/graphql-go/graphql/language/ast"
 	"github.com/graphql-go/graphql/language/kinds"
 	"github.com/graphql-go/graphql/language/parser"
 	"github.com/graphql-go/graphql/language/source"
 	"github.com/icrowley/fake"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type FakeData struct {
-	nodes map[string]ast.Node
-
-	document *ast.Document
+	nodes          map[string]ast.Node
+	scalarsMapping map[string]string
+	document       *ast.Document
 }
 
-func NewFakeData(typeDefs string) (*FakeData, error) {
+type NewFakeDataParams struct {
+	typeDefs       string
+	scalarsMapping map[string]string
+}
+
+const (
+	dateTimeKind = "dateTimeKind"
+	idKind       = "idKind"
+	objectIdKind = "objectIdKind"
+)
+
+func NewFakeData(p NewFakeDataParams) (*FakeData, error) {
 	document, err := parser.Parse(parser.ParseParams{
 		Source: &source.Source{
-			Body: []byte(typeDefs),
+			Body: []byte(p.typeDefs),
 			Name: "GraphQL",
 		},
 	})
@@ -30,15 +43,38 @@ func NewFakeData(typeDefs string) (*FakeData, error) {
 	}
 
 	instance := &FakeData{
-		document: document,
+		document:       document,
+		scalarsMapping: p.scalarsMapping,
 		nodes: map[string]ast.Node{
-			"ID":      &ast.StringValue{},
-			"String":  &ast.StringValue{},
-			"Int":     &ast.IntValue{},
-			"Float":   &ast.FloatValue{},
-			"Boolean": &ast.BooleanValue{},
+			"ID": &ast.ScalarDefinition{
+				Kind: idKind,
+			},
+			"ObjectId": &ast.ScalarDefinition{
+				Kind: objectIdKind,
+			},
+			"DateTime": &ast.ScalarDefinition{
+				Kind: dateTimeKind,
+			},
+			"String": &ast.ScalarDefinition{
+				Kind: kinds.StringValue,
+			},
+			"Int": &ast.ScalarDefinition{
+				Kind: kinds.IntValue,
+			},
+			"Float": &ast.ScalarDefinition{
+				Kind: kinds.FloatValue,
+			},
+			"Boolean": &ast.ScalarDefinition{
+				Kind: kinds.BooleanValue,
+			},
 			// "DateTime": graphql.DateTime,
 		},
+	}
+
+	for scalarName, kind := range p.scalarsMapping {
+		instance.nodes[scalarName] = &ast.ScalarDefinition{
+			Kind: kind,
+		}
 	}
 
 	for _, definition := range document.Definitions {
@@ -51,9 +87,17 @@ func NewFakeData(typeDefs string) (*FakeData, error) {
 func (self *FakeData) Generate(name string) (interface{}, error) {
 	definition := self.getNode(name)
 	if definition == nil {
-		return nil, errors.New("cannot find node for " + name)
+		return nil, errors.New("cannot find ast node for " + name)
 	}
 	switch nodeKind := definition.GetKind(); nodeKind {
+
+	// custom scalars kinds
+	case dateTimeKind:
+		return randate(), nil
+	case idKind:
+		return fake.DigitsN(10), nil
+	case objectIdKind:
+		return primitive.NewObjectID(), nil
 
 	case kinds.StringValue:
 		return fake.FirstName(), nil
@@ -76,19 +120,20 @@ func (self *FakeData) Generate(name string) (interface{}, error) {
 			}
 		}
 
-	case kinds.ObjectDefinition, kinds.UnionDefinition: // TODO support for kinds.InterfaceDefinition
+	case kinds.ObjectDefinition, kinds.UnionDefinition, kinds.InterfaceDefinition:
 		dest := make(map[string]interface{})
 		fields := self.getNodeFields(definition)
 		for _, field := range fields {
 			generated, err := self.generateField(field.Type)
 			if err != nil {
-				fmt.Print(err)
-				continue
+				return nil, err
 			}
 			dest[field.Name.Value] = generated
 			// print(field.Type.String())
 		}
 		return dest, nil
+	default:
+		return nil, errors.New("kind " + nodeKind + " was not handled")
 	}
 	return nil, errors.New("kind " + definition.GetKind() + " was not handled")
 
@@ -154,6 +199,8 @@ func (self FakeData) getNodeFields(object ast.Node) []*ast.FieldDefinition {
 	switch v := object.(type) {
 	case *ast.ObjectDefinition:
 		return v.Fields
+	case *ast.InterfaceDefinition:
+		return v.Fields
 	case *ast.UnionDefinition:
 		var fields []*ast.FieldDefinition
 		for _, t := range v.Types {
@@ -162,11 +209,19 @@ func (self FakeData) getNodeFields(object ast.Node) []*ast.FieldDefinition {
 				print("cannot find union type for " + t.Name.Value)
 				continue
 			}
-			fields = append(fields, self.getNodeFields(node)...)
+			fields = append(fields, self.getNodeFields(node)...) // TODO union should choose between one of the types
 		}
 		return fields
-	// TODO return interface fields
 	default:
 		return make([]*ast.FieldDefinition, 0)
 	}
+}
+
+func randate() time.Time {
+	min := time.Date(2018, 1, 0, 0, 0, 0, 0, time.UTC).Unix()
+	max := time.Date(2025, 1, 0, 0, 0, 0, 0, time.UTC).Unix()
+	delta := max - min
+
+	sec := rand.Int63n(delta) + min
+	return time.Unix(sec, 0)
 }

@@ -8,6 +8,7 @@ require (
 	firebase.google.com/go v3.12.1+incompatible // indirect
 	github.com/256dpi/lungo v0.2.5
 	github.com/PaesslerAG/gval v1.0.1
+	github.com/buger/jsonparser v1.0.0
 	github.com/caarlos0/env v3.5.0+incompatible
 	github.com/caarlos0/env/v6 v6.2.2 // indirect
 	github.com/corpix/uarand v0.1.1 // indirect
