@@ -12,6 +12,7 @@ import (
 var (
 	lockDatabaseInterfaceMockFindMany   sync.RWMutex
 	lockDatabaseInterfaceMockInsertMany sync.RWMutex
+	lockDatabaseInterfaceMockUpdateMany sync.RWMutex
 	lockDatabaseInterfaceMockUpdateOne  sync.RWMutex
 )
 
@@ -31,7 +32,10 @@ var _ mongoke.DatabaseInterface = &DatabaseInterfaceMock{}
 //             InsertManyFunc: func(ctx context.Context, p mongoke.InsertManyParams) ([]mongoke.Map, error) {
 // 	               panic("mock out the InsertMany method")
 //             },
-//             UpdateOneFunc: func(ctx context.Context, p mongoke.UpdateOneParams) (mongoke.NodeMutationPayload, error) {
+//             UpdateManyFunc: func(ctx context.Context, p mongoke.UpdateParams) (mongoke.NodesMutationPayload, error) {
+// 	               panic("mock out the UpdateMany method")
+//             },
+//             UpdateOneFunc: func(ctx context.Context, p mongoke.UpdateParams) (mongoke.NodeMutationPayload, error) {
 // 	               panic("mock out the UpdateOne method")
 //             },
 //         }
@@ -46,6 +50,9 @@ type DatabaseInterfaceMock struct {
 
 	// InsertManyFunc mocks the InsertMany method.
 	InsertManyFunc func(ctx context.Context, p mongoke.InsertManyParams) ([]mongoke.Map, error)
+
+	// UpdateManyFunc mocks the UpdateMany method.
+	UpdateManyFunc func(ctx context.Context, p mongoke.UpdateParams) (mongoke.NodesMutationPayload, error)
 
 	// UpdateOneFunc mocks the UpdateOne method.
 	UpdateOneFunc func(ctx context.Context, p mongoke.UpdateParams) (mongoke.NodeMutationPayload, error)
@@ -65,6 +72,13 @@ type DatabaseInterfaceMock struct {
 			Ctx context.Context
 			// P is the p argument value.
 			P mongoke.InsertManyParams
+		}
+		// UpdateMany holds details about calls to the UpdateMany method.
+		UpdateMany []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// P is the p argument value.
+			P mongoke.UpdateParams
 		}
 		// UpdateOne holds details about calls to the UpdateOne method.
 		UpdateOne []struct {
@@ -143,6 +157,41 @@ func (mock *DatabaseInterfaceMock) InsertManyCalls() []struct {
 	lockDatabaseInterfaceMockInsertMany.RLock()
 	calls = mock.calls.InsertMany
 	lockDatabaseInterfaceMockInsertMany.RUnlock()
+	return calls
+}
+
+// UpdateMany calls UpdateManyFunc.
+func (mock *DatabaseInterfaceMock) UpdateMany(ctx context.Context, p mongoke.UpdateParams) (mongoke.NodesMutationPayload, error) {
+	if mock.UpdateManyFunc == nil {
+		panic("DatabaseInterfaceMock.UpdateManyFunc: method is nil but DatabaseInterface.UpdateMany was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+		P   mongoke.UpdateParams
+	}{
+		Ctx: ctx,
+		P:   p,
+	}
+	lockDatabaseInterfaceMockUpdateMany.Lock()
+	mock.calls.UpdateMany = append(mock.calls.UpdateMany, callInfo)
+	lockDatabaseInterfaceMockUpdateMany.Unlock()
+	return mock.UpdateManyFunc(ctx, p)
+}
+
+// UpdateManyCalls gets all the calls that were made to UpdateMany.
+// Check the length with:
+//     len(mockedDatabaseInterface.UpdateManyCalls())
+func (mock *DatabaseInterfaceMock) UpdateManyCalls() []struct {
+	Ctx context.Context
+	P   mongoke.UpdateParams
+} {
+	var calls []struct {
+		Ctx context.Context
+		P   mongoke.UpdateParams
+	}
+	lockDatabaseInterfaceMockUpdateMany.RLock()
+	calls = mock.calls.UpdateMany
+	lockDatabaseInterfaceMockUpdateMany.RUnlock()
 	return calls
 }
 
