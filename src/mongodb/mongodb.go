@@ -8,6 +8,7 @@ import (
 
 	mongoke "github.com/remorses/mongoke/src"
 	"github.com/remorses/mongoke/src/testutil"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/x/mongo/driver/connstring"
@@ -64,7 +65,7 @@ func (self *MongodbDatabaseFunctions) InsertMany(ctx context.Context, p mongoke.
 	opts := options.InsertMany()
 	opts.SetOrdered(true)
 	testutil.PrettyPrint(p)
-
+	// TODO stupid costly conversion
 	var data = make([]interface{}, len(p.Data))
 	for i, x := range p.Data {
 		data[i] = x
@@ -79,6 +80,36 @@ func (self *MongodbDatabaseFunctions) InsertMany(ctx context.Context, p mongoke.
 		p.Data[i]["_id"] = id
 	}
 	return p.Data, nil
+}
+
+func (self *MongodbDatabaseFunctions) UpdateOne(ctx context.Context, p mongoke.UpdateOneParams) (mongoke.NodeMutationPayload, error) {
+	db, err := self.Init(ctx)
+	if err != nil {
+		return mongoke.NodeMutationPayload{}, err
+	}
+	opts := options.FindOneAndUpdate()
+	opts.SetReturnDocument(options.After)
+	testutil.PrettyPrint(p)
+
+	res := db.Collection(p.Collection).FindOneAndUpdate(ctx, p.Where, bson.M{"$set": p.Set}, opts)
+	if res.Err() == mongo.ErrNoDocuments {
+		println("no docs to update")
+		return mongoke.NodeMutationPayload{
+			AffectedCount: 0,
+			Returning:     nil,
+		}, nil
+	} else if res.Err() != nil {
+		return mongoke.NodeMutationPayload{}, err
+	}
+	data := mongoke.Map{}
+	err = res.Decode(&data)
+	if err != nil {
+		return mongoke.NodeMutationPayload{}, err
+	}
+	return mongoke.NodeMutationPayload{
+		AffectedCount: 1,
+		Returning:     data,
+	}, nil
 }
 
 func (self *MongodbDatabaseFunctions) Init(ctx context.Context) (*mongo.Database, error) {

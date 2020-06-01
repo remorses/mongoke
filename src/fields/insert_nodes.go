@@ -26,7 +26,7 @@ func MutationInsertNodes(p CreateFieldParams) (*graphql.Field, error) {
 		if err != nil {
 			return nil, err
 		}
-		// TODO let insert only nodes the user can insert, based on expressions
+		// TODO insert only nodes the user can insert, based on expressions
 		nodes, err := p.Config.DatabaseFunctions.InsertMany(
 			params.Context, opts,
 		)

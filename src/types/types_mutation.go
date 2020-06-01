@@ -58,6 +58,9 @@ func GetMutationNodePayload(cache mongoke.Map, object graphql.Type) (*graphql.Ob
 		"returning": &graphql.Field{
 			Type: object,
 		},
+		"affectedCount": &graphql.Field{
+			Type: graphql.Int,
+		},
 	}
 	payload := graphql.NewObject(graphql.ObjectConfig{
 		Name:   name,
@@ -77,7 +80,7 @@ func GetMutationNodesPayload(cache mongoke.Map, object graphql.Type) (*graphql.O
 		"returning": &graphql.Field{
 			Type: graphql.NewList(object),
 		},
-		"affectedDocuments": &graphql.Field{
+		"affectedCount": &graphql.Field{
 			Type: graphql.Int,
 		},
 	}

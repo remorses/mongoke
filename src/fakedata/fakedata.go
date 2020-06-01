@@ -9,6 +9,8 @@ import (
 	"github.com/pkg/errors"
 	mongoke "github.com/remorses/mongoke/src"
 	"github.com/remorses/mongoke/src/testutil"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -76,6 +78,36 @@ func (self *FakeDatabaseFunctions) InsertMany(ctx context.Context, p mongoke.Ins
 		p.Data[i]["_id"] = id
 	}
 	return p.Data, nil
+}
+
+func (self *FakeDatabaseFunctions) UpdateOne(ctx context.Context, p mongoke.UpdateOneParams) (mongoke.NodeMutationPayload, error) {
+	db, err := self.Init(ctx)
+	if err != nil {
+		return mongoke.NodeMutationPayload{}, err
+	}
+	opts := options.FindOneAndUpdate()
+	opts.SetReturnDocument(options.After)
+	testutil.PrettyPrint(p)
+
+	res := db.Collection(p.Collection).FindOneAndUpdate(ctx, p.Where, bson.M{"$set": p.Set}, opts)
+	if res.Err() == mongo.ErrNoDocuments {
+		println("no docs to update")
+		return mongoke.NodeMutationPayload{
+			AffectedCount: 0,
+			Returning:     nil,
+		}, nil
+	} else if res.Err() != nil {
+		return mongoke.NodeMutationPayload{}, err
+	}
+	data := mongoke.Map{}
+	err = res.Decode(&data)
+	if err != nil {
+		return mongoke.NodeMutationPayload{}, err
+	}
+	return mongoke.NodeMutationPayload{
+		AffectedCount: 1,
+		Returning:     data,
+	}, nil
 }
 
 func (self *FakeDatabaseFunctions) Init(ctx context.Context) (lungo.IDatabase, error) {

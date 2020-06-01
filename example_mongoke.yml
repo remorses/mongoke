@@ -6,11 +6,11 @@
 # mongodb:
 #   uri: mongodb://localhost/testdb
 
-firestore:
-  project_id: example
-  
+# firestore:
+#   project_id: example
+
 fake_database:
-  documents_per_collection: 0
+  documents_per_collection: 10
 
 # admin can do everything, used in server side adding a custom header
 # in the web UI it is set as a password

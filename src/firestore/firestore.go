@@ -128,7 +128,7 @@ func (self *FirestoreDatabaseFunctions) InsertMany(ctx context.Context, p mongok
 		if err != nil {
 			return nil, err
 		}
-		// TODO if firestore uses some id i should add it here
+		// TODO if firestore uses some id i should add it to the returned nodes
 	}
 	return p.Data, nil
 }

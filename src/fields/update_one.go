@@ -2,6 +2,9 @@ package fields
 
 import (
 	"github.com/graphql-go/graphql"
+	"github.com/mitchellh/mapstructure"
+	mongoke "github.com/remorses/mongoke/src"
+	"github.com/remorses/mongoke/src/testutil"
 	"github.com/remorses/mongoke/src/types"
 )
 
@@ -17,8 +20,23 @@ insertUser(data: {name: "xxx"}) {
 func MutationUpdateOne(p CreateFieldParams) (*graphql.Field, error) {
 	indexableNames := takeIndexableTypeNames(p.SchemaConfig)
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
-		// TODO implement resolver
-		return nil, nil
+		args := params.Args
+		opts := mongoke.UpdateOneParams{
+			Collection: p.Collection,
+		}
+		err := mapstructure.Decode(args, &opts)
+		if err != nil {
+			return nil, err
+		}
+		// TODO update only nodes the user can insert, based on expressions
+		res, err := p.Config.DatabaseFunctions.UpdateOne(
+			params.Context, opts,
+		)
+		println(testutil.Pretty(res))
+		if err != nil {
+			return nil, err
+		}
+		return res, nil // TODO go graphql complains if a nested type with non null field has parent null
 	}
 
 	// if err != nil {
