@@ -2,6 +2,8 @@ package fields
 
 import (
 	"github.com/graphql-go/graphql"
+	"github.com/mitchellh/mapstructure"
+	mongoke "github.com/remorses/mongoke/src"
 	"github.com/remorses/mongoke/src/types"
 )
 
@@ -16,8 +18,22 @@ insertOneUser(data: {name: "xxx"}) {
 
 func MutationInsertNodes(p CreateFieldParams) (*graphql.Field, error) {
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
-		// TODO implement resolver
-		return nil, nil
+		args := params.Args
+		opts := mongoke.InsertManyParams{
+			Collection: p.Collection,
+		}
+		err := mapstructure.Decode(args, &opts)
+		if err != nil {
+			return nil, err
+		}
+		// TODO let insert only nodes the user can insert, based on expressions
+		nodes, err := p.Config.DatabaseFunctions.InsertMany(
+			params.Context, opts,
+		)
+		if err != nil {
+			return nil, err
+		}
+		return mongoke.Map{"returning": nodes}, nil
 	}
 
 	// if err != nil {
@@ -26,7 +42,7 @@ func MutationInsertNodes(p CreateFieldParams) (*graphql.Field, error) {
 	args := graphql.FieldConfigArgument{}
 	args["data"] = &graphql.ArgumentConfig{
 		Type: graphql.NewNonNull(
-			graphql.NewList(types.TransformToInput(p.Config.Cache, p.ReturnType)),
+			graphql.NewList(graphql.NewNonNull(types.TransformToInput(p.Config.Cache, p.ReturnType))),
 		),
 	}
 	returnType, err := types.GetMutationNodesPayload(p.Config.Cache, p.ReturnType)

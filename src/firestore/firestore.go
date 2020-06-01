@@ -118,6 +118,21 @@ func isZero(v interface{}) bool {
 	return false
 }
 
+func (self *FirestoreDatabaseFunctions) InsertMany(ctx context.Context, p mongoke.InsertManyParams) ([]mongoke.Map, error) {
+	db, err := self.Init(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, x := range p.Data {
+		_, _, err := db.Collection(p.Collection).Add(ctx, x)
+		if err != nil {
+			return nil, err
+		}
+		// TODO if firestore uses some id i should add it here
+	}
+	return p.Data, nil
+}
+
 func (self *FirestoreDatabaseFunctions) Init(ctx context.Context) (*firestore.Client, error) {
 	if self.db != nil {
 		return self.db, nil

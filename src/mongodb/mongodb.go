@@ -3,6 +3,7 @@ package mongodb
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	mongoke "github.com/remorses/mongoke/src"
@@ -53,6 +54,31 @@ func (self *MongodbDatabaseFunctions) FindMany(ctx context.Context, p mongoke.Fi
 		return nil, err
 	}
 	return nodes, nil
+}
+
+func (self *MongodbDatabaseFunctions) InsertMany(ctx context.Context, p mongoke.InsertManyParams) ([]mongoke.Map, error) {
+	db, err := self.Init(ctx)
+	if err != nil {
+		return nil, err
+	}
+	opts := options.InsertMany()
+	opts.SetOrdered(true)
+	testutil.PrettyPrint(p)
+
+	var data = make([]interface{}, len(p.Data))
+	for i, x := range p.Data {
+		data[i] = x
+	}
+	res, err := db.Collection(p.Collection).InsertMany(ctx, data, opts)
+	if err != nil {
+		// log.Print("Error in findMany", err)
+		return nil, err
+	}
+	fmt.Println(res.InsertedIDs)
+	for i, id := range res.InsertedIDs {
+		p.Data[i]["_id"] = id
+	}
+	return p.Data, nil
 }
 
 func (self *MongodbDatabaseFunctions) Init(ctx context.Context) (*mongo.Database, error) {

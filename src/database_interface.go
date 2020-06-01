@@ -7,7 +7,7 @@ type DatabaseInterface interface {
 	// FindOne(p FindOneParams) (interface{}, error)
 	// FindMany should return p.First + 1 nodes, or p.Last + 1 nodes, so mongoke can compute `hasNextPage` and `hasPreviousPage`
 	FindMany(ctx context.Context, p FindManyParams) ([]Map, error)
-	// InsertMany(ctx context.Context, p FindManyParams) ([]Map, error)
+	InsertMany(ctx context.Context, p InsertManyParams) ([]Map, error)
 	// TODO add InsertMany
 	// TODO add UpdateMany
 	// TODO add UpdateOne
@@ -25,6 +25,11 @@ type FindManyParams struct {
 	Limit      int               `mapstructure:"limit"`
 	Offset     int               `mapstructure:"offset"`
 	OrderBy    map[string]int    `mapstructure:"orderBy"`
+}
+
+type InsertManyParams struct {
+	Collection string
+	Data       []Map `mapstructure:"data"`
 }
 
 type Pagination struct {

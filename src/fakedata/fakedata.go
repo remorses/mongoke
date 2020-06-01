@@ -2,6 +2,7 @@ package fakedata
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/256dpi/lungo"
@@ -52,6 +53,31 @@ func (self *FakeDatabaseFunctions) FindMany(ctx context.Context, p mongoke.FindM
 	return nodes, nil
 }
 
+func (self *FakeDatabaseFunctions) InsertMany(ctx context.Context, p mongoke.InsertManyParams) ([]mongoke.Map, error) {
+	db, err := self.Init(ctx)
+	if err != nil {
+		return nil, err
+	}
+	opts := options.InsertMany()
+	opts.SetOrdered(true)
+	testutil.PrettyPrint(p)
+
+	var data = make([]interface{}, len(p.Data))
+	for i, x := range p.Data {
+		data[i] = x
+	}
+	res, err := db.Collection(p.Collection).InsertMany(ctx, data, opts)
+	if err != nil {
+		// log.Print("Error in findMany", err)
+		return nil, err
+	}
+	fmt.Println(res.InsertedIDs)
+	for i, id := range res.InsertedIDs {
+		p.Data[i]["_id"] = id
+	}
+	return p.Data, nil
+}
+
 func (self *FakeDatabaseFunctions) Init(ctx context.Context) (lungo.IDatabase, error) {
 	if self.db != nil {
 		return self.db, nil
@@ -93,8 +119,12 @@ func (self FakeDatabaseFunctions) generateFakeData(config mongoke.Config) error 
 	if documentsPerCollection == nil {
 		documentsPerCollection = &DEFAULT_DOCUMENTS_PER_COLLECTION
 	}
+	if *documentsPerCollection == 0 {
+		return nil
+	}
 	for name, t := range config.Types {
 		var docs []interface{}
+
 		for i := 0; i < *documentsPerCollection; i++ {
 			data, err := faker.Generate(name)
 			if err != nil {

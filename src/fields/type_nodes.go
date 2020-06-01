@@ -55,7 +55,10 @@ func QueryTypeNodesField(p CreateFieldParams) (*graphql.Field, error) {
 			return nil, err
 		}
 		if p.InitialWhere != nil {
-			mergo.Merge(&decodedArgs.Where, p.InitialWhere)
+			err = mergo.Merge(&decodedArgs.Where, p.InitialWhere)
+			if err != nil {
+				return nil, err
+			}
 		}
 		opts, err := createFindManyParamsFromArgs(decodedArgs, p.Collection)
 		if err != nil {

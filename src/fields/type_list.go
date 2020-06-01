@@ -19,10 +19,10 @@ func QueryTypeListField(p CreateFieldParams) (*graphql.Field, error) {
 			return nil, err
 		}
 		if p.InitialWhere != nil {
-			mergo.Merge(&opts, p.InitialWhere)
-		}
-		if err != nil {
-			return nil, err
+			err = mergo.Merge(&opts, p.InitialWhere)
+			if err != nil {
+				return nil, err
+			}
 		}
 		nodes, err := p.Config.DatabaseFunctions.FindMany(
 			params.Context, opts,
