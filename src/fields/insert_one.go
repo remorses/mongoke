@@ -34,7 +34,7 @@ func MutationInsertOne(p CreateFieldParams) (*graphql.Field, error) {
 			Data:       []mongoke.Map{data},
 		}
 
-		// TODO let insert only nodes the user can insert, based on expressions
+		// TODO insert only nodes the user can insert, based on expressions
 		nodes, err := p.Config.DatabaseFunctions.InsertMany(
 			params.Context, opts,
 		)

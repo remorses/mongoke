@@ -10,8 +10,6 @@ type DatabaseInterface interface {
 	InsertMany(ctx context.Context, p InsertManyParams) ([]Map, error)
 	UpdateOne(ctx context.Context, p UpdateParams) (NodeMutationPayload, error)
 	UpdateMany(ctx context.Context, p UpdateParams) (NodesMutationPayload, error)
-	// TODO add UpdateMany
-	// TODO add UpdateOne
 }
 
 // type FindOneParams struct {
