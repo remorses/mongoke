@@ -124,16 +124,17 @@ func (self *MongodbDatabaseFunctions) UpdateMany(ctx context.Context, p mongoke.
 	testutil.PrettyPrint(p)
 
 	// TODO execute inside a transaction
+	nodes, err := self.FindMany(ctx, mongoke.FindManyParams{Collection: p.Collection, Where: p.Where})
+	if err != nil {
+		return payload, err
+	}
+
 	res, err := db.Collection(p.Collection).UpdateMany(ctx, p.Where, bson.M{"$set": p.Set}, opts)
 	if err != nil {
 		return payload, err
 	}
 	payload.AffectedCount = int(res.ModifiedCount + res.UpsertedCount)
 
-	nodes, err := self.FindMany(ctx, mongoke.FindManyParams{Collection: p.Collection, Where: p.Where})
-	if err != nil {
-		return payload, err
-	}
 	return mongoke.NodesMutationPayload{
 		AffectedCount: payload.AffectedCount,
 		Returning:     nodes,
