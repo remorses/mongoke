@@ -107,7 +107,7 @@ func (self *FirestoreDatabaseFunctions) updateMany(ctx context.Context, p mongok
 		if err != nil {
 			return payload, err
 		}
-		_, err = doc.Ref.Set(ctx, p.Set) // maybe firestore.MergeAll
+		_, err = doc.Ref.Update(ctx, setToUpdates(p.Set))
 		if err != nil {
 			return payload, err
 		}
@@ -123,6 +123,15 @@ func (self *FirestoreDatabaseFunctions) updateMany(ctx context.Context, p mongok
 		payload.Returning = append(payload.Returning, node)
 	}
 	return payload, nil
+}
+
+func setToUpdates(set mongoke.Map) []firestore.Update {
+	var updates []firestore.Update
+	for k, v := range set {
+		// fieldPath := []string{k}
+		updates = append(updates, firestore.Update{Path: k, Value: v})
+	}
+	return updates
 }
 
 func applyWhereQuery(where map[string]mongoke.Filter, q firestore.Query) (firestore.Query, error) {
