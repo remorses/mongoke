@@ -82,8 +82,9 @@ func (self *FakeDatabaseFunctions) InsertMany(ctx context.Context, p mongoke.Ins
 
 func (self *FakeDatabaseFunctions) UpdateOne(ctx context.Context, p mongoke.UpdateParams) (mongoke.NodeMutationPayload, error) {
 	db, err := self.Init(ctx)
+	payload := mongoke.NodeMutationPayload{}
 	if err != nil {
-		return mongoke.NodeMutationPayload{}, err
+		return payload, err
 	}
 	opts := options.FindOneAndUpdate()
 	opts.SetReturnDocument(options.After)
@@ -92,21 +93,46 @@ func (self *FakeDatabaseFunctions) UpdateOne(ctx context.Context, p mongoke.Upda
 	res := db.Collection(p.Collection).FindOneAndUpdate(ctx, p.Where, bson.M{"$set": p.Set}, opts)
 	if res.Err() == mongo.ErrNoDocuments {
 		println("no docs to update")
-		return mongoke.NodeMutationPayload{
-			AffectedCount: 0,
-			Returning:     nil,
-		}, nil
+		return payload, nil
 	} else if res.Err() != nil {
-		return mongoke.NodeMutationPayload{}, err
+		return payload, err
 	}
 	data := mongoke.Map{}
 	err = res.Decode(&data)
 	if err != nil {
-		return mongoke.NodeMutationPayload{}, err
+		return payload, err
 	}
 	return mongoke.NodeMutationPayload{
 		AffectedCount: 1,
 		Returning:     data,
+	}, nil
+}
+
+// first updateMany documents, then query again the documents and return them, all inside a transaction that prevents other writes happen before the query
+func (self *FakeDatabaseFunctions) UpdateMany(ctx context.Context, p mongoke.UpdateParams) (mongoke.NodesMutationPayload, error) {
+	db, err := self.Init(ctx)
+	payload := mongoke.NodesMutationPayload{}
+	if err != nil {
+		return payload, err
+	}
+	opts := options.Update()
+
+	testutil.PrettyPrint(p)
+
+	// TODO execute inside a transaction
+	res, err := db.Collection(p.Collection).UpdateMany(ctx, p.Where, bson.M{"$set": p.Set}, opts)
+	if err != nil {
+		return payload, err
+	}
+	payload.AffectedCount = int(res.ModifiedCount + res.UpsertedCount)
+
+	nodes, err := self.FindMany(ctx, mongoke.FindManyParams{Collection: p.Collection, Where: p.Where})
+	if err != nil {
+		return payload, err
+	}
+	return mongoke.NodesMutationPayload{
+		AffectedCount: payload.AffectedCount,
+		Returning:     nodes,
 	}, nil
 }
 
