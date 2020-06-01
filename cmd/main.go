@@ -74,7 +74,7 @@ func main() {
 			println("listening on http://localhost:" + port)
 			var host string
 			if c.Bool("localhost") {
-				host = "127.0.0.1:" // TODO ListenAndServe does not raises if port already used by 0.0.0.0
+				host = "127.0.0.1:"
 			} else {
 				host = "0.0.0.0:"
 			}

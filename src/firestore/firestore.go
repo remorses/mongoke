@@ -3,13 +3,13 @@ package firestore
 import (
 	"context"
 	"errors"
-	"reflect"
 	"time"
 
 	firestore "cloud.google.com/go/firestore"
 	"google.golang.org/api/iterator"
 
 	mongoke "github.com/remorses/mongoke/src"
+	"github.com/remorses/mongoke/src/testutil"
 )
 
 const (
@@ -62,6 +62,7 @@ func (self *FirestoreDatabaseFunctions) FindMany(ctx context.Context, p mongoke.
 }
 
 func applyWhereQuery(where map[string]mongoke.Filter, q firestore.Query) (firestore.Query, error) {
+	testutil.Pretty("where", where)
 	for k, v := range where {
 		if !isZero(v.Eq) {
 			q = q.Where(k, "==", v.Eq)
@@ -104,14 +105,10 @@ func applyOrderByQuery(orderBy map[string]int, q firestore.Query) firestore.Quer
 }
 
 func isZero(v interface{}) bool {
-	if v == nil || v == false || v == 0 || v == "" {
+	if v == nil {
 		return true
 	}
-	t := reflect.TypeOf(v)
-	if !t.Comparable() { // TODO what types are not comparable?
-		return true
-	}
-	return v == reflect.Zero(t).Interface()
+	return false
 }
 
 func (self *FirestoreDatabaseFunctions) Init(ctx context.Context, projectID string) (*firestore.Client, error) {
