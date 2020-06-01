@@ -41,7 +41,7 @@ func MutationInsertOne(p CreateFieldParams) (*graphql.Field, error) {
 		if err != nil {
 			return nil, err
 		}
-		return mongoke.Map{"returning": nodes[0]}, nil
+		return mongoke.Map{"returning": nodes[0], "affectedCount": 1}, nil
 	}
 
 	// if err != nil {

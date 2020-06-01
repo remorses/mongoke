@@ -37,7 +37,7 @@ func TestMutationWithEmptyFakeDatabase(t *testing.T) {
 		Name          string
 		Query         string
 		Expected      mongoke.Map
-		ExpectedError string
+		ExpectedError bool
 		Config        mongoke.Config
 	}{
 		{
@@ -47,6 +47,58 @@ func TestMutationWithEmptyFakeDatabase(t *testing.T) {
 			Query: `
 			mutation {
 				updateUser(set: {name: "xxx"}) {
+					affectedCount
+					returning {
+						name
+						age
+						_id
+					}
+				}
+			}
+			`,
+		},
+		{
+			Name:     "updateOne with set and where",
+			Config:   config,
+			Expected: mongoke.Map{"updateUser": mongoke.Map{"returning": nil, "affectedCount": 0}},
+			Query: `
+			mutation {
+				updateUser(where: {name: {eq: "zzz"}}, set: {name: "xxx"}) {
+					affectedCount
+					returning {
+						name
+						age
+						_id
+					}
+				}
+			}
+			`,
+		},
+		{
+			Name:     "insert",
+			Config:   config,
+			Expected: mongoke.Map{"insertUser": mongoke.Map{"returning": mongoke.Map{"name": "xxx", "age": 10, "_id": "000000000000000000000000"}, "affectedCount": 1}},
+			Query: `
+			mutation {
+				insertUser(data: {name: "xxx", age: 10, _id: "000000000000000000000000"}) {
+					affectedCount
+					returning {
+						name
+						age
+						_id
+					}
+				}
+			}
+			`,
+		},
+		{
+			Name:          "insert with missing required fields should error",
+			Config:        config,
+			Expected:      mongoke.Map{"insertUser": mongoke.Map{"returning": mongoke.Map{"name": "xxx", "age": 10, "_id": "000000000000000000000000"}, "affectedCount": 1}},
+			ExpectedError: true,
+			Query: `
+			mutation {
+				insertUser(data: {name: "xxx"}) {
 					affectedCount
 					returning {
 						name
@@ -86,7 +138,7 @@ func TestMutationWithEmptyFakeDatabase(t *testing.T) {
 					t.Error(err)
 				}
 			}
-			if testCase.ExpectedError != "" {
+			if testCase.ExpectedError {
 				err = testutil.QuerySchemaShouldFail(t, schema, testCase.Query)
 				return
 			}

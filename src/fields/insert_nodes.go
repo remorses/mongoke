@@ -33,7 +33,7 @@ func MutationInsertNodes(p CreateFieldParams) (*graphql.Field, error) {
 		if err != nil {
 			return nil, err
 		}
-		return mongoke.Map{"returning": nodes}, nil
+		return mongoke.Map{"returning": nodes, "affectedCount": len(nodes)}, nil
 	}
 
 	// if err != nil {
