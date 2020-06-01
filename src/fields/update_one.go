@@ -21,7 +21,7 @@ func MutationUpdateOne(p CreateFieldParams) (*graphql.Field, error) {
 	indexableNames := takeIndexableTypeNames(p.SchemaConfig)
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
-		opts := mongoke.UpdateOneParams{
+		opts := mongoke.UpdateParams{
 			Collection: p.Collection,
 		}
 		err := mapstructure.Decode(args, &opts)

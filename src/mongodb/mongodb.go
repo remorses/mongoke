@@ -82,7 +82,7 @@ func (self *MongodbDatabaseFunctions) InsertMany(ctx context.Context, p mongoke.
 	return p.Data, nil
 }
 
-func (self *MongodbDatabaseFunctions) UpdateOne(ctx context.Context, p mongoke.UpdateOneParams) (mongoke.NodeMutationPayload, error) {
+func (self *MongodbDatabaseFunctions) UpdateOne(ctx context.Context, p mongoke.UpdateParams) (mongoke.NodeMutationPayload, error) {
 	db, err := self.Init(ctx)
 	if err != nil {
 		return mongoke.NodeMutationPayload{}, err

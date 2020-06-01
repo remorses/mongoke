@@ -66,7 +66,7 @@ func (self *FirestoreDatabaseFunctions) FindMany(ctx context.Context, p mongoke.
 	return nodes, nil
 }
 
-func (self *FirestoreDatabaseFunctions) UpdateOne(ctx context.Context, p mongoke.UpdateOneParams) (mongoke.NodeMutationPayload, error) {
+func (self *FirestoreDatabaseFunctions) UpdateOne(ctx context.Context, p mongoke.UpdateParams) (mongoke.NodeMutationPayload, error) {
 	res, err := self.updateMany(ctx, p, 1)
 	payload := mongoke.NodeMutationPayload{}
 	if err != nil {
@@ -80,11 +80,11 @@ func (self *FirestoreDatabaseFunctions) UpdateOne(ctx context.Context, p mongoke
 	return payload, nil
 }
 
-func (self *FirestoreDatabaseFunctions) UpdateMany(ctx context.Context, p mongoke.UpdateOneParams) (mongoke.NodesMutationPayload, error) {
+func (self *FirestoreDatabaseFunctions) UpdateMany(ctx context.Context, p mongoke.UpdateParams) (mongoke.NodesMutationPayload, error) {
 	return self.updateMany(ctx, p, math.MaxInt32)
 }
 
-func (self *FirestoreDatabaseFunctions) updateMany(ctx context.Context, p mongoke.UpdateOneParams, count int) (mongoke.NodesMutationPayload, error) {
+func (self *FirestoreDatabaseFunctions) updateMany(ctx context.Context, p mongoke.UpdateParams, count int) (mongoke.NodesMutationPayload, error) {
 	db, err := self.Init(ctx)
 	if err != nil {
 		return mongoke.NodesMutationPayload{}, err
@@ -99,6 +99,7 @@ func (self *FirestoreDatabaseFunctions) updateMany(ctx context.Context, p mongok
 	iter := query.Documents(ctx)
 	defer iter.Stop()
 	payload := mongoke.NodesMutationPayload{}
+	// TODO use batching for firestore's updateMany
 	for payload.AffectedCount < count {
 		doc, err := iter.Next()
 		if err == iterator.Done {

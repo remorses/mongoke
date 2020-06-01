@@ -48,7 +48,7 @@ type DatabaseInterfaceMock struct {
 	InsertManyFunc func(ctx context.Context, p mongoke.InsertManyParams) ([]mongoke.Map, error)
 
 	// UpdateOneFunc mocks the UpdateOne method.
-	UpdateOneFunc func(ctx context.Context, p mongoke.UpdateOneParams) (mongoke.NodeMutationPayload, error)
+	UpdateOneFunc func(ctx context.Context, p mongoke.UpdateParams) (mongoke.NodeMutationPayload, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -71,7 +71,7 @@ type DatabaseInterfaceMock struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// P is the p argument value.
-			P mongoke.UpdateOneParams
+			P mongoke.UpdateParams
 		}
 	}
 }
@@ -147,13 +147,13 @@ func (mock *DatabaseInterfaceMock) InsertManyCalls() []struct {
 }
 
 // UpdateOne calls UpdateOneFunc.
-func (mock *DatabaseInterfaceMock) UpdateOne(ctx context.Context, p mongoke.UpdateOneParams) (mongoke.NodeMutationPayload, error) {
+func (mock *DatabaseInterfaceMock) UpdateOne(ctx context.Context, p mongoke.UpdateParams) (mongoke.NodeMutationPayload, error) {
 	if mock.UpdateOneFunc == nil {
 		panic("DatabaseInterfaceMock.UpdateOneFunc: method is nil but DatabaseInterface.UpdateOne was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
-		P   mongoke.UpdateOneParams
+		P   mongoke.UpdateParams
 	}{
 		Ctx: ctx,
 		P:   p,
@@ -169,11 +169,11 @@ func (mock *DatabaseInterfaceMock) UpdateOne(ctx context.Context, p mongoke.Upda
 //     len(mockedDatabaseInterface.UpdateOneCalls())
 func (mock *DatabaseInterfaceMock) UpdateOneCalls() []struct {
 	Ctx context.Context
-	P   mongoke.UpdateOneParams
+	P   mongoke.UpdateParams
 } {
 	var calls []struct {
 		Ctx context.Context
-		P   mongoke.UpdateOneParams
+		P   mongoke.UpdateParams
 	}
 	lockDatabaseInterfaceMockUpdateOne.RLock()
 	calls = mock.calls.UpdateOne
