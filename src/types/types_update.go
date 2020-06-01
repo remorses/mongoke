@@ -23,6 +23,7 @@ type UpdateResult struct {
 In firestore i have to handle everything manually, upserts are done manually, i also have to update one by one
 
 
+
 in postgres
 
 */
@@ -32,9 +33,9 @@ func GetSetUpdateArgument(cache mongoke.Map, object graphql.Type) *graphql.Input
 	if item, ok := cache[name].(*graphql.InputObject); ok {
 		return item
 	}
-	input := TransformToInput(cache, object) // TODO make all partial
+	input := MakeInputPartial(cache, TransformToInput(cache, object))
 	fields := graphql.InputObjectConfigFieldMap{}
-	for k, v := range input.(*graphql.InputObject).Fields() {
+	for k, v := range input.Fields() {
 		fields[k] = &graphql.InputObjectFieldConfig{
 			Type: v.Type,
 		}

@@ -34,9 +34,9 @@ schema: |
       c
   }
   type User {
-      type: String
-      _id: ObjectId
-      name: String
+      type: String!
+      _id: ObjectId!
+      name: String!
       surname: String
       friends_ids: [ObjectId]
       url: String

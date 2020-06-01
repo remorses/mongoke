@@ -5,28 +5,46 @@ import (
 	mongoke "github.com/remorses/mongoke/src"
 )
 
-func TransformToInput(cache mongoke.Map, t graphql.Type) graphql.Type {
-	switch t.(type) {
-	case *graphql.Object:
-		return objectToInputObject(cache, t.(*graphql.Object))
-	} // TODO transform unions to input objects
-	return t
-}
-
-func makeObjectInputName(t graphql.Type) string {
-	return t.Name() + "Input"
-}
-
-func objectToInputObject(cache mongoke.Map, object *graphql.Object) *graphql.InputObject {
-	name := makeObjectInputName(object)
+func MakeInputPartial(cache mongoke.Map, object *graphql.InputObject) *graphql.InputObject {
+	name := object.Name() + "Partial"
 	if item, ok := cache[name].(*graphql.InputObject); ok {
 		return item
 	}
 	fields := graphql.InputObjectConfigFieldMap{}
-	for _, field := range object.Fields() {
+	for k, v := range object.Fields() {
+		if f, ok := v.Type.(*graphql.NonNull); ok {
+			fields[k] = &graphql.InputObjectFieldConfig{
+				Type:        f.OfType,
+				Description: f.Description(),
+			}
+		} else {
+			fields[k] = &graphql.InputObjectFieldConfig{
+				Type:        v.Type,
+				Description: v.Description(),
+			}
+		}
+	}
+	res := graphql.NewInputObject(
+		graphql.InputObjectConfig{
+			Name:        name,
+			Fields:      fields,
+			Description: object.Description(),
+		},
+	)
+	cache[name] = res
+	return res
+}
+
+func TransformToInput(cache mongoke.Map, object graphql.Type) *graphql.InputObject {
+	name := object.Name() + "Input"
+	if item, ok := cache[name].(*graphql.InputObject); ok {
+		return item
+	}
+	fields := graphql.InputObjectConfigFieldMap{}
+	for _, field := range GetTypeFields(object) {
 		t := field.Type
 		if v, ok := t.(*graphql.Object); ok {
-			t = objectToInputObject(cache, v)
+			t = TransformToInput(cache, v)
 		}
 		fields[field.Name] = &graphql.InputObjectFieldConfig{
 			Type:        t,
