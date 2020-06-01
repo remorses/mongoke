@@ -5,12 +5,8 @@ import (
 	mongoke "github.com/remorses/mongoke/src"
 )
 
-func MakeIndexableFieldsName(object graphql.Type) string {
-	return object.Name() + "IndexableFields"
-}
-
 func GetIndexableFieldsEnum(cache mongoke.Map, indexableNames []string, object graphql.Type) (*graphql.Enum, error) {
-	name := MakeIndexableFieldsName(object)
+	name := object.Name() + "IndexableFields"
 	if item, ok := cache[name].(*graphql.Enum); ok {
 		return item, nil
 	}
@@ -34,13 +30,21 @@ func GetIndexableFieldsEnum(cache mongoke.Map, indexableNames []string, object g
 func takeIndexableFields(indexableNames []string, object graphql.Type) []*graphql.FieldDefinition {
 	indexableFields := make([]*graphql.FieldDefinition, 0)
 	for _, v := range GetTypeFields(object) {
-		typeName := v.Type.Name()
+		var t graphql.Type
+		if n, ok := v.Type.(*graphql.NonNull); ok {
+			t = n.OfType
+		} else {
+			t = v.Type
+		}
+		// TODO maybe handle list as an indexable type to add the contains operator
+		typeName := t.Name()
+		f := &graphql.FieldDefinition{Type: t, Name: v.Name, Args: v.Args, Description: v.Description, Resolve: v.Resolve}
 		switch typeName {
 		case "String", "Boolean", "Int", "Float", "ID", "DateTime":
-			indexableFields = append(indexableFields, v)
+			indexableFields = append(indexableFields, f)
 		}
 		if contains(indexableNames, typeName) {
-			indexableFields = append(indexableFields, v)
+			indexableFields = append(indexableFields, f)
 		}
 	}
 	return indexableFields
