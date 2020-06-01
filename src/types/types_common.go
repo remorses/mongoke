@@ -104,6 +104,15 @@ var AnyScalar = graphql.NewScalar(
 	},
 )
 
+var UpdateManyPayload = graphql.NewObject(graphql.ObjectConfig{
+	Name: "UpdateNodesPayload",
+	Fields: graphql.Fields{
+		"count": &graphql.Field{
+			Type: graphql.Int,
+		},
+	},
+})
+
 func parseAnyScalarLiteral(astValue ast.Value) interface{} {
 	kind := astValue.GetKind()
 

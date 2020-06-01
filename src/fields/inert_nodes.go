@@ -29,8 +29,12 @@ func MutationInsertNodes(p CreateFieldParams) (*graphql.Field, error) {
 			graphql.NewList(types.TransformToInput(p.Config.Cache, p.ReturnType)),
 		),
 	}
+	returnType, err := types.GetMutationNodesPayload(p.Config.Cache, p.ReturnType)
+	if err != nil {
+		return nil, err
+	}
 	field := graphql.Field{
-		Type:    graphql.NewList(p.ReturnType),
+		Type:    returnType,
 		Args:    args,
 		Resolve: resolver,
 	}

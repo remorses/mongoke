@@ -14,7 +14,7 @@ insertUser(data: {name: "xxx"}) {
 
 */
 
-func MutationUpdateOne(p CreateFieldParams) (*graphql.Field, error) {
+func MutationUpdateNodes(p CreateFieldParams) (*graphql.Field, error) {
 	indexableNames := takeIndexableTypeNames(p.SchemaConfig)
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		// TODO implement resolver
@@ -28,12 +28,15 @@ func MutationUpdateOne(p CreateFieldParams) (*graphql.Field, error) {
 	args["set"] = &graphql.ArgumentConfig{
 		Type: types.GetSetUpdateArgument(p.Config.Cache, p.ReturnType),
 	}
+	// TODO add update increment field
+	// TODO add update append field
+	// TODO add update prepend field
 	whereArg, err := types.GetWhereArg(p.Config.Cache, indexableNames, p.ReturnType)
 	if err != nil {
 		return nil, err
 	}
 	args["where"] = &graphql.ArgumentConfig{Type: whereArg}
-	returnType, err := types.GetMutationNodePayload(p.Config.Cache, p.ReturnType)
+	returnType, err := types.GetMutationNodesPayload(p.Config.Cache, p.ReturnType)
 	if err != nil {
 		return nil, err
 	}

@@ -7,7 +7,9 @@ type DatabaseInterface interface {
 	// FindOne(p FindOneParams) (interface{}, error)
 	// FindMany should return p.First + 1 nodes, or p.Last + 1 nodes, so mongoke can compute `hasNextPage` and `hasPreviousPage`
 	FindMany(ctx context.Context, p FindManyParams) ([]Map, error)
-	// TODO add mutations in databaseFunctions
+	// TODO add InsertMany
+	// TODO add UpdateMany
+	// TODO add UpdateOne
 }
 
 // type FindOneParams struct {

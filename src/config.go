@@ -55,7 +55,7 @@ type MongodbConfig struct {
 }
 
 type FakeDatabaseConfig struct {
-	DocumentsPerCollection int `json: "documents_per_collection"`
+	DocumentsPerCollection *int `json: "documents_per_collection"`
 }
 
 type FirestoreConfig struct {

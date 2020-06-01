@@ -11,10 +11,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const (
-	TIMEOUT_CONNECT = 5
-	MAX_QUERY_TIME  = 10
-	TIMEOUT_FIND    = 10
+var (
+	TIMEOUT_CONNECT                  = 5
+	MAX_QUERY_TIME                   = 10
+	TIMEOUT_FIND                     = 10
+	DEFAULT_DOCUMENTS_PER_COLLECTION = 50
 )
 
 type FakeDatabaseFunctions struct {
@@ -29,9 +30,9 @@ func (self *FakeDatabaseFunctions) FindMany(ctx context.Context, p mongoke.FindM
 	if err != nil {
 		return nil, err
 	}
-	ctx, _ = context.WithTimeout(ctx, TIMEOUT_FIND*time.Second)
+	ctx, _ = context.WithTimeout(ctx, time.Duration(TIMEOUT_FIND)*time.Second)
 	opts := options.Find()
-	opts.SetMaxTime(MAX_QUERY_TIME * time.Second)
+	opts.SetMaxTime(time.Duration(MAX_QUERY_TIME) * time.Second)
 	opts.SetLimit(int64(p.Limit))
 	opts.SetSkip(int64(p.Offset))
 	opts.SetSort(p.OrderBy)
@@ -89,12 +90,12 @@ func (self FakeDatabaseFunctions) generateFakeData(config mongoke.Config) error 
 		return err
 	}
 	documentsPerCollection := config.FakeDatabase.DocumentsPerCollection
-	if documentsPerCollection == 0 {
-		documentsPerCollection = 50
+	if documentsPerCollection == nil {
+		documentsPerCollection = &DEFAULT_DOCUMENTS_PER_COLLECTION
 	}
 	for name, t := range config.Types {
 		var docs []interface{}
-		for i := 0; i < documentsPerCollection; i++ {
+		for i := 0; i < *documentsPerCollection; i++ {
 			data, err := faker.Generate(name)
 			if err != nil {
 				return err
