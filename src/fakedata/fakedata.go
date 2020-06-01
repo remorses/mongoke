@@ -82,7 +82,10 @@ func (self *FakeDatabaseFunctions) InsertMany(ctx context.Context, p mongoke.Ins
 
 func (self *FakeDatabaseFunctions) UpdateOne(ctx context.Context, p mongoke.UpdateParams) (mongoke.NodeMutationPayload, error) {
 	db, err := self.Init(ctx)
-	payload := mongoke.NodeMutationPayload{}
+	payload := mongoke.NodeMutationPayload{
+		Returning:     nil,
+		AffectedCount: 0,
+	}
 	if err != nil {
 		return payload, err
 	}
