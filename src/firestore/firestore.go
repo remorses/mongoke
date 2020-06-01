@@ -9,7 +9,6 @@ import (
 	"google.golang.org/api/iterator"
 
 	mongoke "github.com/remorses/mongoke/src"
-	"github.com/remorses/mongoke/src/testutil"
 )
 
 const (
@@ -62,7 +61,7 @@ func (self *FirestoreDatabaseFunctions) FindMany(ctx context.Context, p mongoke.
 }
 
 func applyWhereQuery(where map[string]mongoke.Filter, q firestore.Query) (firestore.Query, error) {
-	testutil.Pretty("where", where)
+	// println(testutil.Pretty("where", where))
 	for k, v := range where {
 		if !isZero(v.Eq) {
 			q = q.Where(k, "==", v.Eq)
@@ -107,6 +106,9 @@ func applyOrderByQuery(orderBy map[string]int, q firestore.Query) firestore.Quer
 func isZero(v interface{}) bool {
 	if v == nil {
 		return true
+	}
+	if l, ok := v.([]interface{}); ok { // this way the in and nin operators cannot be given []
+		return len(l) == 0
 	}
 	return false
 }

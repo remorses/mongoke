@@ -120,6 +120,7 @@ func TestFindMany(t *testing.T) {
 			}
 			result, err := m.FindMany(ctx, c.params)
 			if err != nil {
+				t.Log(c.params.Where)
 				t.Error(err)
 			}
 			t.Log("expected", testutil.Pretty(c.expected))
