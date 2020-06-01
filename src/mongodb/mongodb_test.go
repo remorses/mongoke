@@ -90,8 +90,14 @@ func TestFindMany(t *testing.T) {
 	}
 
 	// clear and insert some docs
-	m := MongodbDatabaseFunctions{}
-	db, err := m.Init(ctx, uri)
+	m := MongodbDatabaseFunctions{
+		Config: mongoke.Config{
+			Mongodb: mongoke.MongodbConfig{
+				Uri: uri,
+			},
+		},
+	}
+	db, err := m.Init(ctx)
 	if err != nil {
 		t.Error(err)
 	}

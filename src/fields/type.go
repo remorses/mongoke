@@ -13,8 +13,7 @@ func QueryTypeField(p CreateFieldParams) (*graphql.Field, error) {
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
 		opts := mongoke.FindManyParams{
-			Collection:  p.Collection,
-			DatabaseUri: p.Config.DatabaseUri,
+			Collection: p.Collection,
 			OrderBy: map[string]int{
 				getDefaultCursorField(p.ReturnType, indexableNames): mongoke.DESC,
 			},

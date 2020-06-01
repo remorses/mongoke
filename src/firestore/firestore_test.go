@@ -104,8 +104,14 @@ func TestFindMany(t *testing.T) {
 	}
 
 	// clear and insert some docs
-	m := FirestoreDatabaseFunctions{}
-	db, err := m.Init(ctx, testutil.FIRESTORE_PROJECT_ID)
+	m := FirestoreDatabaseFunctions{
+		Config: mongoke.Config{
+			Firestore: mongoke.FirestoreConfig{
+				ProjectID: testutil.FIRESTORE_PROJECT_ID,
+			},
+		},
+	}
+	db, err := m.Init(ctx)
 	if err != nil {
 		t.Error(err)
 	}

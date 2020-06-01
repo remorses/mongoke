@@ -17,12 +17,17 @@ const (
 )
 
 type FirestoreDatabaseFunctions struct {
+	Config mongoke.Config
 	mongoke.DatabaseInterface
 	db *firestore.Client
 }
 
+func (self FirestoreDatabaseFunctions) projectId() string {
+	return self.Config.Firestore.ProjectID
+}
+
 func (self *FirestoreDatabaseFunctions) FindMany(ctx context.Context, p mongoke.FindManyParams) ([]mongoke.Map, error) {
-	db, err := self.Init(ctx, p.DatabaseUri)
+	db, err := self.Init(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -113,13 +118,17 @@ func isZero(v interface{}) bool {
 	return false
 }
 
-func (self *FirestoreDatabaseFunctions) Init(ctx context.Context, projectID string) (*firestore.Client, error) {
+func (self *FirestoreDatabaseFunctions) Init(ctx context.Context) (*firestore.Client, error) {
 	if self.db != nil {
 		return self.db, nil
 	}
 	ctx, _ = context.WithTimeout(ctx, TIMEOUT_CONNECT*time.Second)
 	// option.WithCredentialsJSON()
-	db, err := firestore.NewClient(ctx, projectID)
+	uri := self.projectId()
+	if uri == "" {
+		return nil, errors.New("firestore projectId is missing")
+	}
+	db, err := firestore.NewClient(ctx, uri)
 	if err != nil {
 		return nil, err
 	}

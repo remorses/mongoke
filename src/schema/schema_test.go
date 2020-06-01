@@ -31,6 +31,13 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 		}
 		u["_id"] = id
 	}
+	mongo := mongodb.MongodbDatabaseFunctions{
+		Config: mongoke.Config{
+			Mongodb: mongoke.MongodbConfig{
+				Uri: testutil.MONGODB_URI,
+			},
+		},
+	}
 	exampleUser := exampleUsers[2]
 	config := mongoke.Config{
 		Schema: `
@@ -45,8 +52,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			age: Int
 		}
 		`,
-		DatabaseFunctions: &mongodb.MongodbDatabaseFunctions{},
-		DatabaseUri:       testutil.MONGODB_URI,
+		DatabaseFunctions: &mongo,
 		Types: map[string]*mongoke.TypeConfig{
 			"User": {Collection: "users"},
 		},
@@ -238,8 +244,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			if err != nil {
 				t.Error(err)
 			}
-			m := mongodb.MongodbDatabaseFunctions{}
-			db, err := m.Init(ctx, testutil.MONGODB_URI)
+			db, err := mongo.Init(ctx)
 			if err != nil {
 				t.Error(err)
 			}

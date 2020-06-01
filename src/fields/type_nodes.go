@@ -57,7 +57,7 @@ func QueryTypeNodesField(p CreateFieldParams) (*graphql.Field, error) {
 		if p.InitialWhere != nil {
 			mergo.Merge(&decodedArgs.Where, p.InitialWhere)
 		}
-		opts, err := createFindManyParamsFromArgs(decodedArgs, p.Collection, p.Config.DatabaseUri)
+		opts, err := createFindManyParamsFromArgs(decodedArgs, p.Collection)
 		if err != nil {
 			return nil, err
 		}
@@ -260,15 +260,14 @@ func addTypeNodesArgsDefaults(p typeNodesArgs) (typeNodesArgs, error) {
 	return p, nil
 }
 
-func createFindManyParamsFromArgs(p typeNodesArgs, collection string, databaseUri string) (mongoke.FindManyParams, error) {
+func createFindManyParamsFromArgs(p typeNodesArgs, collection string) (mongoke.FindManyParams, error) {
 	last := p.Pagination.Last
 	first := p.Pagination.First
 
 	opts := mongoke.FindManyParams{
-		Collection:  collection,
-		DatabaseUri: databaseUri,
-		Where:       p.Where,
-		Limit:       p.Pagination.First,
+		Collection: collection,
+		Where:      p.Where,
+		Limit:      p.Pagination.First,
 		OrderBy: map[string]int{
 			p.CursorField: p.Direction,
 		},

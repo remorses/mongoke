@@ -35,7 +35,7 @@ var (
 )
 
 type Config struct {
-	DatabaseUri       string
+	// DatabaseUri       string
 	Mongodb           MongodbConfig          `json:"mongodb"`
 	FakeDatabase      FakeDatabaseConfig     `json:"fake_database"`
 	Firestore         FirestoreConfig        `json:"firestore"`

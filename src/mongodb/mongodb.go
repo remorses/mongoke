@@ -20,11 +20,16 @@ const (
 
 type MongodbDatabaseFunctions struct {
 	mongoke.DatabaseInterface
-	db *mongo.Database
+	db     *mongo.Database
+	Config mongoke.Config
+}
+
+func (self MongodbDatabaseFunctions) databaseUri() string {
+	return self.Config.Mongodb.Uri
 }
 
 func (self *MongodbDatabaseFunctions) FindMany(ctx context.Context, p mongoke.FindManyParams) ([]mongoke.Map, error) {
-	db, err := self.Init(ctx, p.DatabaseUri)
+	db, err := self.Init(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -50,9 +55,13 @@ func (self *MongodbDatabaseFunctions) FindMany(ctx context.Context, p mongoke.Fi
 	return nodes, nil
 }
 
-func (self *MongodbDatabaseFunctions) Init(ctx context.Context, uri string) (*mongo.Database, error) {
+func (self *MongodbDatabaseFunctions) Init(ctx context.Context) (*mongo.Database, error) {
 	if self.db != nil {
 		return self.db, nil
+	}
+	uri := self.databaseUri()
+	if uri == "" {
+		return nil, errors.New("uri is missing")
 	}
 	uriOptions, err := connstring.Parse(uri)
 	if err != nil {

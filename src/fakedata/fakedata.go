@@ -26,7 +26,7 @@ type FakeDatabaseFunctions struct {
 }
 
 func (self *FakeDatabaseFunctions) FindMany(ctx context.Context, p mongoke.FindManyParams) ([]mongoke.Map, error) {
-	db, err := self.Init(ctx, p.DatabaseUri)
+	db, err := self.Init(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (self *FakeDatabaseFunctions) FindMany(ctx context.Context, p mongoke.FindM
 	return nodes, nil
 }
 
-func (self *FakeDatabaseFunctions) Init(ctx context.Context, uri string) (lungo.IDatabase, error) {
+func (self *FakeDatabaseFunctions) Init(ctx context.Context) (lungo.IDatabase, error) {
 	if self.db != nil {
 		return self.db, nil
 	}

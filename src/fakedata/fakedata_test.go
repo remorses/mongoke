@@ -13,7 +13,6 @@ import (
 func TestFindMany(t *testing.T) {
 	collection := "users"
 	ctx := context.Background()
-	uri := testutil.MONGODB_URI
 	type Case struct {
 		params   mongoke.FindManyParams
 		expected []mongoke.Map
@@ -91,7 +90,7 @@ func TestFindMany(t *testing.T) {
 
 	// clear and insert some docs
 	m := FakeDatabaseFunctions{skipDataGeneration: true}
-	db, err := m.Init(ctx, uri)
+	db, err := m.Init(ctx)
 	if err != nil {
 		t.Error(err)
 	}

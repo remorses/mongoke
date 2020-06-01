@@ -45,16 +45,13 @@ func MakeMongokeSchema(config mongoke.Config) (graphql.Schema, error) {
 	}
 
 	if config.Mongodb.Uri != "" {
-		config.DatabaseUri = config.Mongodb.Uri
-		config.DatabaseFunctions = &mongodb.MongodbDatabaseFunctions{}
+		config.DatabaseFunctions = &mongodb.MongodbDatabaseFunctions{Config: config}
 	} else if config.Firestore.ProjectID != "" {
-		config.DatabaseUri = config.Firestore.ProjectID // TODO add the config directly inside the functions interface instead of using a uri at runtime
-		config.DatabaseFunctions = &firestore.FirestoreDatabaseFunctions{}
+		config.DatabaseFunctions = &firestore.FirestoreDatabaseFunctions{Config: config}
 	}
 
 	if config.DatabaseFunctions == nil { // by default use local fake data
 		println("using local fake data source")
-		config.DatabaseUri = ""
 		config.DatabaseFunctions = &fakedata.FakeDatabaseFunctions{Config: config}
 	}
 
