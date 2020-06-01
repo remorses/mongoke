@@ -48,10 +48,10 @@ func GetSetUpdateArgument(cache mongoke.Map, object graphql.Type) *graphql.Input
 	return set
 }
 
-func GetMutationNodePayload(cache mongoke.Map, object graphql.Type) (*graphql.Object, error) {
+func GetMutationNodePayload(cache mongoke.Map, object graphql.Type) (*graphql.NonNull, error) {
 	name := object.Name() + "MutationNodePayload"
 	// get cached value to not dupe
-	if item, ok := cache[name].(*graphql.Object); ok {
+	if item, ok := cache[name].(*graphql.NonNull); ok {
 		return item, nil
 	}
 	fields := graphql.Fields{
@@ -62,32 +62,32 @@ func GetMutationNodePayload(cache mongoke.Map, object graphql.Type) (*graphql.Ob
 			Type: graphql.Int,
 		},
 	}
-	payload := graphql.NewObject(graphql.ObjectConfig{
+	payload := graphql.NewNonNull(graphql.NewObject(graphql.ObjectConfig{
 		Name:   name,
 		Fields: fields,
-	})
+	}))
 	cache[name] = payload
 	return payload, nil
 }
 
-func GetMutationNodesPayload(cache mongoke.Map, object graphql.Type) (*graphql.Object, error) {
+func GetMutationNodesPayload(cache mongoke.Map, object graphql.Type) (*graphql.NonNull, error) {
 	name := object.Name() + "MutationNodesPayload"
 	// get cached value to not dupe
-	if item, ok := cache[name].(*graphql.Object); ok {
+	if item, ok := cache[name].(*graphql.NonNull); ok {
 		return item, nil
 	}
 	fields := graphql.Fields{
 		"returning": &graphql.Field{
-			Type: graphql.NewList(object),
+			Type: graphql.NewNonNull(graphql.NewList(object)),
 		},
 		"affectedCount": &graphql.Field{
 			Type: graphql.Int,
 		},
 	}
-	payload := graphql.NewObject(graphql.ObjectConfig{
+	payload := graphql.NewNonNull(graphql.NewObject(graphql.ObjectConfig{
 		Name:   name,
 		Fields: fields,
-	})
+	}))
 	cache[name] = payload
 	return payload, nil
 }

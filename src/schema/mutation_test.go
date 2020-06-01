@@ -41,7 +41,7 @@ func TestMutationWithEmptyFakeDatabase(t *testing.T) {
 		Config        mongoke.Config
 	}{
 		{
-			Name:     "updateOne with set",
+			Name:     "update with set",
 			Config:   config,
 			Expected: mongoke.Map{"updateUser": mongoke.Map{"returning": nil, "affectedCount": 0}},
 			Query: `
@@ -58,12 +58,29 @@ func TestMutationWithEmptyFakeDatabase(t *testing.T) {
 			`,
 		},
 		{
-			Name:     "updateOne with set and where",
+			Name:     "update with set and where",
 			Config:   config,
 			Expected: mongoke.Map{"updateUser": mongoke.Map{"returning": nil, "affectedCount": 0}},
 			Query: `
 			mutation {
 				updateUser(where: {name: {eq: "zzz"}}, set: {name: "xxx"}) {
+					affectedCount
+					returning {
+						name
+						age
+						_id
+					}
+				}
+			}
+			`,
+		},
+		{
+			Name:     "updateNodes with set",
+			Config:   config,
+			Expected: mongoke.Map{"updateUserNodes": mongoke.Map{"returning": []mongoke.Map{}, "affectedCount": 0}},
+			Query: `
+			mutation {
+				updateUserNodes(set: {name: "xxx"}) {
 					affectedCount
 					returning {
 						name

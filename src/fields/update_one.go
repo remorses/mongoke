@@ -36,7 +36,7 @@ func MutationUpdateOne(p CreateFieldParams) (*graphql.Field, error) {
 		if err != nil {
 			return nil, err
 		}
-		return res, nil // TODO go graphql complains if a nested type with non null field has parent null
+		return res, nil
 	}
 
 	// if err != nil {

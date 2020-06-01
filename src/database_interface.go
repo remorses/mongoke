@@ -21,7 +21,7 @@ type DatabaseInterface interface {
 // }
 
 type NodeMutationPayload struct {
-	Returning     interface{} `json:"returning,omitempty"`
+	Returning     interface{} `json:"returning"`
 	AffectedCount int         `json:"affectedCount"`
 }
 
