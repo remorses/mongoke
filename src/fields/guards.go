@@ -68,7 +68,7 @@ func evaluateAuthPermission(guards []mongoke.AuthGuard, jwt jwt.MapClaims, docum
 			mongoke.Map{
 				"jwt":      jwt,
 				"document": document,
-				// TODO more evaluation params like x, utility functions, ...
+				// TODO more auth evaluation params like x, utility functions, ...
 			},
 		)
 		if err != nil {

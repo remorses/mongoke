@@ -71,6 +71,7 @@ func NewFakeData(p NewFakeDataParams) (*FakeData, error) {
 		},
 	}
 
+	// add custom scalars
 	for scalarName, kind := range p.scalarsMapping {
 		instance.nodes[scalarName] = &ast.ScalarDefinition{
 			Kind: kind,
@@ -112,13 +113,8 @@ func (self *FakeData) Generate(name string) (interface{}, error) {
 	case kinds.BooleanValue:
 		return rand.Intn(2) == 0, nil
 	case kinds.ScalarDefinition:
+		// by default scalars without specified mapped type return null
 		return nil, nil
-		node := definition.(*ast.ScalarDefinition) // TODO take scalar to type mapping from options
-		res, err := self.Generate(node.Name.Value)
-		if err != nil {
-			println("error for " + node.Name.Value + " " + err.Error())
-		}
-		return res, nil
 	case kinds.EnumDefinition:
 		node := definition.(*ast.EnumDefinition)
 		randomIndex := rand.Intn(len(node.Values))
@@ -151,7 +147,8 @@ func (c FakeData) generateField(astType ast.Type) (interface{}, error) {
 	switch kind := astType.GetKind(); kind {
 	case kinds.List:
 		var list []interface{}
-		for i := 0; i < 10; i++ { // TODO list has random length
+		length := rand.Intn(20)
+		for i := 0; i < length; i++ {
 			generated, err := c.generateField(astType.(*ast.List).Type)
 			if err != nil {
 				return nil, err
@@ -217,7 +214,7 @@ func (self FakeData) getNodeFields(object ast.Node) []*ast.FieldDefinition {
 				print("cannot find union type for " + t.Name.Value)
 				continue
 			}
-			fields = append(fields, self.getNodeFields(node)...) // TODO union should choose between one of the types
+			fields = append(fields, self.getNodeFields(node)...)
 		}
 		return fields
 	default:
