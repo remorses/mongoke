@@ -3,6 +3,7 @@ package firestore
 import (
 	"context"
 	"errors"
+	"math"
 	"time"
 
 	firestore "cloud.google.com/go/firestore"
@@ -63,6 +64,65 @@ func (self *FirestoreDatabaseFunctions) FindMany(ctx context.Context, p mongoke.
 		nodes = append(nodes, node)
 	}
 	return nodes, nil
+}
+
+func (self *FirestoreDatabaseFunctions) UpdateOne(ctx context.Context, p mongoke.UpdateOneParams) (mongoke.NodeMutationPayload, error) {
+	res, err := self.updateMany(ctx, p, 1)
+	payload := mongoke.NodeMutationPayload{}
+	if err != nil {
+		return payload, err
+	}
+	if len(res.Returning) == 0 {
+		return payload, nil
+	}
+	payload.Returning = res.Returning[0]
+	payload.AffectedCount = 1
+	return payload, nil
+}
+
+func (self *FirestoreDatabaseFunctions) UpdateMany(ctx context.Context, p mongoke.UpdateOneParams) (mongoke.NodesMutationPayload, error) {
+	return self.updateMany(ctx, p, math.MaxInt32)
+}
+
+func (self *FirestoreDatabaseFunctions) updateMany(ctx context.Context, p mongoke.UpdateOneParams, count int) (mongoke.NodesMutationPayload, error) {
+	db, err := self.Init(ctx)
+	if err != nil {
+		return mongoke.NodesMutationPayload{}, err
+	}
+	var query firestore.Query = db.Collection(p.Collection).Query
+
+	query, err = applyWhereQuery(p.Where, query)
+	if err != nil {
+		return mongoke.NodesMutationPayload{}, err
+	}
+
+	iter := query.Documents(ctx)
+	defer iter.Stop()
+	payload := mongoke.NodesMutationPayload{}
+	for payload.AffectedCount < count {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return payload, err
+		}
+		_, err = doc.Ref.Set(ctx, p.Set) // maybe firestore.MergeAll
+		if err != nil {
+			return payload, err
+		}
+		payload.AffectedCount++
+		doc, err = doc.Ref.Get(ctx)
+		if err != nil {
+			return payload, err
+		}
+		var node mongoke.Map
+		if err := doc.DataTo(&node); err != nil {
+			return payload, err
+		}
+		payload.Returning = append(payload.Returning, node)
+	}
+	return payload, nil
 }
 
 func applyWhereQuery(where map[string]mongoke.Filter, q firestore.Query) (firestore.Query, error) {

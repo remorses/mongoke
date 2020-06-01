@@ -9,6 +9,7 @@ type DatabaseInterface interface {
 	FindMany(ctx context.Context, p FindManyParams) ([]Map, error)
 	InsertMany(ctx context.Context, p InsertManyParams) ([]Map, error)
 	UpdateOne(ctx context.Context, p UpdateOneParams) (NodeMutationPayload, error)
+	UpdateMany(ctx context.Context, p UpdateOneParams) (NodesMutationPayload, error)
 	// TODO add UpdateMany
 	// TODO add UpdateOne
 }
@@ -22,6 +23,11 @@ type DatabaseInterface interface {
 type NodeMutationPayload struct {
 	Returning     Map `json:"returning"`
 	AffectedCount int `json:"affectedCount"`
+}
+
+type NodesMutationPayload struct {
+	Returning     []Map `json:"returning"`
+	AffectedCount int   `json:"affectedCount"`
 }
 
 type FindManyParams struct {

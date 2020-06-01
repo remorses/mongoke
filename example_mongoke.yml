@@ -6,8 +6,8 @@
 # mongodb:
 #   uri: mongodb://localhost/testdb
 
-# firestore:
-#   project_id: example
+firestore:
+  project_id: example
 
 fake_database:
   documents_per_collection: 10
