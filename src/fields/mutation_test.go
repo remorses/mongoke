@@ -1,16 +1,17 @@
-package schema
+package fields_test
 
 import (
 	"testing"
 
 	mongoke "github.com/remorses/mongoke/src"
 	"github.com/remorses/mongoke/src/fakedata"
+	mongoke_schema "github.com/remorses/mongoke/src/schema"
 	"github.com/remorses/mongoke/src/testutil"
 )
 
 func TestMutationWithEmptyFakeDatabase(t *testing.T) {
 	db := &fakedata.FakeDatabaseFunctions{}
-	schema, _ := MakeMongokeSchema(mongoke.Config{
+	schema, _ := mongoke_schema.MakeMongokeSchema(mongoke.Config{
 		Schema: `
 		scalar ObjectId
 		interface Named {

@@ -22,7 +22,7 @@ func makeQuery(Config mongoke.Config, baseSchemaConfig graphql.SchemaConfig) (*g
 		typeConf := Config.GetTypeConfig(gqlType.Name())
 
 		if unexposedType(typeConf) {
-			println("ignoring not exposed type " + gqlType.Name())
+			// println("ignoring not exposed type " + gqlType.Name())
 			continue
 		}
 

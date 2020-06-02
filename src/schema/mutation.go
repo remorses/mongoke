@@ -19,7 +19,7 @@ func makeMutation(Config mongoke.Config, baseSchemaConfig graphql.SchemaConfig) 
 		typeConf := Config.GetTypeConfig(gqlType.Name())
 
 		if unexposedType(typeConf) {
-			println("ignoring not exposed type " + gqlType.Name())
+			// println("ignoring not exposed type " + gqlType.Name())
 			continue
 		}
 		p := fields.CreateFieldParams{

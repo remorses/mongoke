@@ -1,4 +1,4 @@
-package schema
+package fields_test
 
 import (
 	"fmt"
@@ -7,6 +7,7 @@ import (
 	mongoke "github.com/remorses/mongoke/src"
 	"github.com/remorses/mongoke/src/fakedata"
 	"github.com/remorses/mongoke/src/mongodb"
+	mongoke_schema "github.com/remorses/mongoke/src/schema"
 	"github.com/remorses/mongoke/src/testutil"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -37,7 +38,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 		},
 	}
 	exampleUser := exampleUsers[2]
-	schema, _ := MakeMongokeSchema(mongoke.Config{
+	schema, _ := mongoke_schema.MakeMongokeSchema(mongoke.Config{
 		Schema: `
 		scalar ObjectId
 		interface Named {
@@ -249,7 +250,7 @@ func TestQueryWithFakeDatabase(t *testing.T) {
 	}
 	db := &fakedata.FakeDatabaseFunctions{}
 	exampleUser := exampleUsers[2]
-	schema, _ := MakeMongokeSchema(mongoke.Config{
+	schema, _ := mongoke_schema.MakeMongokeSchema(mongoke.Config{
 		Schema: `
 		scalar ObjectId
 		interface Named {
@@ -450,7 +451,7 @@ func TestQueryWithFakeDatabase(t *testing.T) {
 func TestQueryWithEmptyFakeDatabase(t *testing.T) {
 	db := &fakedata.FakeDatabaseFunctions{}
 	emptyList := []mongoke.Map{}
-	schema, _ := MakeMongokeSchema(mongoke.Config{
+	schema, _ := mongoke_schema.MakeMongokeSchema(mongoke.Config{
 		Schema: `
 		scalar ObjectId
 		interface Named {
