@@ -10,7 +10,7 @@ import (
 	yaml "github.com/ghodss/yaml"
 )
 
-type Map map[string]interface{}
+type Map = map[string]interface{}
 
 var Operations = struct {
 	READ   string
