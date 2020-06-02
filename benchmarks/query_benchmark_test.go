@@ -17,13 +17,27 @@ func BenchmarkQuery(b *testing.B) {
 
 	db := &mock.DatabaseInterfaceMock{
 		FindManyFunc: func(ctx context.Context, p mongoke.FindManyParams) ([]map[string]interface{}, error) {
-			return []mongoke.Map{
-				{
-					"_id":  primitive.NewObjectID(),
-					"name": "1",
-					"age":  10,
+			elem := mongoke.Map{
+				"_id":  primitive.NewObjectID(),
+				"name": "1",
+				"nested": mongoke.Map{
+					"x":     1,
+					"field": "ciao",
 				},
-			}, nil
+				"age": 10,
+			}
+			return append(
+				[]mongoke.Map{},
+				elem,
+				elem,
+				elem,
+				elem,
+				elem,
+				elem,
+				elem,
+				elem,
+				elem,
+			), nil
 		},
 	}
 
@@ -38,6 +52,12 @@ func BenchmarkQuery(b *testing.B) {
 			_id: ObjectId!
 			name: String
 			age: Int!
+			nested: Obj
+		}
+
+		type Obj {
+			field: String
+			x: Int
 		}
 		`,
 		DatabaseFunctions: db,
@@ -53,10 +73,14 @@ func BenchmarkQuery(b *testing.B) {
 				Schema: s,
 				RequestString: `
 			{
-				User {
+				User(where: {name: {neq: "xxx"}}) {
 					name
 					age
 					_id
+					nested {
+						field
+						x
+					}
 				}
 			}
 			`,
