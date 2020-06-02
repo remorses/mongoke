@@ -56,6 +56,9 @@ func (self *FakeDatabaseFunctions) FindMany(ctx context.Context, p mongoke.FindM
 }
 
 func (self *FakeDatabaseFunctions) InsertMany(ctx context.Context, p mongoke.InsertManyParams) ([]mongoke.Map, error) {
+	if len(p.Data) == 0 {
+		return nil, nil
+	}
 	db, err := self.Init(ctx)
 	if err != nil {
 		return nil, err
@@ -63,7 +66,6 @@ func (self *FakeDatabaseFunctions) InsertMany(ctx context.Context, p mongoke.Ins
 	opts := options.InsertMany()
 	opts.SetOrdered(true)
 	testutil.PrettyPrint(p)
-
 	var data = make([]interface{}, len(p.Data))
 	for i, x := range p.Data {
 		data[i] = x
