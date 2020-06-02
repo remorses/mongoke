@@ -86,19 +86,19 @@ func (self *FirestoreDatabaseFunctions) UpdateMany(ctx context.Context, p mongok
 
 func (self *FirestoreDatabaseFunctions) updateMany(ctx context.Context, p mongoke.UpdateParams, count int) (mongoke.NodesMutationPayload, error) {
 	db, err := self.Init(ctx)
+	payload := mongoke.NodesMutationPayload{}
 	if err != nil {
-		return mongoke.NodesMutationPayload{}, err
+		return payload, err
 	}
 	var query firestore.Query = db.Collection(p.Collection).Query
 
 	query, err = applyWhereQuery(p.Where, query)
 	if err != nil {
-		return mongoke.NodesMutationPayload{}, err
+		return payload, err
 	}
 
 	iter := query.Documents(ctx)
 	defer iter.Stop()
-	payload := mongoke.NodesMutationPayload{}
 	// TODO use batching for firestore's updateMany
 	for payload.AffectedCount < count {
 		doc, err := iter.Next()
@@ -122,6 +122,45 @@ func (self *FirestoreDatabaseFunctions) updateMany(ctx context.Context, p mongok
 			return payload, err
 		}
 		payload.Returning = append(payload.Returning, node)
+	}
+	return payload, nil
+}
+
+func (self *FirestoreDatabaseFunctions) DeleteMany(ctx context.Context, p mongoke.DeleteManyParams) (mongoke.NodesMutationPayload, error) {
+	return self.deleteMany(ctx, p, math.MaxInt32)
+}
+
+func (self *FirestoreDatabaseFunctions) deleteMany(ctx context.Context, p mongoke.DeleteManyParams, count int) (mongoke.NodesMutationPayload, error) {
+	db, err := self.Init(ctx)
+	payload := mongoke.NodesMutationPayload{}
+	if err != nil {
+		return payload, err
+	}
+	var query firestore.Query = db.Collection(p.Collection).Query
+
+	query, err = applyWhereQuery(p.Where, query)
+	if err != nil {
+		return payload, err
+	}
+
+	iter := query.Documents(ctx)
+	defer iter.Stop()
+	// TODO use batching for firestore's updateMany
+	for payload.AffectedCount < count {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return payload, err
+		}
+		data := doc.Data()
+		_, err = doc.Ref.Delete(ctx)
+		if err != nil {
+			return payload, err
+		}
+		payload.AffectedCount++
+		payload.Returning = append(payload.Returning, data)
 	}
 	return payload, nil
 }

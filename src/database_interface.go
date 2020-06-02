@@ -10,6 +10,7 @@ type DatabaseInterface interface {
 	InsertMany(ctx context.Context, p InsertManyParams) ([]Map, error)
 	UpdateOne(ctx context.Context, p UpdateParams) (NodeMutationPayload, error)
 	UpdateMany(ctx context.Context, p UpdateParams) (NodesMutationPayload, error)
+	DeleteMany(ctx context.Context, p DeleteManyParams) (NodesMutationPayload, error)
 }
 
 // type FindOneParams struct {
@@ -44,6 +45,11 @@ type InsertManyParams struct {
 type UpdateParams struct {
 	Collection string
 	Set        Map               `mapstructure:"set" bson:"$set"`
+	Where      map[string]Filter `mapstructure:"where"`
+}
+
+type DeleteManyParams struct {
+	Collection string
 	Where      map[string]Filter `mapstructure:"where"`
 }
 

@@ -140,6 +140,31 @@ func (self *FakeDatabaseFunctions) UpdateMany(ctx context.Context, p mongoke.Upd
 	}, nil
 }
 
+func (self *FakeDatabaseFunctions) DeleteMany(ctx context.Context, p mongoke.DeleteManyParams) (mongoke.NodesMutationPayload, error) {
+	db, err := self.Init(ctx)
+	payload := mongoke.NodesMutationPayload{}
+	if err != nil {
+		return payload, err
+	}
+	opts := options.Delete()
+
+	testutil.PrettyPrint(p)
+
+	nodes, err := self.FindMany(ctx, mongoke.FindManyParams{Collection: p.Collection, Where: p.Where})
+	if err != nil {
+		return payload, err
+	}
+
+	res, err := db.Collection(p.Collection).DeleteMany(ctx, p.Where, opts)
+	if err != nil {
+		return payload, err
+	}
+	return mongoke.NodesMutationPayload{
+		AffectedCount: int(res.DeletedCount),
+		Returning:     nodes,
+	}, nil
+}
+
 func (self *FakeDatabaseFunctions) Init(ctx context.Context) (lungo.IDatabase, error) {
 	if self.db != nil {
 		return self.db, nil

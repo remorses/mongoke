@@ -10,6 +10,7 @@ import (
 )
 
 var (
+	lockDatabaseInterfaceMockDeleteMany sync.RWMutex
 	lockDatabaseInterfaceMockFindMany   sync.RWMutex
 	lockDatabaseInterfaceMockInsertMany sync.RWMutex
 	lockDatabaseInterfaceMockUpdateMany sync.RWMutex
@@ -26,10 +27,13 @@ var _ mongoke.DatabaseInterface = &DatabaseInterfaceMock{}
 //
 //         // make and configure a mocked mongoke.DatabaseInterface
 //         mockedDatabaseInterface := &DatabaseInterfaceMock{
-//             FindManyFunc: func(ctx context.Context, p mongoke.FindManyParams) ([]mongoke.Map, error) {
+//             DeleteManyFunc: func(ctx context.Context, p mongoke.DeleteManyParams) (mongoke.NodesMutationPayload, error) {
+// 	               panic("mock out the DeleteMany method")
+//             },
+//             FindManyFunc: func(ctx context.Context, p mongoke.FindManyParams) ([]map[string]interface{}, error) {
 // 	               panic("mock out the FindMany method")
 //             },
-//             InsertManyFunc: func(ctx context.Context, p mongoke.InsertManyParams) ([]mongoke.Map, error) {
+//             InsertManyFunc: func(ctx context.Context, p mongoke.InsertManyParams) ([]map[string]interface{}, error) {
 // 	               panic("mock out the InsertMany method")
 //             },
 //             UpdateManyFunc: func(ctx context.Context, p mongoke.UpdateParams) (mongoke.NodesMutationPayload, error) {
@@ -45,11 +49,14 @@ var _ mongoke.DatabaseInterface = &DatabaseInterfaceMock{}
 //
 //     }
 type DatabaseInterfaceMock struct {
+	// DeleteManyFunc mocks the DeleteMany method.
+	DeleteManyFunc func(ctx context.Context, p mongoke.DeleteManyParams) (mongoke.NodesMutationPayload, error)
+
 	// FindManyFunc mocks the FindMany method.
-	FindManyFunc func(ctx context.Context, p mongoke.FindManyParams) ([]mongoke.Map, error)
+	FindManyFunc func(ctx context.Context, p mongoke.FindManyParams) ([]map[string]interface{}, error)
 
 	// InsertManyFunc mocks the InsertMany method.
-	InsertManyFunc func(ctx context.Context, p mongoke.InsertManyParams) ([]mongoke.Map, error)
+	InsertManyFunc func(ctx context.Context, p mongoke.InsertManyParams) ([]map[string]interface{}, error)
 
 	// UpdateManyFunc mocks the UpdateMany method.
 	UpdateManyFunc func(ctx context.Context, p mongoke.UpdateParams) (mongoke.NodesMutationPayload, error)
@@ -59,6 +66,13 @@ type DatabaseInterfaceMock struct {
 
 	// calls tracks calls to the methods.
 	calls struct {
+		// DeleteMany holds details about calls to the DeleteMany method.
+		DeleteMany []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// P is the p argument value.
+			P mongoke.DeleteManyParams
+		}
 		// FindMany holds details about calls to the FindMany method.
 		FindMany []struct {
 			// Ctx is the ctx argument value.
@@ -90,8 +104,43 @@ type DatabaseInterfaceMock struct {
 	}
 }
 
+// DeleteMany calls DeleteManyFunc.
+func (mock *DatabaseInterfaceMock) DeleteMany(ctx context.Context, p mongoke.DeleteManyParams) (mongoke.NodesMutationPayload, error) {
+	if mock.DeleteManyFunc == nil {
+		panic("DatabaseInterfaceMock.DeleteManyFunc: method is nil but DatabaseInterface.DeleteMany was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+		P   mongoke.DeleteManyParams
+	}{
+		Ctx: ctx,
+		P:   p,
+	}
+	lockDatabaseInterfaceMockDeleteMany.Lock()
+	mock.calls.DeleteMany = append(mock.calls.DeleteMany, callInfo)
+	lockDatabaseInterfaceMockDeleteMany.Unlock()
+	return mock.DeleteManyFunc(ctx, p)
+}
+
+// DeleteManyCalls gets all the calls that were made to DeleteMany.
+// Check the length with:
+//     len(mockedDatabaseInterface.DeleteManyCalls())
+func (mock *DatabaseInterfaceMock) DeleteManyCalls() []struct {
+	Ctx context.Context
+	P   mongoke.DeleteManyParams
+} {
+	var calls []struct {
+		Ctx context.Context
+		P   mongoke.DeleteManyParams
+	}
+	lockDatabaseInterfaceMockDeleteMany.RLock()
+	calls = mock.calls.DeleteMany
+	lockDatabaseInterfaceMockDeleteMany.RUnlock()
+	return calls
+}
+
 // FindMany calls FindManyFunc.
-func (mock *DatabaseInterfaceMock) FindMany(ctx context.Context, p mongoke.FindManyParams) ([]mongoke.Map, error) {
+func (mock *DatabaseInterfaceMock) FindMany(ctx context.Context, p mongoke.FindManyParams) ([]map[string]interface{}, error) {
 	if mock.FindManyFunc == nil {
 		panic("DatabaseInterfaceMock.FindManyFunc: method is nil but DatabaseInterface.FindMany was just called")
 	}
@@ -126,7 +175,7 @@ func (mock *DatabaseInterfaceMock) FindManyCalls() []struct {
 }
 
 // InsertMany calls InsertManyFunc.
-func (mock *DatabaseInterfaceMock) InsertMany(ctx context.Context, p mongoke.InsertManyParams) ([]mongoke.Map, error) {
+func (mock *DatabaseInterfaceMock) InsertMany(ctx context.Context, p mongoke.InsertManyParams) ([]map[string]interface{}, error) {
 	if mock.InsertManyFunc == nil {
 		panic("DatabaseInterfaceMock.InsertManyFunc: method is nil but DatabaseInterface.InsertMany was just called")
 	}
