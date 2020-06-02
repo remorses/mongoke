@@ -12,6 +12,7 @@ bin
 # Distribution / packaging
 .Python
 build/
+coverage.out
 develop-eggs/
 dist/
 downloads/
