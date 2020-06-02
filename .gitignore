@@ -5,6 +5,8 @@ __pycache__/
 
 # C extensions
 *.so
+*.out
+*.test
 play*
 node_modules
 .DS_Store
