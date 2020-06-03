@@ -57,15 +57,18 @@ func (self *MongodbDatabaseFunctions) FindMany(ctx context.Context, p mongoke.Fi
 	return nodes, nil
 }
 
-func (self *MongodbDatabaseFunctions) InsertMany(ctx context.Context, p mongoke.InsertManyParams) ([]mongoke.Map, error) {
+func (self *MongodbDatabaseFunctions) InsertMany(ctx context.Context, p mongoke.InsertManyParams) (mongoke.NodesMutationPayload, error) {
+	payload := mongoke.NodesMutationPayload{}
+	if len(p.Data) == 0 {
+		return payload, nil
+	}
 	db, err := self.Init(ctx)
 	if err != nil {
-		return nil, err
+		return payload, err
 	}
 	opts := options.InsertMany()
 	opts.SetOrdered(true)
 	testutil.PrettyPrint(p)
-	// TODO stupid costly conversion
 	var data = make([]interface{}, len(p.Data))
 	for i, x := range p.Data {
 		data[i] = x
@@ -73,13 +76,16 @@ func (self *MongodbDatabaseFunctions) InsertMany(ctx context.Context, p mongoke.
 	res, err := db.Collection(p.Collection).InsertMany(ctx, data, opts)
 	if err != nil {
 		// log.Print("Error in findMany", err)
-		return nil, err
+		return payload, err
 	}
 	fmt.Println(res.InsertedIDs)
 	for i, id := range res.InsertedIDs {
 		p.Data[i]["_id"] = id
 	}
-	return p.Data, nil
+	return mongoke.NodesMutationPayload{
+		Returning:     p.Data[:len(res.InsertedIDs)],
+		AffectedCount: len(res.InsertedIDs),
+	}, nil
 }
 
 func (self *MongodbDatabaseFunctions) UpdateOne(ctx context.Context, p mongoke.UpdateParams) (mongoke.NodeMutationPayload, error) {

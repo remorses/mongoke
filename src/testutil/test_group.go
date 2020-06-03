@@ -27,21 +27,26 @@ type TestCase struct {
 
 func NewTestGroup(t *testing.T, p NewTestGroupParams) {
 	ctx := context.Background()
-	_, err := p.Database.DeleteMany(ctx, mongoke.DeleteManyParams{
-		Collection: p.Collection,
-	})
-	if err != nil {
-		t.Error(err)
+	if p.Database != nil {
+		_, err := p.Database.DeleteMany(ctx, mongoke.DeleteManyParams{
+			Collection: p.Collection,
+		})
+
+		if err != nil {
+			t.Error(err)
+		}
 	}
 	for _, testCase := range p.Tests {
 		t.Run(testCase.Name, func(t *testing.T) {
 			t.Log()
 
 			// t.Log(testCase.Name)
-			p.Database.InsertMany(ctx, mongoke.InsertManyParams{
-				Collection: p.Collection,
-				Data:       p.Documents,
-			})
+			if p.Database != nil {
+				p.Database.InsertMany(ctx, mongoke.InsertManyParams{
+					Collection: p.Collection,
+					Data:       p.Documents,
+				})
+			}
 			schema := testCase.Schema
 			if testCase.ExpectedError {
 				actualErr := QuerySchemaShouldFail(t, schema, testCase.Query)
@@ -59,11 +64,13 @@ func NewTestGroup(t *testing.T, p NewTestGroupParams) {
 			if diff := deep.Equal(res, expected); diff != nil {
 				t.Error(diff)
 			}
-			_, err := p.Database.DeleteMany(ctx, mongoke.DeleteManyParams{
-				Collection: p.Collection,
-			})
-			if err != nil {
-				t.Error(err)
+			if p.Database != nil {
+				_, err := p.Database.DeleteMany(ctx, mongoke.DeleteManyParams{
+					Collection: p.Collection,
+				})
+				if err != nil {
+					t.Error(err)
+				}
 			}
 		})
 	}

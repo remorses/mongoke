@@ -27,13 +27,13 @@ func MutationInsertNodes(p CreateFieldParams) (*graphql.Field, error) {
 			return nil, err
 		}
 		// TODO insert only nodes the user can insert, based on expressions
-		nodes, err := p.Config.DatabaseFunctions.InsertMany(
+		res, err := p.Config.DatabaseFunctions.InsertMany(
 			params.Context, opts,
 		)
 		if err != nil {
 			return nil, err
 		}
-		return mongoke.Map{"returning": nodes, "affectedCount": len(nodes)}, nil
+		return res, nil
 	}
 
 	// if err != nil {

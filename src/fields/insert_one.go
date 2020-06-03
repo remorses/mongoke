@@ -35,13 +35,16 @@ func MutationInsertOne(p CreateFieldParams) (*graphql.Field, error) {
 		}
 
 		// TODO insert only nodes the user can insert, based on expressions
-		nodes, err := p.Config.DatabaseFunctions.InsertMany(
+		res, err := p.Config.DatabaseFunctions.InsertMany(
 			params.Context, opts,
 		)
 		if err != nil {
 			return nil, err
 		}
-		return mongoke.Map{"returning": nodes[0], "affectedCount": 1}, nil
+		if len(res.Returning) == 0 {
+			return nil, errors.New("could not insert document")
+		}
+		return mongoke.Map{"returning": res.Returning[0], "affectedCount": res.AffectedCount}, nil
 	}
 
 	// if err != nil {

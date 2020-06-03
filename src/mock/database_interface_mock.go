@@ -33,7 +33,7 @@ var _ mongoke.DatabaseInterface = &DatabaseInterfaceMock{}
 //             FindManyFunc: func(ctx context.Context, p mongoke.FindManyParams) ([]map[string]interface{}, error) {
 // 	               panic("mock out the FindMany method")
 //             },
-//             InsertManyFunc: func(ctx context.Context, p mongoke.InsertManyParams) ([]map[string]interface{}, error) {
+//             InsertManyFunc: func(ctx context.Context, p mongoke.InsertManyParams) (mongoke.NodesMutationPayload, error) {
 // 	               panic("mock out the InsertMany method")
 //             },
 //             UpdateManyFunc: func(ctx context.Context, p mongoke.UpdateParams) (mongoke.NodesMutationPayload, error) {
@@ -56,7 +56,7 @@ type DatabaseInterfaceMock struct {
 	FindManyFunc func(ctx context.Context, p mongoke.FindManyParams) ([]map[string]interface{}, error)
 
 	// InsertManyFunc mocks the InsertMany method.
-	InsertManyFunc func(ctx context.Context, p mongoke.InsertManyParams) ([]map[string]interface{}, error)
+	InsertManyFunc func(ctx context.Context, p mongoke.InsertManyParams) (mongoke.NodesMutationPayload, error)
 
 	// UpdateManyFunc mocks the UpdateMany method.
 	UpdateManyFunc func(ctx context.Context, p mongoke.UpdateParams) (mongoke.NodesMutationPayload, error)
@@ -175,7 +175,7 @@ func (mock *DatabaseInterfaceMock) FindManyCalls() []struct {
 }
 
 // InsertMany calls InsertManyFunc.
-func (mock *DatabaseInterfaceMock) InsertMany(ctx context.Context, p mongoke.InsertManyParams) ([]map[string]interface{}, error) {
+func (mock *DatabaseInterfaceMock) InsertMany(ctx context.Context, p mongoke.InsertManyParams) (mongoke.NodesMutationPayload, error) {
 	if mock.InsertManyFunc == nil {
 		panic("DatabaseInterfaceMock.InsertManyFunc: method is nil but DatabaseInterface.InsertMany was just called")
 	}

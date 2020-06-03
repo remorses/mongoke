@@ -1,10 +1,14 @@
 package fields_test
 
 import (
+	"context"
+	"errors"
 	"testing"
 
+	"github.com/graphql-go/graphql"
 	mongoke "github.com/remorses/mongoke/src"
 	"github.com/remorses/mongoke/src/fakedata"
+	"github.com/remorses/mongoke/src/mock"
 	mongoke_schema "github.com/remorses/mongoke/src/schema"
 	"github.com/remorses/mongoke/src/testutil"
 )
@@ -124,4 +128,60 @@ func TestMutationWithEmptyFakeDatabase(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestMutationWithMockedDb(t *testing.T) {
+	typeDefs := `
+	scalar ObjectId
+	interface Named {
+		name: String
+	}
+
+	type User implements Named {
+		_id: ObjectId
+		name: String
+		age: Int
+	}
+	`
+	typesConf := map[string]*mongoke.TypeConfig{
+		"User": {Collection: "users"},
+	}
+
+	testutil.NewTestGroup(t, testutil.NewTestGroupParams{
+		Collection: "users",
+		Documents:  []mongoke.Map{},
+		Tests: []testutil.TestCase{
+			{
+				Name: "insertone returns error",
+				Schema: takeFirst(mongoke_schema.MakeMongokeSchema(mongoke.Config{
+					Schema: typeDefs,
+					DatabaseFunctions: &mock.DatabaseInterfaceMock{
+						InsertManyFunc: func(ctx context.Context, p mongoke.InsertManyParams) (mongoke.NodesMutationPayload, error) {
+							return mongoke.NodesMutationPayload{}, errors.New("error")
+						},
+					},
+					Types: typesConf,
+				})),
+				// Expected:      mongoke.Map{"insertUser": mongoke.Map{"returning": nil, "affectedCount": 0}},
+				ExpectedError: true,
+				Query: `
+				mutation {
+					insertUser(data: {name: "xxx"}) {
+						affectedCount
+						returning {
+							name
+							age
+							_id
+						}
+					}
+				}
+				`,
+			},
+		},
+	})
+}
+
+func takeFirst(x, y interface{}) graphql.Schema {
+	// t.Error(y)
+	return x.(graphql.Schema)
 }

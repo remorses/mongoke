@@ -227,19 +227,23 @@ func isZero(v interface{}) bool {
 	return false
 }
 
-func (self *FirestoreDatabaseFunctions) InsertMany(ctx context.Context, p mongoke.InsertManyParams) ([]mongoke.Map, error) {
+func (self *FirestoreDatabaseFunctions) InsertMany(ctx context.Context, p mongoke.InsertManyParams) (mongoke.NodesMutationPayload, error) {
 	db, err := self.Init(ctx)
+	payload := mongoke.NodesMutationPayload{}
 	if err != nil {
-		return nil, err
+		return payload, err
 	}
 	for _, x := range p.Data {
 		_, _, err := db.Collection(p.Collection).Add(ctx, x)
 		if err != nil {
-			return nil, err
+			return payload, err
 		}
 		// TODO if firestore uses some id i should add it to the returned nodes
+		payload.AffectedCount++
+		payload.Returning = append(payload.Returning, x)
+
 	}
-	return p.Data, nil
+	return payload, nil
 }
 
 func (self *FirestoreDatabaseFunctions) Init(ctx context.Context) (*firestore.Client, error) {
