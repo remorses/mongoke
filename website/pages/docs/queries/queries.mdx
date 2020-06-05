@@ -1,0 +1,25 @@
+import { Graphiql } from '../../components'
+
+# Queries
+
+The following queries will use the goke schema below
+
+```graphql
+type User {
+    name: String
+    email: String
+    isVerified: Boolean
+}
+```
+
+Goke exposes queries to fetch your database documents
+
+<Graphiql
+    query={`
+{
+    countries {
+        name
+    }
+}
+`}
+/>
