@@ -32,3 +32,32 @@ const Page = (props) => {
 }
 
 export default Page
+
+
+
+// const Playground = dynamic(
+//     () =>
+//         import('graphql-playground-react').then(
+//             ({
+//                 Playground,
+//                 store,
+//             }: {
+//                 Playground: FC<PlaygroundWrapperProps>
+//                 store
+//             }) => {
+//                 console.log('init')
+//                 return () => {
+//                     return (
+//                         <Provider store={store}>
+//                             <Playground
+//                                 // settings={{ 'editor.theme': 'light' } as any}
+//                                 subscriptionEndpoint={API_URL}
+//                                 endpoint={API_URL}
+//                             />
+//                         </Provider>
+//                     )
+//                 }
+//             },
+//         ),
+//     { ssr: false },
+// )
