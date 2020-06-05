@@ -22,7 +22,6 @@ var (
 )
 
 type FakeDatabaseFunctions struct {
-	mongoke.DatabaseInterface
 	Config             mongoke.Config
 	skipDataGeneration bool
 	db                 lungo.IDatabase

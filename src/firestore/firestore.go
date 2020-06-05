@@ -19,8 +19,7 @@ const (
 
 type FirestoreDatabaseFunctions struct {
 	Config mongoke.Config
-	mongoke.DatabaseInterface
-	db *firestore.Client
+	db     *firestore.Client
 }
 
 func (self FirestoreDatabaseFunctions) projectId() string {

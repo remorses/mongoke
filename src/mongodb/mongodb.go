@@ -21,7 +21,6 @@ const (
 )
 
 type MongodbDatabaseFunctions struct {
-	mongoke.DatabaseInterface
 	db     *mongo.Database
 	Config mongoke.Config
 }
