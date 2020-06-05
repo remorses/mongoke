@@ -1,4 +1,4 @@
-package fields_test
+package schema_test
 
 import (
 	"fmt"
