@@ -29,6 +29,13 @@ jobs:
           version_file: VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          version: latest
+          args: release --rm-dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     # - name: Publish to Dockerhub
     #   uses: elgohr/Publish-Docker-Github-Action@master
     #   with:
