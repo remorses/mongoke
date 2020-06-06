@@ -14,7 +14,7 @@ jobs:
               with:
                   node-version: 12
                   registry-url: https://registry.npmjs.org/
-            - run: cd cli && yarn
+            - run: cd cli && yarn install --ignore-scripts
             - run: cd cli && yarn test
             - run: cd cli && tsc
             - name: Bump version
