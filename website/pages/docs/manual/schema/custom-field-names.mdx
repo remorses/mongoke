@@ -1,0 +1,58 @@
+
+Customise auto-generated field names
+====================================
+
+Table of contents
+
+It is possible to override the auto-generated table and column field
+names exposed over the GraphQL API.
+
+Note
+
+This feature is supported in versions `v1.0.0-beta.8` and later.
+
+Expose columns with a different name in the GraphQL API
+-------------------------------------------------------
+
+api\_tabs
+
+Console
+
+Head to the `Data -> [table-name] -> Modify`
+
+/img/graphql/manual/schema/custom-field-name-column.png
+
+Metadata API
+
+A custom field name can be set for a column via the following 2 methods:
+
+-   passing a `table_config`{.interpreted-text role="ref"} with the
+    `CustomColumnNames`{.interpreted-text role="ref"} to the
+    `track_table_v2`{.interpreted-text role="ref"} API while tracking a
+    table
+-   using the `set_table_custom_fields`{.interpreted-text role="ref"}
+    API to set the `CustomColumnNames`{.interpreted-text role="ref"}
+
+Expose table root fields with a different name in the GraphQL API
+-----------------------------------------------------------------
+
+api\_tabs
+
+Console
+
+Head to the `Data -> [table-name] -> Modify`
+
+/img/graphql/manual/schema/custom-field-name-root-fields.png
+
+Metadata API
+
+A custom field name can be set for a table root field via the following
+2 methods:
+
+-   passing a `table_config`{.interpreted-text role="ref"} with the
+    `custom_root_fields`{.interpreted-text role="ref"} names to the
+    `track_table_v2`{.interpreted-text role="ref"} API while tracking a
+    table
+-   using the `set_table_custom_fields`{.interpreted-text role="ref"}
+    API to set the `custom_root_fields`{.interpreted-text role="ref"}
+    names

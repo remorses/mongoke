@@ -11,7 +11,7 @@
         "@chakra-ui/core": "0.x",
         "@emotion/core": "^10.0.28",
         "@emotion/styled": "^10.0.27",
-        "dokz": "latest",
+        "dokz": "^1.0.20",
         "graphql": "^15.0.0",
         "layout-kit-react": "^0.0.3",
         "mini-graphiql": "^1.0.4",

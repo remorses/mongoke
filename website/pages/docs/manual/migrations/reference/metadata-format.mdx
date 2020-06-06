@@ -1,0 +1,36 @@
+
+Metadata format reference
+=========================
+
+Table of contents
+
+Introduction
+------------
+
+With `config v2`, the metadata that is exported from the server is a
+directory of multiple files.
+
+Note
+
+For `config v1`, see `metadata_file_format_v1`{.interpreted-text
+role="ref"}.
+
+Metadata directory format
+-------------------------
+
+The following files will be generated in the `metadata/` directory of
+your project.
+
+-   `version.yaml`: Contains the metadata version of the server
+-   `tables.yaml`: Contains the metadata related to tables
+-   `remote_schemas.yaml`: Contains the metadata related to
+    `remote schemas<remote_schemas>`{.interpreted-text role="ref"}
+-   `functions.yaml`: Contains the metadata related to
+    `custom functions<custom_sql_functions>`{.interpreted-text
+    role="ref"}
+-   `allow_list.yaml`: Contains the metadata related to
+    `allow lists<allow_list>`{.interpreted-text role="ref"}
+-   `actions.yaml`: Contains the metadata related to
+    `actions<actions>`{.interpreted-text role="ref"}
+-   `actions.graphql`: Contains all the action definition and custom
+    type definitions

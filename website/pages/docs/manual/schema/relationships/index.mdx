@@ -1,0 +1,84 @@
+
+Relationships between tables/views
+==================================
+
+Table of contents
+
+To make
+`nested object queries <nested_object_queries>`{.interpreted-text
+role="ref"}, the tables/views in your database need to be connected via
+relationships.
+
+Let\'s say we have the following tables in our database: `author`,
+`passport_info`, `article` and `tag`.
+
+Table relationships
+-------------------
+
+The tables/views in any relational database are typically related to
+each other via one of the following types of table relationships:
+
++------------+-----------------------+--------------------------------+
+| Type       | Example               | Meaning                        |
++============+=======================+================================+
+| `one-to-on | `author` and          | -   an `author` can have one   |
+| e`         | `passport_info`       |     `passport_info`            |
+|            |                       | -   a `passport_info` can have |
+|            |                       |     one `owner`                |
++------------+-----------------------+--------------------------------+
+| `one-to-ma | `author` and          | -   an `author` can have many  |
+| ny`        | `article`             |     `articles`                 |
+|            |                       | -   an `article` can have one  |
+|            |                       |     `author`                   |
++------------+-----------------------+--------------------------------+
+| `many-to-m | `article` and `tag`   | -   an `article` can have many |
+| any`       |                       |     `tags`                     |
+|            |                       | -   a `tag` can have many      |
+|            |                       |     `articles`                 |
++------------+-----------------------+--------------------------------+
+
+GraphQL schema relationships
+----------------------------
+
+Each table relationship, as you can see from the above section, will
+have two component relationships (one in either direction) in the
+GraphQL schema. These relationships can be one of the following types:
+
+  ------------------------------------------------------------------------------
+  Type                    Example           Meaning
+  ----------------------- ----------------- ------------------------------------
+  `object relationship`   an `article` can  an `article` object will have a
+  (one-to-one)            have one `author` single nested author object called
+                                            `author`
+
+  `array relationship`    an `author` can   an `author` object will have an
+  (one-to-many)           have many         array of nested article objects
+                          `articles`        called `articles`
+  ------------------------------------------------------------------------------
+
+Note
+
+The relationship name is used to refer to the nested objects in queries.
+For example, \"`articles`\" of an `author` and \"`author`\" of an
+`article`.
+
+Managing GraphQL relationships
+------------------------------
+
+See the following to manage the object/array relationships between
+tables/views for the GraphQL schema:
+
+-   `create_relationships`{.interpreted-text role="ref"}
+-   `rename_relationships`{.interpreted-text role="ref"}
+
+Table relationships modelling guides
+------------------------------------
+
+The following guides will help you model the different types of table
+relationships in the database:
+
+-   `one_to_one_modelling`{.interpreted-text role="ref"}
+-   `one_to_many_modelling`{.interpreted-text role="ref"}
+-   `many_to_many_modelling`{.interpreted-text role="ref"}
+
+create rename Database modelling \<database-modelling/index\>

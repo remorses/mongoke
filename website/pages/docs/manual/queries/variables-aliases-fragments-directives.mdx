@@ -1,0 +1,135 @@
+
+Using variables / aliases / fragments / directives in queries
+=============================================================
+
+Table of contents
+
+Using variables
+---------------
+
+In order to make a query re-usable, it can be made dynamic by using
+variables.
+
+**Example:** Fetch an author by their `author_id`:
+
+  articles(
+    where: { author_id: { _eq: $author_id } }
+  ) {
+    id
+    title
+  }
+
+
+Variables and performance
+
+Variables have an impact on query performance. Refer to
+`query performance <query_performance>`{.interpreted-text role="ref"} to
+learn more about Hasura\'s query plan caching and about optimizing when
+using variables.
+
+Using aliases
+-------------
+
+Aliases can be used to return objects with a different name than their
+field name. This is especially useful while fetching the same type of
+objects with different arguments in the same query.
+
+**Example:** First, fetch all articles. Second, fetch the two top-rated
+articles. Third, fetch the worst-rated article:
+
+  articles {
+    title
+    rating
+  }
+  topTwoArticles: articles(
+    order_by: {rating: desc},
+    limit: 2
+  ) {
+    title
+    rating
+  }
+  worstArticle: articles(
+    order_by: {rating: asc},
+    limit: 1
+  ) {
+    title
+    rating
+  }
+
+
+Using fragments
+---------------
+
+Sometimes, queries can get long and confusing. A fragment is a set of
+fields with any chosen name. This fragment can then be used to represent
+the defined set.
+
+**Example:** Creating a fragment for a set of `article` fields (`id` and
+`title`) and using it in a query:
+
+  id
+  title
+}
+query getArticles {
+  articles {
+    ...articleFields
+  }
+  topTwoArticles: articles(
+    order_by: {rating: desc},
+    limit: 2
+  ) {
+    ...articleFields
+  }
+
+
+Using directives
+----------------
+
+Directives make it possible to include or skip a field based on a
+boolean expression passed as a query variable.
+
+### \@include(if: Boolean)
+
+With `@include(if: Boolean)`, it is possible to include a field in the
+query result based on a Boolean expression.
+
+**Example:** The query result includes the field `publisher`, as
+`$with_publisher` is set to `true`:
+
+  articles {
+    title
+    publisher @include(if: $with_publisher)
+  }
+
+
+**Example:** The query result doesn\'t include the field `publisher`, as
+`$with_publisher` is set to `false`:
+
+  articles {
+    title
+    publisher @include(if: $with_publisher)
+  }
+
+
+### \@skip(if: Boolean)
+
+With `@skip(if: Boolean)`, it is possible to exclude (skip) a field in
+the query result based on a Boolean expression.
+
+**Example:** The query result doesn\'t include the field `publisher`, as
+`$with_publisher` is set to `true`:
+
+  articles {
+    title
+    publisher @skip(if: $with_publisher)
+  }
+
+
+**Example:** The query result includes the field `publisher`, as
+`$with_publisher` is set to `false`:
+
+  articles {
+    title
+    publisher @skip(if: $with_publisher)
+  }
+

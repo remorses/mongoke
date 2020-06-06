@@ -1,0 +1,29 @@
+
+Using multiple arguments in a query
+===================================
+
+Table of contents
+
+Multiple arguments can be used together in the same query.
+
+For example, you can use the `where` argument to filter the results and
+then use the `order_by` argument to sort them.
+
+**For example**, fetch a list of authors and only 2 of their published
+articles that are sorted by their date of publication:
+
+  author {
+    id
+    name
+    articles(
+      where: {is_published: {_eq: true}},
+      order_by: {published_on: desc},
+      limit: 2
+    ) {
+      id
+      title
+      is_published
+      published_on
+    }
+  }
+

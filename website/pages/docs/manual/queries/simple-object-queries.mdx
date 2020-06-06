@@ -1,0 +1,48 @@
+
+Simple object queries
+=====================
+
+Table of contents
+
+You can fetch a single node or multiple nodes of the same type using a
+simple object query.
+
+Fetch list of objects
+---------------------
+
+**Example:** Fetch a list of authors:
+
+  author {
+    id
+    name
+  }
+
+
+Fetch an object using its primary key
+-------------------------------------
+
+**Example:** Fetch an author using their primary key:
+
+  author_by_pk(id: 1) {
+    id
+    name
+  }
+
+
+Fetch value from JSON/JSONB column at particular path
+-----------------------------------------------------
+
+**Example:** Fetch the city and phone number of an author from their
+JSONB address column:
+
+  author_by_pk(id: 1) {
+    id
+    name
+    address
+    city: address(path: \"$.city\")
+    phone: address(path: \"$.phone_numbers.[0]\")
+  }
+
+
+See the `API reference <SimpleObject>`{.interpreted-text role="ref"} for
+more details.

@@ -1,0 +1,74 @@
+
+Migrations & Metadata
+=====================
+
+Table of contents
+
+Introduction
+------------
+
+It is a typical requirement to export an existing Hasura \"setup\" so
+that you can apply it on another instance to reproduce the same setup.
+For example, to achieve a dev -\> staging -\> production environment
+promotion scenario.
+
+Note
+
+This documentation is for Hasura migrations `config v2`, supported from
+`v1.2.0`. (See `upgrade guide <migrations_upgrade_v2>`{.interpreted-text
+role="ref"}).
+
+For `config v1`, see `migrations_v1`{.interpreted-text role="ref"}.
+
+How is Hasura state managed?
+----------------------------
+
+Hasura needs 2 pieces of information to recreate your GraphQL API, the
+underlying PG database schema and the Hasura metadata which is used to
+describe the exposed GraphQL API.
+
+The `Hasura CLI <hasuracli-manual>`{.interpreted-text role="ref"} lets
+you manage these pieces of information as you build your project via:
+
+### Database migration files
+
+The state of your PG database is managed via incremental SQL migration
+files. These migration files can be applied one after the other to
+achieve the final DB schema.
+
+DB migration files can be generated incrementally and can by applied in
+parts to reach particular checkpoints. They can be used to roll-back the
+DB schema as well.
+
+### Hasura metadata files
+
+The state of Hasura metadata is managed via snapshots of the metadata.
+These snapshots can be applied as a whole to configure Hasura to a state
+represented in the snapshot.
+
+Hasura metadata can be exported and imported as a whole.
+
+Setting up migrations
+---------------------
+
+See `migrations_basics`{.interpreted-text role="ref"}.
+
+Advanced use cases
+------------------
+
+-   `auto_apply_migrations`{.interpreted-text role="ref"}
+-   `manual_migrations`{.interpreted-text role="ref"}
+-   `roll_back_migrations`{.interpreted-text role="ref"}
+-   `seed_data_migration`{.interpreted-text role="ref"}
+
+Reference documentation
+-----------------------
+
+-   `migrations_how_it_works`{.interpreted-text role="ref"}
+-   `Migration file format <migration_file_format_v2>`{.interpreted-text
+    role="ref"}
+-   `Metadata format <metadata_format_v2>`{.interpreted-text role="ref"}
+
+Basics \<basics\> Manage metadata \<manage-metadata\> Advanced use cases
+\<advanced/index\> Reference documentation \<reference/index\> Upgrading
+to config v2 \<upgrade-v2\> Config v1 \<config-v1/index\>

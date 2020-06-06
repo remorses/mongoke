@@ -1,0 +1,62 @@
+
+Nested object queries
+=====================
+
+Table of contents
+
+You can use the object (one-to-one) or array (one-to-many)
+`relationships <relationships>`{.interpreted-text role="ref"} defined in
+your schema to make a nested query i.e. fetch data for a type along with
+data from a nested or related type.
+
+The **name of the nested object** is the same as the name of the
+object/array relationship configured in the console.
+
+You can also filter, sort, aggregate and paginate nested objects in case
+of array relationships. These are not exposed for object relationships
+as they have only one nested object.
+
+Fetch nested object using an object relationship
+------------------------------------------------
+
+The following is an example of a nested object query using the **object
+relationship** between an article and an author.
+
+**Example:** Fetch a list of articles and the name of each article's
+author:
+
+  article {
+    id
+    title
+    author {
+      name
+    }
+  }
+
+
+Fetch nested objects using an array relationship
+------------------------------------------------
+
+The following is an example of a nested object query using the **array
+relationship** between an author and articles.
+
+**Example:** Fetch a list of authors and a nested list of each author's
+articles:
+
+  author {
+    id
+    name
+    articles {
+      id
+      title
+    }
+  }
+
+
+Note
+
+You can also `filter <nested_filter>`{.interpreted-text role="ref"},
+`sort <nested_sort>`{.interpreted-text role="ref"},
+`aggregate <nested_aggregate>`{.interpreted-text role="ref"} and
+`paginate <nested_paginate>`{.interpreted-text role="ref"} nested
+objects in case of array relationships.

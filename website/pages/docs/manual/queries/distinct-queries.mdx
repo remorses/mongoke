@@ -1,0 +1,56 @@
+
+Distinct query results
+======================
+
+Table of contents
+
+The **distinct\_on** argument
+-----------------------------
+
+You can fetch rows with only distinct values of a column using the
+`distinct_on` argument.
+
+It is typically recommended to use `order_by` along with `distinct_on`
+to ensure we get predictable results *(otherwise any arbitrary row with
+a distinct value of the column may be returned)*. Note that the
+`distinct_on` column needs to be the first column in the `order_by`
+expression. See `sort queries <sort_query_results>`{.interpreted-text
+role="ref"} for more info on using `order_by`.
+
+```graphql
+employee (
+  distinct_on: [employee_select_column]
+  order_by: [employee_order_by]
+): [employee]!
+
+# select column enum type for "employee" table
+enum employee_select_column {
+  id
+  name
+  department
+  salary
+}
+```
+
+You can see the complete specification of the `distinct_on` argument in
+the `API reference <DistinctOnExp>`{.interpreted-text role="ref"}.
+
+Fetch results with distinct values of a particular field
+--------------------------------------------------------
+
+**For example**, fetch the employee with the highest salary from each
+department:
+
+  employee (
+    distinct_on: [department]
+    order_by: [
+      {department: asc},
+      {salary: desc}
+    ]
+  ) {
+    id
+    name
+    department
+    salary
+  }
+

@@ -1,0 +1,83 @@
+
+Aggregation queries
+===================
+
+Table of contents
+
+Aggregate fields
+----------------
+
+You can fetch aggregations on columns along with nodes using an
+aggregation query.
+
+The **name of the aggregate field** is of the form
+`<field-name> + _aggregate`.
+
+Common aggregation functions are `count`, `sum`, `avg`, `max`, `min`,
+etc. You can see the complete specification of the aggregate field in
+the `API reference <AggregateObject>`{.interpreted-text role="ref"}.
+
+Note
+
+For more advanced use cases, you can use
+`views <custom_views>`{.interpreted-text role="ref"} or
+`custom SQL functions <custom_sql_functions>`{.interpreted-text
+role="ref"}.
+
+Fetch aggregated data of an object
+----------------------------------
+
+**Example:** Fetch a list of articles with aggregated data of their
+rating:
+
+  article_aggregate {
+    aggregate {
+      count
+      sum {
+        rating
+      }
+      avg {
+        rating
+      }
+      max {
+        rating
+      }
+    }
+    nodes {
+      id
+      title
+      rating
+    }
+  }
+
+
+Fetch aggregated data on nested objects
+---------------------------------------
+
+The following is an example of a nested object query with aggregations
+on the **array relationship** between an author and articles.
+
+**Example:** Fetch author with id \"1\" and a nested list of articles
+with aggregated data of their rating:
+
+  author (where: {id: {_eq: 1}}) {
+    id
+    name
+    articles_aggregate {
+      aggregate {
+        count
+        avg {
+          rating
+        }
+        max {
+          rating
+        }
+      }
+      nodes {
+        id
+        title
+        rating
+      }
+    }
+  }
+

@@ -1,0 +1,51 @@
+
+Health check API Reference
+==========================
+
+Table of contents
+
+The Health API is a public endpoint which gives info on the server
+health.
+
+Endpoint
+--------
+
+All requests are `GET` requests to the `/healthz` endpoint.
+
+API Spec
+--------
+
+### Request
+
+```http
+GET /healthz HTTP/1.1
+```
+
+### Response
+
+Depending on the server health status any of the following responses can
+be returned:
+
+  Server condition                                                            HTTP Status   Message
+  --------------------------------------------------------------------------- ------------- --------------------------------------
+  All healthy                                                                 200           OK
+  Serving requests but some metadata objects are inconsistent/not-available   200           WARN: inconsistent objects in schema
+  Unhealthy                                                                   500           ERROR
+
+Note
+
+If there are metadata inconsistencies, you should use the Hasura console
+or the
+[get\_inconsistent\_metadata](schema-metadata-api/manage-metadata.html#get-inconsistent-metadata)
+API to find out what the inconsistent objects are and resolve them.
+
+#### Sample response
+
+```http
+HTTP/1.1 200 OK
+```
+
+Disabling Health check API
+--------------------------
+
+The `healthz` API endpoint is public and cannot be disabled

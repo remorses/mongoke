@@ -1,0 +1,44 @@
+
+Actions permissions
+===================
+
+Table of contents
+
+Introduction
+------------
+
+As with the other fields in the GraphQL schema, users need to be given
+access to an action.
+
+Set action permissions
+----------------------
+
+api\_tabs
+
+Console
+
+Head to the `Actions -> [action-name] -> Permissions` tab in the
+console.
+
+/img/graphql/manual/actions/actions-permissions.png
+
+Hit `Save` to give the role permission to access the action.
+
+CLI
+
+Go to `metadata/actions.yaml` in the Hasura project directory.
+
+Update the definition of the `insertAuthor` action as:
+
+```yaml
+- actions
+  - name: insertAuthor
+    definition:
+      kind: synchronous
+      handler: '{{ACTIONS_BASE_URL}}/insertAuthor'
+    permissions:
+    - role: user
+    - role: publisher
+```
+
+Save the changes and run `hasura metadata apply` to set the permissions.

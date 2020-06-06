@@ -1,0 +1,39 @@
+
+Securing the GraphQL endpoint (Heroku)
+======================================
+
+Table of contents
+
+To make sure that your GraphQL endpoint and the Hasura console are not
+publicly accessible, you need to configure an admin secret key.
+
+Add the HASURA\_GRAPHQL\_ADMIN\_SECRET env var
+----------------------------------------------
+
+Head to the config-vars URL on your Heroku dashboard and set the
+`HASURA_GRAPHQL_ADMIN_SECRET` environment variable.
+
+/img/graphql/manual/deployment/secure-heroku.png
+
+Setting this environment variable will automatically restart the dyno.
+Now when you access your console, you\'ll be prompted for the admin
+secret key.
+
+/img/graphql/manual/deployment/access-key-console.png
+
+Note
+
+The `HASURA_GRAPHQL_ADMIN_SECRET` should never be passed from the client
+to Hasura GraphQL engine as it would give the client full admin rights
+to your Hasura instance. See `auth`{.interpreted-text role="ref"} for
+information on setting up authentication.
+
+(optional) Use the admin secret with the CLI
+--------------------------------------------
+
+In case you\'re using the CLI to open the Hasura console, use the
+`admin-secret` flag when you open the console:
+
+```bash
+hasura console --admin-secret=myadminsecretkey
+```

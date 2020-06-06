@@ -1,0 +1,129 @@
+
+Schema design basics
+====================
+
+Table of contents
+
+The Hasura GraphQL engine creates GraphQL schema object types and
+corresponding query/mutation fields with resolvers automatically as we
+create tables/views in the Postgres database.
+
+Let\'s take a look at how to create tables using the Hasura console, a
+UI tool meant for doing exactly this, and the GraphQL schema it
+generates.
+
+Let\'s say we want to create two simple tables for an article/author
+schema:
+
+```sql
+author (
+  id SERIAL PRIMARY KEY,
+  name TEXT
+)
+
+article (
+  id SERIAL PRIMARY KEY,
+  title TEXT,
+  content TEXT,
+  rating INT,
+  author_id INT
+)
+```
+
+Create tables
+-------------
+
+Open the Hasura console and head to the `Data` tab and click the
+`Create Table` button to open up an interface to create tables.
+
+As soon as a table is created, the corresponding GraphQL schema types
+and query/mutation resolvers will be automatically generated.
+
+For example, here is the schema for the `article` table in this
+interface:
+
+/img/graphql/manual/schema/create-table-graphql.png
+
+The following object type and query/mutation fields are generated for
+the `article` table we just created:
+
+```graphql
+# Object type
+type Article {
+  id: Int
+  title: String
+  content: String
+  rating: Int
+  author_id: Int
+}
+
+# Query field
+article (
+  where: article_bool_exp
+  limit: Int
+  offset: Int
+  order_by: [article_order_by!]
+): [article!]!
+
+# insert/upsert mutation field
+insert_article (
+  objects: [article_insert_input!]!
+  on_conflict: article_on_conflict
+): article_mutation_response
+
+# update mutation field
+update_article (
+  where: article_bool_exp!
+  _inc: article_inc_input
+  _set: article_set_input
+): article_mutation_response
+
+# delete mutation field
+delete_article (
+  where: article_bool_exp!
+): article_mutation_response
+```
+
+See the `query <graphql_api_query>`{.interpreted-text role="ref"} and
+`mutation <graphql_api_mutation>`{.interpreted-text role="ref"} API
+references for the full specifications.
+
+You can insert some sample data into the tables using the `Insert Row`
+tab of the created tables.
+
+Try out basic GraphQL queries
+-----------------------------
+
+At this point, you should be able to try out basic GraphQL
+queries/mutations on the newly created tables from the GraphiQL tab in
+the console (*you may want to add some sample data into the tables
+first*).
+
+Here are a couple of examples:
+
+-   Query all rows in the `article` table
+
+  article {
+    id
+    title
+    author_id
+  }
+
+
+-   Insert data in the `author` table
+
+  insert_author(
+    objects: [
+      { name: \"Jane\" }
+    ]
+  ) {
+    affected_rows
+    returning {
+      id
+      name
+    }
+  }
+
+
+Note that the author\'s `id` does not need to passed as an input as it
+is of type `serial` (auto incrementing integer).

@@ -1,0 +1,194 @@
+
+Modelling many-to-many table relationships
+==========================================
+
+Table of contents
+
+A `many-to-many` relationship between two tables can be established by
+creating a table typically called as **bridge/junction/join table** and
+adding **foreign-key constraints** from it to the original tables.
+
+Say we have the following two tables in our database schema:
+
+```sql
+article (
+  id SERIAL PRIMARY KEY,
+  title TEXT
+  ...
+)
+
+tag (
+  id SERIAL PRIMARY KEY,
+  tag_value TEXT
+  ...
+)
+```
+
+These two tables are related via a `many-to-many` relationship. i.e:
+
+-   an `article` can have many `tags`
+-   a `tag` has many `articles`
+
+Set up a table relationship in the database
+-------------------------------------------
+
+This `many-to-many` relationship can be established in the database by:
+
+1.  Creating a **bridge table** called `article_tag` with the following
+    structure:
+
+    ```sql
+    article_tag (
+      article_id INT
+      tag_id INT
+      PRIMARY KEY (article_id, tag_id)
+      ...
+    )
+    ```
+
+2.  Adding **foreign key constraints** from the `article_tag` table to:
+
+    -   the `article` table using the `article_id` and `id` columns of
+        the tables respectively
+    -   the `tag` table using the `tag_id` and `id` columns of the
+        tables respectively
+
+The table `article_tag` sits between the two tables involved in the
+many-to-many relationship and captures possible permutations of their
+association via the foreign keys.
+
+Set up GraphQL relationships
+----------------------------
+
+To access the nested objects via the GraphQL API,
+`create the following relationships <create_relationships>`{.interpreted-text
+role="ref"}:
+
+-   Array relationship, `article_tags` from `article` table using
+    `article_tag :: article_id -> id`
+-   Object relationship, `tag` from `article_tag` table using
+    `tag_id -> tag :: id`
+-   Array relationship, `tag_articles` from `tag` table using
+    `article_tag :: tag_id -> id`
+-   Object relationship, `article` from `article_tag` table using
+    `article_id -> article :: id`
+
+Query using relationships
+-------------------------
+
+We can now:
+
+-   fetch a list of articles with their tags:
+
+          article {
+        id
+        title
+        article_tags {
+          tag {
+            id
+            tag_value
+          }
+        }
+      }
+    
+    
+-   fetch a list of tags with their articles:
+
+          tag {
+        id
+        tag_value
+        tag_articles {
+          article {
+            id
+            title
+          }
+        }
+      }
+    
+    
+Fetching relationship information
+---------------------------------
+
+The intermediate fields `article_tags` & `tag_articles` can be used to
+fetch extra information about the relationship. For example, you can
+have a column like `tagged_at` in the `article_tag` table which you can
+fetch as follows:
+
+  article {
+    id
+    title
+    article_tags {
+      tagged_at
+      tag {
+        id
+        tag_value
+      }
+    }
+  }
+
+
+Flattening a many-to-many relationship query
+--------------------------------------------
+
+In case you would like to flatten the above queries and avoid the
+intermediate fields `article_tags` & `tag_articles`, you can
+`create the following views <custom_views>`{.interpreted-text
+role="ref"} additionally and then query using relationships created on
+these views:
+
+```sql
+CREATE VIEW article_tags_view AS
+  SELECT article_id, tag.*
+    FROM article_tag LEFT JOIN tag
+      ON article_tag.tag_id = tag.id
+
+CREATE VIEW tag_articles_view AS
+  SELECT tag_id, article.*
+    FROM article_tag LEFT JOIN article
+      ON article_tag.article_id = article.id
+```
+
+Now
+`create the following relationships <create_relationships>`{.interpreted-text
+role="ref"}:
+
+-   Array relationship, `tags` from the `article` table using
+    `article_tags_view :: article_id -> id`
+-   Array relationship, `articles` from the `tag` table using
+    `tag_articles_view :: tag_id -> id`
+
+We can now:
+
+-   fetch articles with their tags without an intermediate field:
+
+          article {
+        id
+        title
+        tags {
+          id
+          tag_value
+        }
+      }
+    
+    
+    -   fetch tags with their articles without an intermediate field:
+
+                  tag {
+            id
+            tag_value
+            articles {
+              id
+              title
+            }
+          }
+        
+        
+Note
+
+**We do not recommend this** flattening pattern of modelling as this
+introduces an additional overhead of managing permissions and
+relationships on the newly created views. e.g. You cannot query for the
+author of the nested articles without setting up a new relationship to
+the `author` table from the `tag_articles_view` view.
+
+In our opinion, the cons of this approach seem to outweigh the pros.

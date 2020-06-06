@@ -1,0 +1,25 @@
+
+Debugging actions
+=================
+
+Table of contents
+
+While you\'re developing actions for your application, to debug faster
+you may want to see the exact details of the webhook call for the action
+as well.
+
+To do so, start the server in
+`debugging mode <dev-mode>`{.interpreted-text role="ref"}. In the case
+of errors, the GraphQL response will contain debugging information of
+the webhook calls in the `extensions.internal` field.
+
+**For example**:
+
+    create_user(email: \"foo@bar.com\", name: \"Foo\"){
+      id
+      user {
+        name
+        email
+      }
+    }
+  
