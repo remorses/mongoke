@@ -25,7 +25,7 @@ jobs:
       - run: env
       - uses: actions/checkout@master
       - name: Unshallow
-        run: git fetch --prune --unshallow
+      - run: git fetch --prune --unshallow
       - run: go mod download
       - run: make test
       - name: Bump version
