@@ -3,5 +3,8 @@
     "workspaces": [
         "website",
         "cli/**"
-    ]
+    ],
+    "scripts": {
+        "cli": "DEBUG=1 DEV_START_COMMAND='go run cmd/main.go' node -r sucrase/register cli/src/main.ts"
+    }
 }

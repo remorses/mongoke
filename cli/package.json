@@ -41,7 +41,9 @@
         "typescript": "^3.9.5"
     },
     "dependencies": {
+        "@types/yargs": "^15.0.5",
         "go-npm": "^0.1.9",
-        "tslib": "^2.0.0"
+        "tslib": "^2.0.0",
+        "yargs": "^15.3.1"
     }
 }
