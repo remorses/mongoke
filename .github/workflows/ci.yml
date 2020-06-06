@@ -32,6 +32,7 @@ jobs:
           version_file: VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: go get github.com/matryer/moq
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
