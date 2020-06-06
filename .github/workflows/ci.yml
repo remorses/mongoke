@@ -24,6 +24,8 @@ jobs:
           go-version: 1.14
       - run: env
       - uses: actions/checkout@master
+      - name: Unshallow
+        run: git fetch --prune --unshallow
       - run: go mod download
       - run: make test
       - name: Bump version
@@ -32,7 +34,6 @@ jobs:
           version_file: VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: go get github.com/matryer/moq
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
