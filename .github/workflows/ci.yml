@@ -20,6 +20,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/setup-go@v2
+      - run: env
+      - run: "export PATH=$PATH:$GOPATH/bin"
       - uses: actions/checkout@master
       - run: go mod download
       - run: make test
@@ -33,7 +35,7 @@ jobs:
         uses: goreleaser/goreleaser-action@v2
         with:
           version: latest
-          args: release --rm-dist
+          args: release --rm-dist --skip-validate
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     # - name: Publish to Dockerhub
