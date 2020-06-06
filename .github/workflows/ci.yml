@@ -42,6 +42,7 @@ jobs:
           args: --rm-dist --skip-validate
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: cd web-ui && yarn && yarn build
       - name: Publish to Dockerhub
         uses: docker/build-push-action@v1
         with:
