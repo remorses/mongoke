@@ -17,24 +17,21 @@ const command: CommandModule = {
     },
     handler: async (argv) => {
         console.log('starting the server')
-        await startGokeServer({})
+        // console.log(argv.$0)
+        // console.log(process.argv)
+        await startGokeServer(process.argv.slice(process.env.DEBUG ? 2 : 1)) // TODO this is brittle
         // TODO start the server
     },
 } // as CommandModule
 
 export default command
 
-interface StartArgs {}
-
-async function startGokeServer(p: StartArgs) {
+async function startGokeServer(a) {
     const command_ = GOKE_START_COMMAND
-    const args = [...command_.slice(1), ...makeStartArgs(p)]
+    console.log([...command_, ...a])
+    const args = [...command_.slice(1), ...a]
     return await runCommand({
         command: command_[0],
         args,
     })
-}
-
-function makeStartArgs(p: StartArgs): string[] {
-    return ['']
 }
