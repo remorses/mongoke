@@ -10,7 +10,7 @@ builds:
   - env:
       - CGO_ENABLED=0
     main: ./cmd/main.go
-    binary: mongoke-server
+    binary: goke-server
 archives:
   - replacements:
       darwin: Darwin
