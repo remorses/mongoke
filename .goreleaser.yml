@@ -28,3 +28,6 @@ changelog:
     exclude:
       - "^docs:"
       - "^test:"
+      - "^Merge branch"
+      - "^Merge branch"
+      - "^Version "
