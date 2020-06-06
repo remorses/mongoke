@@ -23,7 +23,7 @@ jobs:
         with:
           go-version: 1.14
       - run: env
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
       - name: Unshallow
         run: git fetch --prune --unshallow
       - run: go mod download
@@ -38,7 +38,7 @@ jobs:
         uses: goreleaser/goreleaser-action@v2
         with:
           version: latest
-          args: release --rm-dist --skip-validate
+          args: --rm-dist --skip-validate
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     # - name: Publish to Dockerhub
