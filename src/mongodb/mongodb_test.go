@@ -151,6 +151,15 @@ func TestMakeMongodbMatch(t *testing.T) {
 						Eq: "1",
 					},
 				},
+				Or: []mongoke.WhereTree{
+					{
+						Match: map[string]mongoke.Filter{
+							"field2": {
+								Eq: "2",
+							},
+						},
+					},
+				},
 			},
 			{
 				Match: map[string]mongoke.Filter{
