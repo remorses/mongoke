@@ -19,6 +19,10 @@ jobs:
           FIRESTORE_PROJECT_ID: project-test
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+          registry-url: https://registry.npmjs.org/
       - uses: actions/setup-go@v2
         with:
           go-version: 1.14
@@ -42,7 +46,13 @@ jobs:
           args: --rm-dist --skip-validate
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: cd web-ui && yarn && yarn build
+      - run: cd web-ui && yarn --ignore-scripts && yarn build # create web ui assets
+      - run: cd cli && yarn install --ignore-scripts
+      - run: cd cli && yarn test
+      - run: cd cli && yarn build
+      - run: cd cli && yarn publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
       - name: Publish to Dockerhub
         uses: docker/build-push-action@v1
         with:
