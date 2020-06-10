@@ -204,7 +204,7 @@ func (self *MongodbDatabaseFunctions) Init(ctx context.Context) (*mongo.Database
 }
 
 func MakeMongodbMatch(where mongoke.WhereTree) map[string]interface{} {
-	// TODO for every k, v use mapstructure to map to a filter
+	// for every k, v use mapstructure to map to a filter
 	// if k is or, and, use mapstructure to map to an array of filters
 	var res = make(map[string]interface{})
 	for k, v := range where.Match {

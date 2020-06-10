@@ -41,11 +41,10 @@ type WhereTree struct {
 
 type FindManyParams struct {
 	Collection string
-	Where      WhereTree // `mapstructure:"where"`
-	// TODO add `or` []Filter
-	Limit   int            `mapstructure:"limit"`
-	Offset  int            `mapstructure:"offset"`
-	OrderBy map[string]int `mapstructure:"orderBy"`
+	Where      WhereTree      // `mapstructure:"where"`
+	Limit      int            `mapstructure:"limit"`
+	Offset     int            `mapstructure:"offset"`
+	OrderBy    map[string]int `mapstructure:"orderBy"`
 }
 
 type InsertManyParams struct {
@@ -83,7 +82,7 @@ type Filter struct {
 }
 
 func MakeWhereTree(where map[string]interface{}, initialMatch map[string]Filter) (WhereTree, error) {
-	// TODO for every k, v use mapstructure to map to a filter
+	// for every k, v use mapstructure to map to a filter
 	// if k is or, and, use mapstructure to map to an array of filters
 	if initialMatch == nil {
 		initialMatch = make(map[string]Filter)

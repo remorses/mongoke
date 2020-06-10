@@ -136,3 +136,32 @@ func TestFindMany(t *testing.T) {
 	_, err = db.Collection(collection).DeleteMany(ctx, mongoke.Map{})
 
 }
+
+func TestMakeMongodbMatch(t *testing.T) {
+	where := mongoke.WhereTree{
+		Match: map[string]mongoke.Filter{
+			"field": {
+				Gt: 4,
+			},
+		},
+		And: []mongoke.WhereTree{
+			{
+				Match: map[string]mongoke.Filter{
+					"field1": {
+						Eq: "1",
+					},
+				},
+			},
+			{
+				Match: map[string]mongoke.Filter{
+					"field2": {
+						Eq: "2",
+					},
+				},
+			},
+		},
+	}
+	x := MakeMongodbMatch(where)
+	d := testutil.Bsonify(t, x)
+	println(testutil.Pretty(d))
+}

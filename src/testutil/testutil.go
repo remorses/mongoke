@@ -7,10 +7,24 @@ import (
 	"testing"
 
 	"github.com/graphql-go/graphql"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 const MONGODB_URI = "mongodb://localhost/testdb"
 const FIRESTORE_PROJECT_ID = "example"
+
+func Bsonify(t *testing.T, x interface{}) map[string]interface{} {
+	b, err := bson.Marshal(x)
+	if err != nil {
+		t.Error(err)
+	}
+	var d map[string]interface{}
+	err = bson.Unmarshal(b, &d)
+	if err != nil {
+		t.Error(err)
+	}
+	return d
+}
 
 func QuerySchema(t *testing.T, schema graphql.Schema, query string) interface{} {
 	res := graphql.Do(graphql.Params{Schema: schema, RequestString: query, Context: context.Background()})
