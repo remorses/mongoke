@@ -8,6 +8,7 @@ import (
 	"github.com/256dpi/lungo"
 	"github.com/pkg/errors"
 	mongoke "github.com/remorses/mongoke/src"
+	mongodb "github.com/remorses/mongoke/src/mongodb"
 	"github.com/remorses/mongoke/src/testutil"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -40,7 +41,8 @@ func (self *FakeDatabaseFunctions) FindMany(ctx context.Context, p mongoke.FindM
 	opts.SetSort(p.OrderBy)
 	testutil.PrettyPrint(p)
 
-	res, err := db.Collection(p.Collection).Find(ctx, p.Where, opts)
+	where := mongodb.MakeMongodbMatch(p.Where, p.And, p.Or)
+	res, err := db.Collection(p.Collection).Find(ctx, where, opts)
 	if err != nil {
 		// log.Print("Error in findMany", err)
 		return nil, err
@@ -98,7 +100,8 @@ func (self *FakeDatabaseFunctions) UpdateOne(ctx context.Context, p mongoke.Upda
 	opts.SetReturnDocument(options.After)
 	testutil.PrettyPrint(p)
 
-	res := db.Collection(p.Collection).FindOneAndUpdate(ctx, p.Where, bson.M{"$set": p.Set}, opts)
+	where := mongodb.MakeMongodbMatch(p.Where, p.And, p.Or)
+	res := db.Collection(p.Collection).FindOneAndUpdate(ctx, where, bson.M{"$set": p.Set}, opts)
 	if res.Err() == mongo.ErrNoDocuments {
 		println("no docs to update")
 		return payload, nil
@@ -128,12 +131,13 @@ func (self *FakeDatabaseFunctions) UpdateMany(ctx context.Context, p mongoke.Upd
 	testutil.PrettyPrint(p)
 
 	// TODO execute inside a transaction
-	nodes, err := self.FindMany(ctx, mongoke.FindManyParams{Collection: p.Collection, Where: p.Where})
+	nodes, err := self.FindMany(ctx, mongoke.FindManyParams{Collection: p.Collection, Where: p.Where, And: p.And, Or: p.Or})
 	if err != nil {
 		return payload, err
 	}
 
-	res, err := db.Collection(p.Collection).UpdateMany(ctx, p.Where, bson.M{"$set": p.Set}, opts)
+	where := mongodb.MakeMongodbMatch(p.Where, p.And, p.Or)
+	res, err := db.Collection(p.Collection).UpdateMany(ctx, where, bson.M{"$set": p.Set}, opts)
 	if err != nil {
 		return payload, err
 	}
@@ -155,12 +159,13 @@ func (self *FakeDatabaseFunctions) DeleteMany(ctx context.Context, p mongoke.Del
 
 	testutil.PrettyPrint(p)
 
-	nodes, err := self.FindMany(ctx, mongoke.FindManyParams{Collection: p.Collection, Where: p.Where})
+	nodes, err := self.FindMany(ctx, mongoke.FindManyParams{Collection: p.Collection, Where: p.Where, And: p.And, Or: p.Or})
 	if err != nil {
 		return payload, err
 	}
 
-	res, err := db.Collection(p.Collection).DeleteMany(ctx, p.Where, opts)
+	where := mongodb.MakeMongodbMatch(p.Where, p.And, p.Or)
+	res, err := db.Collection(p.Collection).DeleteMany(ctx, where, opts)
 	if err != nil {
 		return payload, err
 	}

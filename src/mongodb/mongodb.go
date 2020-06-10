@@ -14,7 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/x/mongo/driver/connstring"
 )
 
-const (
+var (
 	TIMEOUT_CONNECT = 5
 	MAX_QUERY_TIME  = 10
 	TIMEOUT_FIND    = 10
@@ -34,15 +34,16 @@ func (self *MongodbDatabaseFunctions) FindMany(ctx context.Context, p mongoke.Fi
 	if err != nil {
 		return nil, err
 	}
-	ctx, _ = context.WithTimeout(ctx, TIMEOUT_FIND*time.Second)
+	ctx, _ = context.WithTimeout(ctx, time.Duration(TIMEOUT_FIND)*time.Second)
 	opts := options.Find()
-	opts.SetMaxTime(MAX_QUERY_TIME * time.Second)
+	opts.SetMaxTime(time.Duration(MAX_QUERY_TIME) * time.Second)
 	opts.SetLimit(int64(p.Limit))
 	opts.SetSkip(int64(p.Offset))
 	opts.SetSort(p.OrderBy)
 	testutil.PrettyPrint(p)
-	// TODO replace or nodes with $or and `and` with $and
-	res, err := db.Collection(p.Collection).Find(ctx, p.Where, opts)
+
+	where := MakeMongodbMatch(p.Where, p.And, p.Or)
+	res, err := db.Collection(p.Collection).Find(ctx, where, opts)
 	if err != nil {
 		// log.Print("Error in findMany", err)
 		return nil, err
@@ -96,7 +97,8 @@ func (self *MongodbDatabaseFunctions) UpdateOne(ctx context.Context, p mongoke.U
 	opts.SetReturnDocument(options.After)
 	testutil.PrettyPrint(p)
 
-	res := db.Collection(p.Collection).FindOneAndUpdate(ctx, p.Where, bson.M{"$set": p.Set}, opts)
+	where := MakeMongodbMatch(p.Where, p.And, p.Or)
+	res := db.Collection(p.Collection).FindOneAndUpdate(ctx, where, bson.M{"$set": p.Set}, opts)
 	if res.Err() == mongo.ErrNoDocuments {
 		println("no docs to update")
 		return mongoke.NodeMutationPayload{
@@ -129,12 +131,13 @@ func (self *MongodbDatabaseFunctions) UpdateMany(ctx context.Context, p mongoke.
 	testutil.PrettyPrint(p)
 
 	// TODO execute inside a transaction
-	nodes, err := self.FindMany(ctx, mongoke.FindManyParams{Collection: p.Collection, Where: p.Where})
+	nodes, err := self.FindMany(ctx, mongoke.FindManyParams{Collection: p.Collection, Where: p.Where, Or: p.Or, And: p.And})
 	if err != nil {
 		return payload, err
 	}
 
-	res, err := db.Collection(p.Collection).UpdateMany(ctx, p.Where, bson.M{"$set": p.Set}, opts)
+	where := MakeMongodbMatch(p.Where, p.And, p.Or)
+	res, err := db.Collection(p.Collection).UpdateMany(ctx, where, bson.M{"$set": p.Set}, opts)
 	if err != nil {
 		return payload, err
 	}
@@ -156,14 +159,15 @@ func (self *MongodbDatabaseFunctions) DeleteMany(ctx context.Context, p mongoke.
 
 	testutil.PrettyPrint(p)
 
-	nodes, err := self.FindMany(ctx, mongoke.FindManyParams{Collection: p.Collection, Where: p.Where})
+	nodes, err := self.FindMany(ctx, mongoke.FindManyParams{Collection: p.Collection, Where: p.Where, And: p.And, Or: p.Or})
 	if err != nil {
 		return payload, err
 	}
 
 	// TODO delete only documents user has permissions to
 
-	res, err := db.Collection(p.Collection).DeleteMany(ctx, p.Where, opts)
+	where := MakeMongodbMatch(p.Where, p.And, p.Or)
+	res, err := db.Collection(p.Collection).DeleteMany(ctx, where, opts)
 	if err != nil {
 		return payload, err
 	}
@@ -189,7 +193,7 @@ func (self *MongodbDatabaseFunctions) Init(ctx context.Context) (*mongo.Database
 	if dbName == "" {
 		return nil, errors.New("the db uri must contain the database name")
 	}
-	ctx, _ = context.WithTimeout(ctx, TIMEOUT_CONNECT*time.Second)
+	ctx, _ = context.WithTimeout(ctx, time.Duration(TIMEOUT_CONNECT)*time.Second)
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
 	if err != nil {
 		return nil, err
@@ -197,4 +201,18 @@ func (self *MongodbDatabaseFunctions) Init(ctx context.Context) (*mongo.Database
 	db := client.Database(dbName)
 	self.db = db
 	return db, nil
+}
+
+func MakeMongodbMatch(where map[string]mongoke.Filter, and []map[string]mongoke.Filter, or []map[string]mongoke.Filter) map[string]interface{} {
+	var res = make(map[string]interface{})
+	for k, v := range where {
+		res[k] = v
+	}
+	if len(and) != 0 {
+		res["$and"] = and
+	}
+	if len(or) != 0 {
+		res["$or"] = or
+	}
+	return res
 }

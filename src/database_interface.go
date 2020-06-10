@@ -31,9 +31,10 @@ type NodesMutationPayload struct {
 
 type FindManyParams struct {
 	Collection string
+	And        []map[string]Filter
+	Or         []map[string]Filter
 	Where      map[string]Filter `mapstructure:"where"`
 	// TODO add `or` []Filter
-	// TODO add `and` []Filter
 	Limit   int            `mapstructure:"limit"`
 	Offset  int            `mapstructure:"offset"`
 	OrderBy map[string]int `mapstructure:"orderBy"`
@@ -48,11 +49,15 @@ type UpdateParams struct {
 	Collection string
 	Set        Map               `mapstructure:"set" bson:"$set"`
 	Where      map[string]Filter `mapstructure:"where"`
+	And        []map[string]Filter
+	Or         []map[string]Filter
 }
 
 type DeleteManyParams struct {
 	Collection string
 	Where      map[string]Filter `mapstructure:"where"`
+	And        []map[string]Filter
+	Or         []map[string]Filter
 }
 
 type Pagination struct {

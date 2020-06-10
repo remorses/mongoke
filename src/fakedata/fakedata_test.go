@@ -86,6 +86,61 @@ func TestFindMany(t *testing.T) {
 			print:    true,
 			expected: exampleUsers[1:3],
 		},
+		"Where and And": {
+			params: mongoke.FindManyParams{
+				Collection: collection,
+				Where: map[string]mongoke.Filter{
+					"age": {
+						Gt: 1,
+					},
+				},
+				And: []map[string]mongoke.Filter{{
+					"age": {
+						Lte: 3,
+					},
+				}},
+			},
+			print:    true,
+			expected: exampleUsers[1:3],
+		},
+		"multiple And": {
+			params: mongoke.FindManyParams{
+				Collection: collection,
+				And: []map[string]mongoke.Filter{
+					{
+						"age": {
+							Gt: 1,
+						},
+					},
+					{
+						"age": {
+							Lte: 3,
+						},
+					},
+				},
+			},
+			print:    true,
+			expected: exampleUsers[1:3],
+		},
+		"multiple Or": {
+			params: mongoke.FindManyParams{
+				Collection: collection,
+				Or: []map[string]mongoke.Filter{
+					{
+						"age": {
+							Eq: 2,
+						},
+					},
+					{
+						"age": {
+							Eq: 3,
+						},
+					},
+				},
+			},
+			print:    true,
+			expected: exampleUsers[1:],
+		},
 	}
 
 	// clear and insert some docs
