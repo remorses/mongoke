@@ -19,6 +19,7 @@ jobs:
           FIRESTORE_PROJECT_ID: project-test
     runs-on: ubuntu-latest
     steps:
+      # setup ######################################
       - uses: actions/setup-node@v1
         with:
           node-version: 12
@@ -31,7 +32,9 @@ jobs:
       - name: Unshallow
         run: git fetch --prune --unshallow
       - run: go mod download
+      # test #######################################
       - run: make test
+      # bump #######################################
       - name: Bump version
         id: bump
         uses: remorses/bump-version@js
@@ -39,6 +42,7 @@ jobs:
           version_file: VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # upload binaries ############################
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
@@ -46,13 +50,15 @@ jobs:
           args: --rm-dist --skip-validate
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: cd web-ui && yarn --ignore-scripts && yarn build # create web ui assets
+      # cli #######################################
+      - run: cd web-ui && yarn --ignore-scripts && yarn build # create web ui assets, also for docker
       - run: cd cli && yarn install --ignore-scripts
       - run: cd cli && yarn test
       - run: cd cli && yarn build
       - run: cd cli && yarn publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
+      # docker ####################################
       - name: Publish to Dockerhub
         uses: docker/build-push-action@v1
         with:
