@@ -41,7 +41,7 @@ func (self *MongodbDatabaseFunctions) FindMany(ctx context.Context, p mongoke.Fi
 	opts.SetSkip(int64(p.Offset))
 	opts.SetSort(p.OrderBy)
 	testutil.PrettyPrint(p)
-
+	// TODO replace or nodes with $or and `and` with $and
 	res, err := db.Collection(p.Collection).Find(ctx, p.Where, opts)
 	if err != nil {
 		// log.Print("Error in findMany", err)

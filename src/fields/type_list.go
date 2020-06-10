@@ -15,6 +15,7 @@ func QueryTypeListField(p CreateFieldParams) (*graphql.Field, error) {
 			Collection: p.Collection,
 		}
 		err := mapstructure.Decode(args, &opts)
+		// TODO add or and `and` args, using mapstructure.Decode(args['or'], []Filter)
 		if err != nil {
 			return nil, err
 		}
@@ -37,6 +38,7 @@ func QueryTypeListField(p CreateFieldParams) (*graphql.Field, error) {
 
 		jwt := getJwt(params)
 		var accessibleNodes []mongoke.Map
+		// TODO move validation logic in a function that returns only accessible documents
 		for _, document := range nodes {
 			node, err := applyGuardsOnDocument(applyGuardsOnDocumentParams{
 				document:  document,

@@ -201,6 +201,7 @@ func applyWhereQuery(where map[string]mongoke.Filter, q firestore.Query) (firest
 			return q, errors.New("firestore cannot use the `Nin` operator")
 		}
 	}
+	// TODO check if or and are not nil, use mapstructure to map them to a map to []Filter structs and recurse on the and nodes and throw if any or nodes are present
 	return q, nil
 }
 

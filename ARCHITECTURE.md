@@ -1,4 +1,22 @@
 
+getUserRelayConnection
+
+findOneUser
+findManyUser
+
+insertOneUser
+insertManyUser
+
+updateOneUser
+updateManyUser
+
+deleteOneUser
+deleteManyUser
+
+upsertOneUser
+upsertManyUser
+
+
 
 
 functions

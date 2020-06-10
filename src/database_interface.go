@@ -32,9 +32,11 @@ type NodesMutationPayload struct {
 type FindManyParams struct {
 	Collection string
 	Where      map[string]Filter `mapstructure:"where"`
-	Limit      int               `mapstructure:"limit"`
-	Offset     int               `mapstructure:"offset"`
-	OrderBy    map[string]int    `mapstructure:"orderBy"`
+	// TODO add `or` []Filter
+	// TODO add `and` []Filter
+	Limit   int            `mapstructure:"limit"`
+	Offset  int            `mapstructure:"offset"`
+	OrderBy map[string]int `mapstructure:"orderBy"`
 }
 
 type InsertManyParams struct {
