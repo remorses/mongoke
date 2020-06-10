@@ -29,7 +29,7 @@ export const withErrorHandling = makeMiddleware(async (argv, next) => {
         await next()
     } catch (e) {
         if (!process.env.DEBUG) {
-            printRed(e.name + e.message)
+            printRed(e.message)
         } else {
             console.error(e)
         }
@@ -41,10 +41,14 @@ export const print = console.log
 export const printRed = (x) => console.log(chalk.red(x))
 export const printGreen = (x) => console.log(chalk.green(x))
 
-export function runCommand({ command, args, silent = false }) {
+export function runCommand({ command, args, env, silent = false }) {
     return new Promise((res, rej) => {
         const ps = spawn(command, args, {
             stdio: silent ? 'ignore' : 'inherit',
+            env: {
+                ...process.env,
+                ...env,
+            },
         })
         ps.on('close', (code) => {
             if (code !== 0) {

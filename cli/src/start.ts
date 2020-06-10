@@ -1,5 +1,5 @@
 import { runCommand } from './support'
-import { GOKE_START_COMMAND } from './contsants'
+import { GOKE_START_COMMAND, WEB_UI_ASSETS } from './contsants'
 import { CommandModule } from 'yargs'
 
 const command: CommandModule = {
@@ -27,11 +27,18 @@ const command: CommandModule = {
 export default command
 
 async function startGokeServer(a) {
-    const command_ = GOKE_START_COMMAND
-    console.log([...command_, ...a])
-    const args = [...command_.slice(1), ...a]
+    const command = GOKE_START_COMMAND
+    if (process.env.DEBUG) {
+        console.log([...command, ...a])
+    }
+    const args = [...command.slice(1), ...a]
     return await runCommand({
-        command: command_[0],
+        command: command[0],
         args,
+        env: {
+            WEB_UI_ASSETS,
+        },
+    }).catch((e) => {
+        throw new Error('could not start mongoke server')
     })
 }

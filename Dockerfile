@@ -42,5 +42,7 @@ RUN ls -l ./web-ui
 # Expose port 8080 to the outside world
 EXPOSE 8080
 
+ENV WEB_UI_ASSETS=./web-ui
+
 # Command to run the executable
-ENTRYPOINT ["./main", "--www", "./web-ui"]
+ENTRYPOINT ["./main"]

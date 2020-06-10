@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && next export",
+    "build": "next build && next export && mkdir -p ../cli/dist/web-ui && cp -r out/ ../cli/dist/web-ui/",
     "start": "next start"
   },
   "dependencies": {

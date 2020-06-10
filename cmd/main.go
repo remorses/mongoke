@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -27,11 +28,6 @@ func main() {
 				Name:  "port",
 				Value: "8090",
 				Usage: "port to listen to",
-			},
-			&cli.StringFlag{
-				Name:  "www",
-				Value: "",
-				Usage: "web ui assets folder",
 			},
 			&cli.BoolFlag{
 				Name:  "localhost",
@@ -65,7 +61,11 @@ func main() {
 				return cli.Exit(e, 1)
 			}
 			// fmt.Println("using database_uri " + config.DatabaseUri)
-			h, err := handler.MakeMongokeHandler(config, c.String("www"))
+			www := os.Getenv("WEB_UI_ASSETS")
+			if www == "" {
+				return cli.Exit(errors.New("cannot find web ui assets"), 1)
+			}
+			h, err := handler.MakeMongokeHandler(config, www)
 			if err != nil {
 				return cli.Exit(err, 1)
 			}
