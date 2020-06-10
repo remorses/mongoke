@@ -11,7 +11,7 @@ builds:
     main: ./cmd/main.go
     binary: goke-server
     goos:
-      - debian
+      - darwin
       - windows
       - linux
     goarch:
