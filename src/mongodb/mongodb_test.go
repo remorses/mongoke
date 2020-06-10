@@ -170,7 +170,36 @@ func TestMakeMongodbMatch(t *testing.T) {
 			},
 		},
 	}
+	expected := testutil.FormatJson(t, `
+	{
+		"$and": [
+		   {
+			  "$or": [
+				 {
+					"field2": {
+					   "$eq": "2"
+					}
+				 }
+			  ],
+			  "field1": {
+				 "$eq": "1"
+			  }
+		   },
+		   {
+			  "field2": {
+				 "$eq": "2"
+			  }
+		   }
+		],
+		"field": {
+		   "$gt": 4
+		}
+	}	 
+	`)
+
 	x := MakeMongodbMatch(where)
 	d := testutil.Bsonify(t, x)
-	println(testutil.Pretty(d))
+	actual := testutil.Pretty(d)
+	t.Log(actual)
+	require.Equal(t, expected, actual)
 }

@@ -69,6 +69,15 @@ func ConvertToPlainMap(in interface{}) map[string]interface{} {
 	return inInterface
 }
 
+func FormatJson(t *testing.T, s string) string {
+	var expectedObj map[string]interface{}
+	err := json.Unmarshal([]byte(s), &expectedObj)
+	if err != nil {
+		t.Error(err)
+	}
+	return Pretty(expectedObj)
+}
+
 func QuerySchemaShouldFail(t *testing.T, schema graphql.Schema, query string) error {
 	res := graphql.Do(graphql.Params{Schema: schema, RequestString: query})
 	if res.Errors != nil && len(res.Errors) > 0 {
