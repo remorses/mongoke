@@ -10,6 +10,7 @@ import (
 	"google.golang.org/api/iterator"
 
 	mongoke "github.com/remorses/mongoke/src"
+	"github.com/remorses/mongoke/src/testutil"
 )
 
 const (
@@ -173,14 +174,20 @@ func setToUpdates(set mongoke.Map) []firestore.Update {
 	return updates
 }
 
-func applyWhereQuery(where map[string]mongoke.Filter, q firestore.Query) (firestore.Query, error) {
-	// println(testutil.Pretty("where", where))
-	for k, v := range where {
-		if !isZero(v.Eq) {
-			q = q.Where(k, "==", v.Eq)
-		}
+func applyWhereQuery(where mongoke.WhereTree, q firestore.Query) (firestore.Query, error) {
+	println(testutil.Pretty("where", where))
+	if len(where.Or) != 0 {
+		return q, errors.New("cannot use or operator with firestore")
+	}
+	for k, v := range where.Match {
 		if !isZero(v.Neq) {
 			return q, errors.New("firestore cannot use the `Neq` operator")
+		}
+		if !isZero(v.Nin) {
+			return q, errors.New("firestore cannot use the `Nin` operator")
+		}
+		if !isZero(v.Eq) {
+			q = q.Where(k, "==", v.Eq)
 		}
 		if !isZero(v.Gt) {
 			q = q.Where(k, ">", v.Gt)
@@ -197,11 +204,13 @@ func applyWhereQuery(where map[string]mongoke.Filter, q firestore.Query) (firest
 		if !isZero(v.In) {
 			q = q.Where(k, "in", v.In)
 		}
-		if !isZero(v.Nin) {
-			return q, errors.New("firestore cannot use the `Nin` operator")
+	}
+	for _, a := range where.And {
+		q, err := applyWhereQuery(a, q)
+		if err != nil {
+			return q, err
 		}
 	}
-	// TODO check if or and are not nil, use mapstructure to map them to a map to []Filter structs and recurse on the and nodes and throw if any or nodes are present
 	return q, nil
 }
 

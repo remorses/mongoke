@@ -54,9 +54,11 @@ func TestFindMany(t *testing.T) {
 		"Eq": {
 			params: mongoke.FindManyParams{
 				Collection: collection,
-				Where: map[string]mongoke.Filter{
-					"name": {
-						Eq: "01",
+				Where: mongoke.WhereTree{
+					Match: map[string]mongoke.Filter{
+						"name": {
+							Eq: "01",
+						},
 					},
 				},
 			},
@@ -65,9 +67,11 @@ func TestFindMany(t *testing.T) {
 		"Gt": {
 			params: mongoke.FindManyParams{
 				Collection: collection,
-				Where: map[string]mongoke.Filter{
-					"name": {
-						Gt: "01",
+				Where: mongoke.WhereTree{
+					Match: map[string]mongoke.Filter{
+						"name": {
+							Gt: "01",
+						},
 					},
 				},
 			},
@@ -76,10 +80,12 @@ func TestFindMany(t *testing.T) {
 		"Gt and Lte": {
 			params: mongoke.FindManyParams{
 				Collection: collection,
-				Where: map[string]mongoke.Filter{
-					"age": {
-						Gt:  1,
-						Lte: 3,
+				Where: mongoke.WhereTree{
+					Match: map[string]mongoke.Filter{
+						"age": {
+							Gt:  1,
+							Lte: 3,
+						},
 					},
 				},
 			},
@@ -89,16 +95,22 @@ func TestFindMany(t *testing.T) {
 		"Where and And": {
 			params: mongoke.FindManyParams{
 				Collection: collection,
-				Where: map[string]mongoke.Filter{
-					"age": {
-						Gt: 1,
+				Where: mongoke.WhereTree{
+					Match: map[string]mongoke.Filter{
+						"age": {
+							Gt: 1,
+						},
+					},
+					And: []mongoke.WhereTree{
+						{
+							Match: map[string]mongoke.Filter{
+								"age": {
+									Lte: 3,
+								},
+							},
+						},
 					},
 				},
-				And: []map[string]mongoke.Filter{{
-					"age": {
-						Lte: 3,
-					},
-				}},
 			},
 			print:    true,
 			expected: exampleUsers[1:3],
@@ -106,15 +118,21 @@ func TestFindMany(t *testing.T) {
 		"multiple And": {
 			params: mongoke.FindManyParams{
 				Collection: collection,
-				And: []map[string]mongoke.Filter{
-					{
-						"age": {
-							Gt: 1,
+				Where: mongoke.WhereTree{
+					And: []mongoke.WhereTree{
+						{
+							Match: map[string]mongoke.Filter{
+								"age": {
+									Gt: 1,
+								},
+							},
 						},
-					},
-					{
-						"age": {
-							Lte: 3,
+						{
+							Match: map[string]mongoke.Filter{
+								"age": {
+									Lte: 3,
+								},
+							},
 						},
 					},
 				},
@@ -125,15 +143,21 @@ func TestFindMany(t *testing.T) {
 		"multiple Or": {
 			params: mongoke.FindManyParams{
 				Collection: collection,
-				Or: []map[string]mongoke.Filter{
-					{
-						"age": {
-							Eq: 2,
+				Where: mongoke.WhereTree{
+					Or: []mongoke.WhereTree{
+						{
+							Match: map[string]mongoke.Filter{
+								"age": {
+									Eq: 2,
+								},
+							},
 						},
-					},
-					{
-						"age": {
-							Eq: 3,
+						{
+							Match: map[string]mongoke.Filter{
+								"age": {
+									Eq: 3,
+								},
+							},
 						},
 					},
 				},

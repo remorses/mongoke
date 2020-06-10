@@ -42,7 +42,7 @@ func (self *MongodbDatabaseFunctions) FindMany(ctx context.Context, p mongoke.Fi
 	opts.SetSort(p.OrderBy)
 	testutil.PrettyPrint(p)
 
-	where := MakeMongodbMatch(p.Where, p.And, p.Or)
+	where := MakeMongodbMatch(p.Where)
 	res, err := db.Collection(p.Collection).Find(ctx, where, opts)
 	if err != nil {
 		// log.Print("Error in findMany", err)
@@ -97,7 +97,7 @@ func (self *MongodbDatabaseFunctions) UpdateOne(ctx context.Context, p mongoke.U
 	opts.SetReturnDocument(options.After)
 	testutil.PrettyPrint(p)
 
-	where := MakeMongodbMatch(p.Where, p.And, p.Or)
+	where := MakeMongodbMatch(p.Where)
 	res := db.Collection(p.Collection).FindOneAndUpdate(ctx, where, bson.M{"$set": p.Set}, opts)
 	if res.Err() == mongo.ErrNoDocuments {
 		println("no docs to update")
@@ -131,12 +131,12 @@ func (self *MongodbDatabaseFunctions) UpdateMany(ctx context.Context, p mongoke.
 	testutil.PrettyPrint(p)
 
 	// TODO execute inside a transaction
-	nodes, err := self.FindMany(ctx, mongoke.FindManyParams{Collection: p.Collection, Where: p.Where, Or: p.Or, And: p.And})
+	nodes, err := self.FindMany(ctx, mongoke.FindManyParams{Collection: p.Collection, Where: p.Where})
 	if err != nil {
 		return payload, err
 	}
 
-	where := MakeMongodbMatch(p.Where, p.And, p.Or)
+	where := MakeMongodbMatch(p.Where)
 	res, err := db.Collection(p.Collection).UpdateMany(ctx, where, bson.M{"$set": p.Set}, opts)
 	if err != nil {
 		return payload, err
@@ -159,14 +159,14 @@ func (self *MongodbDatabaseFunctions) DeleteMany(ctx context.Context, p mongoke.
 
 	testutil.PrettyPrint(p)
 
-	nodes, err := self.FindMany(ctx, mongoke.FindManyParams{Collection: p.Collection, Where: p.Where, And: p.And, Or: p.Or})
+	nodes, err := self.FindMany(ctx, mongoke.FindManyParams{Collection: p.Collection, Where: p.Where})
 	if err != nil {
 		return payload, err
 	}
 
 	// TODO delete only documents user has permissions to
 
-	where := MakeMongodbMatch(p.Where, p.And, p.Or)
+	where := MakeMongodbMatch(p.Where)
 	res, err := db.Collection(p.Collection).DeleteMany(ctx, where, opts)
 	if err != nil {
 		return payload, err
@@ -203,16 +203,25 @@ func (self *MongodbDatabaseFunctions) Init(ctx context.Context) (*mongo.Database
 	return db, nil
 }
 
-func MakeMongodbMatch(where map[string]mongoke.Filter, and []map[string]mongoke.Filter, or []map[string]mongoke.Filter) map[string]interface{} {
+func MakeMongodbMatch(where mongoke.WhereTree) map[string]interface{} {
+	// TODO for every k, v use mapstructure to map to a filter
+	// if k is or, and, use mapstructure to map to an array of filters
 	var res = make(map[string]interface{})
-	for k, v := range where {
+	for k, v := range where.Match {
 		res[k] = v
 	}
-	if len(and) != 0 {
-		res["$and"] = and
+
+	if len(where.And) != 0 {
+		res["$and"] = make([]map[string]interface{}, len(where.And))
+		for i, a := range where.And {
+			res["$and"].([]map[string]interface{})[i] = MakeMongodbMatch(a)
+		}
 	}
-	if len(or) != 0 {
-		res["$or"] = or
+	if len(where.Or) != 0 {
+		res["$or"] = make([]map[string]interface{}, len(where.Or))
+		for i, a := range where.Or {
+			res["$or"].([]map[string]interface{})[i] = MakeMongodbMatch(a)
+		}
 	}
 	return res
 }

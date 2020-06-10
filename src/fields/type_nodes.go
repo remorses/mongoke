@@ -5,14 +5,13 @@ import (
 	"fmt"
 
 	"github.com/graphql-go/graphql"
-	"github.com/imdario/mergo"
 	"github.com/mitchellh/mapstructure"
 	mongoke "github.com/remorses/mongoke/src"
 	"github.com/remorses/mongoke/src/types"
 )
 
 type typeNodesArgs struct {
-	Where       map[string]mongoke.Filter `mapstructure:"where"`
+	Where       mongoke.WhereTree // `mapstructure:"where"`
 	Pagination  mongoke.Pagination
 	CursorField string `mapstructure:"cursorField"`
 	Direction   int    `mapstructure:"direction"`
@@ -54,11 +53,12 @@ func QueryTypeNodesField(p CreateFieldParams) (*graphql.Field, error) {
 		if err != nil {
 			return nil, err
 		}
-		if p.InitialWhere != nil {
-			err = mergo.Merge(&decodedArgs.Where, p.InitialWhere)
+		if args["where"] != nil {
+			where, err := mongoke.MakeWhereTree(args["where"].(map[string]interface{}), p.InitialWhere)
 			if err != nil {
 				return nil, err
 			}
+			decodedArgs.Where = where
 		}
 		opts, err := createFindManyParamsFromArgs(decodedArgs, p.Collection)
 		if err != nil {
@@ -245,7 +245,7 @@ func addTypeNodesArgsDefaults(p typeNodesArgs) (typeNodesArgs, error) {
 	}
 
 	// gt and lt
-	cursorFieldMatch := p.Where[p.CursorField]
+	cursorFieldMatch := p.Where.Match[p.CursorField]
 	if after != "" {
 		if p.Direction == mongoke.DESC {
 			cursorFieldMatch.Lt = after

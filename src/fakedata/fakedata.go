@@ -41,7 +41,7 @@ func (self *FakeDatabaseFunctions) FindMany(ctx context.Context, p mongoke.FindM
 	opts.SetSort(p.OrderBy)
 	testutil.PrettyPrint(p)
 
-	where := mongodb.MakeMongodbMatch(p.Where, p.And, p.Or)
+	where := mongodb.MakeMongodbMatch(p.Where)
 	res, err := db.Collection(p.Collection).Find(ctx, where, opts)
 	if err != nil {
 		// log.Print("Error in findMany", err)
@@ -100,7 +100,7 @@ func (self *FakeDatabaseFunctions) UpdateOne(ctx context.Context, p mongoke.Upda
 	opts.SetReturnDocument(options.After)
 	testutil.PrettyPrint(p)
 
-	where := mongodb.MakeMongodbMatch(p.Where, p.And, p.Or)
+	where := mongodb.MakeMongodbMatch(p.Where)
 	res := db.Collection(p.Collection).FindOneAndUpdate(ctx, where, bson.M{"$set": p.Set}, opts)
 	if res.Err() == mongo.ErrNoDocuments {
 		println("no docs to update")
@@ -131,12 +131,12 @@ func (self *FakeDatabaseFunctions) UpdateMany(ctx context.Context, p mongoke.Upd
 	testutil.PrettyPrint(p)
 
 	// TODO execute inside a transaction
-	nodes, err := self.FindMany(ctx, mongoke.FindManyParams{Collection: p.Collection, Where: p.Where, And: p.And, Or: p.Or})
+	nodes, err := self.FindMany(ctx, mongoke.FindManyParams{Collection: p.Collection, Where: p.Where})
 	if err != nil {
 		return payload, err
 	}
 
-	where := mongodb.MakeMongodbMatch(p.Where, p.And, p.Or)
+	where := mongodb.MakeMongodbMatch(p.Where)
 	res, err := db.Collection(p.Collection).UpdateMany(ctx, where, bson.M{"$set": p.Set}, opts)
 	if err != nil {
 		return payload, err
@@ -159,12 +159,12 @@ func (self *FakeDatabaseFunctions) DeleteMany(ctx context.Context, p mongoke.Del
 
 	testutil.PrettyPrint(p)
 
-	nodes, err := self.FindMany(ctx, mongoke.FindManyParams{Collection: p.Collection, Where: p.Where, And: p.And, Or: p.Or})
+	nodes, err := self.FindMany(ctx, mongoke.FindManyParams{Collection: p.Collection, Where: p.Where})
 	if err != nil {
 		return payload, err
 	}
 
-	where := mongodb.MakeMongodbMatch(p.Where, p.And, p.Or)
+	where := mongodb.MakeMongodbMatch(p.Where)
 	res, err := db.Collection(p.Collection).DeleteMany(ctx, where, opts)
 	if err != nil {
 		return payload, err

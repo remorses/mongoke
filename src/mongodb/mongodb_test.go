@@ -55,9 +55,12 @@ func TestFindMany(t *testing.T) {
 		"Eq": {
 			params: mongoke.FindManyParams{
 				Collection: collection,
-				Where: map[string]mongoke.Filter{
-					"name": {
-						Eq: "01",
+
+				Where: mongoke.WhereTree{
+					Match: map[string]mongoke.Filter{
+						"name": {
+							Eq: "01",
+						},
 					},
 				},
 			},
@@ -66,9 +69,11 @@ func TestFindMany(t *testing.T) {
 		"Gt": {
 			params: mongoke.FindManyParams{
 				Collection: collection,
-				Where: map[string]mongoke.Filter{
-					"name": {
-						Gt: "01",
+				Where: mongoke.WhereTree{
+					Match: map[string]mongoke.Filter{
+						"name": {
+							Gt: "01",
+						},
 					},
 				},
 			},
@@ -77,10 +82,12 @@ func TestFindMany(t *testing.T) {
 		"Gt and Lte": {
 			params: mongoke.FindManyParams{
 				Collection: collection,
-				Where: map[string]mongoke.Filter{
-					"age": {
-						Gt:  1,
-						Lte: 3,
+				Where: mongoke.WhereTree{
+					Match: map[string]mongoke.Filter{
+						"age": {
+							Gt:  1,
+							Lte: 3,
+						},
 					},
 				},
 			},

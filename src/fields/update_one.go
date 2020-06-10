@@ -28,6 +28,13 @@ func MutationUpdateOne(p CreateFieldParams) (*graphql.Field, error) {
 		if err != nil {
 			return nil, err
 		}
+		if args["where"] != nil {
+			where, err := mongoke.MakeWhereTree(args["where"].(map[string]interface{}), p.InitialWhere)
+			if err != nil {
+				return nil, err
+			}
+			opts.Where = where
+		}
 		// TODO update only nodes the user can insert, based on expressions
 		res, err := p.Config.DatabaseFunctions.UpdateOne(
 			params.Context, opts,

@@ -2,7 +2,6 @@ package fields
 
 import (
 	"github.com/graphql-go/graphql"
-	"github.com/imdario/mergo"
 	"github.com/mitchellh/mapstructure"
 	mongoke "github.com/remorses/mongoke/src"
 	"github.com/remorses/mongoke/src/types"
@@ -19,11 +18,12 @@ func QueryTypeListField(p CreateFieldParams) (*graphql.Field, error) {
 		if err != nil {
 			return nil, err
 		}
-		if p.InitialWhere != nil {
-			err = mergo.Merge(&opts, p.InitialWhere)
+		if args["where"] != nil {
+			where, err := mongoke.MakeWhereTree(args["where"].(map[string]interface{}), p.InitialWhere)
 			if err != nil {
 				return nil, err
 			}
+			opts.Where = where
 		}
 		nodes, err := p.Config.DatabaseFunctions.FindMany(
 			params.Context, opts,

@@ -30,8 +30,8 @@ func GetWhereArg(cache mongoke.Map, indexableNames []string, object graphql.Type
 		Name:   name,
 		Fields: inputFields,
 	})
-	inputFields["or"] = &graphql.InputObjectFieldConfig{Type: where}
-	inputFields["and"] = &graphql.InputObjectFieldConfig{Type: where}
+	inputFields["or"] = &graphql.InputObjectFieldConfig{Type: graphql.NewList(where)} // TODO add more non null in input arguments
+	inputFields["and"] = &graphql.InputObjectFieldConfig{Type: graphql.NewList(where)}
 	cache[name] = where
 	return where, nil
 }
