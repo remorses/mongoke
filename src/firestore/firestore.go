@@ -63,6 +63,10 @@ func (self *FirestoreDatabaseFunctions) FindMany(ctx context.Context, p goke.Fin
 		}
 		nodes = append(nodes, node)
 	}
+	nodes, err = goke.FilterDocuments(nodes, hook)
+	if err != nil {
+		return nil, err
+	}
 	return nodes, nil
 }
 

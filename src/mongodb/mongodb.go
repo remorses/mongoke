@@ -54,6 +54,10 @@ func (self *MongodbDatabaseFunctions) FindMany(ctx context.Context, p goke.FindM
 	if err != nil {
 		return nil, err
 	}
+	nodes, err = goke.FilterDocuments(nodes, hook)
+	if err != nil {
+		return nil, err
+	}
 	return nodes, nil
 }
 
