@@ -42,7 +42,6 @@ func NewTestGroup(t *testing.T, p NewTestGroupParams) {
 
 			// t.Log(testCase.Name)
 			if p.Database != nil {
-				// TODO insertMany mutates input arguments and adds _id fields
 				p.Database.InsertMany(ctx, goke.InsertManyParams{
 					Collection: p.Collection,
 					Data:       p.Documents,

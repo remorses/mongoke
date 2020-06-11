@@ -16,12 +16,12 @@ func DeleteOne(p CreateFieldParams) (*graphql.Field, error) {
 		}
 		err := mapstructure.Decode(args, &opts)
 		if err != nil {
-			return nil, err
+			return goke.NodeMutationPayload{}, err
 		}
 		if args["where"] != nil {
 			where, err := goke.MakeWhereTree(args["where"].(map[string]interface{}), p.InitialWhere)
 			if err != nil {
-				return nil, err
+				return goke.NodeMutationPayload{}, err
 			}
 			opts.Where = where
 		}
@@ -38,9 +38,17 @@ func DeleteOne(p CreateFieldParams) (*graphql.Field, error) {
 			},
 		)
 		if err != nil {
-			return nil, err
+			return goke.NodeMutationPayload{}, err
 		}
-		return res, nil
+		if len(res.Returning) == 0 {
+			return goke.NodeMutationPayload{
+				AffectedCount: res.AffectedCount,
+			}, nil
+		}
+		return goke.NodeMutationPayload{
+			AffectedCount: res.AffectedCount,
+			Returning:     res.Returning[0],
+		}, nil
 	}
 	indexableNames := takeIndexableTypeNames(p.SchemaConfig)
 	whereArg, err := types.GetWhereArg(p.Config.Cache, indexableNames, p.ReturnType)

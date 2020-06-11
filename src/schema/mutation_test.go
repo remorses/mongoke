@@ -130,7 +130,7 @@ func TestMutationWithEmptyFakeDatabase(t *testing.T) {
 	})
 }
 
-func TestDeleteWithEmptyFakeDatabase(t *testing.T) {
+func TestDeleteWithFakeDatabase(t *testing.T) {
 	exampleUsers := []goke.Map{
 		{"name": "01", "age": 1},
 		{"name": "02", "age": 2},
@@ -166,6 +166,22 @@ func TestDeleteWithEmptyFakeDatabase(t *testing.T) {
 				Query: `
 				mutation {
 					deleteManyUser {
+						returning {
+							name
+							age
+						}
+						affectedCount
+					}
+				}
+				`,
+			},
+			{
+				Name:     "deleteOne removes first item",
+				Schema:   schema,
+				Expected: goke.Map{"deleteOneUser": goke.Map{"returning": exampleUsers[0], "affectedCount": 1}},
+				Query: `
+				mutation {
+					deleteOneUser(where: {age: {eq: 1}}) {
 						returning {
 							name
 							age

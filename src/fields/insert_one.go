@@ -49,10 +49,17 @@ func InsertOne(p CreateFieldParams) (*graphql.Field, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		if len(res.Returning) == 0 {
-			return nil, errors.New("could not insert document")
+			return goke.NodeMutationPayload{
+				AffectedCount: res.AffectedCount,
+			}, nil
 		}
-		return goke.Map{"returning": res.Returning[0], "affectedCount": res.AffectedCount}, nil
+
+		return goke.NodeMutationPayload{
+			AffectedCount: res.AffectedCount,
+			Returning:     res.Returning[0],
+		}, nil
 	}
 
 	// if err != nil {
