@@ -17,6 +17,9 @@ type DatabaseInterface interface {
 	DeleteMany(ctx context.Context, p DeleteManyParams) (NodesMutationPayload, error)
 }
 
+// remove non accessible fields from a document and returns nil if document is not accessible
+type TransformDocument = func(document Map) (Map, error)
+
 // type FindOneParams struct {
 // 	Collection  string
 // 	DatabaseUri string

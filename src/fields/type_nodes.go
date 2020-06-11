@@ -95,7 +95,7 @@ func QueryTypeNodesField(p CreateFieldParams) (*graphql.Field, error) {
 				continue
 			}
 			if node != nil {
-				accessibleNodes = append(accessibleNodes, node.(mongoke.Map))
+				accessibleNodes = append(accessibleNodes, node)
 			}
 		}
 		connection := makeConnection(

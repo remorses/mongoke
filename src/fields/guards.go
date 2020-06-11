@@ -8,13 +8,13 @@ import (
 )
 
 type applyGuardsOnDocumentParams struct {
-	document  interface{}
+	document  mongoke.Map
 	guards    []mongoke.AuthGuard
 	jwt       jwt.MapClaims
 	operation string
 }
 
-func applyGuardsOnDocument(p applyGuardsOnDocumentParams) (interface{}, error) {
+func applyGuardsOnDocument(p applyGuardsOnDocumentParams) (mongoke.Map, error) {
 	if p.document == nil {
 		return nil, nil
 	}
@@ -32,14 +32,11 @@ func applyGuardsOnDocument(p applyGuardsOnDocumentParams) (interface{}, error) {
 	return p.document, nil
 }
 
-func hideFieldsFromDocument(document interface{}, toHide []string) interface{} {
-	if document == nil {
+func hideFieldsFromDocument(documentMap mongoke.Map, toHide []string) mongoke.Map {
+	if documentMap == nil {
 		return nil
 	}
-	documentMap, ok := document.(mongoke.Map)
-	if !ok {
-		return document
-	}
+
 	// clone the map
 	copy := make(mongoke.Map, len(documentMap))
 	for k, v := range documentMap {
