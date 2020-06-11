@@ -108,7 +108,7 @@ func (self *FirestoreDatabaseFunctions) UpdateOne(ctx context.Context, p goke.Up
 }
 
 func (self *FirestoreDatabaseFunctions) UpdateMany(ctx context.Context, p goke.UpdateParams, hook goke.TransformDocument) (goke.NodesMutationPayload, error) {
-	return self.updateMany(ctx, p, hook, math.MaxInt32)
+	return self.updateMany(ctx, p, hook, math.MaxInt16)
 }
 
 func (self *FirestoreDatabaseFunctions) updateMany(ctx context.Context, p goke.UpdateParams, hook goke.TransformDocument, count int) (goke.NodesMutationPayload, error) {

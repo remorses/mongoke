@@ -92,6 +92,7 @@ func (self *FakeDatabaseFunctions) InsertMany(ctx context.Context, p goke.Insert
 	}, nil
 }
 
+// TODO make the update one a variation of update many, adding a limit parameter (but i have to make 1 more round trip to database to get the updated data this way)
 func (self *FakeDatabaseFunctions) UpdateOne(ctx context.Context, p goke.UpdateParams, hook goke.TransformDocument) (goke.NodeMutationPayload, error) {
 	db, err := self.Init(ctx)
 	payload := goke.NodeMutationPayload{
