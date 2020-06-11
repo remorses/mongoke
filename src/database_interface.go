@@ -104,6 +104,7 @@ type UpdateParams struct {
 type DeleteManyParams struct {
 	Collection string
 	Where      WhereTree //  `mapstructure:"where"`
+	Limit      int
 }
 
 type Pagination struct {

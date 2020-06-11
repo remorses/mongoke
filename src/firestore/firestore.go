@@ -171,10 +171,9 @@ func (self *FirestoreDatabaseFunctions) updateMany(ctx context.Context, p goke.U
 }
 
 func (self *FirestoreDatabaseFunctions) DeleteMany(ctx context.Context, p goke.DeleteManyParams, hook goke.TransformDocument) (goke.NodesMutationPayload, error) {
-	return self.deleteMany(ctx, p, hook, math.MaxInt32)
-}
-
-func (self *FirestoreDatabaseFunctions) deleteMany(ctx context.Context, p goke.DeleteManyParams, hook goke.TransformDocument, count int) (goke.NodesMutationPayload, error) {
+	if p.Limit == 0 {
+		p.Limit = math.MaxInt16
+	}
 	db, err := self.Init(ctx)
 	payload := goke.NodesMutationPayload{}
 	if err != nil {
@@ -190,7 +189,7 @@ func (self *FirestoreDatabaseFunctions) deleteMany(ctx context.Context, p goke.D
 	iter := query.Documents(ctx)
 	defer iter.Stop()
 	// TODO use batching for firestore's updateMany
-	for payload.AffectedCount < count {
+	for payload.AffectedCount < p.Limit {
 		doc, err := iter.Next()
 		if err == iterator.Done {
 			break

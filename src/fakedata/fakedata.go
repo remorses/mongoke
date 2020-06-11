@@ -3,6 +3,7 @@ package fakedata
 import (
 	"context"
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/256dpi/lungo"
@@ -187,6 +188,9 @@ func (self *FakeDatabaseFunctions) UpdateMany(ctx context.Context, p goke.Update
 }
 
 func (self *FakeDatabaseFunctions) DeleteMany(ctx context.Context, p goke.DeleteManyParams, hook goke.TransformDocument) (goke.NodesMutationPayload, error) {
+	if p.Limit == 0 {
+		p.Limit = math.MaxInt16
+	}
 	db, err := self.Init(ctx)
 	payload := goke.NodesMutationPayload{}
 	if err != nil {
@@ -196,7 +200,7 @@ func (self *FakeDatabaseFunctions) DeleteMany(ctx context.Context, p goke.Delete
 	testutil.PrettyPrint(p)
 
 	// find accessible nodes
-	nodes, err := self.FindMany(ctx, goke.FindManyParams{Collection: p.Collection, Where: p.Where}, hook)
+	nodes, err := self.FindMany(ctx, goke.FindManyParams{Collection: p.Collection, Where: p.Where, Limit: p.Limit}, hook)
 	if err != nil {
 		return payload, err
 	}
