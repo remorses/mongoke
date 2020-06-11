@@ -118,7 +118,6 @@ func (self *FirestoreDatabaseFunctions) updateMany(ctx context.Context, p goke.U
 		return payload, err
 	}
 	var query firestore.Query = db.Collection(p.Collection).Query
-
 	query, err = applyWhereQuery(p.Where, query)
 	if err != nil {
 		return payload, err
@@ -135,6 +134,22 @@ func (self *FirestoreDatabaseFunctions) updateMany(ctx context.Context, p goke.U
 		if err != nil {
 			return payload, err
 		}
+
+		// check with hook
+		var m goke.Map
+		err = doc.DataTo(&m)
+		if err != nil {
+			return payload, err
+		}
+		m, err = hook(m)
+		if err != nil {
+			return payload, err
+		}
+		if m == nil {
+			continue
+		}
+
+		// update the doc
 		_, err = doc.Ref.Update(ctx, setToUpdates(p.Set))
 		if err != nil {
 			return payload, err
