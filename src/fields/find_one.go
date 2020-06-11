@@ -29,7 +29,14 @@ func FindOne(p CreateFieldParams) (*graphql.Field, error) {
 			}
 			opts.Where = where
 		}
-		documents, err := p.Config.DatabaseFunctions.FindMany(params.Context, opts)
+		documents, err := p.Config.DatabaseFunctions.FindMany(
+			params.Context,
+			opts,
+			func(document goke.Map) (goke.Map, error) {
+				// TODO implement check
+				return document, nil
+			},
+		)
 		if err != nil {
 			return nil, err
 		}

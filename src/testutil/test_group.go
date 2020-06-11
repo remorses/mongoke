@@ -30,7 +30,7 @@ func NewTestGroup(t *testing.T, p NewTestGroupParams) {
 	if p.Database != nil {
 		_, err := p.Database.DeleteMany(ctx, goke.DeleteManyParams{
 			Collection: p.Collection,
-		})
+		}, nil)
 
 		if err != nil {
 			t.Error(err)
@@ -45,7 +45,7 @@ func NewTestGroup(t *testing.T, p NewTestGroupParams) {
 				p.Database.InsertMany(ctx, goke.InsertManyParams{
 					Collection: p.Collection,
 					Data:       p.Documents,
-				})
+				}, nil)
 			}
 			schema := testCase.Schema
 			if testCase.ExpectedError {
@@ -67,7 +67,7 @@ func NewTestGroup(t *testing.T, p NewTestGroupParams) {
 			if p.Database != nil {
 				_, err := p.Database.DeleteMany(ctx, goke.DeleteManyParams{
 					Collection: p.Collection,
-				})
+				}, nil)
 				if err != nil {
 					t.Error(err)
 				}

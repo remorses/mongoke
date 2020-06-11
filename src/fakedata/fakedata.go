@@ -28,7 +28,7 @@ type FakeDatabaseFunctions struct {
 	db                 lungo.IDatabase
 }
 
-func (self *FakeDatabaseFunctions) FindMany(ctx context.Context, p goke.FindManyParams) ([]goke.Map, error) {
+func (self *FakeDatabaseFunctions) FindMany(ctx context.Context, p goke.FindManyParams, hook goke.TransformDocument) ([]goke.Map, error) {
 	db, err := self.Init(ctx)
 	if err != nil {
 		return nil, err
@@ -53,10 +53,15 @@ func (self *FakeDatabaseFunctions) FindMany(ctx context.Context, p goke.FindMany
 	if err != nil {
 		return nil, err
 	}
+	nodes, err = goke.FilterDocuments(nodes, hook)
+	if err != nil {
+		return nil, err
+	}
 	return nodes, nil
 }
 
-func (self *FakeDatabaseFunctions) InsertMany(ctx context.Context, p goke.InsertManyParams) (goke.NodesMutationPayload, error) {
+func (self *FakeDatabaseFunctions) InsertMany(ctx context.Context, p goke.InsertManyParams, hook goke.TransformDocument) (goke.NodesMutationPayload, error) {
+	// TODO implement hook check
 	payload := goke.NodesMutationPayload{}
 	if len(p.Data) == 0 {
 		return payload, nil
@@ -87,7 +92,7 @@ func (self *FakeDatabaseFunctions) InsertMany(ctx context.Context, p goke.Insert
 	}, nil
 }
 
-func (self *FakeDatabaseFunctions) UpdateOne(ctx context.Context, p goke.UpdateParams) (goke.NodeMutationPayload, error) {
+func (self *FakeDatabaseFunctions) UpdateOne(ctx context.Context, p goke.UpdateParams, hook goke.TransformDocument) (goke.NodeMutationPayload, error) {
 	db, err := self.Init(ctx)
 	payload := goke.NodeMutationPayload{
 		Returning:     nil,
@@ -120,36 +125,46 @@ func (self *FakeDatabaseFunctions) UpdateOne(ctx context.Context, p goke.UpdateP
 }
 
 // first updateMany documents, then query again the documents and return them, all inside a transaction that prevents other writes happen before the query
-func (self *FakeDatabaseFunctions) UpdateMany(ctx context.Context, p goke.UpdateParams) (goke.NodesMutationPayload, error) {
-	db, err := self.Init(ctx)
+func (self *FakeDatabaseFunctions) UpdateMany(ctx context.Context, p goke.UpdateParams, hook goke.TransformDocument) (goke.NodesMutationPayload, error) {
+	// db, err := self.Init(ctx)
+
+	// if err != nil {
+	// 	return payload, err
+	// }
 	payload := goke.NodesMutationPayload{}
-	if err != nil {
-		return payload, err
-	}
-	opts := options.Update()
 
 	testutil.PrettyPrint(p)
 
 	// TODO execute inside a transaction
-	nodes, err := self.FindMany(ctx, goke.FindManyParams{Collection: p.Collection, Where: p.Where})
+	nodes, err := self.FindMany(ctx, goke.FindManyParams{Collection: p.Collection, Where: p.Where}, hook)
 	if err != nil {
 		return payload, err
 	}
 
-	where := mongodb.MakeMongodbMatch(p.Where)
-	res, err := db.Collection(p.Collection).UpdateMany(ctx, where, bson.M{"$set": p.Set}, opts)
-	if err != nil {
-		return payload, err
+	for _, node := range nodes {
+		where := p.Where
+		// TODO instead of using `and` append directly to the Match, it is faster
+		where.And = append(where.And, goke.WhereTree{
+			Match: map[string]goke.Filter{
+				"_id": {
+					Eq: node["_id"],
+				},
+			},
+		})
+		r, err := self.UpdateOne(ctx, goke.UpdateParams{Collection: p.Collection, Where: where}, hook)
+		if err != nil {
+			return payload, err
+		}
+		payload.AffectedCount += r.AffectedCount
+		if r.Returning != nil {
+			payload.Returning = append(payload.Returning, r.Returning.(goke.Map))
+		}
 	}
-	payload.AffectedCount = int(res.ModifiedCount + res.UpsertedCount)
 
-	return goke.NodesMutationPayload{
-		AffectedCount: payload.AffectedCount,
-		Returning:     nodes,
-	}, nil
+	return payload, nil
 }
 
-func (self *FakeDatabaseFunctions) DeleteMany(ctx context.Context, p goke.DeleteManyParams) (goke.NodesMutationPayload, error) {
+func (self *FakeDatabaseFunctions) DeleteMany(ctx context.Context, p goke.DeleteManyParams, hook goke.TransformDocument) (goke.NodesMutationPayload, error) {
 	db, err := self.Init(ctx)
 	payload := goke.NodesMutationPayload{}
 	if err != nil {
@@ -159,7 +174,7 @@ func (self *FakeDatabaseFunctions) DeleteMany(ctx context.Context, p goke.Delete
 
 	testutil.PrettyPrint(p)
 
-	nodes, err := self.FindMany(ctx, goke.FindManyParams{Collection: p.Collection, Where: p.Where})
+	nodes, err := self.FindMany(ctx, goke.FindManyParams{Collection: p.Collection, Where: p.Where}, hook)
 	if err != nil {
 		return payload, err
 	}

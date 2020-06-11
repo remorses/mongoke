@@ -156,7 +156,7 @@ func TestMutationWithMockedDb(t *testing.T) {
 				Schema: takeFirst(goke_schema.MakeGokeSchema(goke.Config{
 					Schema: typeDefs,
 					DatabaseFunctions: &mock.DatabaseInterfaceMock{
-						InsertManyFunc: func(ctx context.Context, p goke.InsertManyParams) (goke.NodesMutationPayload, error) {
+						InsertManyFunc: func(ctx context.Context, p goke.InsertManyParams, h goke.TransformDocument) (goke.NodesMutationPayload, error) {
 							return goke.NodesMutationPayload{}, errors.New("error")
 						},
 					},

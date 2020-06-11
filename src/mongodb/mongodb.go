@@ -29,7 +29,7 @@ func (self MongodbDatabaseFunctions) databaseUri() string {
 	return self.Config.Mongodb.Uri
 }
 
-func (self *MongodbDatabaseFunctions) FindMany(ctx context.Context, p goke.FindManyParams) ([]goke.Map, error) {
+func (self *MongodbDatabaseFunctions) FindMany(ctx context.Context, p goke.FindManyParams, hook goke.TransformDocument) ([]goke.Map, error) {
 	db, err := self.Init(ctx)
 	if err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func (self *MongodbDatabaseFunctions) FindMany(ctx context.Context, p goke.FindM
 	return nodes, nil
 }
 
-func (self *MongodbDatabaseFunctions) InsertMany(ctx context.Context, p goke.InsertManyParams) (goke.NodesMutationPayload, error) {
+func (self *MongodbDatabaseFunctions) InsertMany(ctx context.Context, p goke.InsertManyParams, hook goke.TransformDocument) (goke.NodesMutationPayload, error) {
 	payload := goke.NodesMutationPayload{}
 	if len(p.Data) == 0 {
 		return payload, nil
@@ -88,7 +88,7 @@ func (self *MongodbDatabaseFunctions) InsertMany(ctx context.Context, p goke.Ins
 	}, nil
 }
 
-func (self *MongodbDatabaseFunctions) UpdateOne(ctx context.Context, p goke.UpdateParams) (goke.NodeMutationPayload, error) {
+func (self *MongodbDatabaseFunctions) UpdateOne(ctx context.Context, p goke.UpdateParams, hook goke.TransformDocument) (goke.NodeMutationPayload, error) {
 	db, err := self.Init(ctx)
 	if err != nil {
 		return goke.NodeMutationPayload{}, err
@@ -120,7 +120,7 @@ func (self *MongodbDatabaseFunctions) UpdateOne(ctx context.Context, p goke.Upda
 }
 
 // first updateMany documents, then query again the documents and return them, all inside a transaction that prevents other writes happen before the query
-func (self *MongodbDatabaseFunctions) UpdateMany(ctx context.Context, p goke.UpdateParams) (goke.NodesMutationPayload, error) {
+func (self *MongodbDatabaseFunctions) UpdateMany(ctx context.Context, p goke.UpdateParams, hook goke.TransformDocument) (goke.NodesMutationPayload, error) {
 	db, err := self.Init(ctx)
 	payload := goke.NodesMutationPayload{}
 	if err != nil {
@@ -131,7 +131,7 @@ func (self *MongodbDatabaseFunctions) UpdateMany(ctx context.Context, p goke.Upd
 	testutil.PrettyPrint(p)
 
 	// TODO execute inside a transaction
-	nodes, err := self.FindMany(ctx, goke.FindManyParams{Collection: p.Collection, Where: p.Where})
+	nodes, err := self.FindMany(ctx, goke.FindManyParams{Collection: p.Collection, Where: p.Where}, hook)
 	if err != nil {
 		return payload, err
 	}
@@ -149,7 +149,7 @@ func (self *MongodbDatabaseFunctions) UpdateMany(ctx context.Context, p goke.Upd
 	}, nil
 }
 
-func (self *MongodbDatabaseFunctions) DeleteMany(ctx context.Context, p goke.DeleteManyParams) (goke.NodesMutationPayload, error) {
+func (self *MongodbDatabaseFunctions) DeleteMany(ctx context.Context, p goke.DeleteManyParams, hook goke.TransformDocument) (goke.NodesMutationPayload, error) {
 	db, err := self.Init(ctx)
 	payload := goke.NodesMutationPayload{}
 	if err != nil {
@@ -159,7 +159,7 @@ func (self *MongodbDatabaseFunctions) DeleteMany(ctx context.Context, p goke.Del
 
 	testutil.PrettyPrint(p)
 
-	nodes, err := self.FindMany(ctx, goke.FindManyParams{Collection: p.Collection, Where: p.Where})
+	nodes, err := self.FindMany(ctx, goke.FindManyParams{Collection: p.Collection, Where: p.Where}, hook)
 	if err != nil {
 		return payload, err
 	}

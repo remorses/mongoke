@@ -120,7 +120,7 @@ func TestFindMany(t *testing.T) {
 					t.Error(err)
 				}
 			}
-			result, err := m.FindMany(ctx, c.params)
+			result, err := m.FindMany(ctx, c.params, nil)
 			if err != nil {
 				t.Error(err)
 			}

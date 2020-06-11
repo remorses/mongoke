@@ -16,7 +16,7 @@ import (
 func BenchmarkQuery(b *testing.B) {
 
 	db := &mock.DatabaseInterfaceMock{
-		FindManyFunc: func(ctx context.Context, p goke.FindManyParams) ([]map[string]interface{}, error) {
+		FindManyFunc: func(ctx context.Context, p goke.FindManyParams, h goke.TransformDocument) ([]goke.Map, error) {
 			elem := goke.Map{
 				"_id":  primitive.NewObjectID(),
 				"name": "1",

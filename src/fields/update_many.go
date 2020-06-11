@@ -37,7 +37,12 @@ func UpdateMany(p CreateFieldParams) (*graphql.Field, error) {
 		}
 		// TODO update only nodes the user can insert, based on expressions
 		res, err := p.Config.DatabaseFunctions.UpdateMany(
-			params.Context, opts,
+			params.Context,
+			opts,
+			func(document goke.Map) (goke.Map, error) {
+				// TODO implement check
+				return document, nil
+			},
 		)
 		println(testutil.Pretty(res))
 		if err != nil {

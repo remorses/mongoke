@@ -36,7 +36,12 @@ func InsertOne(p CreateFieldParams) (*graphql.Field, error) {
 
 		// TODO insert only nodes the user can insert, based on expressions
 		res, err := p.Config.DatabaseFunctions.InsertMany(
-			params.Context, opts,
+			params.Context,
+			opts,
+			func(document goke.Map) (goke.Map, error) {
+				// TODO implement check
+				return document, nil
+			},
 		)
 		if err != nil {
 			return nil, err

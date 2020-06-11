@@ -27,19 +27,19 @@ var _ goke.DatabaseInterface = &DatabaseInterfaceMock{}
 //
 //         // make and configure a mocked goke.DatabaseInterface
 //         mockedDatabaseInterface := &DatabaseInterfaceMock{
-//             DeleteManyFunc: func(ctx context.Context, p goke.DeleteManyParams) (goke.NodesMutationPayload, error) {
+//             DeleteManyFunc: func(ctx context.Context, p goke.DeleteManyParams, hook func(document goke.Map) (goke.Map, error)) (goke.NodesMutationPayload, error) {
 // 	               panic("mock out the DeleteMany method")
 //             },
-//             FindManyFunc: func(ctx context.Context, p goke.FindManyParams) ([]map[string]interface{}, error) {
+//             FindManyFunc: func(ctx context.Context, p goke.FindManyParams, hook func(document goke.Map) (goke.Map, error)) ([]goke.Map, error) {
 // 	               panic("mock out the FindMany method")
 //             },
-//             InsertManyFunc: func(ctx context.Context, p goke.InsertManyParams) (goke.NodesMutationPayload, error) {
+//             InsertManyFunc: func(ctx context.Context, p goke.InsertManyParams, hook func(document goke.Map) (goke.Map, error)) (goke.NodesMutationPayload, error) {
 // 	               panic("mock out the InsertMany method")
 //             },
-//             UpdateManyFunc: func(ctx context.Context, p goke.UpdateParams) (goke.NodesMutationPayload, error) {
+//             UpdateManyFunc: func(ctx context.Context, p goke.UpdateParams, hook func(document goke.Map) (goke.Map, error)) (goke.NodesMutationPayload, error) {
 // 	               panic("mock out the UpdateMany method")
 //             },
-//             UpdateOneFunc: func(ctx context.Context, p goke.UpdateParams) (goke.NodeMutationPayload, error) {
+//             UpdateOneFunc: func(ctx context.Context, p goke.UpdateParams, hook func(document goke.Map) (goke.Map, error)) (goke.NodeMutationPayload, error) {
 // 	               panic("mock out the UpdateOne method")
 //             },
 //         }
@@ -50,19 +50,19 @@ var _ goke.DatabaseInterface = &DatabaseInterfaceMock{}
 //     }
 type DatabaseInterfaceMock struct {
 	// DeleteManyFunc mocks the DeleteMany method.
-	DeleteManyFunc func(ctx context.Context, p goke.DeleteManyParams) (goke.NodesMutationPayload, error)
+	DeleteManyFunc func(ctx context.Context, p goke.DeleteManyParams, hook func(document goke.Map) (goke.Map, error)) (goke.NodesMutationPayload, error)
 
 	// FindManyFunc mocks the FindMany method.
-	FindManyFunc func(ctx context.Context, p goke.FindManyParams) ([]map[string]interface{}, error)
+	FindManyFunc func(ctx context.Context, p goke.FindManyParams, hook func(document goke.Map) (goke.Map, error)) ([]goke.Map, error)
 
 	// InsertManyFunc mocks the InsertMany method.
-	InsertManyFunc func(ctx context.Context, p goke.InsertManyParams) (goke.NodesMutationPayload, error)
+	InsertManyFunc func(ctx context.Context, p goke.InsertManyParams, hook func(document goke.Map) (goke.Map, error)) (goke.NodesMutationPayload, error)
 
 	// UpdateManyFunc mocks the UpdateMany method.
-	UpdateManyFunc func(ctx context.Context, p goke.UpdateParams) (goke.NodesMutationPayload, error)
+	UpdateManyFunc func(ctx context.Context, p goke.UpdateParams, hook func(document goke.Map) (goke.Map, error)) (goke.NodesMutationPayload, error)
 
 	// UpdateOneFunc mocks the UpdateOne method.
-	UpdateOneFunc func(ctx context.Context, p goke.UpdateParams) (goke.NodeMutationPayload, error)
+	UpdateOneFunc func(ctx context.Context, p goke.UpdateParams, hook func(document goke.Map) (goke.Map, error)) (goke.NodeMutationPayload, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -72,6 +72,8 @@ type DatabaseInterfaceMock struct {
 			Ctx context.Context
 			// P is the p argument value.
 			P goke.DeleteManyParams
+			// Hook is the hook argument value.
+			Hook func(document goke.Map) (goke.Map, error)
 		}
 		// FindMany holds details about calls to the FindMany method.
 		FindMany []struct {
@@ -79,6 +81,8 @@ type DatabaseInterfaceMock struct {
 			Ctx context.Context
 			// P is the p argument value.
 			P goke.FindManyParams
+			// Hook is the hook argument value.
+			Hook func(document goke.Map) (goke.Map, error)
 		}
 		// InsertMany holds details about calls to the InsertMany method.
 		InsertMany []struct {
@@ -86,6 +90,8 @@ type DatabaseInterfaceMock struct {
 			Ctx context.Context
 			// P is the p argument value.
 			P goke.InsertManyParams
+			// Hook is the hook argument value.
+			Hook func(document goke.Map) (goke.Map, error)
 		}
 		// UpdateMany holds details about calls to the UpdateMany method.
 		UpdateMany []struct {
@@ -93,6 +99,8 @@ type DatabaseInterfaceMock struct {
 			Ctx context.Context
 			// P is the p argument value.
 			P goke.UpdateParams
+			// Hook is the hook argument value.
+			Hook func(document goke.Map) (goke.Map, error)
 		}
 		// UpdateOne holds details about calls to the UpdateOne method.
 		UpdateOne []struct {
@@ -100,38 +108,44 @@ type DatabaseInterfaceMock struct {
 			Ctx context.Context
 			// P is the p argument value.
 			P goke.UpdateParams
+			// Hook is the hook argument value.
+			Hook func(document goke.Map) (goke.Map, error)
 		}
 	}
 }
 
 // DeleteMany calls DeleteManyFunc.
-func (mock *DatabaseInterfaceMock) DeleteMany(ctx context.Context, p goke.DeleteManyParams) (goke.NodesMutationPayload, error) {
+func (mock *DatabaseInterfaceMock) DeleteMany(ctx context.Context, p goke.DeleteManyParams, hook func(document goke.Map) (goke.Map, error)) (goke.NodesMutationPayload, error) {
 	if mock.DeleteManyFunc == nil {
 		panic("DatabaseInterfaceMock.DeleteManyFunc: method is nil but DatabaseInterface.DeleteMany was just called")
 	}
 	callInfo := struct {
-		Ctx context.Context
-		P   goke.DeleteManyParams
+		Ctx  context.Context
+		P    goke.DeleteManyParams
+		Hook func(document goke.Map) (goke.Map, error)
 	}{
-		Ctx: ctx,
-		P:   p,
+		Ctx:  ctx,
+		P:    p,
+		Hook: hook,
 	}
 	lockDatabaseInterfaceMockDeleteMany.Lock()
 	mock.calls.DeleteMany = append(mock.calls.DeleteMany, callInfo)
 	lockDatabaseInterfaceMockDeleteMany.Unlock()
-	return mock.DeleteManyFunc(ctx, p)
+	return mock.DeleteManyFunc(ctx, p, hook)
 }
 
 // DeleteManyCalls gets all the calls that were made to DeleteMany.
 // Check the length with:
 //     len(mockedDatabaseInterface.DeleteManyCalls())
 func (mock *DatabaseInterfaceMock) DeleteManyCalls() []struct {
-	Ctx context.Context
-	P   goke.DeleteManyParams
+	Ctx  context.Context
+	P    goke.DeleteManyParams
+	Hook func(document goke.Map) (goke.Map, error)
 } {
 	var calls []struct {
-		Ctx context.Context
-		P   goke.DeleteManyParams
+		Ctx  context.Context
+		P    goke.DeleteManyParams
+		Hook func(document goke.Map) (goke.Map, error)
 	}
 	lockDatabaseInterfaceMockDeleteMany.RLock()
 	calls = mock.calls.DeleteMany
@@ -140,33 +154,37 @@ func (mock *DatabaseInterfaceMock) DeleteManyCalls() []struct {
 }
 
 // FindMany calls FindManyFunc.
-func (mock *DatabaseInterfaceMock) FindMany(ctx context.Context, p goke.FindManyParams) ([]map[string]interface{}, error) {
+func (mock *DatabaseInterfaceMock) FindMany(ctx context.Context, p goke.FindManyParams, hook func(document goke.Map) (goke.Map, error)) ([]goke.Map, error) {
 	if mock.FindManyFunc == nil {
 		panic("DatabaseInterfaceMock.FindManyFunc: method is nil but DatabaseInterface.FindMany was just called")
 	}
 	callInfo := struct {
-		Ctx context.Context
-		P   goke.FindManyParams
+		Ctx  context.Context
+		P    goke.FindManyParams
+		Hook func(document goke.Map) (goke.Map, error)
 	}{
-		Ctx: ctx,
-		P:   p,
+		Ctx:  ctx,
+		P:    p,
+		Hook: hook,
 	}
 	lockDatabaseInterfaceMockFindMany.Lock()
 	mock.calls.FindMany = append(mock.calls.FindMany, callInfo)
 	lockDatabaseInterfaceMockFindMany.Unlock()
-	return mock.FindManyFunc(ctx, p)
+	return mock.FindManyFunc(ctx, p, hook)
 }
 
 // FindManyCalls gets all the calls that were made to FindMany.
 // Check the length with:
 //     len(mockedDatabaseInterface.FindManyCalls())
 func (mock *DatabaseInterfaceMock) FindManyCalls() []struct {
-	Ctx context.Context
-	P   goke.FindManyParams
+	Ctx  context.Context
+	P    goke.FindManyParams
+	Hook func(document goke.Map) (goke.Map, error)
 } {
 	var calls []struct {
-		Ctx context.Context
-		P   goke.FindManyParams
+		Ctx  context.Context
+		P    goke.FindManyParams
+		Hook func(document goke.Map) (goke.Map, error)
 	}
 	lockDatabaseInterfaceMockFindMany.RLock()
 	calls = mock.calls.FindMany
@@ -175,33 +193,37 @@ func (mock *DatabaseInterfaceMock) FindManyCalls() []struct {
 }
 
 // InsertMany calls InsertManyFunc.
-func (mock *DatabaseInterfaceMock) InsertMany(ctx context.Context, p goke.InsertManyParams) (goke.NodesMutationPayload, error) {
+func (mock *DatabaseInterfaceMock) InsertMany(ctx context.Context, p goke.InsertManyParams, hook func(document goke.Map) (goke.Map, error)) (goke.NodesMutationPayload, error) {
 	if mock.InsertManyFunc == nil {
 		panic("DatabaseInterfaceMock.InsertManyFunc: method is nil but DatabaseInterface.InsertMany was just called")
 	}
 	callInfo := struct {
-		Ctx context.Context
-		P   goke.InsertManyParams
+		Ctx  context.Context
+		P    goke.InsertManyParams
+		Hook func(document goke.Map) (goke.Map, error)
 	}{
-		Ctx: ctx,
-		P:   p,
+		Ctx:  ctx,
+		P:    p,
+		Hook: hook,
 	}
 	lockDatabaseInterfaceMockInsertMany.Lock()
 	mock.calls.InsertMany = append(mock.calls.InsertMany, callInfo)
 	lockDatabaseInterfaceMockInsertMany.Unlock()
-	return mock.InsertManyFunc(ctx, p)
+	return mock.InsertManyFunc(ctx, p, hook)
 }
 
 // InsertManyCalls gets all the calls that were made to InsertMany.
 // Check the length with:
 //     len(mockedDatabaseInterface.InsertManyCalls())
 func (mock *DatabaseInterfaceMock) InsertManyCalls() []struct {
-	Ctx context.Context
-	P   goke.InsertManyParams
+	Ctx  context.Context
+	P    goke.InsertManyParams
+	Hook func(document goke.Map) (goke.Map, error)
 } {
 	var calls []struct {
-		Ctx context.Context
-		P   goke.InsertManyParams
+		Ctx  context.Context
+		P    goke.InsertManyParams
+		Hook func(document goke.Map) (goke.Map, error)
 	}
 	lockDatabaseInterfaceMockInsertMany.RLock()
 	calls = mock.calls.InsertMany
@@ -210,33 +232,37 @@ func (mock *DatabaseInterfaceMock) InsertManyCalls() []struct {
 }
 
 // UpdateMany calls UpdateManyFunc.
-func (mock *DatabaseInterfaceMock) UpdateMany(ctx context.Context, p goke.UpdateParams) (goke.NodesMutationPayload, error) {
+func (mock *DatabaseInterfaceMock) UpdateMany(ctx context.Context, p goke.UpdateParams, hook func(document goke.Map) (goke.Map, error)) (goke.NodesMutationPayload, error) {
 	if mock.UpdateManyFunc == nil {
 		panic("DatabaseInterfaceMock.UpdateManyFunc: method is nil but DatabaseInterface.UpdateMany was just called")
 	}
 	callInfo := struct {
-		Ctx context.Context
-		P   goke.UpdateParams
+		Ctx  context.Context
+		P    goke.UpdateParams
+		Hook func(document goke.Map) (goke.Map, error)
 	}{
-		Ctx: ctx,
-		P:   p,
+		Ctx:  ctx,
+		P:    p,
+		Hook: hook,
 	}
 	lockDatabaseInterfaceMockUpdateMany.Lock()
 	mock.calls.UpdateMany = append(mock.calls.UpdateMany, callInfo)
 	lockDatabaseInterfaceMockUpdateMany.Unlock()
-	return mock.UpdateManyFunc(ctx, p)
+	return mock.UpdateManyFunc(ctx, p, hook)
 }
 
 // UpdateManyCalls gets all the calls that were made to UpdateMany.
 // Check the length with:
 //     len(mockedDatabaseInterface.UpdateManyCalls())
 func (mock *DatabaseInterfaceMock) UpdateManyCalls() []struct {
-	Ctx context.Context
-	P   goke.UpdateParams
+	Ctx  context.Context
+	P    goke.UpdateParams
+	Hook func(document goke.Map) (goke.Map, error)
 } {
 	var calls []struct {
-		Ctx context.Context
-		P   goke.UpdateParams
+		Ctx  context.Context
+		P    goke.UpdateParams
+		Hook func(document goke.Map) (goke.Map, error)
 	}
 	lockDatabaseInterfaceMockUpdateMany.RLock()
 	calls = mock.calls.UpdateMany
@@ -245,33 +271,37 @@ func (mock *DatabaseInterfaceMock) UpdateManyCalls() []struct {
 }
 
 // UpdateOne calls UpdateOneFunc.
-func (mock *DatabaseInterfaceMock) UpdateOne(ctx context.Context, p goke.UpdateParams) (goke.NodeMutationPayload, error) {
+func (mock *DatabaseInterfaceMock) UpdateOne(ctx context.Context, p goke.UpdateParams, hook func(document goke.Map) (goke.Map, error)) (goke.NodeMutationPayload, error) {
 	if mock.UpdateOneFunc == nil {
 		panic("DatabaseInterfaceMock.UpdateOneFunc: method is nil but DatabaseInterface.UpdateOne was just called")
 	}
 	callInfo := struct {
-		Ctx context.Context
-		P   goke.UpdateParams
+		Ctx  context.Context
+		P    goke.UpdateParams
+		Hook func(document goke.Map) (goke.Map, error)
 	}{
-		Ctx: ctx,
-		P:   p,
+		Ctx:  ctx,
+		P:    p,
+		Hook: hook,
 	}
 	lockDatabaseInterfaceMockUpdateOne.Lock()
 	mock.calls.UpdateOne = append(mock.calls.UpdateOne, callInfo)
 	lockDatabaseInterfaceMockUpdateOne.Unlock()
-	return mock.UpdateOneFunc(ctx, p)
+	return mock.UpdateOneFunc(ctx, p, hook)
 }
 
 // UpdateOneCalls gets all the calls that were made to UpdateOne.
 // Check the length with:
 //     len(mockedDatabaseInterface.UpdateOneCalls())
 func (mock *DatabaseInterfaceMock) UpdateOneCalls() []struct {
-	Ctx context.Context
-	P   goke.UpdateParams
+	Ctx  context.Context
+	P    goke.UpdateParams
+	Hook func(document goke.Map) (goke.Map, error)
 } {
 	var calls []struct {
-		Ctx context.Context
-		P   goke.UpdateParams
+		Ctx  context.Context
+		P    goke.UpdateParams
+		Hook func(document goke.Map) (goke.Map, error)
 	}
 	lockDatabaseInterfaceMockUpdateOne.RLock()
 	calls = mock.calls.UpdateOne

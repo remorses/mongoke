@@ -25,7 +25,10 @@ func FindMany(p CreateFieldParams) (*graphql.Field, error) {
 			opts.Where = where
 		}
 		nodes, err := p.Config.DatabaseFunctions.FindMany(
-			params.Context, opts,
+			params.Context, opts, func(document goke.Map) (goke.Map, error) {
+				// TODO implement check
+				return document, nil
+			},
 		)
 		if err != nil {
 			return nil, err

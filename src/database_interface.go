@@ -10,15 +10,38 @@ import (
 type DatabaseInterface interface {
 	// FindOne(p FindOneParams) (interface{}, error)
 	// FindMany should return p.First + 1 nodes, or p.Last + 1 nodes, so goke can compute `hasNextPage` and `hasPreviousPage`
-	FindMany(ctx context.Context, p FindManyParams) ([]Map, error)
-	InsertMany(ctx context.Context, p InsertManyParams) (NodesMutationPayload, error)
-	UpdateOne(ctx context.Context, p UpdateParams) (NodeMutationPayload, error)
-	UpdateMany(ctx context.Context, p UpdateParams) (NodesMutationPayload, error)
-	DeleteMany(ctx context.Context, p DeleteManyParams) (NodesMutationPayload, error)
+	FindMany(ctx context.Context, p FindManyParams, hook TransformDocument) ([]Map, error)
+	InsertMany(ctx context.Context, p InsertManyParams, hook TransformDocument) (NodesMutationPayload, error)
+	UpdateOne(ctx context.Context, p UpdateParams, hook TransformDocument) (NodeMutationPayload, error)
+	UpdateMany(ctx context.Context, p UpdateParams, hook TransformDocument) (NodesMutationPayload, error)
+	DeleteMany(ctx context.Context, p DeleteManyParams, hook TransformDocument) (NodesMutationPayload, error)
 }
 
 // remove non accessible fields from a document and returns nil if document is not accessible
 type TransformDocument = func(document Map) (Map, error)
+
+func FilterDocuments(xs []Map, filter TransformDocument) ([]Map, error) {
+	var result []Map
+	for _, x := range xs {
+		if filter != nil {
+			res, err := filter(x)
+			if err != nil {
+				return nil, err
+			}
+			if res == nil {
+				continue
+			}
+			result = append(result, res)
+		} else {
+			if x == nil {
+				continue
+			}
+			result = append(result, x)
+		}
+
+	}
+	return result, nil
+}
 
 // type FindOneParams struct {
 // 	Collection  string

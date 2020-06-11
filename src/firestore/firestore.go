@@ -27,7 +27,7 @@ func (self FirestoreDatabaseFunctions) projectId() string {
 	return self.Config.Firestore.ProjectID
 }
 
-func (self *FirestoreDatabaseFunctions) FindMany(ctx context.Context, p goke.FindManyParams) ([]goke.Map, error) {
+func (self *FirestoreDatabaseFunctions) FindMany(ctx context.Context, p goke.FindManyParams, hook goke.TransformDocument) ([]goke.Map, error) {
 	db, err := self.Init(ctx)
 	if err != nil {
 		return nil, err
@@ -66,8 +66,8 @@ func (self *FirestoreDatabaseFunctions) FindMany(ctx context.Context, p goke.Fin
 	return nodes, nil
 }
 
-func (self *FirestoreDatabaseFunctions) UpdateOne(ctx context.Context, p goke.UpdateParams) (goke.NodeMutationPayload, error) {
-	res, err := self.updateMany(ctx, p, 1)
+func (self *FirestoreDatabaseFunctions) UpdateOne(ctx context.Context, p goke.UpdateParams, hook goke.TransformDocument) (goke.NodeMutationPayload, error) {
+	res, err := self.updateMany(ctx, p, hook, 1)
 	payload := goke.NodeMutationPayload{}
 	if err != nil {
 		return payload, err
@@ -80,11 +80,11 @@ func (self *FirestoreDatabaseFunctions) UpdateOne(ctx context.Context, p goke.Up
 	return payload, nil
 }
 
-func (self *FirestoreDatabaseFunctions) UpdateMany(ctx context.Context, p goke.UpdateParams) (goke.NodesMutationPayload, error) {
-	return self.updateMany(ctx, p, math.MaxInt32)
+func (self *FirestoreDatabaseFunctions) UpdateMany(ctx context.Context, p goke.UpdateParams, hook goke.TransformDocument) (goke.NodesMutationPayload, error) {
+	return self.updateMany(ctx, p, hook, math.MaxInt32)
 }
 
-func (self *FirestoreDatabaseFunctions) updateMany(ctx context.Context, p goke.UpdateParams, count int) (goke.NodesMutationPayload, error) {
+func (self *FirestoreDatabaseFunctions) updateMany(ctx context.Context, p goke.UpdateParams, hook goke.TransformDocument, count int) (goke.NodesMutationPayload, error) {
 	db, err := self.Init(ctx)
 	payload := goke.NodesMutationPayload{}
 	if err != nil {
@@ -126,11 +126,11 @@ func (self *FirestoreDatabaseFunctions) updateMany(ctx context.Context, p goke.U
 	return payload, nil
 }
 
-func (self *FirestoreDatabaseFunctions) DeleteMany(ctx context.Context, p goke.DeleteManyParams) (goke.NodesMutationPayload, error) {
-	return self.deleteMany(ctx, p, math.MaxInt32)
+func (self *FirestoreDatabaseFunctions) DeleteMany(ctx context.Context, p goke.DeleteManyParams, hook goke.TransformDocument) (goke.NodesMutationPayload, error) {
+	return self.deleteMany(ctx, p, hook, math.MaxInt32)
 }
 
-func (self *FirestoreDatabaseFunctions) deleteMany(ctx context.Context, p goke.DeleteManyParams, count int) (goke.NodesMutationPayload, error) {
+func (self *FirestoreDatabaseFunctions) deleteMany(ctx context.Context, p goke.DeleteManyParams, hook goke.TransformDocument, count int) (goke.NodesMutationPayload, error) {
 	db, err := self.Init(ctx)
 	payload := goke.NodesMutationPayload{}
 	if err != nil {
@@ -236,7 +236,7 @@ func isZero(v interface{}) bool {
 	return false
 }
 
-func (self *FirestoreDatabaseFunctions) InsertMany(ctx context.Context, p goke.InsertManyParams) (goke.NodesMutationPayload, error) {
+func (self *FirestoreDatabaseFunctions) InsertMany(ctx context.Context, p goke.InsertManyParams, hook goke.TransformDocument) (goke.NodesMutationPayload, error) {
 	db, err := self.Init(ctx)
 	payload := goke.NodesMutationPayload{}
 	if err != nil {
