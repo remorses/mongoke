@@ -7,7 +7,7 @@ import (
 	"github.com/remorses/goke/src/types"
 )
 
-func QueryTypeField(p CreateFieldParams) (*graphql.Field, error) {
+func FindOne(p CreateFieldParams) (*graphql.Field, error) {
 	indexableNames := takeIndexableTypeNames(p.SchemaConfig)
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args

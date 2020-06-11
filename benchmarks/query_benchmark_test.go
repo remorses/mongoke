@@ -73,7 +73,7 @@ func BenchmarkQuery(b *testing.B) {
 				Schema: s,
 				RequestString: `
 			{
-				User(where: {name: {neq: "xxx"}}) {
+				findOneUser(where: {name: {neq: "xxx"}}) {
 					name
 					age
 					_id

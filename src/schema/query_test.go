@@ -65,169 +65,170 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			{
 				Name:     "findOne query without args",
 				Schema:   schema,
-				Expected: goke.Map{"User": exampleUser},
+				Expected: goke.Map{"findOneUser": exampleUser},
 				Query: `
-			{
-				User {
-					name
-					age
-					_id
+				{
+					findOneUser {
+						name
+						age
+						_id
+					}
 				}
-			}
 			`,
 			},
 			{
 				Name:     "findOne query with eq",
 				Schema:   schema,
-				Expected: goke.Map{"User": goke.Map{"name": "03"}},
+				Expected: goke.Map{"findOneUser": goke.Map{"name": "03"}},
 				Query: `
-			{
-				User(where: {name: {eq: "03"}}) {
-					name
+				{
+					findOneUser(where: {name: {eq: "03"}}) {
+						name
+					}
 				}
-			}
 			`,
 			},
 			{
 				Name:     "findOne query with eq objectId",
 				Schema:   schema,
-				Expected: goke.Map{"User": exampleUsers[0]},
+				Expected: goke.Map{"findOneUser": exampleUsers[0]},
 				Query: `
-			{
-				User(where: {_id: {eq: "000000000000000000000000"}}) {
-					_id
-					age
-					name
+				{
+					findOneUser(where: {_id: {eq: "000000000000000000000000"}}) {
+						_id
+						age
+						name
+					}
 				}
-			}
 			`,
 			},
 			{
-				Name:     "findMany query without args",
+				Name:     "findMany simple",
+				Schema:   schema,
+				Expected: goke.Map{"findManyUser": exampleUsers},
+				Query: `
+				{
+					findManyUser {
+						_id
+						name
+						age
+					}
+				}
+				`,
+			},
+			{
+				Name:     "relay query without args",
 				Schema:   schema,
 				Expected: goke.Map{"UserNodes": goke.Map{"nodes": exampleUsers}},
 				Query: `
-			{
-				UserNodes(direction: ASC) {
-					nodes {
-						_id
-						name
-						age
+				{
+					UserNodes(direction: ASC) {
+						nodes {
+							_id
+							name
+							age
+						}
 					}
 				}
-			}
-			`,
+				`,
 			},
+
 			{
-				Name:     "findMany with list",
-				Schema:   schema,
-				Expected: goke.Map{"UserList": exampleUsers},
-				Query: `
-			{
-				UserList {
-					_id
-					name
-					age
-				}
-			}
-			`,
-			},
-			{
-				Name:     "findMany query with first",
+				Name:     "relay query with first",
 				Schema:   schema,
 				Expected: goke.Map{"UserNodes": goke.Map{"nodes": exampleUsers[:2]}},
 				Query: `
-			{
-				UserNodes(first: 2, direction: ASC) {
-					nodes {
-						_id
-						name
-						age
+				{
+					UserNodes(first: 2, direction: ASC) {
+						nodes {
+							_id
+							name
+							age
+						}
 					}
 				}
-			}
-			`,
+				`,
 			},
 			{
-				Name:     "findMany query with last",
+				Name:     "relay query with last",
 				Schema:   schema,
 				Expected: goke.Map{"UserNodes": goke.Map{"nodes": exampleUsers[len(exampleUsers)-2:]}},
 				Query: `
-			{
-				UserNodes(last: 2, direction: ASC) {
-					nodes {
-						_id
-						name
-						age
+				{
+					UserNodes(last: 2, direction: ASC) {
+						nodes {
+							_id
+							name
+							age
+						}
 					}
 				}
-			}
 			`,
 			},
 			{
-				Name:   "findMany query with string cursorField",
+				Name:   "relay query with string cursorField",
 				Schema: schema,
 				Expected: goke.Map{"UserNodes": goke.Map{
 					"nodes":    exampleUsers[:2],
 					"pageInfo": goke.Map{"endCursor": "02"},
 				}},
 				Query: `
-			{
-				UserNodes(first: 2, cursorField: name, direction: ASC) {
-					nodes {
-						_id
-						name
-						age
-					}
-					pageInfo {
-						endCursor
+				{
+					UserNodes(first: 2, cursorField: name, direction: ASC) {
+						nodes {
+							_id
+							name
+							age
+						}
+						pageInfo {
+							endCursor
+						}
 					}
 				}
-			}
 			`,
 			},
 			{
-				Name:   "findMany query with int cursorField",
+				Name:   "relay query with int cursorField",
 				Schema: schema,
 				Expected: goke.Map{"UserNodes": goke.Map{
 					"nodes":    exampleUsers[:2],
 					"pageInfo": goke.Map{"endCursor": 2},
 				}},
 				Query: `
-			{
-				UserNodes(first: 2, cursorField: age, direction: ASC) {
-					nodes {
-						_id
-						name
-						age
-					}
-					pageInfo {
-						endCursor
+				{
+					UserNodes(first: 2, cursorField: age, direction: ASC) {
+						nodes {
+							_id
+							name
+							age
+						}
+						pageInfo {
+							endCursor
+						}
 					}
 				}
-			}
 			`,
 			},
 			{
-				Name:   "findMany query with ObjectId cursorField",
+				Name:   "relay query with ObjectId cursorField",
 				Schema: schema,
 				Expected: goke.Map{"UserNodes": goke.Map{
 					"nodes":    exampleUsers[:2],
 					"pageInfo": goke.Map{"endCursor": exampleUsers[1]["_id"].(primitive.ObjectID).Hex()},
 				}},
 				Query: `
-			{
-				UserNodes(first: 2, direction: ASC) {
-					nodes {
-						_id
-						name
-						age
-					}
-					pageInfo {
-						endCursor
+				{
+					UserNodes(first: 2, direction: ASC) {
+						nodes {
+							_id
+							name
+							age
+						}
+						pageInfo {
+							endCursor
+						}
 					}
 				}
-			}
 			`,
 			},
 		},
@@ -278,10 +279,10 @@ func TestQueryWithFakeDatabase(t *testing.T) {
 			{
 				Name:     "findOne query without args",
 				Schema:   schema,
-				Expected: goke.Map{"User": exampleUser},
+				Expected: goke.Map{"findOneUser": exampleUser},
 				Query: `
 			{
-				User {
+				findOneUser {
 					name
 					age
 					_id
@@ -292,10 +293,10 @@ func TestQueryWithFakeDatabase(t *testing.T) {
 			{
 				Name:     "findOne query with eq",
 				Schema:   schema,
-				Expected: goke.Map{"User": goke.Map{"name": "03"}},
+				Expected: goke.Map{"findOneUser": goke.Map{"name": "03"}},
 				Query: `
 			{
-				User(where: {name: {eq: "03"}}) {
+				findOneUser(where: {name: {eq: "03"}}) {
 					name
 				}
 			}
@@ -304,10 +305,10 @@ func TestQueryWithFakeDatabase(t *testing.T) {
 			{
 				Name:     "findOne query with eq objectId",
 				Schema:   schema,
-				Expected: goke.Map{"User": exampleUsers[0]},
+				Expected: goke.Map{"findOneUser": exampleUsers[0]},
 				Query: `
 			{
-				User(where: {_id: {eq: "000000000000000000000000"}}) {
+				findOneUser(where: {_id: {eq: "000000000000000000000000"}}) {
 					_id
 					age
 					name
@@ -332,12 +333,12 @@ func TestQueryWithFakeDatabase(t *testing.T) {
 			`,
 			},
 			{
-				Name:     "findMany with list",
+				Name:     "findMany simple",
 				Schema:   schema,
-				Expected: goke.Map{"UserList": exampleUsers},
+				Expected: goke.Map{"findManyUser": exampleUsers},
 				Query: `
 			{
-				UserList {
+				findManyUser {
 					_id
 					name
 					age
@@ -346,7 +347,7 @@ func TestQueryWithFakeDatabase(t *testing.T) {
 			`,
 			},
 			{
-				Name:     "findMany query with first",
+				Name:     "relay query with first",
 				Schema:   schema,
 				Expected: goke.Map{"UserNodes": goke.Map{"nodes": exampleUsers[:2]}},
 				Query: `
@@ -362,7 +363,7 @@ func TestQueryWithFakeDatabase(t *testing.T) {
 			`,
 			},
 			{
-				Name:     "findMany query with last",
+				Name:     "relay query with last",
 				Schema:   schema,
 				Expected: goke.Map{"UserNodes": goke.Map{"nodes": exampleUsers[len(exampleUsers)-2:]}},
 				Query: `
@@ -378,7 +379,7 @@ func TestQueryWithFakeDatabase(t *testing.T) {
 			`,
 			},
 			{
-				Name:   "findMany query with string cursorField",
+				Name:   "relay query with string cursorField",
 				Schema: schema,
 				Expected: goke.Map{"UserNodes": goke.Map{
 					"nodes":    exampleUsers[:2],
@@ -400,7 +401,7 @@ func TestQueryWithFakeDatabase(t *testing.T) {
 			`,
 			},
 			{
-				Name:   "findMany query with int cursorField",
+				Name:   "relay query with int cursorField",
 				Schema: schema,
 				Expected: goke.Map{"UserNodes": goke.Map{
 					"nodes":    exampleUsers[:2],
@@ -422,7 +423,7 @@ func TestQueryWithFakeDatabase(t *testing.T) {
 			`,
 			},
 			{
-				Name:   "findMany query with ObjectId cursorField",
+				Name:   "relay query with ObjectId cursorField",
 				Schema: schema,
 				Expected: goke.Map{"UserNodes": goke.Map{
 					"nodes":    exampleUsers[:2],
@@ -479,10 +480,10 @@ func TestQueryWithEmptyFakeDatabase(t *testing.T) {
 			{
 				Name:     "findOne query without args",
 				Schema:   schema,
-				Expected: goke.Map{"User": nil},
+				Expected: goke.Map{"findOneUser": nil},
 				Query: `
 			{
-				User {
+				findOneUser {
 					name
 					age
 					_id
@@ -493,10 +494,10 @@ func TestQueryWithEmptyFakeDatabase(t *testing.T) {
 			{
 				Name:     "findOne query with eq",
 				Schema:   schema,
-				Expected: goke.Map{"User": nil},
+				Expected: goke.Map{"findOneUser": nil},
 				Query: `
 			{
-				User(where: {name: {eq: "03"}}) {
+				findOneUser(where: {name: {eq: "03"}}) {
 					name
 				}
 			}
@@ -505,10 +506,10 @@ func TestQueryWithEmptyFakeDatabase(t *testing.T) {
 			{
 				Name:     "findMany with list",
 				Schema:   schema,
-				Expected: goke.Map{"UserList": emptyList},
+				Expected: goke.Map{"findManyUser": emptyList},
 				Query: `
 			{
-				UserList {
+				findManyUser {
 					_id
 					name
 					age

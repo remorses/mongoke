@@ -36,21 +36,27 @@ func makeQuery(Config goke.Config, baseSchemaConfig graphql.SchemaConfig) (*grap
 			Collection:   typeConf.Collection,
 			SchemaConfig: baseSchemaConfig,
 		}
-		findOne, err := fields.QueryTypeField(p)
+
+		// findOne
+		findOne, err := fields.FindOne(p)
 		if err != nil {
 			return nil, err
 		}
-		queryFields[object.Name()] = findOne
+		queryFields["findOne"+object.Name()] = findOne
+
+		// findMany
+		findMany, err := fields.FindMany(p)
+		if err != nil {
+			return nil, err
+		}
+		queryFields["findMany"+object.Name()] = findMany
+
+		// relay nodes
 		typeNodes, err := fields.QueryTypeNodesField(p)
 		if err != nil {
 			return nil, err
 		}
 		queryFields[object.Name()+"Nodes"] = typeNodes
-		typeList, err := fields.QueryTypeListField(p)
-		if err != nil {
-			return nil, err
-		}
-		queryFields[object.Name()+"List"] = typeList
 
 	}
 	query := graphql.NewObject(graphql.ObjectConfig{Name: "Query", Fields: queryFields})
@@ -95,7 +101,7 @@ func addRelationsFields(Config goke.Config, baseSchemaConfig graphql.SchemaConfi
 			}
 			object.AddFieldConfig(relation.Field, field)
 		} else if relation.RelationType == "to_one" {
-			field, err := fields.QueryTypeField(p)
+			field, err := fields.FindOne(p)
 			if err != nil {
 				return err
 			}

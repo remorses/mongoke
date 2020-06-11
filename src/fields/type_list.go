@@ -7,7 +7,7 @@ import (
 	"github.com/remorses/goke/src/types"
 )
 
-func QueryTypeListField(p CreateFieldParams) (*graphql.Field, error) {
+func FindMany(p CreateFieldParams) (*graphql.Field, error) {
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
 		opts := goke.FindManyParams{
