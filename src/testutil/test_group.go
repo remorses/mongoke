@@ -42,6 +42,7 @@ func NewTestGroup(t *testing.T, p NewTestGroupParams) {
 
 			// t.Log(testCase.Name)
 			if p.Database != nil {
+				// TODO insertMany mutates input arguments and adds _id fields
 				p.Database.InsertMany(ctx, goke.InsertManyParams{
 					Collection: p.Collection,
 					Data:       p.Documents,
@@ -56,8 +57,8 @@ func NewTestGroup(t *testing.T, p NewTestGroupParams) {
 			res := QuerySchema(t, schema, testCase.Query)
 			res = ConvertToPlainMap(res)
 			expected := ConvertToPlainMap(testCase.Expected)
-			t.Log("expected:", expected)
-			t.Log("result:", res)
+			// t.Log("expected:", expected)
+			// t.Log("result:", res)
 			t.Log("expected:", Pretty(expected))
 			t.Log("result:", Pretty(res))
 			// require.Equal(t, Pretty(res), Pretty(expected))

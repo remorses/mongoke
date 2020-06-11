@@ -130,6 +130,55 @@ func TestMutationWithEmptyFakeDatabase(t *testing.T) {
 	})
 }
 
+func TestDeleteWithEmptyFakeDatabase(t *testing.T) {
+	exampleUsers := []goke.Map{
+		{"name": "01", "age": 1},
+		{"name": "02", "age": 2},
+		{"name": "03", "age": 3},
+	}
+	db := &fakedata.FakeDatabaseFunctions{}
+	schema, _ := goke_schema.MakeGokeSchema(goke.Config{
+		Schema: `
+		scalar ObjectId
+
+		type User {
+			_id: ObjectId!
+			name: String
+			age: Int!
+		}
+		`,
+		DatabaseFunctions: db,
+		Types: map[string]*goke.TypeConfig{
+			"User": {Collection: "users"},
+		},
+	})
+
+	testutil.NewTestGroup(t, testutil.NewTestGroupParams{
+		Collection:    "users",
+		Database:      db,
+		Documents:     exampleUsers,
+		DefaultSchema: schema,
+		Tests: []testutil.TestCase{
+			{
+				Name:     "deleteMany removes everything",
+				Schema:   schema,
+				Expected: goke.Map{"deleteManyUser": goke.Map{"returning": exampleUsers, "affectedCount": len(exampleUsers)}},
+				Query: `
+				mutation {
+					deleteManyUser {
+						returning {
+							name
+							age
+						}
+						affectedCount
+					}
+				}
+				`,
+			},
+		},
+	})
+}
+
 func TestMutationWithMockedDb(t *testing.T) {
 	typeDefs := `
 	scalar ObjectId

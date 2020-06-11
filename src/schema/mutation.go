@@ -56,6 +56,20 @@ func makeMutation(Config goke.Config, baseSchemaConfig graphql.SchemaConfig) (*g
 			return nil, err
 		}
 		mutationFields["updateMany"+object.Name()] = updateMany
+
+		// deleteOne
+		deleteOne, err := fields.DeleteMany(p)
+		if err != nil {
+			return nil, err
+		}
+		mutationFields["deleteOne"+object.Name()] = deleteOne
+
+		// deleteMany
+		deleteMany, err := fields.DeleteMany(p)
+		if err != nil {
+			return nil, err
+		}
+		mutationFields["deleteMany"+object.Name()] = deleteMany
 	}
 	mutation := graphql.NewObject(graphql.ObjectConfig{Name: "Mutation", Fields: mutationFields})
 	return mutation, nil

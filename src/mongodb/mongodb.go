@@ -84,11 +84,20 @@ func (self *MongodbDatabaseFunctions) InsertMany(ctx context.Context, p goke.Ins
 		return payload, err
 	}
 	fmt.Println(res.InsertedIDs)
+
+	// copy to new list of maps to not mutate input argument
+	resultNodes := make([]goke.Map, len(res.InsertedIDs))
 	for i, id := range res.InsertedIDs {
-		nodes[i]["_id"] = id
+		if resultNodes[i] == nil {
+			resultNodes[i] = make(goke.Map)
+		}
+		for k, v := range nodes[i] {
+			resultNodes[i][k] = v
+		}
+		resultNodes[i]["_id"] = id
 	}
 	return goke.NodesMutationPayload{
-		Returning:     nodes[:len(res.InsertedIDs)],
+		Returning:     resultNodes,
 		AffectedCount: len(res.InsertedIDs),
 	}, nil
 }
