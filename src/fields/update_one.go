@@ -4,7 +4,6 @@ import (
 	"github.com/graphql-go/graphql"
 	"github.com/mitchellh/mapstructure"
 	goke "github.com/remorses/goke/src"
-	"github.com/remorses/goke/src/testutil"
 	"github.com/remorses/goke/src/types"
 )
 
@@ -23,6 +22,7 @@ func UpdateOne(p CreateFieldParams) (*graphql.Field, error) {
 		args := params.Args
 		opts := goke.UpdateParams{
 			Collection: p.Collection,
+			Limit:      1,
 		}
 		err := mapstructure.Decode(args, &opts)
 		if err != nil {
@@ -35,7 +35,7 @@ func UpdateOne(p CreateFieldParams) (*graphql.Field, error) {
 			}
 			opts.Where = where
 		}
-		res, err := p.Config.DatabaseFunctions.UpdateOne(
+		res, err := p.Config.DatabaseFunctions.UpdateMany(
 			params.Context,
 			opts,
 			func(document goke.Map) (goke.Map, error) {
@@ -47,11 +47,20 @@ func UpdateOne(p CreateFieldParams) (*graphql.Field, error) {
 				})
 			},
 		)
-		println(testutil.Pretty(res))
+		// println(testutil.Pretty(res))
 		if err != nil {
 			return nil, err
 		}
-		return res, nil
+		if len(res.Returning) == 0 {
+			return goke.NodeMutationPayload{
+				AffectedCount: res.AffectedCount,
+			}, nil
+		}
+
+		return goke.NodeMutationPayload{
+			AffectedCount: res.AffectedCount,
+			Returning:     res.Returning[0],
+		}, nil
 	}
 
 	// if err != nil {

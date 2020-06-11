@@ -93,25 +93,10 @@ func (self *FirestoreDatabaseFunctions) InsertMany(ctx context.Context, p goke.I
 	return payload, nil
 }
 
-func (self *FirestoreDatabaseFunctions) UpdateOne(ctx context.Context, p goke.UpdateParams, hook goke.TransformDocument) (goke.NodeMutationPayload, error) {
-	res, err := self.updateMany(ctx, p, hook, 1)
-	payload := goke.NodeMutationPayload{}
-	if err != nil {
-		return payload, err
-	}
-	if len(res.Returning) == 0 {
-		return payload, nil
-	}
-	payload.Returning = res.Returning[0]
-	payload.AffectedCount = 1
-	return payload, nil
-}
-
 func (self *FirestoreDatabaseFunctions) UpdateMany(ctx context.Context, p goke.UpdateParams, hook goke.TransformDocument) (goke.NodesMutationPayload, error) {
-	return self.updateMany(ctx, p, hook, math.MaxInt16)
-}
-
-func (self *FirestoreDatabaseFunctions) updateMany(ctx context.Context, p goke.UpdateParams, hook goke.TransformDocument, count int) (goke.NodesMutationPayload, error) {
+	if p.Limit == 0 {
+		p.Limit = math.MaxInt16
+	}
 	db, err := self.Init(ctx)
 	payload := goke.NodesMutationPayload{}
 	if err != nil {
@@ -126,7 +111,7 @@ func (self *FirestoreDatabaseFunctions) updateMany(ctx context.Context, p goke.U
 	iter := query.Documents(ctx)
 	defer iter.Stop()
 	// TODO use batching for firestore's updateMany
-	for payload.AffectedCount < count {
+	for payload.AffectedCount < p.Limit {
 		doc, err := iter.Next()
 		if err == iterator.Done {
 			break

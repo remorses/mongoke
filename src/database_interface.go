@@ -12,7 +12,6 @@ type DatabaseInterface interface {
 	// FindMany should return p.First + 1 nodes, or p.Last + 1 nodes, so goke can compute `hasNextPage` and `hasPreviousPage`
 	FindMany(ctx context.Context, p FindManyParams, hook TransformDocument) ([]Map, error)
 	InsertMany(ctx context.Context, p InsertManyParams, hook TransformDocument) (NodesMutationPayload, error)
-	UpdateOne(ctx context.Context, p UpdateParams, hook TransformDocument) (NodeMutationPayload, error)
 	UpdateMany(ctx context.Context, p UpdateParams, hook TransformDocument) (NodesMutationPayload, error)
 	DeleteMany(ctx context.Context, p DeleteManyParams, hook TransformDocument) (NodesMutationPayload, error)
 }

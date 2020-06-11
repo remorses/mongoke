@@ -14,7 +14,6 @@ var (
 	lockDatabaseInterfaceMockFindMany   sync.RWMutex
 	lockDatabaseInterfaceMockInsertMany sync.RWMutex
 	lockDatabaseInterfaceMockUpdateMany sync.RWMutex
-	lockDatabaseInterfaceMockUpdateOne  sync.RWMutex
 )
 
 // Ensure, that DatabaseInterfaceMock does implement goke.DatabaseInterface.
@@ -39,9 +38,6 @@ var _ goke.DatabaseInterface = &DatabaseInterfaceMock{}
 //             UpdateManyFunc: func(ctx context.Context, p goke.UpdateParams, hook func(document goke.Map) (goke.Map, error)) (goke.NodesMutationPayload, error) {
 // 	               panic("mock out the UpdateMany method")
 //             },
-//             UpdateOneFunc: func(ctx context.Context, p goke.UpdateParams, hook func(document goke.Map) (goke.Map, error)) (goke.NodeMutationPayload, error) {
-// 	               panic("mock out the UpdateOne method")
-//             },
 //         }
 //
 //         // use mockedDatabaseInterface in code that requires goke.DatabaseInterface
@@ -60,9 +56,6 @@ type DatabaseInterfaceMock struct {
 
 	// UpdateManyFunc mocks the UpdateMany method.
 	UpdateManyFunc func(ctx context.Context, p goke.UpdateParams, hook func(document goke.Map) (goke.Map, error)) (goke.NodesMutationPayload, error)
-
-	// UpdateOneFunc mocks the UpdateOne method.
-	UpdateOneFunc func(ctx context.Context, p goke.UpdateParams, hook func(document goke.Map) (goke.Map, error)) (goke.NodeMutationPayload, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -95,15 +88,6 @@ type DatabaseInterfaceMock struct {
 		}
 		// UpdateMany holds details about calls to the UpdateMany method.
 		UpdateMany []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-			// P is the p argument value.
-			P goke.UpdateParams
-			// Hook is the hook argument value.
-			Hook func(document goke.Map) (goke.Map, error)
-		}
-		// UpdateOne holds details about calls to the UpdateOne method.
-		UpdateOne []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// P is the p argument value.
@@ -267,44 +251,5 @@ func (mock *DatabaseInterfaceMock) UpdateManyCalls() []struct {
 	lockDatabaseInterfaceMockUpdateMany.RLock()
 	calls = mock.calls.UpdateMany
 	lockDatabaseInterfaceMockUpdateMany.RUnlock()
-	return calls
-}
-
-// UpdateOne calls UpdateOneFunc.
-func (mock *DatabaseInterfaceMock) UpdateOne(ctx context.Context, p goke.UpdateParams, hook func(document goke.Map) (goke.Map, error)) (goke.NodeMutationPayload, error) {
-	if mock.UpdateOneFunc == nil {
-		panic("DatabaseInterfaceMock.UpdateOneFunc: method is nil but DatabaseInterface.UpdateOne was just called")
-	}
-	callInfo := struct {
-		Ctx  context.Context
-		P    goke.UpdateParams
-		Hook func(document goke.Map) (goke.Map, error)
-	}{
-		Ctx:  ctx,
-		P:    p,
-		Hook: hook,
-	}
-	lockDatabaseInterfaceMockUpdateOne.Lock()
-	mock.calls.UpdateOne = append(mock.calls.UpdateOne, callInfo)
-	lockDatabaseInterfaceMockUpdateOne.Unlock()
-	return mock.UpdateOneFunc(ctx, p, hook)
-}
-
-// UpdateOneCalls gets all the calls that were made to UpdateOne.
-// Check the length with:
-//     len(mockedDatabaseInterface.UpdateOneCalls())
-func (mock *DatabaseInterfaceMock) UpdateOneCalls() []struct {
-	Ctx  context.Context
-	P    goke.UpdateParams
-	Hook func(document goke.Map) (goke.Map, error)
-} {
-	var calls []struct {
-		Ctx  context.Context
-		P    goke.UpdateParams
-		Hook func(document goke.Map) (goke.Map, error)
-	}
-	lockDatabaseInterfaceMockUpdateOne.RLock()
-	calls = mock.calls.UpdateOne
-	lockDatabaseInterfaceMockUpdateOne.RUnlock()
 	return calls
 }

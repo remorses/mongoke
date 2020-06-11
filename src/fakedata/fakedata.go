@@ -54,7 +54,7 @@ func (self *FakeDatabaseFunctions) FindMany(ctx context.Context, p goke.FindMany
 	if err != nil {
 		return nil, err
 	}
-	nodes, err = goke.FilterDocuments(nodes, hook)
+	nodes, err = goke.FilterDocuments(nodes, hook) // TODO filtering after will potentially remove documents, making the limit lower than the query one
 	if err != nil {
 		return nil, err
 	}
@@ -101,64 +101,11 @@ func (self *FakeDatabaseFunctions) InsertMany(ctx context.Context, p goke.Insert
 	}, nil
 }
 
-func (self *FakeDatabaseFunctions) UpdateOne(ctx context.Context, p goke.UpdateParams, hook goke.TransformDocument) (goke.NodeMutationPayload, error) {
-	db, err := self.Init(ctx)
-	payload := goke.NodeMutationPayload{
-		Returning:     nil,
-		AffectedCount: 0,
-	}
-	if err != nil {
-		return payload, err
-	}
-
-	// TODO this step of checking could be skipped if there are no guards
-	nodes, err := self.FindMany(ctx, goke.FindManyParams{
-		Collection: p.Collection,
-		Limit:      1,
-		Where:      p.Where,
-	}, hook)
-	if err != nil {
-		return payload, err
-	}
-	if len(nodes) == 0 {
-		return payload, nil
-	}
-
-	// make sure we update the document we checked with the hook
-	where := goke.ExtendWhereMatch(
-		p.Where,
-		map[string]goke.Filter{
-			"_id": {
-				Eq: nodes[0]["_id"],
-			},
-		},
-	)
-	match := mongodb.MakeMongodbMatch(where)
-
-	opts := options.FindOneAndUpdate()
-	opts.SetReturnDocument(options.After)
-	testutil.PrettyPrint(p)
-
-	res := db.Collection(p.Collection).FindOneAndUpdate(ctx, match, bson.M{"$set": p.Set}, opts)
-	if res.Err() == mongo.ErrNoDocuments {
-		println("no docs to update")
-		return payload, nil
-	} else if res.Err() != nil {
-		return payload, err
-	}
-	data := goke.Map{}
-	err = res.Decode(&data)
-	if err != nil {
-		return payload, err
-	}
-	return goke.NodeMutationPayload{
-		AffectedCount: 1,
-		Returning:     data,
-	}, nil
-}
-
 // first updateMany documents, then query again the documents and return them, all inside a transaction that prevents other writes happen before the query
 func (self *FakeDatabaseFunctions) UpdateMany(ctx context.Context, p goke.UpdateParams, hook goke.TransformDocument) (goke.NodesMutationPayload, error) {
+	if p.Limit == 0 {
+		p.Limit = math.MaxInt16
+	}
 	db, err := self.Init(ctx)
 	payload := goke.NodesMutationPayload{
 		Returning:     nil,
@@ -190,7 +137,6 @@ func (self *FakeDatabaseFunctions) UpdateMany(ctx context.Context, p goke.Update
 
 		res := db.Collection(p.Collection).FindOneAndUpdate(ctx, match, bson.M{"$set": p.Set}, opts)
 		if res.Err() == mongo.ErrNoDocuments {
-			println("no docs to update")
 			return payload, nil
 		} else if res.Err() != nil {
 			return payload, err
