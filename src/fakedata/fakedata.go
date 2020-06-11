@@ -101,7 +101,6 @@ func (self *FakeDatabaseFunctions) InsertMany(ctx context.Context, p goke.Insert
 	}, nil
 }
 
-// TODO make the update one a variation of update many, adding a limit parameter (but i have to make 1 more round trip to database to get the updated data this way)
 func (self *FakeDatabaseFunctions) UpdateOne(ctx context.Context, p goke.UpdateParams, hook goke.TransformDocument) (goke.NodeMutationPayload, error) {
 	db, err := self.Init(ctx)
 	payload := goke.NodeMutationPayload{
@@ -160,39 +159,49 @@ func (self *FakeDatabaseFunctions) UpdateOne(ctx context.Context, p goke.UpdateP
 
 // first updateMany documents, then query again the documents and return them, all inside a transaction that prevents other writes happen before the query
 func (self *FakeDatabaseFunctions) UpdateMany(ctx context.Context, p goke.UpdateParams, hook goke.TransformDocument) (goke.NodesMutationPayload, error) {
-	payload := goke.NodesMutationPayload{}
+	db, err := self.Init(ctx)
+	payload := goke.NodesMutationPayload{
+		Returning:     nil,
+		AffectedCount: 0,
+	}
+	if err != nil {
+		return payload, err
+	}
 	testutil.PrettyPrint(p)
 
 	// TODO execute inside a transaction
-	nodes, err := self.FindMany(ctx, goke.FindManyParams{Collection: p.Collection, Where: p.Where}, hook)
+	nodes, err := self.FindMany(ctx, goke.FindManyParams{Collection: p.Collection, Where: p.Where, Limit: p.Limit}, hook)
 	if err != nil {
 		return payload, err
 	}
 
 	for _, node := range nodes {
-		r, err := self.UpdateOne(
-			ctx,
-			goke.UpdateParams{
-				Collection: p.Collection,
-				Set:        p.Set,
-				Where: goke.ExtendWhereMatch(
-					p.Where,
-					map[string]goke.Filter{
-						"_id": {
-							Eq: node["_id"],
-						},
-					},
-				),
+		match := mongodb.MakeMongodbMatch(goke.ExtendWhereMatch(
+			p.Where, // TODO maybe do not extend, if a concurrent update makes the document no more suitable we lose the update, maybe better?
+			map[string]goke.Filter{
+				"_id": {
+					Eq: node["_id"],
+				},
 			},
-			nil, // pass nil to not repeat the check
-		)
+		))
+		opts := options.FindOneAndUpdate()
+		opts.SetReturnDocument(options.After)
+		testutil.PrettyPrint(p)
+
+		res := db.Collection(p.Collection).FindOneAndUpdate(ctx, match, bson.M{"$set": p.Set}, opts)
+		if res.Err() == mongo.ErrNoDocuments {
+			println("no docs to update")
+			return payload, nil
+		} else if res.Err() != nil {
+			return payload, err
+		}
+		data := goke.Map{}
+		err = res.Decode(&data)
 		if err != nil {
 			return payload, err
 		}
-		payload.AffectedCount += r.AffectedCount
-		if r.Returning != nil {
-			payload.Returning = append(payload.Returning, r.Returning.(goke.Map))
-		}
+		payload.AffectedCount++
+		payload.Returning = append(payload.Returning, data)
 	}
 	return payload, nil
 }

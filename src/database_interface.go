@@ -97,7 +97,8 @@ type InsertManyParams struct {
 
 type UpdateParams struct {
 	Collection string
-	Set        Map       `mapstructure:"set" bson:"$set"`
+	Set        Map `mapstructure:"set" bson:"$set"`
+	Limit      int
 	Where      WhereTree // `mapstructure:"where"`
 }
 

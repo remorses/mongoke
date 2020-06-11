@@ -161,38 +161,49 @@ func (self *MongodbDatabaseFunctions) UpdateOne(ctx context.Context, p goke.Upda
 // first updateMany documents, then query again the documents and return them, all inside a transaction that prevents other writes happen before the query
 func (self *MongodbDatabaseFunctions) UpdateMany(ctx context.Context, p goke.UpdateParams, hook goke.TransformDocument) (goke.NodesMutationPayload, error) {
 	db, err := self.Init(ctx)
-	payload := goke.NodesMutationPayload{}
+	payload := goke.NodesMutationPayload{
+		Returning:     nil,
+		AffectedCount: 0,
+	}
 	if err != nil {
 		return payload, err
 	}
-	opts := options.Delete()
 	testutil.PrettyPrint(p)
 
-	// find accessible nodes
-	nodes, err := self.FindMany(ctx, goke.FindManyParams{Collection: p.Collection, Where: p.Where}, hook)
+	// TODO execute inside a transaction
+	nodes, err := self.FindMany(ctx, goke.FindManyParams{Collection: p.Collection, Where: p.Where, Limit: p.Limit}, hook)
 	if err != nil {
 		return payload, err
 	}
 
 	for _, node := range nodes {
-		// find one specific node
-		where := goke.ExtendWhereMatch(
-			p.Where,
+		match := MakeMongodbMatch(goke.ExtendWhereMatch(
+			p.Where, // TODO maybe do not extend, if a concurrent update makes the document no more suitable we lose the update, maybe better?
 			map[string]goke.Filter{
 				"_id": {
 					Eq: node["_id"],
 				},
 			},
-		)
-		match := MakeMongodbMatch(where)
-		res, err := db.Collection(p.Collection).DeleteOne(ctx, match, opts)
+		))
+		opts := options.FindOneAndUpdate()
+		opts.SetReturnDocument(options.After)
+		testutil.PrettyPrint(p)
+
+		res := db.Collection(p.Collection).FindOneAndUpdate(ctx, match, bson.M{"$set": p.Set}, opts)
+		if res.Err() == mongo.ErrNoDocuments {
+			println("no docs to update")
+			return payload, nil
+		} else if res.Err() != nil {
+			return payload, err
+		}
+		data := goke.Map{}
+		err = res.Decode(&data)
 		if err != nil {
 			return payload, err
 		}
-		payload.AffectedCount += int(res.DeletedCount)
-		payload.Returning = append(payload.Returning, node)
+		payload.AffectedCount++
+		payload.Returning = append(payload.Returning, data)
 	}
-
 	return payload, nil
 }
 
