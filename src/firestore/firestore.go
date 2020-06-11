@@ -70,6 +70,29 @@ func (self *FirestoreDatabaseFunctions) FindMany(ctx context.Context, p goke.Fin
 	return nodes, nil
 }
 
+func (self *FirestoreDatabaseFunctions) InsertMany(ctx context.Context, p goke.InsertManyParams, hook goke.TransformDocument) (goke.NodesMutationPayload, error) {
+	db, err := self.Init(ctx)
+	payload := goke.NodesMutationPayload{}
+	if err != nil {
+		return payload, err
+	}
+	nodes, err := goke.FilterDocuments(p.Data, hook)
+	if err != nil {
+		return payload, err
+	}
+	for _, x := range nodes {
+		_, _, err := db.Collection(p.Collection).Add(ctx, x)
+		if err != nil {
+			return payload, err
+		}
+		// TODO if firestore uses some id i should add it to the returned nodes
+		payload.AffectedCount++
+		payload.Returning = append(payload.Returning, x)
+
+	}
+	return payload, nil
+}
+
 func (self *FirestoreDatabaseFunctions) UpdateOne(ctx context.Context, p goke.UpdateParams, hook goke.TransformDocument) (goke.NodeMutationPayload, error) {
 	res, err := self.updateMany(ctx, p, hook, 1)
 	payload := goke.NodeMutationPayload{}
@@ -238,25 +261,6 @@ func isZero(v interface{}) bool {
 		return len(l) == 0
 	}
 	return false
-}
-
-func (self *FirestoreDatabaseFunctions) InsertMany(ctx context.Context, p goke.InsertManyParams, hook goke.TransformDocument) (goke.NodesMutationPayload, error) {
-	db, err := self.Init(ctx)
-	payload := goke.NodesMutationPayload{}
-	if err != nil {
-		return payload, err
-	}
-	for _, x := range p.Data {
-		_, _, err := db.Collection(p.Collection).Add(ctx, x)
-		if err != nil {
-			return payload, err
-		}
-		// TODO if firestore uses some id i should add it to the returned nodes
-		payload.AffectedCount++
-		payload.Returning = append(payload.Returning, x)
-
-	}
-	return payload, nil
 }
 
 func (self *FirestoreDatabaseFunctions) Init(ctx context.Context) (*firestore.Client, error) {

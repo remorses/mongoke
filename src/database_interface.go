@@ -43,6 +43,14 @@ func FilterDocuments(xs []Map, filter TransformDocument) ([]Map, error) {
 	return result, nil
 }
 
+func MapsToInterfaces(nodes []Map) []interface{} {
+	var data = make([]interface{}, len(nodes))
+	for i, x := range nodes {
+		data[i] = x
+	}
+	return data
+}
+
 // type FindOneParams struct {
 // 	Collection  string
 // 	DatabaseUri string

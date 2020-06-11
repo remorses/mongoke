@@ -61,7 +61,6 @@ func (self *FakeDatabaseFunctions) FindMany(ctx context.Context, p goke.FindMany
 }
 
 func (self *FakeDatabaseFunctions) InsertMany(ctx context.Context, p goke.InsertManyParams, hook goke.TransformDocument) (goke.NodesMutationPayload, error) {
-	// TODO implement hook check
 	payload := goke.NodesMutationPayload{}
 	if len(p.Data) == 0 {
 		return payload, nil
@@ -73,21 +72,21 @@ func (self *FakeDatabaseFunctions) InsertMany(ctx context.Context, p goke.Insert
 	opts := options.InsertMany()
 	opts.SetOrdered(true)
 	testutil.PrettyPrint(p)
-	var data = make([]interface{}, len(p.Data))
-	for i, x := range p.Data {
-		data[i] = x
+	nodes, err := goke.FilterDocuments(p.Data, hook)
+	if err != nil {
+		return payload, err
 	}
-	res, err := db.Collection(p.Collection).InsertMany(ctx, data, opts)
+	res, err := db.Collection(p.Collection).InsertMany(ctx, goke.MapsToInterfaces(p.Data), opts)
 	if err != nil {
 		// log.Print("Error in findMany", err)
 		return payload, err
 	}
 	fmt.Println(res.InsertedIDs)
 	for i, id := range res.InsertedIDs {
-		p.Data[i]["_id"] = id
+		nodes[i]["_id"] = id
 	}
 	return goke.NodesMutationPayload{
-		Returning:     p.Data[:len(res.InsertedIDs)],
+		Returning:     nodes[:len(res.InsertedIDs)],
 		AffectedCount: len(res.InsertedIDs),
 	}, nil
 }

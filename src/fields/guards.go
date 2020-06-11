@@ -52,12 +52,21 @@ func hideFieldsFromDocument(documentMap goke.Map, toHide []string) goke.Map {
 	return copy
 }
 
+// TODO default permissions should be configurable
+// now are set to everything to make tests run
+var DEFAULT_PERMISSIONS = []string{
+	goke.Operations.READ,
+	goke.Operations.CREATE,
+	goke.Operations.UPDATE,
+	goke.Operations.DELETE,
+}
+
 func evaluateAuthPermission(guards []goke.AuthGuard, jwt jwt.MapClaims, document interface{}) (goke.AuthGuard, error) {
 	// TODO if user is admin return the all permissions AuthGuard here
 	// if guards are empty default to read permission
 	if len(guards) == 0 {
 		return goke.AuthGuard{
-			AllowedOperations: []string{goke.Operations.READ},
+			AllowedOperations: DEFAULT_PERMISSIONS,
 		}, nil
 	}
 	for _, guard := range guards {
