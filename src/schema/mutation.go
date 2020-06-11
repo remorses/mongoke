@@ -58,7 +58,7 @@ func makeMutation(Config goke.Config, baseSchemaConfig graphql.SchemaConfig) (*g
 		mutationFields["updateMany"+object.Name()] = updateMany
 
 		// deleteOne
-		deleteOne, err := fields.DeleteMany(p)
+		deleteOne, err := fields.DeleteOne(p)
 		if err != nil {
 			return nil, err
 		}
