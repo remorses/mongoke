@@ -36,7 +36,7 @@ func takeIndexableFields(indexableNames []string, object graphql.Type) []*graphq
 		} else {
 			t = v.Type
 		}
-		// TODO maybe handle list as an indexable type to add the contains operator
+		// TODO maybe add List as an indexable type to add the contains operator
 		typeName := t.Name()
 		f := &graphql.FieldDefinition{Type: t, Name: v.Name, Args: v.Args, Description: v.Description, Resolve: v.Resolve}
 		switch typeName {

@@ -26,7 +26,6 @@ func InsertMany(p CreateFieldParams) (*graphql.Field, error) {
 		if err != nil {
 			return nil, err
 		}
-		// TODO insert only nodes the user can insert, based on expressions
 		res, err := p.Config.DatabaseFunctions.InsertMany(
 			params.Context,
 			opts,

@@ -52,7 +52,7 @@ func hideFieldsFromDocument(documentMap goke.Map, toHide []string) goke.Map {
 	return copy
 }
 
-// TODO default permissions should be configurable
+// TODO default permissions levels should be configurable
 // now are set to everything to make tests run
 var DEFAULT_PERMISSIONS = []string{
 	goke.Operations.READ,
