@@ -191,6 +191,22 @@ func TestDeleteWithFakeDatabase(t *testing.T) {
 				}
 				`,
 			},
+			{
+				Name:     "deleteOne does not removes anything returns affectedCount == 0",
+				Schema:   schema,
+				Expected: goke.Map{"deleteOneUser": goke.Map{"returning": nil, "affectedCount": 0}},
+				Query: `
+				mutation {
+					deleteOneUser(where: {age: {eq: 38}}) {
+						returning {
+							name
+							age
+						}
+						affectedCount
+					}
+				}
+				`,
+			},
 		},
 	})
 }
