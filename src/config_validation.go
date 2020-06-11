@@ -206,14 +206,7 @@ var jsonSchemaString = `
                 "if": {
                     "type": "string"
                 },
-                "hide_fields": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "minItems": 0
-                },
-                "allowed_operations": {
+                "allow_operations": {
                     "type": "array",
                     "items": {
                         "enum": ["read", "update", "delete", "create"],

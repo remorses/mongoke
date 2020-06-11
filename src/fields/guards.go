@@ -7,6 +7,15 @@ import (
 	goke "github.com/remorses/goke/src"
 )
 
+// TODO default permissions levels should be configurable
+// now are set to everything to make tests run
+var DEFAULT_PERMISSIONS = []string{
+	goke.Operations.READ,
+	goke.Operations.CREATE,
+	goke.Operations.UPDATE,
+	goke.Operations.DELETE,
+}
+
 type applyGuardsOnDocumentParams struct {
 	document  goke.Map
 	guards    []goke.AuthGuard
@@ -26,39 +35,10 @@ func applyGuardsOnDocument(p applyGuardsOnDocumentParams) (goke.Map, error) {
 	if !contains(guard.AllowedOperations, p.operation) {
 		return nil, errors.New("cannot execute " + p.operation + " operation with current user permissions")
 	}
-	if len(guard.HideFields) != 0 {
-		p.document = hideFieldsFromDocument(p.document, guard.HideFields)
-	}
+	// if len(guard.HideFields) != 0 {
+	// 	p.document = hideFieldsFromDocument(p.document, guard.HideFields)
+	// }
 	return p.document, nil
-}
-
-func hideFieldsFromDocument(documentMap goke.Map, toHide []string) goke.Map {
-	if documentMap == nil {
-		return nil
-	}
-
-	// clone the map
-	copy := make(goke.Map, len(documentMap))
-	for k, v := range documentMap {
-		copy[k] = v
-	}
-	// remove the names from the copy
-	for _, name := range toHide {
-		_, ok := documentMap[name]
-		if ok {
-			delete(copy, name)
-		}
-	}
-	return copy
-}
-
-// TODO default permissions levels should be configurable
-// now are set to everything to make tests run
-var DEFAULT_PERMISSIONS = []string{
-	goke.Operations.READ,
-	goke.Operations.CREATE,
-	goke.Operations.UPDATE,
-	goke.Operations.DELETE,
 }
 
 func evaluateAuthPermission(guards []goke.AuthGuard, jwt jwt.MapClaims, document interface{}) (goke.AuthGuard, error) {
@@ -109,3 +89,23 @@ func contains(arr []string, str string) bool {
 	}
 	return false
 }
+
+// func hideFieldsFromDocument(documentMap goke.Map, toHide []string) goke.Map {
+// 	if documentMap == nil {
+// 		return nil
+// 	}
+
+// 	// clone the map
+// 	copy := make(goke.Map, len(documentMap))
+// 	for k, v := range documentMap {
+// 		copy[k] = v
+// 	}
+// 	// remove the names from the copy
+// 	for _, name := range toHide {
+// 		_, ok := documentMap[name]
+// 		if ok {
+// 			delete(copy, name)
+// 		}
+// 	}
+// 	return copy
+// }

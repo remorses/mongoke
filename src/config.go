@@ -92,9 +92,9 @@ type TypeConfig struct {
 
 type AuthGuard struct {
 	Expression        string   `json:"if"`
-	AllowedOperations []string `json:"allowed_operations"`
-	HideFields        []string `json:"hide_fields"`
-	eval              gval.Evaluable
+	AllowedOperations []string `json:"allow_operations"`
+	// HideFields        []string `json:"hide_fields"`
+	eval gval.Evaluable
 }
 
 func (guard AuthGuard) Evaluate(params Map) (interface{}, error) {

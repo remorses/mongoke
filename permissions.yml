@@ -14,10 +14,7 @@ permissions:
           - create
           - read
           - delete
-      - hide_fields:
-          - password
-          - userId
-        actions:
+      - actions:
           - read
   UsingJwtRoles:
     collection: tasks
