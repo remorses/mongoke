@@ -7,28 +7,19 @@ import (
 	goke "github.com/remorses/goke/src"
 )
 
-// TODO default permissions levels should be configurable
-// now are set to everything to make tests run
-var DEFAULT_PERMISSIONS = []string{
-	goke.Operations.READ,
-	goke.Operations.CREATE,
-	goke.Operations.UPDATE,
-	goke.Operations.DELETE,
-}
-
 type applyGuardsOnDocumentParams struct {
-	document  goke.Map
-	guards    []goke.AuthGuard
-	jwt       jwt.MapClaims
-	operation string
+	document           goke.Map
+	guards             []goke.AuthGuard
+	jwt                jwt.MapClaims
+	defaultPermissions []string
+	operation          string
 }
 
 func applyGuardsOnDocument(p applyGuardsOnDocumentParams) (goke.Map, error) {
 	if p.document == nil {
 		return nil, nil
 	}
-
-	guard, err := evaluateAuthPermission(p.guards, p.jwt, p.document)
+	guard, err := evaluateAuthPermission(p)
 	if err != nil {
 		return nil, err
 	}
@@ -41,19 +32,21 @@ func applyGuardsOnDocument(p applyGuardsOnDocumentParams) (goke.Map, error) {
 	return p.document, nil
 }
 
-func evaluateAuthPermission(guards []goke.AuthGuard, jwt jwt.MapClaims, document interface{}) (goke.AuthGuard, error) {
+// find the final permission where `if` evaluates to true
+func evaluateAuthPermission(p applyGuardsOnDocumentParams) (goke.AuthGuard, error) {
 	// TODO if user is admin return the all permissions AuthGuard here
 	// if guards are empty default to read permission
-	if len(guards) == 0 {
+	if len(p.guards) == 0 {
 		return goke.AuthGuard{
-			AllowedOperations: DEFAULT_PERMISSIONS,
+			AllowedOperations: p.defaultPermissions,
 		}, nil
 	}
-	for _, guard := range guards {
+	// find the final permission where `if` evaluates to true
+	for _, guard := range p.guards {
 		res, err := guard.Evaluate(
 			goke.Map{
-				"jwt":      jwt,
-				"document": document,
+				"jwt":      p.jwt,
+				"document": p.document,
 				// TODO more auth evaluation params like x, utility functions, ...
 			},
 		)
@@ -74,7 +67,7 @@ func evaluateAuthPermission(guards []goke.AuthGuard, jwt jwt.MapClaims, document
 			return guard, nil
 		}
 	}
-	// default last permission is nothing when permissions list not empty and error
+	// user cannot do anything
 	permission := goke.AuthGuard{
 		AllowedOperations: nil,
 	}

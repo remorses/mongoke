@@ -18,47 +18,60 @@ import (
 
 // MakeGokeSchema generates the schema
 func MakeGokeSchema(config goke.Config) (graphql.Schema, error) {
+	config, err := ApplyConfigDefaults(config)
+	if err != nil {
+		return graphql.Schema{}, err
+	}
+	schema, err := generateSchema(config)
+	if err != nil {
+		return schema, err
+	}
+	return schema, nil
+}
 
+func ApplyConfigDefaults(config goke.Config) (goke.Config, error) {
+	// types cache (gaphql-go complains of duplicate types)
 	if config.Cache == nil {
 		config.Cache = make(goke.Map)
 	}
 
+	// add schema type defs
 	if config.Schema == "" && config.SchemaPath != "" {
 		data, e := ioutil.ReadFile(config.SchemaPath)
 		if e != nil {
-			return graphql.Schema{}, e
+			return config, e
 		}
 		config.Schema = string(data)
 	}
-
 	if config.Schema == "" && config.SchemaUrl != "" {
 		data, e := goke.DownloadFile(config.SchemaUrl)
 		if e != nil {
-			return graphql.Schema{}, e
+			return config, e
 		}
 		config.Schema = string(data)
 	}
-
 	if config.Schema == "" {
-		return graphql.Schema{}, errors.New("missing required schema")
+		return config, errors.New("missing required schema")
 	}
 
+	// default permissions
+	if config.DefaultPermissions == nil {
+		config.DefaultPermissions = goke.DEFAULT_PERMISSIONS
+	}
+
+	// database functions
 	if config.Mongodb.Uri != "" {
 		config.DatabaseFunctions = &mongodb.MongodbDatabaseFunctions{Config: config}
 	} else if config.Firestore.ProjectID != "" {
 		config.DatabaseFunctions = &firestore.FirestoreDatabaseFunctions{Config: config}
 	}
 
-	if config.DatabaseFunctions == nil { // by default use local fake data
+	// by default use local fake data
+	if config.DatabaseFunctions == nil {
 		println("using local fake data source")
 		config.DatabaseFunctions = &fakedata.FakeDatabaseFunctions{Config: config}
 	}
-
-	schema, err := generateSchema(config)
-	if err != nil {
-		return schema, err
-	}
-	return schema, nil
+	return config, nil
 }
 
 func makeSchemaConfig(config goke.Config) (graphql.SchemaConfig, error) {

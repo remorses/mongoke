@@ -72,6 +72,12 @@ var jsonSchemaString = `
 						}
 					}
 				},
+				"default_permissions": {
+					"type": "array",
+                    "items": {
+                        "$ref": "#/definitions/PermissionEnum"
+                    }
+				},
                 "schema_url": {
                     "$ref": "#/definitions/Url"
                 },
@@ -209,15 +215,17 @@ var jsonSchemaString = `
                 "allow_operations": {
                     "type": "array",
                     "items": {
-                        "enum": ["read", "update", "delete", "create"],
-                        "type": "string"
+                        "$ref": "#/definitions/PermissionEnum"
                     },
                     "minItems": 0
                 }
             },
             "additionalProperties": false
+        },
+        "PermissionEnum": {
+            "enum": ["read", "update", "delete", "create"],
+            "type": "string"
         }
     }
 }
-
 `

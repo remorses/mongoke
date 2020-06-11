@@ -39,10 +39,11 @@ func InsertOne(p CreateFieldParams) (*graphql.Field, error) {
 			opts,
 			func(document goke.Map) (goke.Map, error) {
 				return applyGuardsOnDocument(applyGuardsOnDocumentParams{
-					jwt:       getJwt(params),
-					document:  document,
-					guards:    p.Permissions,
-					operation: goke.Operations.CREATE,
+					jwt:                getJwt(params),
+					defaultPermissions: p.Config.DefaultPermissions,
+					document:           document,
+					guards:             p.Permissions,
+					operation:          goke.Operations.CREATE,
 				})
 			},
 		)

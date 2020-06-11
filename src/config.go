@@ -24,6 +24,13 @@ var Operations = struct {
 	CREATE: "create",
 }
 
+var DEFAULT_PERMISSIONS = []string{
+	Operations.READ,
+	Operations.CREATE,
+	Operations.UPDATE,
+	Operations.DELETE,
+}
+
 const (
 	ASC  = 1
 	DESC = -1
@@ -36,18 +43,19 @@ var (
 
 type Config struct {
 	// DatabaseUri       string
-	Mongodb           MongodbConfig          `json:"mongodb"`
-	FakeDatabase      FakeDatabaseConfig     `json:"fake_database"`
-	Firestore         FirestoreConfig        `json:"firestore"`
-	DisableGraphiql   bool                   `json:"disable_graphiql" env:"DISABLE_GRAPHIQL"`
-	Schema            string                 `json:"schema"`
-	SchemaPath        string                 `json:"schema_path"`
-	SchemaUrl         string                 `json:"schema_url"`
-	Types             map[string]*TypeConfig `json:"types"`
-	Relations         []RelationConfig       `json:"relations"`
-	JwtConfig         JwtConfig              `json:"jwt"`
-	DatabaseFunctions DatabaseInterface
-	Cache             Map
+	Mongodb            MongodbConfig          `json:"mongodb"`
+	FakeDatabase       FakeDatabaseConfig     `json:"fake_database"`
+	Firestore          FirestoreConfig        `json:"firestore"`
+	DisableGraphiql    bool                   `json:"disable_graphiql" env:"DISABLE_GRAPHIQL"`
+	Schema             string                 `json:"schema"`
+	SchemaPath         string                 `json:"schema_path"`
+	SchemaUrl          string                 `json:"schema_url"`
+	Types              map[string]*TypeConfig `json:"types"`
+	Relations          []RelationConfig       `json:"relations"`
+	JwtConfig          JwtConfig              `json:"jwt"`
+	DefaultPermissions []string               `json:"default_permissions"`
+	DatabaseFunctions  DatabaseInterface
+	Cache              Map
 }
 
 type MongodbConfig struct {
