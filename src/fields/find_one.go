@@ -33,29 +33,21 @@ func FindOne(p CreateFieldParams) (*graphql.Field, error) {
 			params.Context,
 			opts,
 			func(document goke.Map) (goke.Map, error) {
-				// TODO implement check
-				return document, nil
+				return applyGuardsOnDocument(applyGuardsOnDocumentParams{
+					jwt:       getJwt(params),
+					document:  document,
+					guards:    p.Permissions,
+					operation: goke.Operations.READ,
+				})
 			},
 		)
 		if err != nil {
 			return nil, err
 		}
-		jwt := getJwt(params)
-		// don't compute permissions if document is nil
 		if len(documents) == 0 {
 			return nil, nil
 		}
-		document := documents[0]
-		result, err := applyGuardsOnDocument(applyGuardsOnDocumentParams{
-			document:  document,
-			guards:    p.Permissions,
-			jwt:       jwt,
-			operation: goke.Operations.READ,
-		})
-		if err != nil {
-			return nil, err
-		}
-		return result, nil
+		return documents[0], nil
 	}
 
 	whereArg, err := types.GetWhereArg(p.Config.Cache, indexableNames, p.ReturnType)

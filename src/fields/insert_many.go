@@ -31,8 +31,13 @@ func InsertMany(p CreateFieldParams) (*graphql.Field, error) {
 			params.Context,
 			opts,
 			func(document goke.Map) (goke.Map, error) {
-				// TODO implement check
-				return document, nil
+				// here the query errors when one document cannot be inserted
+				return applyGuardsOnDocument(applyGuardsOnDocumentParams{
+					jwt:       getJwt(params),
+					document:  document,
+					guards:    p.Permissions,
+					operation: goke.Operations.CREATE,
+				})
 			},
 		)
 		if err != nil {

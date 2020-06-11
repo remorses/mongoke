@@ -26,36 +26,18 @@ func FindMany(p CreateFieldParams) (*graphql.Field, error) {
 		}
 		nodes, err := p.Config.DatabaseFunctions.FindMany(
 			params.Context, opts, func(document goke.Map) (goke.Map, error) {
-				// TODO implement check
-				return document, nil
+				return applyGuardsOnDocument(applyGuardsOnDocumentParams{
+					jwt:       getJwt(params),
+					document:  document,
+					guards:    p.Permissions,
+					operation: goke.Operations.READ,
+				})
 			},
 		)
 		if err != nil {
 			return nil, err
 		}
-
-		if len(p.Permissions) == 0 {
-			return nodes, nil
-		}
-
-		jwt := getJwt(params)
-		var accessibleNodes []goke.Map
-		// TODO move validation logic in a function that returns only accessible documents
-		for _, document := range nodes {
-			node, err := applyGuardsOnDocument(applyGuardsOnDocumentParams{
-				document:  document,
-				guards:    p.Permissions,
-				jwt:       jwt,
-				operation: goke.Operations.READ,
-			})
-			if err != nil {
-				continue
-			}
-			if node != nil {
-				accessibleNodes = append(accessibleNodes, node)
-			}
-		}
-		return accessibleNodes, nil
+		return nodes, nil
 	}
 	indexableNames := takeIndexableTypeNames(p.SchemaConfig)
 	whereArg, err := types.GetWhereArg(p.Config.Cache, indexableNames, p.ReturnType)

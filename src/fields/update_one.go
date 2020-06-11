@@ -35,13 +35,16 @@ func UpdateOne(p CreateFieldParams) (*graphql.Field, error) {
 			}
 			opts.Where = where
 		}
-		// TODO update only nodes the user can insert, based on expressions
 		res, err := p.Config.DatabaseFunctions.UpdateOne(
 			params.Context,
 			opts,
 			func(document goke.Map) (goke.Map, error) {
-				// TODO implement check
-				return document, nil
+				return applyGuardsOnDocument(applyGuardsOnDocumentParams{
+					jwt:       getJwt(params),
+					document:  document,
+					guards:    p.Permissions,
+					operation: goke.Operations.CREATE,
+				})
 			},
 		)
 		println(testutil.Pretty(res))

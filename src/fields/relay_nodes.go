@@ -68,43 +68,21 @@ func QueryTypeNodesField(p CreateFieldParams) (*graphql.Field, error) {
 			params.Context,
 			opts,
 			func(document goke.Map) (goke.Map, error) {
-				// TODO implement check
-				return document, nil
+				return applyGuardsOnDocument(applyGuardsOnDocumentParams{
+					jwt:       getJwt(params),
+					document:  document,
+					guards:    p.Permissions,
+					operation: goke.Operations.READ,
+				})
 			},
 		)
+
 		if err != nil {
 			return nil, err
 		}
 
-		if len(p.Permissions) == 0 {
-			connection := makeConnection(
-				nodes,
-				decodedArgs.Pagination,
-				decodedArgs.CursorField,
-			)
-			return connection, nil
-		}
-
-		jwt := getJwt(params)
-		var accessibleNodes []goke.Map
-		for _, document := range nodes {
-			node, err := applyGuardsOnDocument(applyGuardsOnDocumentParams{
-				document:  document,
-				guards:    p.Permissions,
-				jwt:       jwt,
-				operation: goke.Operations.READ,
-			})
-			if err != nil {
-				// println("got an error while calling applyGuardsOnDocument on findManyField for " + conf.returnType.PrivateName)
-				// fmt.Println(err)
-				continue
-			}
-			if node != nil {
-				accessibleNodes = append(accessibleNodes, node)
-			}
-		}
 		connection := makeConnection(
-			accessibleNodes,
+			nodes,
 			decodedArgs.Pagination,
 			decodedArgs.CursorField,
 		)

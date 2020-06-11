@@ -34,13 +34,16 @@ func InsertOne(p CreateFieldParams) (*graphql.Field, error) {
 			Data:       []goke.Map{data},
 		}
 
-		// TODO insert only nodes the user can insert, based on expressions
 		res, err := p.Config.DatabaseFunctions.InsertMany(
 			params.Context,
 			opts,
 			func(document goke.Map) (goke.Map, error) {
-				// TODO implement check
-				return document, nil
+				return applyGuardsOnDocument(applyGuardsOnDocumentParams{
+					jwt:       getJwt(params),
+					document:  document,
+					guards:    p.Permissions,
+					operation: goke.Operations.CREATE,
+				})
 			},
 		)
 		if err != nil {
