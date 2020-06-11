@@ -17,7 +17,7 @@ insertUser(data: {name: "xxx"}) {
 
 */
 
-func MutationUpdateNodes(p CreateFieldParams) (*graphql.Field, error) {
+func UpdateMany(p CreateFieldParams) (*graphql.Field, error) {
 	indexableNames := takeIndexableTypeNames(p.SchemaConfig)
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args

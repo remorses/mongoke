@@ -41,12 +41,12 @@ func TestMutationWithEmptyFakeDatabase(t *testing.T) {
 		DefaultSchema: schema,
 		Tests: []testutil.TestCase{
 			{
-				Name:     "update with set",
+				Name:     "updateOne_with_set",
 				Schema:   schema,
-				Expected: goke.Map{"updateUser": goke.Map{"returning": nil, "affectedCount": 0}},
+				Expected: goke.Map{"updateOneUser": goke.Map{"returning": nil, "affectedCount": 0}},
 				Query: `
 				mutation {
-					updateUser(set: {name: "xxx"}) {
+					updateOneUser(set: {name: "xxx"}) {
 						affectedCount
 						returning {
 							name
@@ -58,12 +58,12 @@ func TestMutationWithEmptyFakeDatabase(t *testing.T) {
 				`,
 			},
 			{
-				Name:     "update with set and where",
+				Name:     "updateOne with set and where",
 				Schema:   schema,
-				Expected: goke.Map{"updateUser": goke.Map{"returning": nil, "affectedCount": 0}},
+				Expected: goke.Map{"updateOneUser": goke.Map{"returning": nil, "affectedCount": 0}},
 				Query: `
 				mutation {
-					updateUser(where: {name: {eq: "zzz"}}, set: {name: "xxx"}) {
+					updateOneUser(where: {name: {eq: "zzz"}}, set: {name: "xxx"}) {
 						affectedCount
 						returning {
 							name
@@ -75,12 +75,12 @@ func TestMutationWithEmptyFakeDatabase(t *testing.T) {
 				`,
 			},
 			{
-				Name:     "updateNodes with set",
+				Name:     "updateMany with set",
 				Schema:   schema,
-				Expected: goke.Map{"updateUserNodes": goke.Map{"returning": []goke.Map{}, "affectedCount": 0}},
+				Expected: goke.Map{"updateManyUser": goke.Map{"returning": []goke.Map{}, "affectedCount": 0}},
 				Query: `
 				mutation {
-					updateUserNodes(set: {name: "xxx"}) {
+					updateManyUser(set: {name: "xxx"}) {
 						affectedCount
 						returning {
 							name
@@ -92,12 +92,12 @@ func TestMutationWithEmptyFakeDatabase(t *testing.T) {
 				`,
 			},
 			{
-				Name:     "insert",
+				Name:     "insertOne",
 				Schema:   schema,
-				Expected: goke.Map{"insertUser": goke.Map{"returning": goke.Map{"name": "xxx", "age": 10, "_id": "000000000000000000000000"}, "affectedCount": 1}},
+				Expected: goke.Map{"insertOneUser": goke.Map{"returning": goke.Map{"name": "xxx", "age": 10, "_id": "000000000000000000000000"}, "affectedCount": 1}},
 				Query: `
 				mutation {
-					insertUser(data: {name: "xxx", age: 10, _id: "000000000000000000000000"}) {
+					insertOneUser(data: {name: "xxx", age: 10, _id: "000000000000000000000000"}) {
 						affectedCount
 						returning {
 							name
@@ -109,13 +109,13 @@ func TestMutationWithEmptyFakeDatabase(t *testing.T) {
 				`,
 			},
 			{
-				Name:          "insert with missing required fields should error",
+				Name:          "insertOne with missing required fields should error",
 				Schema:        schema,
-				Expected:      goke.Map{"insertUser": goke.Map{"returning": goke.Map{"name": "xxx", "age": 10, "_id": "000000000000000000000000"}, "affectedCount": 1}},
+				Expected:      goke.Map{"insertOneUser": goke.Map{"returning": goke.Map{"name": "xxx", "age": 10, "_id": "000000000000000000000000"}, "affectedCount": 1}},
 				ExpectedError: true,
 				Query: `
 				mutation {
-					insertUser(data: {name: "xxx"}) {
+					insertOneUser(data: {name: "xxx"}) {
 						affectedCount
 						returning {
 							name
@@ -152,7 +152,7 @@ func TestMutationWithMockedDb(t *testing.T) {
 		Documents:  []goke.Map{},
 		Tests: []testutil.TestCase{
 			{
-				Name: "insertone returns error",
+				Name: "insertOne returns error",
 				Schema: takeFirst(goke_schema.MakeGokeSchema(goke.Config{
 					Schema: typeDefs,
 					DatabaseFunctions: &mock.DatabaseInterfaceMock{
@@ -162,11 +162,11 @@ func TestMutationWithMockedDb(t *testing.T) {
 					},
 					Types: typesConf,
 				})),
-				// Expected:      goke.Map{"insertUser": goke.Map{"returning": nil, "affectedCount": 0}},
+				// Expected:      goke.Map{"insertOneUser": goke.Map{"returning": nil, "affectedCount": 0}},
 				ExpectedError: true,
 				Query: `
 				mutation {
-					insertUser(data: {name: "xxx"}) {
+					insertOneUser(data: {name: "xxx"}) {
 						affectedCount
 						returning {
 							name

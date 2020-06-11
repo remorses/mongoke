@@ -18,7 +18,7 @@ insertUser(data: {name: "xxx"}) {
 
 */
 
-func MutationInsertOne(p CreateFieldParams) (*graphql.Field, error) {
+func InsertOne(p CreateFieldParams) (*graphql.Field, error) {
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
 		data := goke.Map{}

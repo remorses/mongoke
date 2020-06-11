@@ -30,28 +30,32 @@ func makeMutation(Config goke.Config, baseSchemaConfig graphql.SchemaConfig) (*g
 			SchemaConfig: baseSchemaConfig,
 		}
 		// insertOne
-		insertOne, err := fields.MutationInsertOne(p)
+		insertOne, err := fields.InsertOne(p)
 		if err != nil {
 			return nil, err
 		}
-		mutationFields["insert"+object.Name()] = insertOne
+		mutationFields["insertOne"+object.Name()] = insertOne
+
 		// insertMany
-		insertNodes, err := fields.MutationInsertNodes(p)
+		insertMany, err := fields.InsertMany(p)
 		if err != nil {
 			return nil, err
 		}
-		mutationFields["insert"+object.Name()+"Nodes"] = insertNodes
+		mutationFields["insertMany"+object.Name()] = insertMany
+
 		// updateOne
-		updateOne, err := fields.MutationUpdateOne(p)
+		updateOne, err := fields.UpdateOne(p)
 		if err != nil {
 			return nil, err
 		}
-		mutationFields["update"+object.Name()] = updateOne
-		updateNodes, err := fields.MutationUpdateNodes(p)
+		mutationFields["updateOne"+object.Name()] = updateOne
+
+		// updateMany
+		updateMany, err := fields.UpdateMany(p)
 		if err != nil {
 			return nil, err
 		}
-		mutationFields["update"+object.Name()+"Nodes"] = updateNodes
+		mutationFields["updateMany"+object.Name()] = updateMany
 	}
 	mutation := graphql.NewObject(graphql.ObjectConfig{Name: "Mutation", Fields: mutationFields})
 	return mutation, nil
