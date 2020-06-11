@@ -155,6 +155,8 @@ func (self *FirestoreDatabaseFunctions) updateMany(ctx context.Context, p goke.U
 			return payload, err
 		}
 		payload.AffectedCount++
+
+		// refetch doc with updates
 		doc, err = doc.Ref.Get(ctx)
 		if err != nil {
 			return payload, err
@@ -196,13 +198,27 @@ func (self *FirestoreDatabaseFunctions) deleteMany(ctx context.Context, p goke.D
 		if err != nil {
 			return payload, err
 		}
-		data := doc.Data()
+
+		// check with hook
+		var m goke.Map
+		err = doc.DataTo(&m)
+		if err != nil {
+			return payload, err
+		}
+		m, err = hook(m)
+		if err != nil {
+			return payload, err
+		}
+		if m == nil {
+			continue
+		}
+		// delete
 		_, err = doc.Ref.Delete(ctx)
 		if err != nil {
 			return payload, err
 		}
 		payload.AffectedCount++
-		payload.Returning = append(payload.Returning, data)
+		payload.Returning = append(payload.Returning, m)
 	}
 	return payload, nil
 }
