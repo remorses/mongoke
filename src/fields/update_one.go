@@ -43,7 +43,7 @@ func UpdateOne(p CreateFieldParams) (*graphql.Field, error) {
 					jwt:       getJwt(params),
 					document:  document,
 					guards:    p.Permissions,
-					operation: goke.Operations.CREATE,
+					operation: goke.Operations.UPDATE,
 				})
 			},
 		)
