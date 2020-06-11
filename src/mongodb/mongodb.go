@@ -193,25 +193,34 @@ func (self *MongodbDatabaseFunctions) DeleteMany(ctx context.Context, p goke.Del
 		return payload, err
 	}
 	opts := options.Delete()
-
 	testutil.PrettyPrint(p)
 
+	// find accessible nodes
 	nodes, err := self.FindMany(ctx, goke.FindManyParams{Collection: p.Collection, Where: p.Where}, hook)
 	if err != nil {
 		return payload, err
 	}
 
-	// TODO delete only documents user has permissions to
-
-	where := MakeMongodbMatch(p.Where)
-	res, err := db.Collection(p.Collection).DeleteMany(ctx, where, opts)
-	if err != nil {
-		return payload, err
+	for _, node := range nodes {
+		// find one specific node
+		where := goke.ExtendWhereMatch(
+			p.Where,
+			map[string]goke.Filter{
+				"_id": {
+					Eq: node["_id"],
+				},
+			},
+		)
+		match := MakeMongodbMatch(where)
+		res, err := db.Collection(p.Collection).DeleteOne(ctx, match, opts)
+		if err != nil {
+			return payload, err
+		}
+		payload.AffectedCount += int(res.DeletedCount)
+		payload.Returning = append(payload.Returning, node)
 	}
-	return goke.NodesMutationPayload{
-		AffectedCount: int(res.DeletedCount),
-		Returning:     nodes,
-	}, nil
+
+	return payload, nil
 }
 
 func (self *MongodbDatabaseFunctions) Init(ctx context.Context) (*mongo.Database, error) {
