@@ -100,12 +100,36 @@ func (self *FakeDatabaseFunctions) UpdateOne(ctx context.Context, p goke.UpdateP
 	if err != nil {
 		return payload, err
 	}
+
+	// TODO this step of checking could be skipped if there are no guards
+	nodes, err := self.FindMany(ctx, goke.FindManyParams{
+		Collection: p.Collection,
+		Limit:      1,
+		Where:      p.Where,
+	}, hook)
+	if err != nil {
+		return payload, err
+	}
+	if len(nodes) == 0 {
+		return payload, nil
+	}
+
+	// make sure we update the document we checked with the hook
+	where := goke.ExtendWhereMatch(
+		p.Where,
+		map[string]goke.Filter{
+			"_id": {
+				Eq: nodes[0]["_id"],
+			},
+		},
+	)
+	match := mongodb.MakeMongodbMatch(where)
+
 	opts := options.FindOneAndUpdate()
 	opts.SetReturnDocument(options.After)
 	testutil.PrettyPrint(p)
 
-	where := mongodb.MakeMongodbMatch(p.Where)
-	res := db.Collection(p.Collection).FindOneAndUpdate(ctx, where, bson.M{"$set": p.Set}, opts)
+	res := db.Collection(p.Collection).FindOneAndUpdate(ctx, match, bson.M{"$set": p.Set}, opts)
 	if res.Err() == mongo.ErrNoDocuments {
 		println("no docs to update")
 		return payload, nil
@@ -125,13 +149,7 @@ func (self *FakeDatabaseFunctions) UpdateOne(ctx context.Context, p goke.UpdateP
 
 // first updateMany documents, then query again the documents and return them, all inside a transaction that prevents other writes happen before the query
 func (self *FakeDatabaseFunctions) UpdateMany(ctx context.Context, p goke.UpdateParams, hook goke.TransformDocument) (goke.NodesMutationPayload, error) {
-	// db, err := self.Init(ctx)
-
-	// if err != nil {
-	// 	return payload, err
-	// }
 	payload := goke.NodesMutationPayload{}
-
 	testutil.PrettyPrint(p)
 
 	// TODO execute inside a transaction
@@ -141,16 +159,22 @@ func (self *FakeDatabaseFunctions) UpdateMany(ctx context.Context, p goke.Update
 	}
 
 	for _, node := range nodes {
-		where := p.Where
-		// TODO instead of using `and` append directly to the Match, it is faster
-		where.And = append(where.And, goke.WhereTree{
-			Match: map[string]goke.Filter{
-				"_id": {
-					Eq: node["_id"],
-				},
+		r, err := self.UpdateOne(
+			ctx,
+			goke.UpdateParams{
+				Collection: p.Collection,
+				Set:        p.Set,
+				Where: goke.ExtendWhereMatch(
+					p.Where,
+					map[string]goke.Filter{
+						"_id": {
+							Eq: node["_id"],
+						},
+					},
+				),
 			},
-		})
-		r, err := self.UpdateOne(ctx, goke.UpdateParams{Collection: p.Collection, Where: where}, hook)
+			nil, // pass nil to not repeat the check
+		)
 		if err != nil {
 			return payload, err
 		}
@@ -159,7 +183,6 @@ func (self *FakeDatabaseFunctions) UpdateMany(ctx context.Context, p goke.Update
 			payload.Returning = append(payload.Returning, r.Returning.(goke.Map))
 		}
 	}
-
 	return payload, nil
 }
 

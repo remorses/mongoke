@@ -94,28 +94,53 @@ func (self *MongodbDatabaseFunctions) InsertMany(ctx context.Context, p goke.Ins
 
 func (self *MongodbDatabaseFunctions) UpdateOne(ctx context.Context, p goke.UpdateParams, hook goke.TransformDocument) (goke.NodeMutationPayload, error) {
 	db, err := self.Init(ctx)
-	if err != nil {
-		return goke.NodeMutationPayload{}, err
+	payload := goke.NodeMutationPayload{
+		Returning:     nil,
+		AffectedCount: 0,
 	}
+	if err != nil {
+		return payload, err
+	}
+
+	// TODO this step of checking could be skipped if there are no guards
+	nodes, err := self.FindMany(ctx, goke.FindManyParams{
+		Collection: p.Collection,
+		Limit:      1,
+		Where:      p.Where,
+	}, hook)
+	if err != nil {
+		return payload, err
+	}
+	if len(nodes) == 0 {
+		return payload, nil
+	}
+
+	// make sure we update the document we checked with the hook
+	where := goke.ExtendWhereMatch(
+		p.Where,
+		map[string]goke.Filter{
+			"_id": {
+				Eq: nodes[0]["_id"],
+			},
+		},
+	)
+	match := MakeMongodbMatch(where)
+
 	opts := options.FindOneAndUpdate()
 	opts.SetReturnDocument(options.After)
 	testutil.PrettyPrint(p)
 
-	where := MakeMongodbMatch(p.Where)
-	res := db.Collection(p.Collection).FindOneAndUpdate(ctx, where, bson.M{"$set": p.Set}, opts)
+	res := db.Collection(p.Collection).FindOneAndUpdate(ctx, match, bson.M{"$set": p.Set}, opts)
 	if res.Err() == mongo.ErrNoDocuments {
 		println("no docs to update")
-		return goke.NodeMutationPayload{
-			AffectedCount: 0,
-			Returning:     nil,
-		}, nil
+		return payload, nil
 	} else if res.Err() != nil {
-		return goke.NodeMutationPayload{}, err
+		return payload, err
 	}
 	data := goke.Map{}
 	err = res.Decode(&data)
 	if err != nil {
-		return goke.NodeMutationPayload{}, err
+		return payload, err
 	}
 	return goke.NodeMutationPayload{
 		AffectedCount: 1,
@@ -125,13 +150,7 @@ func (self *MongodbDatabaseFunctions) UpdateOne(ctx context.Context, p goke.Upda
 
 // first updateMany documents, then query again the documents and return them, all inside a transaction that prevents other writes happen before the query
 func (self *MongodbDatabaseFunctions) UpdateMany(ctx context.Context, p goke.UpdateParams, hook goke.TransformDocument) (goke.NodesMutationPayload, error) {
-	db, err := self.Init(ctx)
 	payload := goke.NodesMutationPayload{}
-	if err != nil {
-		return payload, err
-	}
-	opts := options.Update()
-
 	testutil.PrettyPrint(p)
 
 	// TODO execute inside a transaction
@@ -140,17 +159,32 @@ func (self *MongodbDatabaseFunctions) UpdateMany(ctx context.Context, p goke.Upd
 		return payload, err
 	}
 
-	where := MakeMongodbMatch(p.Where)
-	res, err := db.Collection(p.Collection).UpdateMany(ctx, where, bson.M{"$set": p.Set}, opts)
-	if err != nil {
-		return payload, err
+	for _, node := range nodes {
+		r, err := self.UpdateOne(
+			ctx,
+			goke.UpdateParams{
+				Collection: p.Collection,
+				Set:        p.Set,
+				Where: goke.ExtendWhereMatch(
+					p.Where,
+					map[string]goke.Filter{
+						"_id": {
+							Eq: node["_id"],
+						},
+					},
+				),
+			},
+			nil, // pass nil to not repeat the check
+		)
+		if err != nil {
+			return payload, err
+		}
+		payload.AffectedCount += r.AffectedCount
+		if r.Returning != nil {
+			payload.Returning = append(payload.Returning, r.Returning.(goke.Map))
+		}
 	}
-	payload.AffectedCount = int(res.ModifiedCount + res.UpsertedCount)
-
-	return goke.NodesMutationPayload{
-		AffectedCount: payload.AffectedCount,
-		Returning:     nodes,
-	}, nil
+	return payload, nil
 }
 
 func (self *MongodbDatabaseFunctions) DeleteMany(ctx context.Context, p goke.DeleteManyParams, hook goke.TransformDocument) (goke.NodesMutationPayload, error) {

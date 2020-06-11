@@ -20,6 +20,7 @@ type DatabaseInterface interface {
 // remove non accessible fields from a document and returns nil if document is not accessible
 type TransformDocument = func(document Map) (Map, error)
 
+// TODO instead of using `and` append directly to the Match, it is faster
 func FilterDocuments(xs []Map, filter TransformDocument) ([]Map, error) {
 	var result []Map
 	for _, x := range xs {
@@ -49,6 +50,14 @@ func MapsToInterfaces(nodes []Map) []interface{} {
 		data[i] = x
 	}
 	return data
+}
+
+func ExtendWhereMatch(where WhereTree, match map[string]Filter) WhereTree {
+	// the where is implicitly copied
+	where.And = append(where.And, WhereTree{
+		Match: match,
+	})
+	return where
 }
 
 // type FindOneParams struct {
