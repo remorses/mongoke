@@ -193,23 +193,34 @@ func (self *FakeDatabaseFunctions) DeleteMany(ctx context.Context, p goke.Delete
 		return payload, err
 	}
 	opts := options.Delete()
-
 	testutil.PrettyPrint(p)
 
+	// find accessible nodes
 	nodes, err := self.FindMany(ctx, goke.FindManyParams{Collection: p.Collection, Where: p.Where}, hook)
 	if err != nil {
 		return payload, err
 	}
 
-	where := mongodb.MakeMongodbMatch(p.Where)
-	res, err := db.Collection(p.Collection).DeleteMany(ctx, where, opts)
-	if err != nil {
-		return payload, err
+	for _, node := range nodes {
+		// find one specific node
+		where := goke.ExtendWhereMatch(
+			p.Where,
+			map[string]goke.Filter{
+				"_id": {
+					Eq: node["_id"],
+				},
+			},
+		)
+		match := mongodb.MakeMongodbMatch(where)
+		res, err := db.Collection(p.Collection).DeleteOne(ctx, match, opts)
+		if err != nil {
+			return payload, err
+		}
+		payload.AffectedCount += int(res.DeletedCount)
+		payload.Returning = append(payload.Returning, node)
 	}
-	return goke.NodesMutationPayload{
-		AffectedCount: int(res.DeletedCount),
-		Returning:     nodes,
-	}, nil
+
+	return payload, nil
 }
 
 func (self *FakeDatabaseFunctions) Init(ctx context.Context) (lungo.IDatabase, error) {

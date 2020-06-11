@@ -150,40 +150,39 @@ func (self *MongodbDatabaseFunctions) UpdateOne(ctx context.Context, p goke.Upda
 
 // first updateMany documents, then query again the documents and return them, all inside a transaction that prevents other writes happen before the query
 func (self *MongodbDatabaseFunctions) UpdateMany(ctx context.Context, p goke.UpdateParams, hook goke.TransformDocument) (goke.NodesMutationPayload, error) {
+	db, err := self.Init(ctx)
 	payload := goke.NodesMutationPayload{}
+	if err != nil {
+		return payload, err
+	}
+	opts := options.Delete()
 	testutil.PrettyPrint(p)
 
-	// TODO execute inside a transaction
+	// find accessible nodes
 	nodes, err := self.FindMany(ctx, goke.FindManyParams{Collection: p.Collection, Where: p.Where}, hook)
 	if err != nil {
 		return payload, err
 	}
 
 	for _, node := range nodes {
-		r, err := self.UpdateOne(
-			ctx,
-			goke.UpdateParams{
-				Collection: p.Collection,
-				Set:        p.Set,
-				Where: goke.ExtendWhereMatch(
-					p.Where,
-					map[string]goke.Filter{
-						"_id": {
-							Eq: node["_id"],
-						},
-					},
-				),
+		// find one specific node
+		where := goke.ExtendWhereMatch(
+			p.Where,
+			map[string]goke.Filter{
+				"_id": {
+					Eq: node["_id"],
+				},
 			},
-			nil, // pass nil to not repeat the check
 		)
+		match := MakeMongodbMatch(where)
+		res, err := db.Collection(p.Collection).DeleteOne(ctx, match, opts)
 		if err != nil {
 			return payload, err
 		}
-		payload.AffectedCount += r.AffectedCount
-		if r.Returning != nil {
-			payload.Returning = append(payload.Returning, r.Returning.(goke.Map))
-		}
+		payload.AffectedCount += int(res.DeletedCount)
+		payload.Returning = append(payload.Returning, node)
 	}
+
 	return payload, nil
 }
 
