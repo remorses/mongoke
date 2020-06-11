@@ -12,15 +12,15 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/handler"
-	mongoke "github.com/remorses/mongoke/src"
-	mongoke_schema "github.com/remorses/mongoke/src/schema"
+	goke "github.com/remorses/goke/src"
+	goke_schema "github.com/remorses/goke/src/schema"
 )
 
 var GRAPHIQL_PATH = "/graphiql"
 
-// MakeMongokeHandler creates an http handler
-func MakeMongokeHandler(config mongoke.Config, webUiFolder string) (http.Handler, error) {
-	schema, err := mongoke_schema.MakeMongokeSchema(config)
+// MakeGokeHandler creates an http handler
+func MakeGokeHandler(config goke.Config, webUiFolder string) (http.Handler, error) {
+	schema, err := goke_schema.MakeGokeSchema(config)
 	if err != nil {
 		return nil, err
 	}
@@ -100,8 +100,8 @@ func makeGraphiqlHandler(webUiFolder string) (http.Handler, error) {
 	return h, nil
 }
 
-func getRootObject(config mongoke.JwtConfig, r *http.Request) map[string]interface{} {
-	rootValue := mongoke.Map{
+func getRootObject(config goke.JwtConfig, r *http.Request) map[string]interface{} {
+	rootValue := goke.Map{
 		"request": r,
 	}
 

@@ -6,14 +6,14 @@ import (
 
 	"github.com/go-test/deep"
 	"github.com/graphql-go/graphql"
-	mongoke "github.com/remorses/mongoke/src"
+	goke "github.com/remorses/goke/src"
 )
 
 type NewTestGroupParams struct {
 	Tests         []TestCase
-	Database      mongoke.DatabaseInterface
+	Database      goke.DatabaseInterface
 	Collection    string
-	Documents     []mongoke.Map
+	Documents     []goke.Map
 	DefaultSchema graphql.Schema
 }
 
@@ -21,14 +21,14 @@ type TestCase struct {
 	Name          string
 	Schema        graphql.Schema
 	Query         string
-	Expected      mongoke.Map
+	Expected      goke.Map
 	ExpectedError bool
 }
 
 func NewTestGroup(t *testing.T, p NewTestGroupParams) {
 	ctx := context.Background()
 	if p.Database != nil {
-		_, err := p.Database.DeleteMany(ctx, mongoke.DeleteManyParams{
+		_, err := p.Database.DeleteMany(ctx, goke.DeleteManyParams{
 			Collection: p.Collection,
 		})
 
@@ -42,7 +42,7 @@ func NewTestGroup(t *testing.T, p NewTestGroupParams) {
 
 			// t.Log(testCase.Name)
 			if p.Database != nil {
-				p.Database.InsertMany(ctx, mongoke.InsertManyParams{
+				p.Database.InsertMany(ctx, goke.InsertManyParams{
 					Collection: p.Collection,
 					Data:       p.Documents,
 				})
@@ -65,7 +65,7 @@ func NewTestGroup(t *testing.T, p NewTestGroupParams) {
 				t.Error(diff)
 			}
 			if p.Database != nil {
-				_, err := p.Database.DeleteMany(ctx, mongoke.DeleteManyParams{
+				_, err := p.Database.DeleteMany(ctx, goke.DeleteManyParams{
 					Collection: p.Collection,
 				})
 				if err != nil {

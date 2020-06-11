@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"testing"
 
-	mongoke "github.com/remorses/mongoke/src"
-	"github.com/remorses/mongoke/src/fakedata"
-	"github.com/remorses/mongoke/src/mongodb"
-	mongoke_schema "github.com/remorses/mongoke/src/schema"
-	"github.com/remorses/mongoke/src/testutil"
+	goke "github.com/remorses/goke/src"
+	"github.com/remorses/goke/src/fakedata"
+	"github.com/remorses/goke/src/mongodb"
+	goke_schema "github.com/remorses/goke/src/schema"
+	"github.com/remorses/goke/src/testutil"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -18,7 +18,7 @@ var (
 )
 
 func TestQueryReturnValuesWithMongoDB(t *testing.T) {
-	exampleUsers := []mongoke.Map{
+	exampleUsers := []goke.Map{
 		{"name": "01", "age": 1},
 		{"name": "02", "age": 2},
 		{"name": "03", "age": 3},
@@ -31,14 +31,14 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 		u["_id"] = id
 	}
 	mongo := &mongodb.MongodbDatabaseFunctions{
-		Config: mongoke.Config{
-			Mongodb: mongoke.MongodbConfig{
+		Config: goke.Config{
+			Mongodb: goke.MongodbConfig{
 				Uri: testutil.MONGODB_URI,
 			},
 		},
 	}
 	exampleUser := exampleUsers[2]
-	schema, _ := mongoke_schema.MakeMongokeSchema(mongoke.Config{
+	schema, _ := goke_schema.MakeGokeSchema(goke.Config{
 		Schema: `
 		scalar ObjectId
 		interface Named {
@@ -52,7 +52,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 		}
 		`,
 		DatabaseFunctions: mongo,
-		Types: map[string]*mongoke.TypeConfig{
+		Types: map[string]*goke.TypeConfig{
 			"User": {Collection: "users"},
 		},
 	})
@@ -65,7 +65,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			{
 				Name:     "findOne query without args",
 				Schema:   schema,
-				Expected: mongoke.Map{"User": exampleUser},
+				Expected: goke.Map{"User": exampleUser},
 				Query: `
 			{
 				User {
@@ -79,7 +79,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			{
 				Name:     "findOne query with eq",
 				Schema:   schema,
-				Expected: mongoke.Map{"User": mongoke.Map{"name": "03"}},
+				Expected: goke.Map{"User": goke.Map{"name": "03"}},
 				Query: `
 			{
 				User(where: {name: {eq: "03"}}) {
@@ -91,7 +91,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			{
 				Name:     "findOne query with eq objectId",
 				Schema:   schema,
-				Expected: mongoke.Map{"User": exampleUsers[0]},
+				Expected: goke.Map{"User": exampleUsers[0]},
 				Query: `
 			{
 				User(where: {_id: {eq: "000000000000000000000000"}}) {
@@ -105,7 +105,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			{
 				Name:     "findMany query without args",
 				Schema:   schema,
-				Expected: mongoke.Map{"UserNodes": mongoke.Map{"nodes": exampleUsers}},
+				Expected: goke.Map{"UserNodes": goke.Map{"nodes": exampleUsers}},
 				Query: `
 			{
 				UserNodes(direction: ASC) {
@@ -121,7 +121,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			{
 				Name:     "findMany with list",
 				Schema:   schema,
-				Expected: mongoke.Map{"UserList": exampleUsers},
+				Expected: goke.Map{"UserList": exampleUsers},
 				Query: `
 			{
 				UserList {
@@ -135,7 +135,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			{
 				Name:     "findMany query with first",
 				Schema:   schema,
-				Expected: mongoke.Map{"UserNodes": mongoke.Map{"nodes": exampleUsers[:2]}},
+				Expected: goke.Map{"UserNodes": goke.Map{"nodes": exampleUsers[:2]}},
 				Query: `
 			{
 				UserNodes(first: 2, direction: ASC) {
@@ -151,7 +151,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			{
 				Name:     "findMany query with last",
 				Schema:   schema,
-				Expected: mongoke.Map{"UserNodes": mongoke.Map{"nodes": exampleUsers[len(exampleUsers)-2:]}},
+				Expected: goke.Map{"UserNodes": goke.Map{"nodes": exampleUsers[len(exampleUsers)-2:]}},
 				Query: `
 			{
 				UserNodes(last: 2, direction: ASC) {
@@ -167,9 +167,9 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			{
 				Name:   "findMany query with string cursorField",
 				Schema: schema,
-				Expected: mongoke.Map{"UserNodes": mongoke.Map{
+				Expected: goke.Map{"UserNodes": goke.Map{
 					"nodes":    exampleUsers[:2],
-					"pageInfo": mongoke.Map{"endCursor": "02"},
+					"pageInfo": goke.Map{"endCursor": "02"},
 				}},
 				Query: `
 			{
@@ -189,9 +189,9 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			{
 				Name:   "findMany query with int cursorField",
 				Schema: schema,
-				Expected: mongoke.Map{"UserNodes": mongoke.Map{
+				Expected: goke.Map{"UserNodes": goke.Map{
 					"nodes":    exampleUsers[:2],
-					"pageInfo": mongoke.Map{"endCursor": 2},
+					"pageInfo": goke.Map{"endCursor": 2},
 				}},
 				Query: `
 			{
@@ -211,9 +211,9 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 			{
 				Name:   "findMany query with ObjectId cursorField",
 				Schema: schema,
-				Expected: mongoke.Map{"UserNodes": mongoke.Map{
+				Expected: goke.Map{"UserNodes": goke.Map{
 					"nodes":    exampleUsers[:2],
-					"pageInfo": mongoke.Map{"endCursor": exampleUsers[1]["_id"].(primitive.ObjectID).Hex()},
+					"pageInfo": goke.Map{"endCursor": exampleUsers[1]["_id"].(primitive.ObjectID).Hex()},
 				}},
 				Query: `
 			{
@@ -236,7 +236,7 @@ func TestQueryReturnValuesWithMongoDB(t *testing.T) {
 }
 
 func TestQueryWithFakeDatabase(t *testing.T) {
-	exampleUsers := []mongoke.Map{
+	exampleUsers := []goke.Map{
 		{"name": "01", "age": 1},
 		{"name": "02", "age": 2},
 		{"name": "03", "age": 3},
@@ -250,7 +250,7 @@ func TestQueryWithFakeDatabase(t *testing.T) {
 	}
 	db := &fakedata.FakeDatabaseFunctions{}
 	exampleUser := exampleUsers[2]
-	schema, _ := mongoke_schema.MakeMongokeSchema(mongoke.Config{
+	schema, _ := goke_schema.MakeGokeSchema(goke.Config{
 		Schema: `
 		scalar ObjectId
 		interface Named {
@@ -264,7 +264,7 @@ func TestQueryWithFakeDatabase(t *testing.T) {
 		}
 		`,
 		DatabaseFunctions: db,
-		Types: map[string]*mongoke.TypeConfig{
+		Types: map[string]*goke.TypeConfig{
 			"User": {Collection: "users"},
 		},
 	})
@@ -278,7 +278,7 @@ func TestQueryWithFakeDatabase(t *testing.T) {
 			{
 				Name:     "findOne query without args",
 				Schema:   schema,
-				Expected: mongoke.Map{"User": exampleUser},
+				Expected: goke.Map{"User": exampleUser},
 				Query: `
 			{
 				User {
@@ -292,7 +292,7 @@ func TestQueryWithFakeDatabase(t *testing.T) {
 			{
 				Name:     "findOne query with eq",
 				Schema:   schema,
-				Expected: mongoke.Map{"User": mongoke.Map{"name": "03"}},
+				Expected: goke.Map{"User": goke.Map{"name": "03"}},
 				Query: `
 			{
 				User(where: {name: {eq: "03"}}) {
@@ -304,7 +304,7 @@ func TestQueryWithFakeDatabase(t *testing.T) {
 			{
 				Name:     "findOne query with eq objectId",
 				Schema:   schema,
-				Expected: mongoke.Map{"User": exampleUsers[0]},
+				Expected: goke.Map{"User": exampleUsers[0]},
 				Query: `
 			{
 				User(where: {_id: {eq: "000000000000000000000000"}}) {
@@ -318,7 +318,7 @@ func TestQueryWithFakeDatabase(t *testing.T) {
 			{
 				Name:     "findMany query without args",
 				Schema:   schema,
-				Expected: mongoke.Map{"UserNodes": mongoke.Map{"nodes": exampleUsers}},
+				Expected: goke.Map{"UserNodes": goke.Map{"nodes": exampleUsers}},
 				Query: `
 			{
 				UserNodes(direction: ASC) {
@@ -334,7 +334,7 @@ func TestQueryWithFakeDatabase(t *testing.T) {
 			{
 				Name:     "findMany with list",
 				Schema:   schema,
-				Expected: mongoke.Map{"UserList": exampleUsers},
+				Expected: goke.Map{"UserList": exampleUsers},
 				Query: `
 			{
 				UserList {
@@ -348,7 +348,7 @@ func TestQueryWithFakeDatabase(t *testing.T) {
 			{
 				Name:     "findMany query with first",
 				Schema:   schema,
-				Expected: mongoke.Map{"UserNodes": mongoke.Map{"nodes": exampleUsers[:2]}},
+				Expected: goke.Map{"UserNodes": goke.Map{"nodes": exampleUsers[:2]}},
 				Query: `
 			{
 				UserNodes(first: 2, direction: ASC) {
@@ -364,7 +364,7 @@ func TestQueryWithFakeDatabase(t *testing.T) {
 			{
 				Name:     "findMany query with last",
 				Schema:   schema,
-				Expected: mongoke.Map{"UserNodes": mongoke.Map{"nodes": exampleUsers[len(exampleUsers)-2:]}},
+				Expected: goke.Map{"UserNodes": goke.Map{"nodes": exampleUsers[len(exampleUsers)-2:]}},
 				Query: `
 			{
 				UserNodes(last: 2, direction: ASC) {
@@ -380,9 +380,9 @@ func TestQueryWithFakeDatabase(t *testing.T) {
 			{
 				Name:   "findMany query with string cursorField",
 				Schema: schema,
-				Expected: mongoke.Map{"UserNodes": mongoke.Map{
+				Expected: goke.Map{"UserNodes": goke.Map{
 					"nodes":    exampleUsers[:2],
-					"pageInfo": mongoke.Map{"endCursor": "02"},
+					"pageInfo": goke.Map{"endCursor": "02"},
 				}},
 				Query: `
 			{
@@ -402,9 +402,9 @@ func TestQueryWithFakeDatabase(t *testing.T) {
 			{
 				Name:   "findMany query with int cursorField",
 				Schema: schema,
-				Expected: mongoke.Map{"UserNodes": mongoke.Map{
+				Expected: goke.Map{"UserNodes": goke.Map{
 					"nodes":    exampleUsers[:2],
-					"pageInfo": mongoke.Map{"endCursor": 2},
+					"pageInfo": goke.Map{"endCursor": 2},
 				}},
 				Query: `
 			{
@@ -424,9 +424,9 @@ func TestQueryWithFakeDatabase(t *testing.T) {
 			{
 				Name:   "findMany query with ObjectId cursorField",
 				Schema: schema,
-				Expected: mongoke.Map{"UserNodes": mongoke.Map{
+				Expected: goke.Map{"UserNodes": goke.Map{
 					"nodes":    exampleUsers[:2],
-					"pageInfo": mongoke.Map{"endCursor": exampleUsers[1]["_id"].(primitive.ObjectID).Hex()},
+					"pageInfo": goke.Map{"endCursor": exampleUsers[1]["_id"].(primitive.ObjectID).Hex()},
 				}},
 				Query: `
 			{
@@ -450,8 +450,8 @@ func TestQueryWithFakeDatabase(t *testing.T) {
 
 func TestQueryWithEmptyFakeDatabase(t *testing.T) {
 	db := &fakedata.FakeDatabaseFunctions{}
-	emptyList := []mongoke.Map{}
-	schema, _ := mongoke_schema.MakeMongokeSchema(mongoke.Config{
+	emptyList := []goke.Map{}
+	schema, _ := goke_schema.MakeGokeSchema(goke.Config{
 		Schema: `
 		scalar ObjectId
 		interface Named {
@@ -465,7 +465,7 @@ func TestQueryWithEmptyFakeDatabase(t *testing.T) {
 		}
 		`,
 		DatabaseFunctions: db,
-		Types: map[string]*mongoke.TypeConfig{
+		Types: map[string]*goke.TypeConfig{
 			"User": {Collection: "users"},
 		},
 	})
@@ -479,7 +479,7 @@ func TestQueryWithEmptyFakeDatabase(t *testing.T) {
 			{
 				Name:     "findOne query without args",
 				Schema:   schema,
-				Expected: mongoke.Map{"User": nil},
+				Expected: goke.Map{"User": nil},
 				Query: `
 			{
 				User {
@@ -493,7 +493,7 @@ func TestQueryWithEmptyFakeDatabase(t *testing.T) {
 			{
 				Name:     "findOne query with eq",
 				Schema:   schema,
-				Expected: mongoke.Map{"User": nil},
+				Expected: goke.Map{"User": nil},
 				Query: `
 			{
 				User(where: {name: {eq: "03"}}) {
@@ -505,7 +505,7 @@ func TestQueryWithEmptyFakeDatabase(t *testing.T) {
 			{
 				Name:     "findMany with list",
 				Schema:   schema,
-				Expected: mongoke.Map{"UserList": emptyList},
+				Expected: goke.Map{"UserList": emptyList},
 				Query: `
 			{
 				UserList {
@@ -519,7 +519,7 @@ func TestQueryWithEmptyFakeDatabase(t *testing.T) {
 			{
 				Name:     "findMany query with first",
 				Schema:   schema,
-				Expected: mongoke.Map{"UserNodes": mongoke.Map{"nodes": emptyList}},
+				Expected: goke.Map{"UserNodes": goke.Map{"nodes": emptyList}},
 				Query: `
 			{
 				UserNodes(first: 2, direction: ASC) {
@@ -536,9 +536,9 @@ func TestQueryWithEmptyFakeDatabase(t *testing.T) {
 			{
 				Name:   "findMany query with string cursorField",
 				Schema: schema,
-				Expected: mongoke.Map{"UserNodes": mongoke.Map{
+				Expected: goke.Map{"UserNodes": goke.Map{
 					"nodes":    emptyList,
-					"pageInfo": mongoke.Map{"endCursor": nil},
+					"pageInfo": goke.Map{"endCursor": nil},
 				}},
 				Query: `
 			{

@@ -39,6 +39,6 @@ async function startGokeServer(a) {
             WEB_UI_ASSETS,
         },
     }).catch((e) => {
-        throw new Error('could not start mongoke server')
+        throw new Error('could not start goke server')
     })
 }

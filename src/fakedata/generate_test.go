@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/buger/jsonparser"
-	"github.com/remorses/mongoke/src/testutil"
+	"github.com/remorses/goke/src/testutil"
 )
 
 func TestGenerate(t *testing.T) {

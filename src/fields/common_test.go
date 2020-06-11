@@ -6,18 +6,18 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/graphql-go/graphql"
 	"github.com/imdario/mergo"
-	mongoke "github.com/remorses/mongoke/src"
-	"github.com/remorses/mongoke/src/testutil"
+	goke "github.com/remorses/goke/src"
+	"github.com/remorses/goke/src/testutil"
 	"github.com/stretchr/testify/require"
 )
 
 func TestMerge(t *testing.T) {
-	a := map[string]mongoke.Filter{
+	a := map[string]goke.Filter{
 		"x": {
 			Eq: "sdf",
 		},
 	}
-	b := map[string]mongoke.Filter{
+	b := map[string]goke.Filter{
 		"x": {
 			Gt: "sdf",
 		},
@@ -33,7 +33,7 @@ func TestGetJwt(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		res := getJwt(graphql.ResolveParams{
 			Info: graphql.ResolveInfo{
-				RootValue: mongoke.Map{
+				RootValue: goke.Map{
 					"jwt": jwt.MapClaims{
 						"email": "email",
 					},

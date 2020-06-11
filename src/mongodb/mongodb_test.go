@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	mongoke "github.com/remorses/mongoke/src"
-	"github.com/remorses/mongoke/src/testutil"
+	goke "github.com/remorses/goke/src"
+	"github.com/remorses/goke/src/testutil"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -15,49 +15,49 @@ func TestFindMany(t *testing.T) {
 	ctx := context.Background()
 	uri := testutil.MONGODB_URI
 	type Case struct {
-		params   mongoke.FindManyParams
-		expected []mongoke.Map
+		params   goke.FindManyParams
+		expected []goke.Map
 		print    bool
 	}
-	exampleUsers := []mongoke.Map{
+	exampleUsers := []goke.Map{
 		{"name": "01", "age": 1, "_id": primitive.NewObjectID()},
 		{"name": "02", "age": 2, "_id": primitive.NewObjectID()},
 		{"name": "03", "age": 3, "_id": primitive.NewObjectID()},
 	}
 	cases := map[string]Case{
 		"no args": {
-			params: mongoke.FindManyParams{
+			params: goke.FindManyParams{
 				Collection: collection,
 			},
 			expected: exampleUsers,
 		},
 		"Limit": {
-			params: mongoke.FindManyParams{
+			params: goke.FindManyParams{
 				Collection: collection,
 				Limit:      2,
 			},
 			expected: exampleUsers[:2],
 		},
 		"Offset": {
-			params: mongoke.FindManyParams{
+			params: goke.FindManyParams{
 				Collection: collection,
 				Offset:     2,
 			},
 			expected: exampleUsers[2:],
 		},
 		"DESC": {
-			params: mongoke.FindManyParams{
+			params: goke.FindManyParams{
 				Collection: collection,
-				OrderBy:    map[string]int{"name": mongoke.DESC},
+				OrderBy:    map[string]int{"name": goke.DESC},
 			},
-			expected: mongoke.ReverseMaps(exampleUsers),
+			expected: goke.ReverseMaps(exampleUsers),
 		},
 		"Eq": {
-			params: mongoke.FindManyParams{
+			params: goke.FindManyParams{
 				Collection: collection,
 
-				Where: mongoke.WhereTree{
-					Match: map[string]mongoke.Filter{
+				Where: goke.WhereTree{
+					Match: map[string]goke.Filter{
 						"name": {
 							Eq: "01",
 						},
@@ -67,10 +67,10 @@ func TestFindMany(t *testing.T) {
 			expected: exampleUsers[:1],
 		},
 		"Gt": {
-			params: mongoke.FindManyParams{
+			params: goke.FindManyParams{
 				Collection: collection,
-				Where: mongoke.WhereTree{
-					Match: map[string]mongoke.Filter{
+				Where: goke.WhereTree{
+					Match: map[string]goke.Filter{
 						"name": {
 							Gt: "01",
 						},
@@ -80,10 +80,10 @@ func TestFindMany(t *testing.T) {
 			expected: exampleUsers[1:],
 		},
 		"Gt and Lte": {
-			params: mongoke.FindManyParams{
+			params: goke.FindManyParams{
 				Collection: collection,
-				Where: mongoke.WhereTree{
-					Match: map[string]mongoke.Filter{
+				Where: goke.WhereTree{
+					Match: map[string]goke.Filter{
 						"age": {
 							Gt:  1,
 							Lte: 3,
@@ -98,8 +98,8 @@ func TestFindMany(t *testing.T) {
 
 	// clear and insert some docs
 	m := MongodbDatabaseFunctions{
-		Config: mongoke.Config{
-			Mongodb: mongoke.MongodbConfig{
+		Config: goke.Config{
+			Mongodb: goke.MongodbConfig{
 				Uri: uri,
 			},
 		},
@@ -110,7 +110,7 @@ func TestFindMany(t *testing.T) {
 	}
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
-			_, err = db.Collection(collection).DeleteMany(ctx, mongoke.Map{})
+			_, err = db.Collection(collection).DeleteMany(ctx, goke.Map{})
 			if err != nil {
 				t.Error(err)
 			}
@@ -133,27 +133,27 @@ func TestFindMany(t *testing.T) {
 			require.Equal(t, testutil.Pretty(c.expected), testutil.Pretty(result))
 		})
 	}
-	_, err = db.Collection(collection).DeleteMany(ctx, mongoke.Map{})
+	_, err = db.Collection(collection).DeleteMany(ctx, goke.Map{})
 
 }
 
 func TestMakeMongodbMatch(t *testing.T) {
-	where := mongoke.WhereTree{
-		Match: map[string]mongoke.Filter{
+	where := goke.WhereTree{
+		Match: map[string]goke.Filter{
 			"field": {
 				Gt: 4,
 			},
 		},
-		And: []mongoke.WhereTree{
+		And: []goke.WhereTree{
 			{
-				Match: map[string]mongoke.Filter{
+				Match: map[string]goke.Filter{
 					"field1": {
 						Eq: "1",
 					},
 				},
-				Or: []mongoke.WhereTree{
+				Or: []goke.WhereTree{
 					{
-						Match: map[string]mongoke.Filter{
+						Match: map[string]goke.Filter{
 							"field2": {
 								Eq: "2",
 							},
@@ -162,7 +162,7 @@ func TestMakeMongodbMatch(t *testing.T) {
 				},
 			},
 			{
-				Match: map[string]mongoke.Filter{
+				Match: map[string]goke.Filter{
 					"field2": {
 						Eq: "2",
 					},

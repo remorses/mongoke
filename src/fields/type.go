@@ -3,18 +3,18 @@ package fields
 import (
 	"github.com/graphql-go/graphql"
 	"github.com/mitchellh/mapstructure"
-	mongoke "github.com/remorses/mongoke/src"
-	"github.com/remorses/mongoke/src/types"
+	goke "github.com/remorses/goke/src"
+	"github.com/remorses/goke/src/types"
 )
 
 func QueryTypeField(p CreateFieldParams) (*graphql.Field, error) {
 	indexableNames := takeIndexableTypeNames(p.SchemaConfig)
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
-		opts := mongoke.FindManyParams{
+		opts := goke.FindManyParams{
 			Collection: p.Collection,
 			OrderBy: map[string]int{
-				getDefaultCursorField(p.ReturnType, indexableNames): mongoke.DESC,
+				getDefaultCursorField(p.ReturnType, indexableNames): goke.DESC,
 			},
 			Limit: 1,
 		}
@@ -23,7 +23,7 @@ func QueryTypeField(p CreateFieldParams) (*graphql.Field, error) {
 			return nil, err
 		}
 		if args["where"] != nil {
-			where, err := mongoke.MakeWhereTree(args["where"].(map[string]interface{}), p.InitialWhere)
+			where, err := goke.MakeWhereTree(args["where"].(map[string]interface{}), p.InitialWhere)
 			if err != nil {
 				return nil, err
 			}
@@ -43,7 +43,7 @@ func QueryTypeField(p CreateFieldParams) (*graphql.Field, error) {
 			document:  document,
 			guards:    p.Permissions,
 			jwt:       jwt,
-			operation: mongoke.Operations.READ,
+			operation: goke.Operations.READ,
 		})
 		if err != nil {
 			return nil, err

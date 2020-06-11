@@ -3,14 +3,14 @@ package fields
 import (
 	"github.com/graphql-go/graphql"
 	"github.com/mitchellh/mapstructure"
-	mongoke "github.com/remorses/mongoke/src"
-	"github.com/remorses/mongoke/src/types"
+	goke "github.com/remorses/goke/src"
+	"github.com/remorses/goke/src/types"
 )
 
 func QueryTypeListField(p CreateFieldParams) (*graphql.Field, error) {
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
-		opts := mongoke.FindManyParams{
+		opts := goke.FindManyParams{
 			Collection: p.Collection,
 		}
 		err := mapstructure.Decode(args, &opts)
@@ -18,7 +18,7 @@ func QueryTypeListField(p CreateFieldParams) (*graphql.Field, error) {
 			return nil, err
 		}
 		if args["where"] != nil {
-			where, err := mongoke.MakeWhereTree(args["where"].(map[string]interface{}), p.InitialWhere)
+			where, err := goke.MakeWhereTree(args["where"].(map[string]interface{}), p.InitialWhere)
 			if err != nil {
 				return nil, err
 			}
@@ -36,14 +36,14 @@ func QueryTypeListField(p CreateFieldParams) (*graphql.Field, error) {
 		}
 
 		jwt := getJwt(params)
-		var accessibleNodes []mongoke.Map
+		var accessibleNodes []goke.Map
 		// TODO move validation logic in a function that returns only accessible documents
 		for _, document := range nodes {
 			node, err := applyGuardsOnDocument(applyGuardsOnDocumentParams{
 				document:  document,
 				guards:    p.Permissions,
 				jwt:       jwt,
-				operation: mongoke.Operations.READ,
+				operation: goke.Operations.READ,
 			})
 			if err != nil {
 				continue

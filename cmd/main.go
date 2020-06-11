@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"os"
 
-	mongoke "github.com/remorses/mongoke/src"
-	handler "github.com/remorses/mongoke/src/handler"
+	goke "github.com/remorses/goke/src"
+	handler "github.com/remorses/goke/src/handler"
 	"github.com/urfave/cli/v2"
 )
 
@@ -51,12 +51,12 @@ func main() {
 			}
 			if url != "" {
 				var err error
-				data, err = mongoke.DownloadFile(url)
+				data, err = goke.DownloadFile(url)
 				if err != nil {
 					return cli.Exit(err, 1)
 				}
 			}
-			config, e := mongoke.MakeConfigFromYaml(data)
+			config, e := goke.MakeConfigFromYaml(data)
 			if e != nil {
 				return cli.Exit(e, 1)
 			}
@@ -65,7 +65,7 @@ func main() {
 			if www == "" {
 				return cli.Exit(errors.New("cannot find web ui assets"), 1)
 			}
-			h, err := handler.MakeMongokeHandler(config, www)
+			h, err := handler.MakeGokeHandler(config, www)
 			if err != nil {
 				return cli.Exit(err, 1)
 			}

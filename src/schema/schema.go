@@ -8,19 +8,19 @@ import (
 
 	"github.com/PaesslerAG/gval"
 	"github.com/graphql-go/graphql"
+	goke "github.com/remorses/goke/src"
+	"github.com/remorses/goke/src/fakedata"
+	"github.com/remorses/goke/src/firestore"
+	"github.com/remorses/goke/src/mongodb"
+	"github.com/remorses/goke/src/types"
 	tools "github.com/remorses/graphql-go-tools"
-	mongoke "github.com/remorses/mongoke/src"
-	"github.com/remorses/mongoke/src/fakedata"
-	"github.com/remorses/mongoke/src/firestore"
-	"github.com/remorses/mongoke/src/mongodb"
-	"github.com/remorses/mongoke/src/types"
 )
 
-// MakeMongokeSchema generates the schema
-func MakeMongokeSchema(config mongoke.Config) (graphql.Schema, error) {
+// MakeGokeSchema generates the schema
+func MakeGokeSchema(config goke.Config) (graphql.Schema, error) {
 
 	if config.Cache == nil {
-		config.Cache = make(mongoke.Map)
+		config.Cache = make(goke.Map)
 	}
 
 	if config.Schema == "" && config.SchemaPath != "" {
@@ -32,7 +32,7 @@ func MakeMongokeSchema(config mongoke.Config) (graphql.Schema, error) {
 	}
 
 	if config.Schema == "" && config.SchemaUrl != "" {
-		data, e := mongoke.DownloadFile(config.SchemaUrl)
+		data, e := goke.DownloadFile(config.SchemaUrl)
 		if e != nil {
 			return graphql.Schema{}, e
 		}
@@ -61,7 +61,7 @@ func MakeMongokeSchema(config mongoke.Config) (graphql.Schema, error) {
 	return schema, nil
 }
 
-func makeSchemaConfig(config mongoke.Config) (graphql.SchemaConfig, error) {
+func makeSchemaConfig(config goke.Config) (graphql.SchemaConfig, error) {
 	resolvers := map[string]tools.Resolver{
 		types.ObjectID.Name(): &tools.ScalarResolver{
 			Serialize:    types.ObjectID.Serialize,
@@ -80,7 +80,7 @@ func makeSchemaConfig(config mongoke.Config) (graphql.SchemaConfig, error) {
 		}
 		resolvers[name] = &tools.ObjectResolver{
 			IsTypeOf: func(p graphql.IsTypeOfParams) bool {
-				res, err := eval(context.Background(), mongoke.Map{
+				res, err := eval(context.Background(), goke.Map{
 					"x":        p.Value, // TODO add more variables to isTypeOf expressions
 					"document": p.Value,
 				})
@@ -105,7 +105,7 @@ func makeSchemaConfig(config mongoke.Config) (graphql.SchemaConfig, error) {
 	return baseSchemaConfig, err
 }
 
-func generateSchema(config mongoke.Config) (graphql.Schema, error) {
+func generateSchema(config goke.Config) (graphql.Schema, error) {
 	baseSchemaConfig, err := makeSchemaConfig(config)
 	if err != nil {
 		return graphql.Schema{}, err
@@ -138,7 +138,7 @@ func generateSchema(config mongoke.Config) (graphql.Schema, error) {
 	return schema, nil
 }
 
-func unexposedType(typeConf *mongoke.TypeConfig) bool {
+func unexposedType(typeConf *goke.TypeConfig) bool {
 	return typeConf == nil || (typeConf.Exposed != nil && !*typeConf.Exposed)
 }
 

@@ -1,4 +1,4 @@
-package mongoke
+package goke
 
 import (
 	"bytes"

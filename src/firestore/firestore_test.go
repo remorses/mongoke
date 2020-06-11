@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"cloud.google.com/go/firestore"
-	mongoke "github.com/remorses/mongoke/src"
-	"github.com/remorses/mongoke/src/testutil"
+	goke "github.com/remorses/goke/src"
+	"github.com/remorses/goke/src/testutil"
 	"github.com/stretchr/testify/require"
 )
 
@@ -14,57 +14,57 @@ func TestFindMany(t *testing.T) {
 	collection := "users"
 	ctx := context.Background()
 	type Case struct {
-		params   mongoke.FindManyParams
-		expected []mongoke.Map
+		params   goke.FindManyParams
+		expected []goke.Map
 		print    bool
 	}
-	exampleUsers := []mongoke.Map{
+	exampleUsers := []goke.Map{
 		{"name": "01", "age": 1},
 		{"name": "02", "age": 2},
 		{"name": "03", "age": 3},
 	}
 	cases := map[string]Case{
 		"no args": {
-			params: mongoke.FindManyParams{
+			params: goke.FindManyParams{
 				Collection: collection,
 				OrderBy: map[string]int{
-					"age": mongoke.ASC,
+					"age": goke.ASC,
 				},
 			},
 			expected: exampleUsers,
 		},
 		"Limit": {
-			params: mongoke.FindManyParams{
+			params: goke.FindManyParams{
 				Collection: collection,
 				Limit:      2,
 				OrderBy: map[string]int{
-					"age": mongoke.ASC,
+					"age": goke.ASC,
 				},
 			},
 			expected: exampleUsers[:2],
 		},
 		"Offset": {
-			params: mongoke.FindManyParams{
+			params: goke.FindManyParams{
 				Collection: collection,
 				Offset:     2,
 				OrderBy: map[string]int{
-					"age": mongoke.ASC,
+					"age": goke.ASC,
 				},
 			},
 			expected: exampleUsers[2:],
 		},
 		"DESC": {
-			params: mongoke.FindManyParams{
+			params: goke.FindManyParams{
 				Collection: collection,
-				OrderBy:    map[string]int{"age": mongoke.DESC},
+				OrderBy:    map[string]int{"age": goke.DESC},
 			},
-			expected: mongoke.ReverseMaps(exampleUsers),
+			expected: goke.ReverseMaps(exampleUsers),
 		},
 		"Eq": {
-			params: mongoke.FindManyParams{
+			params: goke.FindManyParams{
 				Collection: collection,
-				Where: mongoke.WhereTree{
-					Match: map[string]mongoke.Filter{
+				Where: goke.WhereTree{
+					Match: map[string]goke.Filter{
 						"name": {
 							Eq: "01",
 						},
@@ -74,13 +74,13 @@ func TestFindMany(t *testing.T) {
 			expected: exampleUsers[:1],
 		},
 		"Gt": {
-			params: mongoke.FindManyParams{
+			params: goke.FindManyParams{
 				Collection: collection,
 				OrderBy: map[string]int{
-					"name": mongoke.ASC,
+					"name": goke.ASC,
 				},
-				Where: mongoke.WhereTree{
-					Match: map[string]mongoke.Filter{
+				Where: goke.WhereTree{
+					Match: map[string]goke.Filter{
 						"name": {
 							Gt: "01",
 						},
@@ -90,10 +90,10 @@ func TestFindMany(t *testing.T) {
 			expected: exampleUsers[1:],
 		},
 		"Gt and Lte": {
-			params: mongoke.FindManyParams{
+			params: goke.FindManyParams{
 				Collection: collection,
-				Where: mongoke.WhereTree{
-					Match: map[string]mongoke.Filter{
+				Where: goke.WhereTree{
+					Match: map[string]goke.Filter{
 						"age": {
 							Gt:  1,
 							Lte: 3,
@@ -108,8 +108,8 @@ func TestFindMany(t *testing.T) {
 
 	// clear and insert some docs
 	m := FirestoreDatabaseFunctions{
-		Config: mongoke.Config{
-			Firestore: mongoke.FirestoreConfig{
+		Config: goke.Config{
+			Firestore: goke.FirestoreConfig{
 				ProjectID: testutil.FIRESTORE_PROJECT_ID,
 			},
 		},

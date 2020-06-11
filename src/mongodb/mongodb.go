@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	mongoke "github.com/remorses/mongoke/src"
-	"github.com/remorses/mongoke/src/testutil"
+	goke "github.com/remorses/goke/src"
+	"github.com/remorses/goke/src/testutil"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -22,14 +22,14 @@ var (
 
 type MongodbDatabaseFunctions struct {
 	db     *mongo.Database
-	Config mongoke.Config
+	Config goke.Config
 }
 
 func (self MongodbDatabaseFunctions) databaseUri() string {
 	return self.Config.Mongodb.Uri
 }
 
-func (self *MongodbDatabaseFunctions) FindMany(ctx context.Context, p mongoke.FindManyParams) ([]mongoke.Map, error) {
+func (self *MongodbDatabaseFunctions) FindMany(ctx context.Context, p goke.FindManyParams) ([]goke.Map, error) {
 	db, err := self.Init(ctx)
 	if err != nil {
 		return nil, err
@@ -49,7 +49,7 @@ func (self *MongodbDatabaseFunctions) FindMany(ctx context.Context, p mongoke.Fi
 		return nil, err
 	}
 	defer res.Close(ctx)
-	nodes := make([]mongoke.Map, 0)
+	nodes := make([]goke.Map, 0)
 	err = res.All(ctx, &nodes)
 	if err != nil {
 		return nil, err
@@ -57,8 +57,8 @@ func (self *MongodbDatabaseFunctions) FindMany(ctx context.Context, p mongoke.Fi
 	return nodes, nil
 }
 
-func (self *MongodbDatabaseFunctions) InsertMany(ctx context.Context, p mongoke.InsertManyParams) (mongoke.NodesMutationPayload, error) {
-	payload := mongoke.NodesMutationPayload{}
+func (self *MongodbDatabaseFunctions) InsertMany(ctx context.Context, p goke.InsertManyParams) (goke.NodesMutationPayload, error) {
+	payload := goke.NodesMutationPayload{}
 	if len(p.Data) == 0 {
 		return payload, nil
 	}
@@ -82,16 +82,16 @@ func (self *MongodbDatabaseFunctions) InsertMany(ctx context.Context, p mongoke.
 	for i, id := range res.InsertedIDs {
 		p.Data[i]["_id"] = id
 	}
-	return mongoke.NodesMutationPayload{
+	return goke.NodesMutationPayload{
 		Returning:     p.Data[:len(res.InsertedIDs)],
 		AffectedCount: len(res.InsertedIDs),
 	}, nil
 }
 
-func (self *MongodbDatabaseFunctions) UpdateOne(ctx context.Context, p mongoke.UpdateParams) (mongoke.NodeMutationPayload, error) {
+func (self *MongodbDatabaseFunctions) UpdateOne(ctx context.Context, p goke.UpdateParams) (goke.NodeMutationPayload, error) {
 	db, err := self.Init(ctx)
 	if err != nil {
-		return mongoke.NodeMutationPayload{}, err
+		return goke.NodeMutationPayload{}, err
 	}
 	opts := options.FindOneAndUpdate()
 	opts.SetReturnDocument(options.After)
@@ -101,28 +101,28 @@ func (self *MongodbDatabaseFunctions) UpdateOne(ctx context.Context, p mongoke.U
 	res := db.Collection(p.Collection).FindOneAndUpdate(ctx, where, bson.M{"$set": p.Set}, opts)
 	if res.Err() == mongo.ErrNoDocuments {
 		println("no docs to update")
-		return mongoke.NodeMutationPayload{
+		return goke.NodeMutationPayload{
 			AffectedCount: 0,
 			Returning:     nil,
 		}, nil
 	} else if res.Err() != nil {
-		return mongoke.NodeMutationPayload{}, err
+		return goke.NodeMutationPayload{}, err
 	}
-	data := mongoke.Map{}
+	data := goke.Map{}
 	err = res.Decode(&data)
 	if err != nil {
-		return mongoke.NodeMutationPayload{}, err
+		return goke.NodeMutationPayload{}, err
 	}
-	return mongoke.NodeMutationPayload{
+	return goke.NodeMutationPayload{
 		AffectedCount: 1,
 		Returning:     data,
 	}, nil
 }
 
 // first updateMany documents, then query again the documents and return them, all inside a transaction that prevents other writes happen before the query
-func (self *MongodbDatabaseFunctions) UpdateMany(ctx context.Context, p mongoke.UpdateParams) (mongoke.NodesMutationPayload, error) {
+func (self *MongodbDatabaseFunctions) UpdateMany(ctx context.Context, p goke.UpdateParams) (goke.NodesMutationPayload, error) {
 	db, err := self.Init(ctx)
-	payload := mongoke.NodesMutationPayload{}
+	payload := goke.NodesMutationPayload{}
 	if err != nil {
 		return payload, err
 	}
@@ -131,7 +131,7 @@ func (self *MongodbDatabaseFunctions) UpdateMany(ctx context.Context, p mongoke.
 	testutil.PrettyPrint(p)
 
 	// TODO execute inside a transaction
-	nodes, err := self.FindMany(ctx, mongoke.FindManyParams{Collection: p.Collection, Where: p.Where})
+	nodes, err := self.FindMany(ctx, goke.FindManyParams{Collection: p.Collection, Where: p.Where})
 	if err != nil {
 		return payload, err
 	}
@@ -143,15 +143,15 @@ func (self *MongodbDatabaseFunctions) UpdateMany(ctx context.Context, p mongoke.
 	}
 	payload.AffectedCount = int(res.ModifiedCount + res.UpsertedCount)
 
-	return mongoke.NodesMutationPayload{
+	return goke.NodesMutationPayload{
 		AffectedCount: payload.AffectedCount,
 		Returning:     nodes,
 	}, nil
 }
 
-func (self *MongodbDatabaseFunctions) DeleteMany(ctx context.Context, p mongoke.DeleteManyParams) (mongoke.NodesMutationPayload, error) {
+func (self *MongodbDatabaseFunctions) DeleteMany(ctx context.Context, p goke.DeleteManyParams) (goke.NodesMutationPayload, error) {
 	db, err := self.Init(ctx)
-	payload := mongoke.NodesMutationPayload{}
+	payload := goke.NodesMutationPayload{}
 	if err != nil {
 		return payload, err
 	}
@@ -159,7 +159,7 @@ func (self *MongodbDatabaseFunctions) DeleteMany(ctx context.Context, p mongoke.
 
 	testutil.PrettyPrint(p)
 
-	nodes, err := self.FindMany(ctx, mongoke.FindManyParams{Collection: p.Collection, Where: p.Where})
+	nodes, err := self.FindMany(ctx, goke.FindManyParams{Collection: p.Collection, Where: p.Where})
 	if err != nil {
 		return payload, err
 	}
@@ -171,7 +171,7 @@ func (self *MongodbDatabaseFunctions) DeleteMany(ctx context.Context, p mongoke.
 	if err != nil {
 		return payload, err
 	}
-	return mongoke.NodesMutationPayload{
+	return goke.NodesMutationPayload{
 		AffectedCount: int(res.DeletedCount),
 		Returning:     nodes,
 	}, nil
@@ -203,7 +203,7 @@ func (self *MongodbDatabaseFunctions) Init(ctx context.Context) (*mongo.Database
 	return db, nil
 }
 
-func MakeMongodbMatch(where mongoke.WhereTree) map[string]interface{} {
+func MakeMongodbMatch(where goke.WhereTree) map[string]interface{} {
 	// for every k, v use mapstructure to map to a filter
 	// if k is or, and, use mapstructure to map to an array of filters
 	var res = make(map[string]interface{})

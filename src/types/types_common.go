@@ -4,7 +4,7 @@ import (
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/graphql/language/ast"
 	"github.com/graphql-go/graphql/language/kinds"
-	mongoke "github.com/remorses/mongoke/src"
+	goke "github.com/remorses/goke/src"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -18,11 +18,11 @@ var DirectionEnum = graphql.NewEnum(graphql.EnumConfig{
 	Description: "asc or desc",
 	Values: graphql.EnumValueConfigMap{
 		"ASC": &graphql.EnumValueConfig{
-			Value:       mongoke.ASC,
+			Value:       goke.ASC,
 			Description: "ascending",
 		},
 		"DESC": &graphql.EnumValueConfig{
-			Value:       mongoke.DESC,
+			Value:       goke.DESC,
 			Description: "Descending",
 		},
 	},

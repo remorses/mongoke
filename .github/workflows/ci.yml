@@ -69,7 +69,7 @@ jobs:
     # - name: Publish to Gcr.io
     #   uses: elgohr/Publish-Docker-Github-Action@master
     #   with:
-    #     name: containerful/mongoke
+    #     name: containerful/goke
     #     registry: gcr.io
     #     username: _json_key
     #     password: ${{ secrets.GCP_KEY_JSON }}

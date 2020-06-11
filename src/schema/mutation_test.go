@@ -6,16 +6,16 @@ import (
 	"testing"
 
 	"github.com/graphql-go/graphql"
-	mongoke "github.com/remorses/mongoke/src"
-	"github.com/remorses/mongoke/src/fakedata"
-	"github.com/remorses/mongoke/src/mock"
-	mongoke_schema "github.com/remorses/mongoke/src/schema"
-	"github.com/remorses/mongoke/src/testutil"
+	goke "github.com/remorses/goke/src"
+	"github.com/remorses/goke/src/fakedata"
+	"github.com/remorses/goke/src/mock"
+	goke_schema "github.com/remorses/goke/src/schema"
+	"github.com/remorses/goke/src/testutil"
 )
 
 func TestMutationWithEmptyFakeDatabase(t *testing.T) {
 	db := &fakedata.FakeDatabaseFunctions{}
-	schema, _ := mongoke_schema.MakeMongokeSchema(mongoke.Config{
+	schema, _ := goke_schema.MakeGokeSchema(goke.Config{
 		Schema: `
 		scalar ObjectId
 		interface Named {
@@ -29,7 +29,7 @@ func TestMutationWithEmptyFakeDatabase(t *testing.T) {
 		}
 		`,
 		DatabaseFunctions: db,
-		Types: map[string]*mongoke.TypeConfig{
+		Types: map[string]*goke.TypeConfig{
 			"User": {Collection: "users"},
 		},
 	})
@@ -37,13 +37,13 @@ func TestMutationWithEmptyFakeDatabase(t *testing.T) {
 	testutil.NewTestGroup(t, testutil.NewTestGroupParams{
 		Collection:    "users",
 		Database:      db,
-		Documents:     []mongoke.Map{},
+		Documents:     []goke.Map{},
 		DefaultSchema: schema,
 		Tests: []testutil.TestCase{
 			{
 				Name:     "update with set",
 				Schema:   schema,
-				Expected: mongoke.Map{"updateUser": mongoke.Map{"returning": nil, "affectedCount": 0}},
+				Expected: goke.Map{"updateUser": goke.Map{"returning": nil, "affectedCount": 0}},
 				Query: `
 				mutation {
 					updateUser(set: {name: "xxx"}) {
@@ -60,7 +60,7 @@ func TestMutationWithEmptyFakeDatabase(t *testing.T) {
 			{
 				Name:     "update with set and where",
 				Schema:   schema,
-				Expected: mongoke.Map{"updateUser": mongoke.Map{"returning": nil, "affectedCount": 0}},
+				Expected: goke.Map{"updateUser": goke.Map{"returning": nil, "affectedCount": 0}},
 				Query: `
 				mutation {
 					updateUser(where: {name: {eq: "zzz"}}, set: {name: "xxx"}) {
@@ -77,7 +77,7 @@ func TestMutationWithEmptyFakeDatabase(t *testing.T) {
 			{
 				Name:     "updateNodes with set",
 				Schema:   schema,
-				Expected: mongoke.Map{"updateUserNodes": mongoke.Map{"returning": []mongoke.Map{}, "affectedCount": 0}},
+				Expected: goke.Map{"updateUserNodes": goke.Map{"returning": []goke.Map{}, "affectedCount": 0}},
 				Query: `
 				mutation {
 					updateUserNodes(set: {name: "xxx"}) {
@@ -94,7 +94,7 @@ func TestMutationWithEmptyFakeDatabase(t *testing.T) {
 			{
 				Name:     "insert",
 				Schema:   schema,
-				Expected: mongoke.Map{"insertUser": mongoke.Map{"returning": mongoke.Map{"name": "xxx", "age": 10, "_id": "000000000000000000000000"}, "affectedCount": 1}},
+				Expected: goke.Map{"insertUser": goke.Map{"returning": goke.Map{"name": "xxx", "age": 10, "_id": "000000000000000000000000"}, "affectedCount": 1}},
 				Query: `
 				mutation {
 					insertUser(data: {name: "xxx", age: 10, _id: "000000000000000000000000"}) {
@@ -111,7 +111,7 @@ func TestMutationWithEmptyFakeDatabase(t *testing.T) {
 			{
 				Name:          "insert with missing required fields should error",
 				Schema:        schema,
-				Expected:      mongoke.Map{"insertUser": mongoke.Map{"returning": mongoke.Map{"name": "xxx", "age": 10, "_id": "000000000000000000000000"}, "affectedCount": 1}},
+				Expected:      goke.Map{"insertUser": goke.Map{"returning": goke.Map{"name": "xxx", "age": 10, "_id": "000000000000000000000000"}, "affectedCount": 1}},
 				ExpectedError: true,
 				Query: `
 				mutation {
@@ -143,26 +143,26 @@ func TestMutationWithMockedDb(t *testing.T) {
 		age: Int
 	}
 	`
-	typesConf := map[string]*mongoke.TypeConfig{
+	typesConf := map[string]*goke.TypeConfig{
 		"User": {Collection: "users"},
 	}
 
 	testutil.NewTestGroup(t, testutil.NewTestGroupParams{
 		Collection: "users",
-		Documents:  []mongoke.Map{},
+		Documents:  []goke.Map{},
 		Tests: []testutil.TestCase{
 			{
 				Name: "insertone returns error",
-				Schema: takeFirst(mongoke_schema.MakeMongokeSchema(mongoke.Config{
+				Schema: takeFirst(goke_schema.MakeGokeSchema(goke.Config{
 					Schema: typeDefs,
 					DatabaseFunctions: &mock.DatabaseInterfaceMock{
-						InsertManyFunc: func(ctx context.Context, p mongoke.InsertManyParams) (mongoke.NodesMutationPayload, error) {
-							return mongoke.NodesMutationPayload{}, errors.New("error")
+						InsertManyFunc: func(ctx context.Context, p goke.InsertManyParams) (goke.NodesMutationPayload, error) {
+							return goke.NodesMutationPayload{}, errors.New("error")
 						},
 					},
 					Types: typesConf,
 				})),
-				// Expected:      mongoke.Map{"insertUser": mongoke.Map{"returning": nil, "affectedCount": 0}},
+				// Expected:      goke.Map{"insertUser": goke.Map{"returning": nil, "affectedCount": 0}},
 				ExpectedError: true,
 				Query: `
 				mutation {

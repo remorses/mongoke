@@ -1,1 +1,1 @@
-package mongoke
+package goke

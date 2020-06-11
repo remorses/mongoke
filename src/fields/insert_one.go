@@ -5,8 +5,8 @@ import (
 
 	"github.com/graphql-go/graphql"
 	"github.com/mitchellh/mapstructure"
-	mongoke "github.com/remorses/mongoke/src"
-	"github.com/remorses/mongoke/src/types"
+	goke "github.com/remorses/goke/src"
+	"github.com/remorses/goke/src/types"
 )
 
 /*
@@ -21,7 +21,7 @@ insertUser(data: {name: "xxx"}) {
 func MutationInsertOne(p CreateFieldParams) (*graphql.Field, error) {
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
-		data := mongoke.Map{}
+		data := goke.Map{}
 		err := mapstructure.Decode(args["data"], &data)
 		if err != nil {
 			return nil, err
@@ -29,9 +29,9 @@ func MutationInsertOne(p CreateFieldParams) (*graphql.Field, error) {
 		if data == nil {
 			return nil, errors.New("cannot insert null object")
 		}
-		opts := mongoke.InsertManyParams{
+		opts := goke.InsertManyParams{
 			Collection: p.Collection,
-			Data:       []mongoke.Map{data},
+			Data:       []goke.Map{data},
 		}
 
 		// TODO insert only nodes the user can insert, based on expressions
@@ -44,7 +44,7 @@ func MutationInsertOne(p CreateFieldParams) (*graphql.Field, error) {
 		if len(res.Returning) == 0 {
 			return nil, errors.New("could not insert document")
 		}
-		return mongoke.Map{"returning": res.Returning[0], "affectedCount": res.AffectedCount}, nil
+		return goke.Map{"returning": res.Returning[0], "affectedCount": res.AffectedCount}, nil
 	}
 
 	// if err != nil {

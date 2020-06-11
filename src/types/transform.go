@@ -2,10 +2,10 @@ package types
 
 import (
 	"github.com/graphql-go/graphql"
-	mongoke "github.com/remorses/mongoke/src"
+	goke "github.com/remorses/goke/src"
 )
 
-func MakeInputPartial(cache mongoke.Map, object *graphql.InputObject) *graphql.InputObject {
+func MakeInputPartial(cache goke.Map, object *graphql.InputObject) *graphql.InputObject {
 	name := object.Name() + "Partial"
 	if item, ok := cache[name].(*graphql.InputObject); ok {
 		return item
@@ -35,7 +35,7 @@ func MakeInputPartial(cache mongoke.Map, object *graphql.InputObject) *graphql.I
 	return res
 }
 
-func TransformToInput(cache mongoke.Map, object graphql.Type) *graphql.InputObject {
+func TransformToInput(cache goke.Map, object graphql.Type) *graphql.InputObject {
 	name := object.Name() + "Input"
 	if item, ok := cache[name].(*graphql.InputObject); ok {
 		return item

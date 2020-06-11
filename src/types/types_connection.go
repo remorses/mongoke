@@ -2,14 +2,14 @@ package types
 
 import (
 	"github.com/graphql-go/graphql"
-	mongoke "github.com/remorses/mongoke/src"
+	goke "github.com/remorses/goke/src"
 )
 
 func MakeConnectionTypeName(object graphql.Type) string {
 	return object.Name() + "Connection"
 }
 
-func GetConnectionType(cache mongoke.Map, object graphql.Type) (*graphql.Object, error) {
+func GetConnectionType(cache goke.Map, object graphql.Type) (*graphql.Object, error) {
 	name := MakeConnectionTypeName(object)
 	// get cached value to not dupe
 	if item, ok := cache[name].(*graphql.Object); ok {

@@ -9,8 +9,8 @@ import (
 	firestore "cloud.google.com/go/firestore"
 	"google.golang.org/api/iterator"
 
-	mongoke "github.com/remorses/mongoke/src"
-	"github.com/remorses/mongoke/src/testutil"
+	goke "github.com/remorses/goke/src"
+	"github.com/remorses/goke/src/testutil"
 )
 
 const (
@@ -19,7 +19,7 @@ const (
 )
 
 type FirestoreDatabaseFunctions struct {
-	Config mongoke.Config
+	Config goke.Config
 	db     *firestore.Client
 }
 
@@ -27,7 +27,7 @@ func (self FirestoreDatabaseFunctions) projectId() string {
 	return self.Config.Firestore.ProjectID
 }
 
-func (self *FirestoreDatabaseFunctions) FindMany(ctx context.Context, p mongoke.FindManyParams) ([]mongoke.Map, error) {
+func (self *FirestoreDatabaseFunctions) FindMany(ctx context.Context, p goke.FindManyParams) ([]goke.Map, error) {
 	db, err := self.Init(ctx)
 	if err != nil {
 		return nil, err
@@ -47,7 +47,7 @@ func (self *FirestoreDatabaseFunctions) FindMany(ctx context.Context, p mongoke.
 	query = applyOrderByQuery(p.OrderBy, query)
 	iter := query.Documents(ctx)
 	defer iter.Stop()
-	var nodes []mongoke.Map
+	var nodes []goke.Map
 	for {
 		doc, err := iter.Next()
 		if err == iterator.Done {
@@ -57,7 +57,7 @@ func (self *FirestoreDatabaseFunctions) FindMany(ctx context.Context, p mongoke.
 			return nil, err
 		}
 
-		var node mongoke.Map
+		var node goke.Map
 		if err := doc.DataTo(&node); err != nil {
 			return nil, err
 		}
@@ -66,9 +66,9 @@ func (self *FirestoreDatabaseFunctions) FindMany(ctx context.Context, p mongoke.
 	return nodes, nil
 }
 
-func (self *FirestoreDatabaseFunctions) UpdateOne(ctx context.Context, p mongoke.UpdateParams) (mongoke.NodeMutationPayload, error) {
+func (self *FirestoreDatabaseFunctions) UpdateOne(ctx context.Context, p goke.UpdateParams) (goke.NodeMutationPayload, error) {
 	res, err := self.updateMany(ctx, p, 1)
-	payload := mongoke.NodeMutationPayload{}
+	payload := goke.NodeMutationPayload{}
 	if err != nil {
 		return payload, err
 	}
@@ -80,13 +80,13 @@ func (self *FirestoreDatabaseFunctions) UpdateOne(ctx context.Context, p mongoke
 	return payload, nil
 }
 
-func (self *FirestoreDatabaseFunctions) UpdateMany(ctx context.Context, p mongoke.UpdateParams) (mongoke.NodesMutationPayload, error) {
+func (self *FirestoreDatabaseFunctions) UpdateMany(ctx context.Context, p goke.UpdateParams) (goke.NodesMutationPayload, error) {
 	return self.updateMany(ctx, p, math.MaxInt32)
 }
 
-func (self *FirestoreDatabaseFunctions) updateMany(ctx context.Context, p mongoke.UpdateParams, count int) (mongoke.NodesMutationPayload, error) {
+func (self *FirestoreDatabaseFunctions) updateMany(ctx context.Context, p goke.UpdateParams, count int) (goke.NodesMutationPayload, error) {
 	db, err := self.Init(ctx)
-	payload := mongoke.NodesMutationPayload{}
+	payload := goke.NodesMutationPayload{}
 	if err != nil {
 		return payload, err
 	}
@@ -117,7 +117,7 @@ func (self *FirestoreDatabaseFunctions) updateMany(ctx context.Context, p mongok
 		if err != nil {
 			return payload, err
 		}
-		var node mongoke.Map
+		var node goke.Map
 		if err := doc.DataTo(&node); err != nil {
 			return payload, err
 		}
@@ -126,13 +126,13 @@ func (self *FirestoreDatabaseFunctions) updateMany(ctx context.Context, p mongok
 	return payload, nil
 }
 
-func (self *FirestoreDatabaseFunctions) DeleteMany(ctx context.Context, p mongoke.DeleteManyParams) (mongoke.NodesMutationPayload, error) {
+func (self *FirestoreDatabaseFunctions) DeleteMany(ctx context.Context, p goke.DeleteManyParams) (goke.NodesMutationPayload, error) {
 	return self.deleteMany(ctx, p, math.MaxInt32)
 }
 
-func (self *FirestoreDatabaseFunctions) deleteMany(ctx context.Context, p mongoke.DeleteManyParams, count int) (mongoke.NodesMutationPayload, error) {
+func (self *FirestoreDatabaseFunctions) deleteMany(ctx context.Context, p goke.DeleteManyParams, count int) (goke.NodesMutationPayload, error) {
 	db, err := self.Init(ctx)
-	payload := mongoke.NodesMutationPayload{}
+	payload := goke.NodesMutationPayload{}
 	if err != nil {
 		return payload, err
 	}
@@ -165,7 +165,7 @@ func (self *FirestoreDatabaseFunctions) deleteMany(ctx context.Context, p mongok
 	return payload, nil
 }
 
-func setToUpdates(set mongoke.Map) []firestore.Update {
+func setToUpdates(set goke.Map) []firestore.Update {
 	var updates []firestore.Update
 	for k, v := range set {
 		// fieldPath := []string{k}
@@ -174,7 +174,7 @@ func setToUpdates(set mongoke.Map) []firestore.Update {
 	return updates
 }
 
-func applyWhereQuery(where mongoke.WhereTree, q firestore.Query) (firestore.Query, error) {
+func applyWhereQuery(where goke.WhereTree, q firestore.Query) (firestore.Query, error) {
 	println(testutil.Pretty("where", where))
 	if len(where.Or) != 0 {
 		return q, errors.New("cannot use or operator with firestore")
@@ -216,10 +216,10 @@ func applyWhereQuery(where mongoke.WhereTree, q firestore.Query) (firestore.Quer
 
 func applyOrderByQuery(orderBy map[string]int, q firestore.Query) firestore.Query {
 	for k, v := range orderBy {
-		if v == mongoke.ASC {
+		if v == goke.ASC {
 			q = q.OrderBy(k, firestore.Asc)
 		}
-		if v == mongoke.DESC {
+		if v == goke.DESC {
 			q = q.OrderBy(k, firestore.Desc)
 		}
 	}
@@ -236,9 +236,9 @@ func isZero(v interface{}) bool {
 	return false
 }
 
-func (self *FirestoreDatabaseFunctions) InsertMany(ctx context.Context, p mongoke.InsertManyParams) (mongoke.NodesMutationPayload, error) {
+func (self *FirestoreDatabaseFunctions) InsertMany(ctx context.Context, p goke.InsertManyParams) (goke.NodesMutationPayload, error) {
 	db, err := self.Init(ctx)
-	payload := mongoke.NodesMutationPayload{}
+	payload := goke.NodesMutationPayload{}
 	if err != nil {
 		return payload, err
 	}

@@ -2,14 +2,14 @@ package types
 
 import (
 	"github.com/graphql-go/graphql"
-	mongoke "github.com/remorses/mongoke/src"
+	goke "github.com/remorses/goke/src"
 )
 
 func MakeOrderByArgumentName(object graphql.Type) string {
 	return object.Name() + "OrderBy"
 }
 
-func GetOrderByArg(cache mongoke.Map, indexableNames []string, object graphql.Type) (*graphql.InputObject, error) {
+func GetOrderByArg(cache goke.Map, indexableNames []string, object graphql.Type) (*graphql.InputObject, error) {
 	name := MakeOrderByArgumentName(object)
 	if item, ok := cache[name].(*graphql.InputObject); ok {
 		return item, nil

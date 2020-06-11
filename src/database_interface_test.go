@@ -1,18 +1,18 @@
-package mongoke_test
+package goke_test
 
 import (
 	"encoding/json"
 	"testing"
 
-	mongoke "github.com/remorses/mongoke/src"
-	"github.com/remorses/mongoke/src/testutil"
+	goke "github.com/remorses/goke/src"
+	"github.com/remorses/goke/src/testutil"
 	"github.com/stretchr/testify/require"
 )
 
 func TestMakeWhereTree(t *testing.T) {
 	tests := map[string]struct {
 		Json     string
-		Expected mongoke.WhereTree
+		Expected goke.WhereTree
 	}{
 		"empty string": {
 			Json: `{
@@ -22,8 +22,8 @@ func TestMakeWhereTree(t *testing.T) {
 				}
 				
 			}`,
-			Expected: mongoke.WhereTree{
-				Match: map[string]mongoke.Filter{
+			Expected: goke.WhereTree{
+				Match: map[string]goke.Filter{
 					"field": {
 						Eq: "",
 					},
@@ -38,11 +38,11 @@ func TestMakeWhereTree(t *testing.T) {
 					}
 				}]
 			}`,
-			Expected: mongoke.WhereTree{
-				Match: make(map[string]mongoke.Filter),
-				And: []mongoke.WhereTree{
+			Expected: goke.WhereTree{
+				Match: make(map[string]goke.Filter),
+				And: []goke.WhereTree{
 					{
-						Match: map[string]mongoke.Filter{
+						Match: map[string]goke.Filter{
 							"field": {
 								Eq: "xxx",
 							},
@@ -63,18 +63,18 @@ func TestMakeWhereTree(t *testing.T) {
 					}
 				}]
 			}`,
-			Expected: mongoke.WhereTree{
-				Match: make(map[string]mongoke.Filter),
-				And: []mongoke.WhereTree{
+			Expected: goke.WhereTree{
+				Match: make(map[string]goke.Filter),
+				And: []goke.WhereTree{
 					{
-						Match: map[string]mongoke.Filter{
+						Match: map[string]goke.Filter{
 							"field1": {
 								Eq: "1",
 							},
 						},
 					},
 					{
-						Match: map[string]mongoke.Filter{
+						Match: map[string]goke.Filter{
 							"field2": {
 								Eq: "2",
 							},
@@ -103,31 +103,31 @@ func TestMakeWhereTree(t *testing.T) {
 					}
 				}]
 			}`,
-			Expected: mongoke.WhereTree{
-				Match: map[string]mongoke.Filter{
+			Expected: goke.WhereTree{
+				Match: map[string]goke.Filter{
 					"field": {
 						Eq: float64(9),
 					},
 				},
-				Or: []mongoke.WhereTree{
+				Or: []goke.WhereTree{
 					{
-						Match: map[string]mongoke.Filter{
+						Match: map[string]goke.Filter{
 							"field": {
 								Eq: "xxx",
 							},
 						},
 					},
 				},
-				And: []mongoke.WhereTree{
+				And: []goke.WhereTree{
 					{
-						Match: map[string]mongoke.Filter{
+						Match: map[string]goke.Filter{
 							"field1": {
 								Eq: "1",
 							},
 						},
 					},
 					{
-						Match: map[string]mongoke.Filter{
+						Match: map[string]goke.Filter{
 							"field2": {
 								Eq: "2",
 							},
@@ -141,7 +141,7 @@ func TestMakeWhereTree(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			var x map[string]interface{}
 			json.Unmarshal([]byte(test.Json), &x)
-			w, err := mongoke.MakeWhereTree(x, nil)
+			w, err := goke.MakeWhereTree(x, nil)
 			if err != nil {
 				t.Error(err)
 			}

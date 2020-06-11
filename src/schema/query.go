@@ -4,11 +4,11 @@ import (
 	"errors"
 
 	"github.com/graphql-go/graphql"
-	mongoke "github.com/remorses/mongoke/src"
-	"github.com/remorses/mongoke/src/fields"
+	goke "github.com/remorses/goke/src"
+	"github.com/remorses/goke/src/fields"
 )
 
-func makeQuery(Config mongoke.Config, baseSchemaConfig graphql.SchemaConfig) (*graphql.Object, error) {
+func makeQuery(Config goke.Config, baseSchemaConfig graphql.SchemaConfig) (*graphql.Object, error) {
 	queryFields := graphql.Fields{}
 	for _, gqlType := range baseSchemaConfig.Types {
 		var object graphql.Type
@@ -57,7 +57,7 @@ func makeQuery(Config mongoke.Config, baseSchemaConfig graphql.SchemaConfig) (*g
 	return query, nil
 }
 
-func addRelationsFields(Config mongoke.Config, baseSchemaConfig graphql.SchemaConfig) error {
+func addRelationsFields(Config goke.Config, baseSchemaConfig graphql.SchemaConfig) error {
 	// add relations
 	for _, relation := range Config.Relations {
 		if relation.Field == "" {

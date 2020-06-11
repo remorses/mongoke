@@ -8,10 +8,10 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/kofalt/go-memoize"
 	jwk "github.com/lestrrat-go/jwx/jwk"
-	mongoke "github.com/remorses/mongoke/src"
+	goke "github.com/remorses/goke/src"
 )
 
-func extractClaims(config mongoke.JwtConfig, tokenStr string) (jwt.MapClaims, error) {
+func extractClaims(config goke.JwtConfig, tokenStr string) (jwt.MapClaims, error) {
 	claims := jwt.MapClaims{}
 	getKey := jwtKeyGetter(config)
 	if getKey == nil {
@@ -47,7 +47,7 @@ If it is able to parse any of the above successfully, then it will use that pars
 
 */
 
-func validateTokenClaims(config mongoke.JwtConfig, claims jwt.MapClaims) error {
+func validateTokenClaims(config goke.JwtConfig, claims jwt.MapClaims) error {
 	if config.Audience != "" {
 		if aud, ok := claims["aud"]; ok {
 			if aud != config.Audience {
@@ -65,7 +65,7 @@ func validateTokenClaims(config mongoke.JwtConfig, claims jwt.MapClaims) error {
 	return nil
 }
 
-func validateTokenHeaders(config mongoke.JwtConfig, token *jwt.Token) error {
+func validateTokenHeaders(config goke.JwtConfig, token *jwt.Token) error {
 	if token.Method.Alg() == "none" {
 		return errors.New("jwt algorithm none is not supported")
 	}
@@ -78,7 +78,7 @@ func validateTokenHeaders(config mongoke.JwtConfig, token *jwt.Token) error {
 // JwkCache Caches jwks for 10 minutes
 var JwkCache = memoize.NewMemoizer(10*time.Minute, 10*time.Minute)
 
-func jwtKeyGetter(config mongoke.JwtConfig) func(token *jwt.Token) (interface{}, error) {
+func jwtKeyGetter(config goke.JwtConfig) func(token *jwt.Token) (interface{}, error) {
 	if config.Key != "" {
 		return func(token *jwt.Token) (interface{}, error) {
 			if err := validateTokenHeaders(config, token); err != nil {

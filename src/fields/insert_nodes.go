@@ -3,8 +3,8 @@ package fields
 import (
 	"github.com/graphql-go/graphql"
 	"github.com/mitchellh/mapstructure"
-	mongoke "github.com/remorses/mongoke/src"
-	"github.com/remorses/mongoke/src/types"
+	goke "github.com/remorses/goke/src"
+	"github.com/remorses/goke/src/types"
 )
 
 /*
@@ -19,7 +19,7 @@ insertOneUser(data: {name: "xxx"}) {
 func MutationInsertNodes(p CreateFieldParams) (*graphql.Field, error) {
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
-		opts := mongoke.InsertManyParams{
+		opts := goke.InsertManyParams{
 			Collection: p.Collection,
 		}
 		err := mapstructure.Decode(args, &opts)

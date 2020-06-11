@@ -6,6 +6,6 @@
     ],
     "scripts": {
         "cli": "DEBUG=1 DEV_START_COMMAND='go run cmd/main.go' node -r sucrase/register cli/src/main.ts",
-        "play": "FIRESTORE_EMULATOR_HOST=localhost:8080 go run ./cmd/main.go --www ./web-ui/out --localhost --path example_mongoke.yml"
+        "play": "FIRESTORE_EMULATOR_HOST=localhost:8080 go run ./cmd/main.go --www ./web-ui/out --localhost --path example_goke.yml"
     }
 }

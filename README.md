@@ -1,10 +1,10 @@
 <p align="center">
-  <img width="300" src="https://github.com/remorses/mongoke/blob/master/.github/logo.jpg?raw=true">
+  <img width="300" src="https://github.com/remorses/goke/blob/master/.github/logo.jpg?raw=true">
 </p>
-<h1 align="center">mongoke</h1>
+<h1 align="center">goke</h1>
 <h3 align="center">Instantly serve your MongoDb database via graphql</h3>
 
-[**Docs**](https://mongoke.now.sh/docs/) • [**Examples**](https://github.com/remorses/mongoke/tree/master/examples)
+[**Docs**](https://goke.now.sh/docs/) • [**Examples**](https://github.com/remorses/goke/tree/master/examples)
 
 ## Features
 
@@ -19,14 +19,14 @@
 
 ## Using Docker compose
 
-The fastest way to try Mongoke is via docker-compose.
+The fastest way to try Goke is via docker-compose.
 
 ### 1. Write the configuration to describe the database schema and relations
 
 The ObjectId scalar is already defined by default, it is converted to string when sent as json
 
 ```yml
-# ./mongoke.yml
+# ./goke.yml
 schema: |
     type User {
         _id: ObjectId
@@ -55,7 +55,7 @@ relations:
           author_id: ${{ parent['_id'] }}
 ```
 
-### 2. Run the `mongoke` image with the above configuration
+### 2. Run the `goke` image with the above configuration
 
 To start the container mount copy paste the following content in a `docker-compose.yml` file, then execute `docker-compose up`.
 
@@ -64,14 +64,14 @@ To start the container mount copy paste the following content in a `docker-compo
 version: '3'
 
 services:
-    mongoke:
+    goke:
         ports:
             - 4000:80
-        image: mongoke/mongoke
+        image: goke/goke
         environment:
             DB_URL: mongodb://mongo/db
         volumes:
-            - ./mongoke.yml:/conf.yml
+            - ./goke.yml:/conf.yml
     mongo:
         image: mongo
 ```

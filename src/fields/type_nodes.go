@@ -6,13 +6,13 @@ import (
 
 	"github.com/graphql-go/graphql"
 	"github.com/mitchellh/mapstructure"
-	mongoke "github.com/remorses/mongoke/src"
-	"github.com/remorses/mongoke/src/types"
+	goke "github.com/remorses/goke/src"
+	"github.com/remorses/goke/src/types"
 )
 
 type typeNodesArgs struct {
-	Where       mongoke.WhereTree // `mapstructure:"where"`
-	Pagination  mongoke.Pagination
+	Where       goke.WhereTree // `mapstructure:"where"`
+	Pagination  goke.Pagination
 	CursorField string `mapstructure:"cursorField"`
 	Direction   int    `mapstructure:"direction"`
 }
@@ -25,13 +25,13 @@ type pageInfo struct {
 }
 
 type connection struct {
-	Nodes    []mongoke.Map `json:"nodes"`
-	Edges    []edge        `json:"edges"`
-	PageInfo pageInfo      `json:"pageInfo"`
+	Nodes    []goke.Map `json:"nodes"`
+	Edges    []edge     `json:"edges"`
+	PageInfo pageInfo   `json:"pageInfo"`
 }
 
 type edge struct {
-	Node   mongoke.Map `json:"node"`
+	Node   goke.Map    `json:"node"`
 	Cursor interface{} `json:"cursor"`
 }
 
@@ -41,7 +41,7 @@ func QueryTypeNodesField(p CreateFieldParams) (*graphql.Field, error) {
 		args := params.Args
 		pagination := paginationFromArgs(args)
 		decodedArgs := typeNodesArgs{
-			Direction:   mongoke.DESC,
+			Direction:   goke.DESC,
 			CursorField: getDefaultCursorField(p.ReturnType, indexableNames),
 			Pagination:  pagination,
 		}
@@ -54,7 +54,7 @@ func QueryTypeNodesField(p CreateFieldParams) (*graphql.Field, error) {
 			return nil, err
 		}
 		if args["where"] != nil {
-			where, err := mongoke.MakeWhereTree(args["where"].(map[string]interface{}), p.InitialWhere)
+			where, err := goke.MakeWhereTree(args["where"].(map[string]interface{}), p.InitialWhere)
 			if err != nil {
 				return nil, err
 			}
@@ -81,13 +81,13 @@ func QueryTypeNodesField(p CreateFieldParams) (*graphql.Field, error) {
 		}
 
 		jwt := getJwt(params)
-		var accessibleNodes []mongoke.Map
+		var accessibleNodes []goke.Map
 		for _, document := range nodes {
 			node, err := applyGuardsOnDocument(applyGuardsOnDocumentParams{
 				document:  document,
 				guards:    p.Permissions,
 				jwt:       jwt,
-				operation: mongoke.Operations.READ,
+				operation: goke.Operations.READ,
 			})
 			if err != nil {
 				// println("got an error while calling applyGuardsOnDocument on findManyField for " + conf.returnType.PrivateName)
@@ -103,7 +103,7 @@ func QueryTypeNodesField(p CreateFieldParams) (*graphql.Field, error) {
 			decodedArgs.Pagination,
 			decodedArgs.CursorField,
 		)
-		// document, err := mongoke.database.findOne()
+		// document, err := goke.database.findOne()
 		// testutil.PrettyPrint(args)
 		return connection, nil
 	}
@@ -139,12 +139,12 @@ func QueryTypeNodesField(p CreateFieldParams) (*graphql.Field, error) {
 	return &field, nil
 }
 
-func paginationFromArgs(args interface{}) mongoke.Pagination {
-	var pag mongoke.Pagination
+func paginationFromArgs(args interface{}) goke.Pagination {
+	var pag goke.Pagination
 	err := mapstructure.Decode(args, &pag)
 	if err != nil {
 		fmt.Println(err)
-		return mongoke.Pagination{}
+		return goke.Pagination{}
 	}
 	// increment nodes count so createConnection knows how to set `hasNextPage`
 	if pag.First != 0 {
@@ -157,7 +157,7 @@ func paginationFromArgs(args interface{}) mongoke.Pagination {
 	return pag
 }
 
-func makeConnection(nodes []mongoke.Map, pagination mongoke.Pagination, cursorField string) connection {
+func makeConnection(nodes []goke.Map, pagination goke.Pagination, cursorField string) connection {
 	if len(nodes) == 0 {
 		return connection{}
 	}
@@ -172,7 +172,7 @@ func makeConnection(nodes []mongoke.Map, pagination mongoke.Pagination, cursorFi
 		}
 	}
 	if pagination.Last != 0 {
-		nodes = mongoke.ReverseMaps(nodes)
+		nodes = goke.ReverseMaps(nodes)
 		hasPrev = len(nodes) == int(pagination.Last)
 		if hasPrev {
 			nodes = nodes[1:]
@@ -194,7 +194,7 @@ func makeConnection(nodes []mongoke.Map, pagination mongoke.Pagination, cursorFi
 	}
 }
 
-func makeEdges(nodes []mongoke.Map, cursorField string) []edge {
+func makeEdges(nodes []goke.Map, cursorField string) []edge {
 	edges := make([]edge, len(nodes))
 	for _, node := range nodes {
 		edges = append(edges, edge{
@@ -212,7 +212,7 @@ const (
 
 func addTypeNodesArgsDefaults(p typeNodesArgs) (typeNodesArgs, error) {
 	if p.Direction == 0 {
-		p.Direction = mongoke.ASC
+		p.Direction = goke.ASC
 	}
 	if p.CursorField == "" {
 		p.CursorField = "_id"
@@ -247,14 +247,14 @@ func addTypeNodesArgsDefaults(p typeNodesArgs) (typeNodesArgs, error) {
 	// gt and lt
 	cursorFieldMatch := p.Where.Match[p.CursorField]
 	if after != "" {
-		if p.Direction == mongoke.DESC {
+		if p.Direction == goke.DESC {
 			cursorFieldMatch.Lt = after
 		} else {
 			cursorFieldMatch.Gt = after
 		}
 	}
 	if before != "" {
-		if p.Direction == mongoke.DESC {
+		if p.Direction == goke.DESC {
 			cursorFieldMatch.Gt = before
 		} else {
 			cursorFieldMatch.Lt = before
@@ -263,11 +263,11 @@ func addTypeNodesArgsDefaults(p typeNodesArgs) (typeNodesArgs, error) {
 	return p, nil
 }
 
-func createFindManyParamsFromArgs(p typeNodesArgs, collection string) (mongoke.FindManyParams, error) {
+func createFindManyParamsFromArgs(p typeNodesArgs, collection string) (goke.FindManyParams, error) {
 	last := p.Pagination.Last
 	first := p.Pagination.First
 
-	opts := mongoke.FindManyParams{
+	opts := goke.FindManyParams{
 		Collection: collection,
 		Where:      p.Where,
 		Limit:      p.Pagination.First,

@@ -7,27 +7,27 @@ import (
 	_ "net/http/pprof"
 
 	"github.com/graphql-go/graphql"
-	mongoke "github.com/remorses/mongoke/src"
-	"github.com/remorses/mongoke/src/mock"
-	"github.com/remorses/mongoke/src/schema"
+	goke "github.com/remorses/goke/src"
+	"github.com/remorses/goke/src/mock"
+	"github.com/remorses/goke/src/schema"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func BenchmarkQuery(b *testing.B) {
 
 	db := &mock.DatabaseInterfaceMock{
-		FindManyFunc: func(ctx context.Context, p mongoke.FindManyParams) ([]map[string]interface{}, error) {
-			elem := mongoke.Map{
+		FindManyFunc: func(ctx context.Context, p goke.FindManyParams) ([]map[string]interface{}, error) {
+			elem := goke.Map{
 				"_id":  primitive.NewObjectID(),
 				"name": "1",
-				"nested": mongoke.Map{
+				"nested": goke.Map{
 					"x":     1,
 					"field": "ciao",
 				},
 				"age": 10,
 			}
 			return append(
-				[]mongoke.Map{},
+				[]goke.Map{},
 				elem,
 				elem,
 				elem,
@@ -41,7 +41,7 @@ func BenchmarkQuery(b *testing.B) {
 		},
 	}
 
-	s, _ := schema.MakeMongokeSchema(mongoke.Config{
+	s, _ := schema.MakeGokeSchema(goke.Config{
 		Schema: `
 		scalar ObjectId
 		interface Named {
@@ -61,7 +61,7 @@ func BenchmarkQuery(b *testing.B) {
 		}
 		`,
 		DatabaseFunctions: db,
-		Types: map[string]*mongoke.TypeConfig{
+		Types: map[string]*goke.TypeConfig{
 			"User": {Collection: "users"},
 		},
 	})

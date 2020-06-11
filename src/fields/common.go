@@ -3,15 +3,15 @@ package fields
 import (
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/graphql-go/graphql"
-	mongoke "github.com/remorses/mongoke/src"
-	"github.com/remorses/mongoke/src/types"
+	goke "github.com/remorses/goke/src"
+	"github.com/remorses/goke/src/types"
 )
 
 type CreateFieldParams struct {
-	Config       mongoke.Config
+	Config       goke.Config
 	Collection   string
-	InitialWhere map[string]mongoke.Filter
-	Permissions  []mongoke.AuthGuard
+	InitialWhere map[string]goke.Filter
+	Permissions  []goke.AuthGuard
 	ReturnType   graphql.Type
 	SchemaConfig graphql.SchemaConfig
 	OmitWhere    bool
@@ -52,7 +52,7 @@ func getDefaultCursorField(object graphql.Type, scalarTypes []string) string {
 
 func getJwt(params graphql.ResolveParams) jwt.MapClaims {
 	root := params.Info.RootValue
-	rootMap, ok := root.(mongoke.Map)
+	rootMap, ok := root.(goke.Map)
 	if !ok {
 		return jwt.MapClaims{}
 	}

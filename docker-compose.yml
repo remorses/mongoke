@@ -1,17 +1,17 @@
 version: "3.7"
 
 services:
-  mongoke:
+  goke:
     build: .
     command: 
       - --path 
-      - /mongoke.yml
+      - /goke.yml
     ports:
       - 8060:8080
     environment: 
       - DB_URL=mongodb://mongo/testdb
     volumes: 
-      - ./example_mongoke.yml:/mongoke.yml
+      - ./example_goke.yml:/goke.yml
     
   mongo:
     ports:

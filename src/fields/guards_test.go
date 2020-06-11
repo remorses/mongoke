@@ -4,14 +4,14 @@ import (
 	"testing"
 
 	"github.com/PaesslerAG/gval"
-	mongoke "github.com/remorses/mongoke/src"
+	goke "github.com/remorses/goke/src"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func TestBasicEvaluation(t *testing.T) {
 	// notice gval does not support single quotes
-	vars := mongoke.Map{"document": mongoke.Map{"name": "World"}}
+	vars := goke.Map{"document": goke.Map{"name": "World"}}
 
 	t.Run("using dots", func(t *testing.T) {
 		value, err := gval.Evaluate(`"Hello " + document.name + "!"`, vars)
@@ -33,9 +33,9 @@ func TestBasicEvaluation(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		vars := mongoke.Map{
-			"document":        mongoke.Map{"user": mongoke.Map{"_id": objID}},
-			"jwt":             mongoke.Map{"user_id": hex},
+		vars := goke.Map{
+			"document":        goke.Map{"user": goke.Map{"_id": objID}},
+			"jwt":             goke.Map{"user_id": hex},
 			"ObjectIDFromHex": primitive.ObjectIDFromHex,
 		}
 		value, err := gval.Evaluate(`document.user._id == ObjectIDFromHex(jwt.user_id)`, vars)

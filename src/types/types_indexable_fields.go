@@ -2,10 +2,10 @@ package types
 
 import (
 	"github.com/graphql-go/graphql"
-	mongoke "github.com/remorses/mongoke/src"
+	goke "github.com/remorses/goke/src"
 )
 
-func GetIndexableFieldsEnum(cache mongoke.Map, indexableNames []string, object graphql.Type) (*graphql.Enum, error) {
+func GetIndexableFieldsEnum(cache goke.Map, indexableNames []string, object graphql.Type) (*graphql.Enum, error) {
 	name := object.Name() + "IndexableFields"
 	if item, ok := cache[name].(*graphql.Enum); ok {
 		return item, nil

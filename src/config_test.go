@@ -1,14 +1,14 @@
-package mongoke_test
+package goke_test
 
 import (
 	"testing"
 
-	mongoke "github.com/remorses/mongoke/src"
-	"github.com/remorses/mongoke/src/testutil"
+	goke "github.com/remorses/goke/src"
+	"github.com/remorses/goke/src/testutil"
 )
 
 func TestMakeConfigFromYaml(t *testing.T) {
-	conf, err := mongoke.MakeConfigFromYaml(testutil.YamlConfig)
+	conf, err := goke.MakeConfigFromYaml(testutil.YamlConfig)
 	if err != nil {
 		t.Error(err)
 	}

@@ -2,7 +2,7 @@ package types
 
 import (
 	"github.com/graphql-go/graphql"
-	mongoke "github.com/remorses/mongoke/src"
+	goke "github.com/remorses/goke/src"
 )
 
 /*
@@ -28,7 +28,7 @@ in postgres
 
 */
 
-func GetSetUpdateArgument(cache mongoke.Map, object graphql.Type) *graphql.InputObject {
+func GetSetUpdateArgument(cache goke.Map, object graphql.Type) *graphql.InputObject {
 	name := object.Name() + "SetUpdate"
 	if item, ok := cache[name].(*graphql.InputObject); ok {
 		return item
@@ -48,7 +48,7 @@ func GetSetUpdateArgument(cache mongoke.Map, object graphql.Type) *graphql.Input
 	return set
 }
 
-func GetMutationNodePayload(cache mongoke.Map, object graphql.Type) (*graphql.NonNull, error) {
+func GetMutationNodePayload(cache goke.Map, object graphql.Type) (*graphql.NonNull, error) {
 	name := object.Name() + "MutationNodePayload"
 	// get cached value to not dupe
 	if item, ok := cache[name].(*graphql.NonNull); ok {
@@ -70,7 +70,7 @@ func GetMutationNodePayload(cache mongoke.Map, object graphql.Type) (*graphql.No
 	return payload, nil
 }
 
-func GetMutationNodesPayload(cache mongoke.Map, object graphql.Type) (*graphql.NonNull, error) {
+func GetMutationNodesPayload(cache goke.Map, object graphql.Type) (*graphql.NonNull, error) {
 	name := object.Name() + "MutationNodesPayload"
 	// get cached value to not dupe
 	if item, ok := cache[name].(*graphql.NonNull); ok {
@@ -92,7 +92,7 @@ func GetMutationNodesPayload(cache mongoke.Map, object graphql.Type) (*graphql.N
 	return payload, nil
 }
 
-// func GetUpdateArg(cache mongoke.Map, indexableNames []string, object graphql.Type) (*graphql.InputObject, error) {
+// func GetUpdateArg(cache goke.Map, indexableNames []string, object graphql.Type) (*graphql.InputObject, error) {
 // 	name := object.Name() + "Update"
 // 	if item, ok := cache[name].(*graphql.InputObject); ok {
 // 		return item, nil

@@ -7,9 +7,9 @@ import (
 
 	"github.com/256dpi/lungo"
 	"github.com/pkg/errors"
-	mongoke "github.com/remorses/mongoke/src"
-	mongodb "github.com/remorses/mongoke/src/mongodb"
-	"github.com/remorses/mongoke/src/testutil"
+	goke "github.com/remorses/goke/src"
+	mongodb "github.com/remorses/goke/src/mongodb"
+	"github.com/remorses/goke/src/testutil"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -23,12 +23,12 @@ var (
 )
 
 type FakeDatabaseFunctions struct {
-	Config             mongoke.Config
+	Config             goke.Config
 	skipDataGeneration bool
 	db                 lungo.IDatabase
 }
 
-func (self *FakeDatabaseFunctions) FindMany(ctx context.Context, p mongoke.FindManyParams) ([]mongoke.Map, error) {
+func (self *FakeDatabaseFunctions) FindMany(ctx context.Context, p goke.FindManyParams) ([]goke.Map, error) {
 	db, err := self.Init(ctx)
 	if err != nil {
 		return nil, err
@@ -48,7 +48,7 @@ func (self *FakeDatabaseFunctions) FindMany(ctx context.Context, p mongoke.FindM
 		return nil, err
 	}
 	defer res.Close(ctx)
-	nodes := make([]mongoke.Map, 0)
+	nodes := make([]goke.Map, 0)
 	err = res.All(ctx, &nodes)
 	if err != nil {
 		return nil, err
@@ -56,8 +56,8 @@ func (self *FakeDatabaseFunctions) FindMany(ctx context.Context, p mongoke.FindM
 	return nodes, nil
 }
 
-func (self *FakeDatabaseFunctions) InsertMany(ctx context.Context, p mongoke.InsertManyParams) (mongoke.NodesMutationPayload, error) {
-	payload := mongoke.NodesMutationPayload{}
+func (self *FakeDatabaseFunctions) InsertMany(ctx context.Context, p goke.InsertManyParams) (goke.NodesMutationPayload, error) {
+	payload := goke.NodesMutationPayload{}
 	if len(p.Data) == 0 {
 		return payload, nil
 	}
@@ -81,15 +81,15 @@ func (self *FakeDatabaseFunctions) InsertMany(ctx context.Context, p mongoke.Ins
 	for i, id := range res.InsertedIDs {
 		p.Data[i]["_id"] = id
 	}
-	return mongoke.NodesMutationPayload{
+	return goke.NodesMutationPayload{
 		Returning:     p.Data[:len(res.InsertedIDs)],
 		AffectedCount: len(res.InsertedIDs),
 	}, nil
 }
 
-func (self *FakeDatabaseFunctions) UpdateOne(ctx context.Context, p mongoke.UpdateParams) (mongoke.NodeMutationPayload, error) {
+func (self *FakeDatabaseFunctions) UpdateOne(ctx context.Context, p goke.UpdateParams) (goke.NodeMutationPayload, error) {
 	db, err := self.Init(ctx)
-	payload := mongoke.NodeMutationPayload{
+	payload := goke.NodeMutationPayload{
 		Returning:     nil,
 		AffectedCount: 0,
 	}
@@ -108,21 +108,21 @@ func (self *FakeDatabaseFunctions) UpdateOne(ctx context.Context, p mongoke.Upda
 	} else if res.Err() != nil {
 		return payload, err
 	}
-	data := mongoke.Map{}
+	data := goke.Map{}
 	err = res.Decode(&data)
 	if err != nil {
 		return payload, err
 	}
-	return mongoke.NodeMutationPayload{
+	return goke.NodeMutationPayload{
 		AffectedCount: 1,
 		Returning:     data,
 	}, nil
 }
 
 // first updateMany documents, then query again the documents and return them, all inside a transaction that prevents other writes happen before the query
-func (self *FakeDatabaseFunctions) UpdateMany(ctx context.Context, p mongoke.UpdateParams) (mongoke.NodesMutationPayload, error) {
+func (self *FakeDatabaseFunctions) UpdateMany(ctx context.Context, p goke.UpdateParams) (goke.NodesMutationPayload, error) {
 	db, err := self.Init(ctx)
-	payload := mongoke.NodesMutationPayload{}
+	payload := goke.NodesMutationPayload{}
 	if err != nil {
 		return payload, err
 	}
@@ -131,7 +131,7 @@ func (self *FakeDatabaseFunctions) UpdateMany(ctx context.Context, p mongoke.Upd
 	testutil.PrettyPrint(p)
 
 	// TODO execute inside a transaction
-	nodes, err := self.FindMany(ctx, mongoke.FindManyParams{Collection: p.Collection, Where: p.Where})
+	nodes, err := self.FindMany(ctx, goke.FindManyParams{Collection: p.Collection, Where: p.Where})
 	if err != nil {
 		return payload, err
 	}
@@ -143,15 +143,15 @@ func (self *FakeDatabaseFunctions) UpdateMany(ctx context.Context, p mongoke.Upd
 	}
 	payload.AffectedCount = int(res.ModifiedCount + res.UpsertedCount)
 
-	return mongoke.NodesMutationPayload{
+	return goke.NodesMutationPayload{
 		AffectedCount: payload.AffectedCount,
 		Returning:     nodes,
 	}, nil
 }
 
-func (self *FakeDatabaseFunctions) DeleteMany(ctx context.Context, p mongoke.DeleteManyParams) (mongoke.NodesMutationPayload, error) {
+func (self *FakeDatabaseFunctions) DeleteMany(ctx context.Context, p goke.DeleteManyParams) (goke.NodesMutationPayload, error) {
 	db, err := self.Init(ctx)
-	payload := mongoke.NodesMutationPayload{}
+	payload := goke.NodesMutationPayload{}
 	if err != nil {
 		return payload, err
 	}
@@ -159,7 +159,7 @@ func (self *FakeDatabaseFunctions) DeleteMany(ctx context.Context, p mongoke.Del
 
 	testutil.PrettyPrint(p)
 
-	nodes, err := self.FindMany(ctx, mongoke.FindManyParams{Collection: p.Collection, Where: p.Where})
+	nodes, err := self.FindMany(ctx, goke.FindManyParams{Collection: p.Collection, Where: p.Where})
 	if err != nil {
 		return payload, err
 	}
@@ -169,7 +169,7 @@ func (self *FakeDatabaseFunctions) DeleteMany(ctx context.Context, p mongoke.Del
 	if err != nil {
 		return payload, err
 	}
-	return mongoke.NodesMutationPayload{
+	return goke.NodesMutationPayload{
 		AffectedCount: int(res.DeletedCount),
 		Returning:     nodes,
 	}, nil
@@ -206,7 +206,7 @@ func (self *FakeDatabaseFunctions) Init(ctx context.Context) (lungo.IDatabase, e
 	return db, nil
 }
 
-func (self FakeDatabaseFunctions) generateFakeData(config mongoke.Config) error {
+func (self FakeDatabaseFunctions) generateFakeData(config goke.Config) error {
 	println("generating fake data")
 	faker, err := NewFakeData(NewFakeDataParams{typeDefs: config.Schema})
 	if err != nil {

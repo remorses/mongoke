@@ -1,7 +1,7 @@
 
 
 play:
-	FIRESTORE_EMULATOR_HOST=localhost:8080 WEB_UI_ASSETS=./web-ui/out go run ./cmd/main.go --localhost --path example_mongoke.yml
+	FIRESTORE_EMULATOR_HOST=localhost:8080 WEB_UI_ASSETS=./web-ui/out go run ./cmd/main.go --localhost --path example_goke.yml
 
 .PHONY: build
 build:

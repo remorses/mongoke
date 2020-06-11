@@ -3,9 +3,9 @@ package fields
 import (
 	"github.com/graphql-go/graphql"
 	"github.com/mitchellh/mapstructure"
-	mongoke "github.com/remorses/mongoke/src"
-	"github.com/remorses/mongoke/src/testutil"
-	"github.com/remorses/mongoke/src/types"
+	goke "github.com/remorses/goke/src"
+	"github.com/remorses/goke/src/testutil"
+	"github.com/remorses/goke/src/types"
 )
 
 /*
@@ -21,7 +21,7 @@ func MutationUpdateNodes(p CreateFieldParams) (*graphql.Field, error) {
 	indexableNames := takeIndexableTypeNames(p.SchemaConfig)
 	resolver := func(params graphql.ResolveParams) (interface{}, error) {
 		args := params.Args
-		opts := mongoke.UpdateParams{
+		opts := goke.UpdateParams{
 			Collection: p.Collection,
 		}
 		err := mapstructure.Decode(args, &opts)
@@ -29,7 +29,7 @@ func MutationUpdateNodes(p CreateFieldParams) (*graphql.Field, error) {
 			return nil, err
 		}
 		if args["where"] != nil {
-			where, err := mongoke.MakeWhereTree(args["where"].(map[string]interface{}), p.InitialWhere)
+			where, err := goke.MakeWhereTree(args["where"].(map[string]interface{}), p.InitialWhere)
 			if err != nil {
 				return nil, err
 			}

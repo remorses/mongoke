@@ -2,11 +2,11 @@ package schema
 
 import (
 	"github.com/graphql-go/graphql"
-	mongoke "github.com/remorses/mongoke/src"
-	"github.com/remorses/mongoke/src/fields"
+	goke "github.com/remorses/goke/src"
+	"github.com/remorses/goke/src/fields"
 )
 
-func makeMutation(Config mongoke.Config, baseSchemaConfig graphql.SchemaConfig) (*graphql.Object, error) {
+func makeMutation(Config goke.Config, baseSchemaConfig graphql.SchemaConfig) (*graphql.Object, error) {
 	mutationFields := graphql.Fields{}
 	for _, gqlType := range baseSchemaConfig.Types {
 		var object graphql.Type
