@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/dgrijalva/jwt-go"
 	goke "github.com/remorses/goke/src"
 	"github.com/remorses/goke/src/fakedata"
 	"github.com/remorses/goke/src/mongodb"
@@ -601,7 +602,6 @@ func TestAdminCheck(t *testing.T) {
 					"isAdmin": false,
 				},
 				ExpectedError: true, // cannot execute read operation with current user permissions
-				Expected:      goke.Map{"findOneUser": nil},
 				Query: `
 				{
 					findManyUser {
@@ -626,6 +626,88 @@ func TestAdminCheck(t *testing.T) {
 						name
 						age
 						_id
+					}
+				}
+			`,
+			},
+		},
+	})
+
+}
+
+func TestReadPermissions(t *testing.T) {
+	exampleUsers := []goke.Map{
+		{"name": "01", "age": 1},
+		{"name": "02", "age": 2},
+		{"name": "03", "age": 3},
+	}
+	db := &fakedata.FakeDatabaseFunctions{}
+	typeDefs := `
+	scalar ObjectId
+	interface Named {
+		name: String
+	}
+
+	type User implements Named {
+		_id: ObjectId!
+		name: String
+		age: Int!
+	}
+	`
+	userId := "0000000"
+	s, err := goke_schema.MakeGokeSchema(goke.Config{
+		Schema:            typeDefs,
+		DatabaseFunctions: db,
+		Types: map[string]*goke.TypeConfig{
+			"User": {
+				Collection: "users",
+				Permissions: []goke.AuthGuard{
+					{
+						Expression:        fmt.Sprintf("jwt.user_id == \"%s\"", userId),
+						AllowedOperations: []string{goke.Operations.READ},
+					},
+				},
+			},
+		},
+		DefaultPermissions: []string{},
+	})
+	if err != nil {
+		t.Error(err)
+	}
+
+	testutil.NewTestGroup(t, testutil.NewTestGroupParams{
+		Collection: "users",
+		Database:   db,
+		Documents:  exampleUsers,
+		Tests: []testutil.TestCase{
+			{
+				Name:          "findMany without jwt errors",
+				Schema:        s,
+				ExpectedError: true, // cannot execute read operation with current user permissions
+				Query: `
+				{
+					findManyUser {
+						name
+						age
+						_id
+					}
+				}
+			`,
+			},
+			{
+				Name:     "findMany with jwt expressin passes",
+				Schema:   s,
+				Expected: goke.Map{"findManyUser": exampleUsers},
+				RootObject: goke.Map{
+					"jwt": jwt.MapClaims{
+						"user_id": userId,
+					},
+				},
+				Query: `
+				{
+					findManyUser {
+						name
+						age
 					}
 				}
 			`,

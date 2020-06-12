@@ -3,6 +3,9 @@ package goke
 import (
 	"bytes"
 	"context"
+	"errors"
+	"fmt"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/PaesslerAG/gval"
@@ -10,7 +13,7 @@ import (
 	yaml "github.com/ghodss/yaml"
 )
 
-type Map map[string]interface{}
+type Map = map[string]interface{}
 
 var Operations = struct {
 	READ   string
@@ -59,6 +62,48 @@ type Config struct {
 	DefaultPermissions []string               `json:"default_permissions"`
 	DatabaseFunctions  DatabaseInterface
 	Cache              Map
+}
+
+func (config *Config) Init() error {
+	// types cache (gaphql-go complains of duplicate types)
+	if config.Cache == nil {
+		config.Cache = make(Map)
+	}
+
+	// add schema type defs
+	if config.Schema == "" && config.SchemaPath != "" {
+		data, e := ioutil.ReadFile(config.SchemaPath)
+		if e != nil {
+			return e
+		}
+		config.Schema = string(data)
+	}
+	if config.Schema == "" && config.SchemaUrl != "" {
+		data, e := DownloadFile(config.SchemaUrl)
+		if e != nil {
+			return e
+		}
+		config.Schema = string(data)
+	}
+	if config.Schema == "" {
+		return errors.New("missing required schema")
+	}
+
+	// default permissions
+	if config.DefaultPermissions == nil {
+		config.DefaultPermissions = DEFAULT_PERMISSIONS
+	}
+
+	// initialize the expressions
+	for _, t := range config.Types {
+		for _, guard := range t.Permissions {
+			err := guard.Init()
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 type AdminConfig struct {
@@ -112,13 +157,20 @@ type AuthGuard struct {
 	eval gval.Evaluable
 }
 
-func (guard AuthGuard) Evaluate(params Map) (interface{}, error) {
+func (guard *AuthGuard) Init() error {
+	// println("initializing guard with expression " + guard.Expression)
+	eval, err := gval.Full().NewEvaluable(guard.Expression)
+	if err != nil {
+		return err
+	}
+	guard.eval = eval
+	return nil
+}
+
+func (guard *AuthGuard) Evaluate(params Map) (interface{}, error) {
+	fmt.Printf("evaluating '%s'", guard.Expression)
 	if guard.eval == nil {
-		eval, err := gval.Full().NewEvaluable(guard.Expression)
-		if err != nil {
-			return nil, err
-		}
-		guard.eval = eval
+		guard.Init()
 	}
 	res, err := guard.eval(context.Background(), params)
 	if err != nil {

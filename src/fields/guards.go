@@ -38,7 +38,6 @@ func applyGuardsOnDocument(p applyGuardsOnDocumentParams) (goke.Map, error) {
 
 // find the final permission where `if` evaluates to true
 func evaluateAuthPermission(p applyGuardsOnDocumentParams) (goke.AuthGuard, error) {
-	// TODO if user is admin return the all permissions AuthGuard here
 	// if guards are empty default to read permission
 	if len(p.guards) == 0 {
 		return goke.AuthGuard{
@@ -46,6 +45,7 @@ func evaluateAuthPermission(p applyGuardsOnDocumentParams) (goke.AuthGuard, erro
 		}, nil
 	}
 	// find the final permission where `if` evaluates to true
+	// fmt.Println(p.jwt)
 	for _, guard := range p.guards {
 		res, err := guard.Evaluate(
 			goke.Map{
@@ -55,8 +55,11 @@ func evaluateAuthPermission(p applyGuardsOnDocumentParams) (goke.AuthGuard, erro
 			},
 		)
 		if err != nil {
-			println("error while evaluating expression " + guard.Expression)
+			msg := "error while evaluating expression " + guard.Expression + " " + err.Error()
+			println(msg)
 			continue
+			// return guard, errors.New(msg)
+			// continue
 		}
 		if res == true {
 			// default allowed operations is every operation

@@ -2,7 +2,6 @@ package fakedata
 
 import (
 	"context"
-	"fmt"
 	"math"
 	"time"
 
@@ -82,7 +81,7 @@ func (self *FakeDatabaseFunctions) InsertMany(ctx context.Context, p goke.Insert
 		// log.Print("Error in findMany", err)
 		return payload, err
 	}
-	fmt.Println(res.InsertedIDs)
+	// fmt.Println(res.InsertedIDs)
 
 	// copy to new list of maps to not mutate input argument
 	resultNodes := make([]goke.Map, len(res.InsertedIDs))

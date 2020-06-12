@@ -52,8 +52,17 @@ func getDefaultCursorField(object graphql.Type, scalarTypes []string) string {
 
 func getJwt(params graphql.ResolveParams) jwt.MapClaims {
 	root := params.Info.RootValue
-	rootMap, ok := root.(goke.Map)
+	if root == nil {
+		return jwt.MapClaims{}
+	}
+	// rootMap, ok := root.(goke.Map)
+	// if !ok {
+	// 	println("not a map")
+	// 	return jwt.MapClaims{}
+	// }
+	rootMap, ok := root.(map[string]interface{})
 	if !ok {
+		println("WARNING: jwt is not a map")
 		return jwt.MapClaims{}
 	}
 	v, ok := rootMap["jwt"]
@@ -62,6 +71,7 @@ func getJwt(params graphql.ResolveParams) jwt.MapClaims {
 	}
 	jwtMap, ok := v.(jwt.MapClaims)
 	if !ok {
+		println("WARNING: jwt is not a MapClaims")
 		return jwt.MapClaims{}
 	}
 	return jwtMap

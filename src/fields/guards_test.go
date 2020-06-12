@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/PaesslerAG/gval"
+	"github.com/dgrijalva/jwt-go"
 	goke "github.com/remorses/goke/src"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -44,6 +45,18 @@ func TestBasicEvaluation(t *testing.T) {
 		}
 		t.Log(value)
 		require.Equal(t, true, value)
+	})
+	t.Run("using jwt claims object", func(t *testing.T) {
+		x := jwt.MapClaims{
+			"x": goke.Map{
+				"a": 1,
+			},
+		}
+		value, err := gval.Evaluate(`"Hello " + x.a`, x)
+		if err != nil {
+			t.Error(err)
+		}
+		t.Log(value)
 	})
 
 	// Output:

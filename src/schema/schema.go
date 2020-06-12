@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
 
 	"github.com/PaesslerAG/gval"
 	"github.com/graphql-go/graphql"
@@ -18,7 +17,7 @@ import (
 
 // MakeGokeSchema generates the schema
 func MakeGokeSchema(config goke.Config) (graphql.Schema, error) {
-	config, err := ApplyConfigDefaults(config)
+	config, err := InitializeConfig(config)
 	if err != nil {
 		return graphql.Schema{}, err
 	}
@@ -29,36 +28,11 @@ func MakeGokeSchema(config goke.Config) (graphql.Schema, error) {
 	return schema, nil
 }
 
-func ApplyConfigDefaults(config goke.Config) (goke.Config, error) {
-	// types cache (gaphql-go complains of duplicate types)
-	if config.Cache == nil {
-		config.Cache = make(goke.Map)
+func InitializeConfig(config goke.Config) (goke.Config, error) {
+	err := config.Init()
+	if err != nil {
+		return config, err
 	}
-
-	// add schema type defs
-	if config.Schema == "" && config.SchemaPath != "" {
-		data, e := ioutil.ReadFile(config.SchemaPath)
-		if e != nil {
-			return config, e
-		}
-		config.Schema = string(data)
-	}
-	if config.Schema == "" && config.SchemaUrl != "" {
-		data, e := goke.DownloadFile(config.SchemaUrl)
-		if e != nil {
-			return config, e
-		}
-		config.Schema = string(data)
-	}
-	if config.Schema == "" {
-		return config, errors.New("missing required schema")
-	}
-
-	// default permissions
-	if config.DefaultPermissions == nil {
-		config.DefaultPermissions = goke.DEFAULT_PERMISSIONS
-	}
-
 	// database functions
 	if config.Mongodb.Uri != "" {
 		config.DatabaseFunctions = &mongodb.MongodbDatabaseFunctions{Config: config}

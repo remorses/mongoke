@@ -28,19 +28,18 @@ type TestCase struct {
 
 func NewTestGroup(t *testing.T, p NewTestGroupParams) {
 	ctx := context.Background()
-	if p.Database != nil {
-		_, err := p.Database.DeleteMany(ctx, goke.DeleteManyParams{
-			Collection: p.Collection,
-		}, nil)
 
-		if err != nil {
-			t.Error(err)
-		}
-	}
 	for _, testCase := range p.Tests {
 		t.Run(testCase.Name, func(t *testing.T) {
 			t.Log()
-
+			if p.Database != nil {
+				_, err := p.Database.DeleteMany(ctx, goke.DeleteManyParams{
+					Collection: p.Collection,
+				}, nil)
+				if err != nil {
+					t.Error(err)
+				}
+			}
 			// t.Log(testCase.Name)
 			if p.Database != nil {
 				p.Database.InsertMany(ctx, goke.InsertManyParams{
@@ -65,15 +64,17 @@ func NewTestGroup(t *testing.T, p NewTestGroupParams) {
 			if diff := deep.Equal(res, expected); diff != nil {
 				t.Error(diff)
 			}
-			if p.Database != nil {
-				_, err := p.Database.DeleteMany(ctx, goke.DeleteManyParams{
-					Collection: p.Collection,
-				}, nil)
-				if err != nil {
-					t.Error(err)
-				}
-			}
+
 		})
+		if p.Database != nil {
+			_, err := p.Database.DeleteMany(ctx, goke.DeleteManyParams{
+				Collection: p.Collection,
+			}, nil)
+
+			if err != nil {
+				t.Error(err)
+			}
+		}
 	}
 
 }
