@@ -66,3 +66,20 @@ func getJwt(params graphql.ResolveParams) jwt.MapClaims {
 	}
 	return jwtMap
 }
+
+func getIsAdmin(params graphql.ResolveParams) bool {
+	root := params.Info.RootValue
+	rootMap, ok := root.(goke.Map)
+	if !ok {
+		return false
+	}
+	v, ok := rootMap["isAdmin"]
+	if !ok {
+		return false
+	}
+	isAdmin, ok := v.(bool)
+	if !ok {
+		return false
+	}
+	return isAdmin
+}

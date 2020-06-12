@@ -40,7 +40,7 @@ func MakeGokeHandler(config goke.Config, webUiFolder string) (http.Handler, erro
 			Context:        ctx,
 		}
 
-		params.RootObject = getRootObject(config.JwtConfig, r)
+		params.RootObject = getRootObject(config, r)
 
 		result := graphql.Do(params)
 
@@ -100,27 +100,30 @@ func makeGraphiqlHandler(webUiFolder string) (http.Handler, error) {
 	return h, nil
 }
 
-func getRootObject(config goke.JwtConfig, r *http.Request) map[string]interface{} {
+func getRootObject(config goke.Config, r *http.Request) map[string]interface{} {
 	rootValue := goke.Map{
 		"request": r,
 	}
 
+	// jwt token
 	tknStr := r.Header.Get("Authorization")
 	parts := strings.Split(tknStr, "Bearer")
 	tknStr = reverseStrings(parts)[0]
 	tknStr = strings.TrimSpace(tknStr)
-
 	if tknStr == "" {
 		return rootValue
 	}
-
-	claims, err := extractClaims(config, tknStr)
+	claims, err := extractClaims(config.JwtConfig, tknStr)
 	if err != nil {
 		fmt.Println("error in handler", err)
 		return rootValue
 	}
-
 	rootValue["jwt"] = claims
+
+	// admin secret
+	secret := r.Header.Get(goke.AdminSecretHeader)
+	isAdmin := isAdminSecretValid(config.Admins, secret)
+	rootValue["isAdmin"] = isAdmin
 
 	return rootValue
 }

@@ -9,6 +9,7 @@ import (
 
 type applyGuardsOnDocumentParams struct {
 	document           goke.Map
+	isAdmin            bool
 	guards             []goke.AuthGuard
 	jwt                jwt.MapClaims
 	defaultPermissions []string
@@ -18,6 +19,9 @@ type applyGuardsOnDocumentParams struct {
 func applyGuardsOnDocument(p applyGuardsOnDocumentParams) (goke.Map, error) {
 	if p.document == nil {
 		return nil, nil
+	}
+	if p.isAdmin {
+		return p.document, nil
 	}
 	guard, err := evaluateAuthPermission(p)
 	if err != nil {

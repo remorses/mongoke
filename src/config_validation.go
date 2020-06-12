@@ -48,6 +48,18 @@ var jsonSchemaString = `
                 "schema": {
                     "type": "string"
                 },
+				"admins": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": ["secret"],
+                        "properties": {
+                            "secret": {
+                                "type": "string"
+                            }
+                        }
+                    }
+				},
 				"mongodb": {
 					"type": "object",
 					"properties": {

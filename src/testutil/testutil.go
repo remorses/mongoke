@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/graphql-go/graphql"
+	goke "github.com/remorses/goke/src"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -26,13 +27,26 @@ func Bsonify(t *testing.T, x interface{}) map[string]interface{} {
 	return d
 }
 
-func QuerySchema(t *testing.T, schema graphql.Schema, query string) interface{} {
-	res := graphql.Do(graphql.Params{Schema: schema, RequestString: query, Context: context.Background()})
+func Query(t *testing.T, schema graphql.Schema, query string, root goke.Map) interface{} {
+	res := graphql.Do(graphql.Params{Schema: schema, RequestString: query, Context: context.Background(), RootObject: root})
 	if res.Errors != nil && len(res.Errors) > 0 {
 		t.Error(res.Errors[0])
 		return nil
 	}
 	return res.Data
+}
+
+// func QuerySchema(t *testing.T, schema graphql.Schema, query string) interface{} {
+// 	return Query(t, schema, query, nil)
+// }
+
+func QueryShouldFail(t *testing.T, schema graphql.Schema, query string, root goke.Map) error {
+	res := graphql.Do(graphql.Params{Schema: schema, RequestString: query, RootObject: root})
+	if res.Errors != nil && len(res.Errors) > 0 {
+		return res.Errors[0]
+	}
+	t.Fatal("query should have failed")
+	return nil
 }
 
 func PrettyPrint(x ...interface{}) {
@@ -76,15 +90,6 @@ func FormatJson(t *testing.T, s string) string {
 		t.Error(err)
 	}
 	return Pretty(expectedObj)
-}
-
-func QuerySchemaShouldFail(t *testing.T, schema graphql.Schema, query string) error {
-	res := graphql.Do(graphql.Params{Schema: schema, RequestString: query})
-	if res.Errors != nil && len(res.Errors) > 0 {
-		return res.Errors[0]
-	}
-	t.Fatal("query should have failed")
-	return nil
 }
 
 var UserSchema = `

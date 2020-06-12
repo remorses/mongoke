@@ -24,6 +24,8 @@ var Operations = struct {
 	CREATE: "create",
 }
 
+var AdminSecretHeader = "Goke-Admin-Header"
+
 var DEFAULT_PERMISSIONS = []string{
 	Operations.READ,
 	Operations.CREATE,
@@ -43,6 +45,7 @@ var (
 
 type Config struct {
 	// DatabaseUri       string
+	Admins             []AdminConfig          `json:"admins"`
 	Mongodb            MongodbConfig          `json:"mongodb"`
 	FakeDatabase       FakeDatabaseConfig     `json:"fake_database"`
 	Firestore          FirestoreConfig        `json:"firestore"`
@@ -56,6 +59,10 @@ type Config struct {
 	DefaultPermissions []string               `json:"default_permissions"`
 	DatabaseFunctions  DatabaseInterface
 	Cache              Map
+}
+
+type AdminConfig struct {
+	Secret string `json:"secret"`
 }
 
 type MongodbConfig struct {

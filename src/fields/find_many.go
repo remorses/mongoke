@@ -27,6 +27,7 @@ func FindMany(p CreateFieldParams) (*graphql.Field, error) {
 		nodes, err := p.Config.DatabaseFunctions.FindMany(
 			params.Context, opts, func(document goke.Map) (goke.Map, error) {
 				return applyGuardsOnDocument(applyGuardsOnDocumentParams{
+					isAdmin:            getIsAdmin(params),
 					jwt:                getJwt(params),
 					defaultPermissions: p.Config.DefaultPermissions,
 					document:           document,

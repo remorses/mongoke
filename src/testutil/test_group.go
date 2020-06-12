@@ -19,6 +19,7 @@ type NewTestGroupParams struct {
 
 type TestCase struct {
 	Name          string
+	RootObject    goke.Map
 	Schema        graphql.Schema
 	Query         string
 	Expected      goke.Map
@@ -49,11 +50,11 @@ func NewTestGroup(t *testing.T, p NewTestGroupParams) {
 			}
 			schema := testCase.Schema
 			if testCase.ExpectedError {
-				actualErr := QuerySchemaShouldFail(t, schema, testCase.Query)
+				actualErr := QueryShouldFail(t, schema, testCase.Query, testCase.RootObject)
 				t.Log(actualErr)
 				return
 			}
-			res := QuerySchema(t, schema, testCase.Query)
+			res := Query(t, schema, testCase.Query, testCase.RootObject)
 			res = ConvertToPlainMap(res)
 			expected := ConvertToPlainMap(testCase.Expected)
 			// t.Log("expected:", expected)

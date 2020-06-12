@@ -560,3 +560,77 @@ func TestQueryWithEmptyFakeDatabase(t *testing.T) {
 	})
 
 }
+
+func TestAdminCheck(t *testing.T) {
+	exampleUsers := []goke.Map{
+		{"name": "01", "age": 1},
+		{"name": "02", "age": 2},
+		{"name": "03", "age": 3},
+	}
+	db := &fakedata.FakeDatabaseFunctions{}
+	schema, _ := goke_schema.MakeGokeSchema(goke.Config{
+		Schema: `
+		scalar ObjectId
+		interface Named {
+			name: String
+		}
+
+		type User implements Named {
+			_id: ObjectId!
+			name: String
+			age: Int!
+		}
+		`,
+		DatabaseFunctions: db,
+		Types: map[string]*goke.TypeConfig{
+			"User": {Collection: "users"},
+		},
+		DefaultPermissions: []string{},
+	})
+
+	testutil.NewTestGroup(t, testutil.NewTestGroupParams{
+		Collection:    "users",
+		Database:      db,
+		Documents:     exampleUsers,
+		DefaultSchema: schema,
+		Tests: []testutil.TestCase{
+			{
+				Name:   "findMany without admin is blocked",
+				Schema: schema,
+				RootObject: goke.Map{
+					"isAdmin": false,
+				},
+				ExpectedError: true, // cannot execute read operation with current user permissions
+				Expected:      goke.Map{"findOneUser": nil},
+				Query: `
+				{
+					findManyUser {
+						name
+						age
+						_id
+					}
+				}
+			`,
+			},
+			{
+				Name:   "findMany with admin skip checks",
+				Schema: schema,
+				RootObject: goke.Map{
+					"isAdmin": true,
+				},
+				ExpectedError: true,
+				Expected:      goke.Map{"findManyUser": exampleUsers},
+				Query: `
+				{
+					findManyUser {
+						name
+						age
+						_id
+					}
+				}
+			`,
+			},
+		},
+	})
+
+}

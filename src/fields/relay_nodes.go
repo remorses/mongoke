@@ -69,6 +69,7 @@ func QueryTypeNodesField(p CreateFieldParams) (*graphql.Field, error) {
 			opts,
 			func(document goke.Map) (goke.Map, error) {
 				return applyGuardsOnDocument(applyGuardsOnDocumentParams{
+					isAdmin:            getIsAdmin(params),
 					jwt:                getJwt(params),
 					defaultPermissions: p.Config.DefaultPermissions,
 					document:           document,
