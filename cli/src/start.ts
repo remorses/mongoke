@@ -20,7 +20,6 @@ const command: CommandModule = {
         // console.log(argv.$0)
         // console.log(process.argv)
         await startGokeServer(process.argv.slice(process.env.DEBUG ? 2 : 1)) // TODO this is brittle
-        // TODO start the server
     },
 } // as CommandModule
 

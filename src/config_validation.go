@@ -30,7 +30,6 @@ func validateYamlConfig(data string) error {
 	return nil
 }
 
-// TODO upload jsonschema somewhere
 var jsonSchemaString = `
 {
     "$schema": "http://json-schema.org/draft-07/schema#",

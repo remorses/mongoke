@@ -110,7 +110,7 @@ func (self *FirestoreDatabaseFunctions) UpdateMany(ctx context.Context, p goke.U
 
 	iter := query.Documents(ctx)
 	defer iter.Stop()
-	// TODO use batching for firestore's updateMany
+
 	for payload.AffectedCount < p.Limit {
 		doc, err := iter.Next()
 		if err == iterator.Done {

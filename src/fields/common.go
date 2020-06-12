@@ -40,7 +40,7 @@ func getDefaultCursorField(object graphql.Type, scalarTypes []string) string {
 		}
 	}
 	for _, name := range scalarNames {
-		if name == "_id" || name == "id" { // TODO customize default cursor field via config
+		if name == "_id" || name == "id" { // TODO IMPORTANT customize default cursor field via config, in sql it should be the primary key
 			return name
 		}
 	}

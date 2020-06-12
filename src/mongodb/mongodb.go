@@ -125,7 +125,7 @@ func (self *MongodbDatabaseFunctions) UpdateMany(ctx context.Context, p goke.Upd
 
 	for _, node := range nodes {
 		match := MakeMongodbMatch(goke.ExtendWhereMatch(
-			p.Where, // TODO maybe do not extend, if a concurrent update makes the document no more suitable we lose the update, maybe better?
+			p.Where,
 			map[string]goke.Filter{
 				"_id": {
 					Eq: node["_id"],
