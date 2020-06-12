@@ -79,7 +79,7 @@ func getJwt(params graphql.ResolveParams) jwt.MapClaims {
 
 func getIsAdmin(params graphql.ResolveParams) bool {
 	root := params.Info.RootValue
-	rootMap, ok := root.(goke.Map)
+	rootMap, ok := root.(map[string]interface{})
 	if !ok {
 		return false
 	}
