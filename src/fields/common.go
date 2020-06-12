@@ -62,7 +62,7 @@ func getJwt(params graphql.ResolveParams) jwt.MapClaims {
 	// }
 	rootMap, ok := root.(map[string]interface{})
 	if !ok {
-		println("WARNING: jwt is not a map")
+		println("WARNING: RootValue is not a map")
 		return jwt.MapClaims{}
 	}
 	v, ok := rootMap["jwt"]
