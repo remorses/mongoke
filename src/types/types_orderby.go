@@ -25,5 +25,6 @@ func GetOrderByArg(cache goke.Map, indexableNames []string, object graphql.Type)
 		Name:   name,
 		Fields: inputFields,
 	})
+	cache[name] = orderBy
 	return orderBy, nil
 }

@@ -2,7 +2,9 @@ package goke
 
 import (
 	"context"
+	"reflect"
 
+	"github.com/PaesslerAG/gval"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -53,6 +55,10 @@ func MapsToInterfaces(nodes []Map) []interface{} {
 func ExtendWhereMatch(where WhereTree, match map[string]Filter) WhereTree {
 	// the where is implicitly copied
 	if match == nil {
+		return where
+	}
+	if where.Match == nil {
+		where.Match = match
 		return where
 	}
 	where.And = append(where.And, WhereTree{
@@ -125,6 +131,47 @@ type Filter struct {
 	Lt  interface{}   `bson:"$lt,omitempty"`
 	Gte interface{}   `bson:"$gte,omitempty"`
 	Lte interface{}   `bson:"$lte,omitempty"`
+}
+
+func (self Filter) Interpolate(scope Map) (Filter, error) {
+	v := reflect.ValueOf(self)
+	// TODO i am using a map to make code more general, optimize using struct fields
+	result := Map{}
+	typeOfv := v.Type()
+	for i := 0; i < v.NumField(); i++ {
+		value := v.Field(i).Interface()
+		name := typeOfv.Field(i).Name
+		switch value.(type) {
+		case string:
+			// TODO evaluate only if matches a certain regex, like {{ }}
+			evaluated, err := evaluate(value.(string), scope)
+			if err != nil {
+				return Filter{}, err
+			}
+			result[name] = evaluated
+		default:
+			result[name] = value
+		}
+	}
+	var filter Filter
+	err := mapstructure.Decode(result, &filter)
+	if err != nil {
+		return Filter{}, err
+	}
+	return filter, nil
+}
+
+func evaluate(expression string, scope Map) (interface{}, error) {
+	// TODO save the evaluable in object state to optimize
+	eval, err := gval.Full().NewEvaluable(expression)
+	if err != nil {
+		return "", err
+	}
+	res, err := eval(context.Background(), scope)
+	if err != nil {
+		return "", err
+	}
+	return res, nil
 }
 
 func MakeWhereTree(where map[string]interface{}) (WhereTree, error) {

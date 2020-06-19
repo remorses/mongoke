@@ -93,3 +93,26 @@ func getIsAdmin(params graphql.ResolveParams) bool {
 	}
 	return isAdmin
 }
+
+func makeWhere(args goke.Map, initialWhere map[string]goke.Filter, document interface{}) (goke.WhereTree, error) {
+	var where goke.WhereTree
+	if args["where"] != nil {
+		var err error
+		where, err = goke.MakeWhereTree(args["where"].(map[string]interface{}))
+		if err != nil {
+			return where, err
+		}
+	}
+	if initialWhere != nil {
+		interpolated, err := goke.InterpolateMatch(initialWhere, goke.Map{
+			"parent": document,
+			"x":      document,
+			// TODO add more evaluable scope
+		})
+		if err != nil {
+			return goke.WhereTree{}, err
+		}
+		where = goke.ExtendWhereMatch(where, interpolated)
+	}
+	return where, nil
+}

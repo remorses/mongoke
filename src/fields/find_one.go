@@ -22,13 +22,9 @@ func FindOne(p CreateFieldParams) (*graphql.Field, error) {
 		if err != nil {
 			return nil, err
 		}
-		if args["where"] != nil {
-			where, err := goke.MakeWhereTree(args["where"].(map[string]interface{}))
-			if err != nil {
-				return nil, err
-			}
-			where = goke.ExtendWhereMatch(where, p.InitialWhere)
-			opts.Where = where
+		opts.Where, err = makeWhere(args, p.InitialWhere, params.Source)
+		if err != nil {
+			return nil, err
 		}
 		documents, err := p.Config.DatabaseFunctions.FindMany(
 			params.Context,

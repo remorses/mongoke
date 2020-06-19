@@ -90,12 +90,12 @@ func addRelationsFields(Config goke.Config, baseSchemaConfig graphql.SchemaConfi
 			ReturnType:   returnType,
 			Permissions:  returnTypeConf.Permissions,
 			Collection:   returnTypeConf.Collection,
-			InitialWhere: relation.Where, // TODO evaluate stuff inside the where object
+			InitialWhere: relation.Where,
 			SchemaConfig: baseSchemaConfig,
 			OmitWhere:    true,
 		}
 		if relation.RelationType == "to_many" {
-			field, err := fields.QueryTypeNodesField(p)
+			field, err := fields.FindMany(p)
 			if err != nil {
 				return err
 			}
