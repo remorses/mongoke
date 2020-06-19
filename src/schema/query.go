@@ -90,7 +90,7 @@ func addRelationsFields(Config goke.Config, baseSchemaConfig graphql.SchemaConfi
 			ReturnType:   returnType,
 			Permissions:  returnTypeConf.Permissions,
 			Collection:   returnTypeConf.Collection,
-			InitialWhere: relation.Where,
+			InitialWhere: relation.Where, // TODO evaluate stuff inside the where object
 			SchemaConfig: baseSchemaConfig,
 			OmitWhere:    true,
 		}

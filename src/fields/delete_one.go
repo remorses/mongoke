@@ -19,7 +19,7 @@ func DeleteOne(p CreateFieldParams) (*graphql.Field, error) {
 			return goke.NodeMutationPayload{}, err
 		}
 		if args["where"] != nil {
-			where, err := goke.MakeWhereTree(args["where"].(map[string]interface{}), p.InitialWhere)
+			where, err := goke.MakeWhereTree(args["where"].(map[string]interface{}))
 			if err != nil {
 				return goke.NodeMutationPayload{}, err
 			}

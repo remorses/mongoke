@@ -185,6 +185,8 @@ type RelationConfig struct {
 	To           string            `json:"to"`
 	RelationType string            `json:"type"`
 	Where        map[string]Filter `json:"where"`
+	// TODO currently the relations do not support and, or operators
+	// TODO init the evaluations inside the where, create a map that stores the where evaluables and make a function, Interpolate() that takes the current document and the parent to evaluate every evaluable previously initialized
 }
 
 // MakeConfigFromYaml parses the config from yaml

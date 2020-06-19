@@ -141,7 +141,7 @@ func TestMakeWhereTree(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			var x map[string]interface{}
 			json.Unmarshal([]byte(test.Json), &x)
-			w, err := goke.MakeWhereTree(x, nil)
+			w, err := goke.MakeWhereTree(x)
 			if err != nil {
 				t.Error(err)
 			}

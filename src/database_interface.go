@@ -52,6 +52,9 @@ func MapsToInterfaces(nodes []Map) []interface{} {
 
 func ExtendWhereMatch(where WhereTree, match map[string]Filter) WhereTree {
 	// the where is implicitly copied
+	if match == nil {
+		return where
+	}
 	where.And = append(where.And, WhereTree{
 		Match: match,
 	})
@@ -124,14 +127,11 @@ type Filter struct {
 	Lte interface{}   `bson:"$lte,omitempty"`
 }
 
-func MakeWhereTree(where map[string]interface{}, initialMatch map[string]Filter) (WhereTree, error) {
+func MakeWhereTree(where map[string]interface{}) (WhereTree, error) {
 	// for every k, v use mapstructure to map to a filter
 	// if k is or, and, use mapstructure to map to an array of filters
-	if initialMatch == nil {
-		initialMatch = make(map[string]Filter)
-	}
 	tree := WhereTree{
-		Match: initialMatch,
+		Match: make(map[string]Filter),
 	}
 	if where == nil {
 		return tree, nil
@@ -139,7 +139,7 @@ func MakeWhereTree(where map[string]interface{}, initialMatch map[string]Filter)
 	for k, v := range where {
 		if k == "and" || k == "or" {
 			for _, item := range v.([]interface{}) {
-				w, err := MakeWhereTree(item.(map[string]interface{}), nil)
+				w, err := MakeWhereTree(item.(map[string]interface{}))
 				if err != nil {
 					return tree, err
 				}

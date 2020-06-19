@@ -29,7 +29,7 @@ func UpdateOne(p CreateFieldParams) (*graphql.Field, error) {
 			return nil, err
 		}
 		if args["where"] != nil {
-			where, err := goke.MakeWhereTree(args["where"].(map[string]interface{}), p.InitialWhere)
+			where, err := goke.MakeWhereTree(args["where"].(map[string]interface{}))
 			if err != nil {
 				return nil, err
 			}

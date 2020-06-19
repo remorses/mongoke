@@ -56,6 +56,7 @@ func makeSchemaConfig(config goke.Config) (graphql.SchemaConfig, error) {
 			ParseValue:   types.ObjectID.ParseValue,
 		},
 	}
+	// IsTypeOf
 	for name, typeConf := range config.Types {
 		if typeConf.IsTypeOf == "" {
 			continue
