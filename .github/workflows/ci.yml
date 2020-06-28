@@ -29,8 +29,6 @@ jobs:
           go-version: 1.14
       - run: env
       - uses: actions/checkout@v2
-      - name: Unshallow
-        run: git fetch --prune --unshallow
       - run: go mod download
       # test #######################################
       - run: make test
@@ -42,6 +40,8 @@ jobs:
           version_file: VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Unshallow
+        run: git fetch --prune --unshallow && git fetch --tags
       # upload binaries ############################
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2

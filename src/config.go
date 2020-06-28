@@ -111,7 +111,7 @@ type AdminConfig struct {
 }
 
 type MongodbConfig struct {
-	Uri string `json:"uri" env:"MONGODB_URL"`
+	Uri string `json:"uri" env:"MONGODB_URL"` // TODO does env parse create these structs?
 }
 
 type FakeDatabaseConfig struct {
