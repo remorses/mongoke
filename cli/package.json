@@ -29,7 +29,7 @@
     "goBinary": {
         "name": "goke-server",
         "path": "./bin",
-        "url": "https://github.com/remorses/mongoke/releases/download/v{{version}}/mongoke_{{version}}_{{platform}}_{{arch}}.tar.gz"
+        "url": "https://github.com/remorses/mongoke/releases/download/{{version}}/mongoke_{{version}}_{{platform}}_{{arch}}.tar.gz"
     },
     "author": "Tommaso De Rossi, morse <beats.by.morse@gmail.com>",
     "license": "ISC",
