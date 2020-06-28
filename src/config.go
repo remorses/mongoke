@@ -7,8 +7,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 
 	"github.com/PaesslerAG/gval"
+	"github.com/buildkite/interpolate"
 	"github.com/caarlos0/env"
 	yaml "github.com/ghodss/yaml"
 )
@@ -202,18 +204,28 @@ func InterpolateMatch(match map[string]Filter, scope Map) (map[string]Filter, er
 
 // MakeConfigFromYaml parses the config from yaml
 func MakeConfigFromYaml(data string) (Config, error) {
-	if err := validateYamlConfig(data); err != nil {
-		return Config{}, err
-	}
-
 	config := Config{}
 
-	if err := yaml.Unmarshal([]byte(data), &config); err != nil {
-		return Config{}, err
+	// interpolate env vars
+	envInterpolator := interpolate.NewSliceEnv(os.Environ())
+	data, err := interpolate.Interpolate(envInterpolator, data)
+	if err != nil {
+		return config, err
 	}
 
+	// validate
+	if err := validateYamlConfig(data); err != nil {
+		return config, err
+	}
+
+	// parse from yaml
+	if err := yaml.Unmarshal([]byte(data), &config); err != nil {
+		return config, err
+	}
+
+	// add env values, can overwrite the config ones
 	if err := env.Parse(&config); err != nil {
-		return Config{}, err
+		return config, err
 	}
 
 	return config, nil

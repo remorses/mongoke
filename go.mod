@@ -8,6 +8,7 @@ require (
 	github.com/256dpi/lungo v0.2.5
 	github.com/PaesslerAG/gval v1.0.1
 	github.com/buger/jsonparser v1.0.0
+	github.com/buildkite/interpolate v0.0.0-20200526001904-07f35b4ae251
 	github.com/caarlos0/env v3.5.0+incompatible
 	github.com/corpix/uarand v0.1.1 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
