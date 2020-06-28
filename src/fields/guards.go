@@ -51,6 +51,7 @@ func evaluateAuthPermission(p applyGuardsOnDocumentParams) (goke.AuthGuard, erro
 			goke.Map{
 				"jwt":      p.jwt,
 				"document": p.document,
+				"x":        p.document,
 				// TODO more auth evaluation params like x, utility functions, ...
 			},
 		)

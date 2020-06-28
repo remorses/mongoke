@@ -186,7 +186,6 @@ type RelationConfig struct {
 	RelationType string            `json:"type"`
 	Where        map[string]Filter `json:"where"`
 	// TODO currently the relations do not support and, or operators
-	// TODO init the expressions inside the where, create a map that stores the where evaluables and make a function, Interpolate() that takes the current document and the parent to evaluate every evaluable previously initialized
 }
 
 func InterpolateMatch(match map[string]Filter, scope Map) (map[string]Filter, error) {
