@@ -1,7 +1,7 @@
 {
     "name": "goke",
     "_": "[bump]",
-    "version": "2.0.29",
+    "version": "2.0.30",
     "description": "Goke cli",
     "keywords": [],
     "main": "dist/index.js",
