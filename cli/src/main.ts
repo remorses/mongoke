@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import yargs from 'yargs'
 import startCommand from './start'
 import { withErrorHandling } from './support'
